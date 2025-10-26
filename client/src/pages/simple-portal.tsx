@@ -31,7 +31,7 @@ export default function SimplePortal() {
         className="absolute inset-0 bg-cover bg-center bg-no-repeat pointer-events-none"
         style={{ 
           backgroundImage: `url(${backgroundImage})`,
-          opacity: 0.15
+          opacity: 0.75
         }}
         aria-hidden="true"
       ></div>
