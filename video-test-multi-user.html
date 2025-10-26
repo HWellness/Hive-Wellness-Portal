@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Call Multi-User Test - Hive Wellness</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .user-section {
+            background: linear-gradient(135deg, #9306B1, #97A5D0);
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        button {
+            background: #9306B1;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #7a0591;
+        }
+        .video-window {
+            border: 2px solid #9306B1;
+            border-radius: 8px;
+            margin: 10px 0;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9fa;
+        }
+        .test-result {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 4px;
+            border-left: 4px solid;
+        }
+        .success {
+            background: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+        .error {
+            background: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+        .info {
+            background: #d1ecf1;
+            border-color: #17a2b8;
+            color: #0c5460;
+        }
+    </style>
+</head>
+<body>
+    <h1>📹 Video Call Multi-User Testing</h1>
+    <p>Test video functionality across all user roles</p>
+
+    <div class="test-container">
+        <h2>🎯 Quick Actions</h2>
+        <button onclick="testAllVideoAccess()">Test All User Video Access</button>
+        <button onclick="testWebSocketConnections()">Test WebSocket Connections</button>
+        <button onclick="testMediaPermissions()">Test Media Permissions</button>
+        <button onclick="openMultiUserTest()">Open Multi-User Test Windows</button>
+        <button onclick="clearResults()">Clear Results</button>
+    </div>
+
+    <!-- Client Video Testing -->
+    <div class="user-section">
+        <h3>👤 Client Video Testing</h3>
+        <button onclick="loginAsClient()">Login as Client</button>
+        <button onclick="testClientVideo()">Test Client Video Access</button>
+        <button onclick="openClientVideoWindow()">Open Client Video Window</button>
+    </div>
+
+    <!-- Therapist Video Testing -->
+    <div class="user-section">
+        <h3>🩺 Therapist Video Testing</h3>
+        <button onclick="loginAsTherapist()">Login as Therapist</button>
+        <button onclick="testTherapistVideo()">Test Therapist Video Access</button>
+        <button onclick="openTherapistVideoWindow()">Open Therapist Video Window</button>
+    </div>
+
+    <!-- Admin Video Testing -->
+    <div class="user-section">
+        <h3>⚙️ Admin Video Testing</h3>
+        <button onclick="loginAsAdmin()">Login as Admin</button>
+        <button onclick="testAdminVideo()">Test Admin Video Access</button>
+        <button onclick="openAdminVideoWindow()">Open Admin Video Window</button>
+    </div>
+
+    <!-- Institution Video Testing -->
+    <div class="user-section">
+        <h3>🏢 Institution Video Testing</h3>
+        <button onclick="loginAsInstitution()">Login as Institution</button>
+        <button onclick="testInstitutionVideo()">Test Institution Video Access</button>
+        <button onclick="openInstitutionVideoWindow()">Open Institution Video Window</button>
+    </div>
+
+    <!-- Video Connection Testing -->
+    <div class="test-container">
+        <h2>🔗 Video Connection Testing</h2>
+        <div id="video-local" class="video-window">
+            <div>Local Video Stream (Your Camera)</div>
+        </div>
+        <div id="video-remote" class="video-window">
+            <div>Remote Video Stream (Other Participant)</div>
+        </div>
+        
+        <button onclick="startLocalVideo()">Start Local Video</button>
+        <button onclick="stopLocalVideo()">Stop Local Video</button>
+        <button onclick="testScreenShare()">Test Screen Share</button>
+        <button onclick="testAudioMute()">Test Audio Mute</button>
+    </div>
+
+    <!-- Results -->
+    <div class="test-container">
+        <h2>📊 Test Results</h2>
+        <div id="results"></div>
+    </div>
+
+    <script>
+        const BASE_URL = window.location.origin;
+        let localStream = null;
+        let currentUser = null;
+
+        function logResult(message, type = 'info') {
+            const resultDiv = document.createElement('div');
+            resultDiv.className = `test-result ${type}`;
+            resultDiv.innerHTML = `<strong>${new Date().toLocaleTimeString()}</strong> - ${message}`;
+            document.getElementById('results').appendChild(resultDiv);
+        }
+
+        function clearResults() {
+            document.getElementById('results').innerHTML = '';
+        }
+
+        // Authentication Functions
+        async function loginAsClient() {
+            try {
+                const response = await fetch(BASE_URL + '/api/auth/demo/client', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                if (response.ok) {
+                    currentUser = 'client';
+                    logResult('✅ Client login successful', 'success');
+                } else {
+                    logResult('❌ Client login failed', 'error');
+                }
+            } catch (error) {
+                logResult(`❌ Client login error: ${error.message}`, 'error');
+            }
+        }
+
+        async function loginAsTherapist() {
+            try {
+                const response = await fetch(BASE_URL + '/api/auth/demo/therapist', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                if (response.ok) {
+                    currentUser = 'therapist';
+                    logResult('✅ Therapist login successful', 'success');
+                } else {
+                    logResult('❌ Therapist login failed', 'error');
+                }
+            } catch (error) {
+                logResult(`❌ Therapist login error: ${error.message}`, 'error');
+            }
+        }
+
+        async function loginAsAdmin() {
+            try {
+                const response = await fetch(BASE_URL + '/api/auth/demo/admin', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                if (response.ok) {
+                    currentUser = 'admin';
+                    logResult('✅ Admin login successful', 'success');
+                } else {
+                    logResult('❌ Admin login failed', 'error');
+                }
+            } catch (error) {
+                logResult(`❌ Admin login error: ${error.message}`, 'error');
+            }
+        }
+
+        async function loginAsInstitution() {
+            try {
+                const response = await fetch(BASE_URL + '/api/auth/demo/institution', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                if (response.ok) {
+                    currentUser = 'institution';
+                    logResult('✅ Institution login successful', 'success');
+                } else {
+                    logResult('❌ Institution login failed', 'error');
+                }
+            } catch (error) {
+                logResult(`❌ Institution login error: ${error.message}`, 'error');
+            }
+        }
+
+        // Video Testing Functions
+        async function testClientVideo() {
+            await loginAsClient();
+            await testVideoServices('client');
+        }
+
+        async function testTherapistVideo() {
+            await loginAsTherapist();
+            await testVideoServices('therapist');
+        }
+
+        async function testAdminVideo() {
+            await loginAsAdmin();
+            await testVideoServices('admin');
+        }
+
+        async function testInstitutionVideo() {
+            await loginAsInstitution();
+            await testVideoServices('institution');
+        }
+
+        async function testVideoServices(role) {
+            try {
+                const response = await fetch(BASE_URL + '/api/services', {
+                    credentials: 'include'
+                });
+                
+                if (response.ok) {
+                    const services = await response.json();
+                    const videoService = services.find(s => s.id === 'video-sessions');
+                    
+                    if (videoService) {
+                        logResult(`✅ ${role.toUpperCase()} has video service access: "${videoService.name}"`, 'success');
+                    } else {
+                        logResult(`❌ ${role.toUpperCase()} does not have video service access`, 'error');
+                    }
+                } else {
+                    logResult(`❌ ${role.toUpperCase()} service check failed: ${response.status}`, 'error');
+                }
+            } catch (error) {
+                logResult(`❌ ${role.toUpperCase()} video test error: ${error.message}`, 'error');
+            }
+        }
+
+        // Window Opening Functions
+        function openClientVideoWindow() {
+            const url = `${BASE_URL}/#/video-sessions`;
+            window.open(url, 'clientVideo', 'width=800,height=600,left=100,top=100');
+            logResult('🔄 Opened client video window', 'info');
+        }
+
+        function openTherapistVideoWindow() {
+            const url = `${BASE_URL}/#/video-sessions`;
+            window.open(url, 'therapistVideo', 'width=800,height=600,left=920,top=100');
+            logResult('🔄 Opened therapist video window', 'info');
+        }
+
+        function openAdminVideoWindow() {
+            const url = `${BASE_URL}/#/video-sessions`;
+            window.open(url, 'adminVideo', 'width=800,height=600,left=100,top=720');
+            logResult('🔄 Opened admin video window', 'info');
+        }
+
+        function openInstitutionVideoWindow() {
+            const url = `${BASE_URL}/#/video-sessions`;
+            window.open(url, 'institutionVideo', 'width=800,height=600,left=920,top=720');
+            logResult('🔄 Opened institution video window', 'info');
+        }
+
+        function openMultiUserTest() {
+            openClientVideoWindow();
+            setTimeout(() => openTherapistVideoWindow(), 1000);
+            setTimeout(() => openAdminVideoWindow(), 2000);
+            setTimeout(() => openInstitutionVideoWindow(), 3000);
+            logResult('🚀 Opened all user role video windows for multi-user testing', 'info');
+        }
+
+        // Media Testing Functions
+        async function testMediaPermissions() {
+            logResult('🎥 Testing media permissions...', 'info');
+            
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: true, 
+                    audio: true 
+                });
+                
+                logResult('✅ Camera and microphone permissions granted', 'success');
+                stream.getTracks().forEach(track => track.stop());
+            } catch (error) {
+                logResult(`❌ Media permissions denied: ${error.message}`, 'error');
+            }
+        }
+
+        async function startLocalVideo() {
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ 
+                    video: true, 
+                    audio: true 
+                });
+                
+                const videoElement = document.createElement('video');
+                videoElement.srcObject = localStream;
+                videoElement.autoplay = true;
+                videoElement.muted = true;
+                videoElement.style.width = '100%';
+                videoElement.style.height = '100%';
+                
+                const container = document.getElementById('video-local');
+                container.innerHTML = '';
+                container.appendChild(videoElement);
+                
+                logResult('✅ Local video stream started', 'success');
+            } catch (error) {
+                logResult(`❌ Failed to start local video: ${error.message}`, 'error');
+            }
+        }
+
+        function stopLocalVideo() {
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+                localStream = null;
+                document.getElementById('video-local').innerHTML = '<div>Local Video Stream (Stopped)</div>';
+                logResult('✅ Local video stream stopped', 'success');
+            } else {
+                logResult('⚠️ No local video stream to stop', 'info');
+            }
+        }
+
+        async function testScreenShare() {
+            try {
+                const stream = await navigator.mediaDevices.getDisplayMedia({ 
+                    video: true, 
+                    audio: true 
+                });
+                
+                logResult('✅ Screen sharing capabilities available', 'success');
+                stream.getTracks().forEach(track => track.stop());
+            } catch (error) {
+                logResult(`❌ Screen sharing failed: ${error.message}`, 'error');
+            }
+        }
+
+        function testAudioMute() {
+            if (localStream) {
+                const audioTracks = localStream.getAudioTracks();
+                if (audioTracks.length > 0) {
+                    const currentlyMuted = !audioTracks[0].enabled;
+                    audioTracks[0].enabled = currentlyMuted;
+                    logResult(`✅ Audio ${currentlyMuted ? 'unmuted' : 'muted'}`, 'success');
+                } else {
+                    logResult('⚠️ No audio tracks available', 'info');
+                }
+            } else {
+                logResult('⚠️ No local stream to mute/unmute', 'info');
+            }
+        }
+
+        // WebSocket Testing
+        function testWebSocketConnections() {
+            const wsUrl = BASE_URL.replace('http', 'ws') + '/ws/video-sessions';
+            logResult(`🔌 Testing WebSocket connection to: ${wsUrl}`, 'info');
+            
+            const ws = new WebSocket(wsUrl);
+            
+            ws.onopen = () => {
+                logResult('✅ WebSocket connection successful', 'success');
+                ws.send(JSON.stringify({ type: 'test', message: 'Connection test' }));
+            };
+            
+            ws.onmessage = (event) => {
+                logResult(`📨 WebSocket message received: ${event.data}`, 'info');
+            };
+            
+            ws.onerror = (error) => {
+                logResult('❌ WebSocket connection error', 'error');
+            };
+            
+            ws.onclose = () => {
+                logResult('🔌 WebSocket connection closed', 'info');
+            };
+            
+            // Close after 5 seconds
+            setTimeout(() => {
+                ws.close();
+            }, 5000);
+        }
+
+        // Comprehensive Testing
+        async function testAllVideoAccess() {
+            logResult('🚀 Starting comprehensive video access testing...', 'info');
+            
+            await testClientVideo();
+            await testTherapistVideo();
+            await testAdminVideo();
+            await testInstitutionVideo();
+            
+            logResult('✅ Video access testing completed', 'success');
+        }
+
+        // Initialize
+        logResult('📹 Video testing suite initialized', 'info');
+    </script>
+</body>
+</html>

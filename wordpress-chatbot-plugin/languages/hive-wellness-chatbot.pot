@@ -1,0 +1,170 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Hive Wellness Chatbot 1.0.0\n"
+"Report-Msgid-Bugs-To: support@hive-wellness.co.uk\n"
+"POT-Creation-Date: 2025-01-21 12:00+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: hive-wellness-chatbot.php:87
+msgid "Hi! I'm here to help with questions about Hive Wellness therapy services. How can I assist you today?"
+msgstr ""
+
+#: hive-wellness-chatbot.php:88
+msgid "Type your message here..."
+msgstr ""
+
+#: hive-wellness-chatbot.php:89
+msgid "Send"
+msgstr ""
+
+#: hive-wellness-chatbot.php:90
+msgid "Thinking..."
+msgstr ""
+
+#: hive-wellness-chatbot.php:91
+msgid "I'm sorry, I'm having trouble connecting right now. Please try again in a moment."
+msgstr ""
+
+#: hive-wellness-chatbot.php:92
+msgid "Was this helpful?"
+msgstr ""
+
+#: hive-wellness-chatbot.php:93
+msgid "Close chat"
+msgstr ""
+
+#: hive-wellness-chatbot.php:94
+msgid "Minimize chat"
+msgstr ""
+
+#: hive-wellness-chatbot.php:95
+msgid "Maximize chat"
+msgstr ""
+
+#: hive-wellness-chatbot.php:96
+msgid "Powered by Hive Wellness"
+msgstr ""
+
+#: hive-wellness-chatbot.php:97
+msgid "Please note: This chat is for general information only. Do not share sensitive clinical data. For medical emergencies, call 999."
+msgstr ""
+
+#: hive-wellness-chatbot.php:100
+msgid "Our Therapists"
+msgstr ""
+
+#: hive-wellness-chatbot.php:101
+msgid "Tell me about your therapists and their specialties"
+msgstr ""
+
+#: hive-wellness-chatbot.php:104
+msgid "Book Session"
+msgstr ""
+
+#: hive-wellness-chatbot.php:105
+msgid "How can I book a therapy session?"
+msgstr ""
+
+#: hive-wellness-chatbot.php:108
+msgid "Pricing"
+msgstr ""
+
+#: hive-wellness-chatbot.php:109
+msgid "What are your therapy session prices?"
+msgstr ""
+
+#: hive-wellness-chatbot.php:244
+msgid "Hive Wellness Chatbot"
+msgstr ""
+
+#: hive-wellness-chatbot.php:245
+msgid "Hive Chatbot"
+msgstr ""
+
+#: hive-wellness-chatbot.php:254
+msgid "General Settings"
+msgstr ""
+
+#: hive-wellness-chatbot.php:261
+msgid "Enable Chatbot"
+msgstr ""
+
+#: hive-wellness-chatbot.php:268
+msgid "API Endpoint"
+msgstr ""
+
+#: hive-wellness-chatbot.php:275
+msgid "Widget Position"
+msgstr ""
+
+#: hive-wellness-chatbot.php:282
+msgid "Primary Color"
+msgstr ""
+
+#: hive-wellness-chatbot.php:289
+msgid "Show Branding"
+msgstr ""
+
+#: hive-wellness-chatbot.php:312
+msgid "Usage"
+msgstr ""
+
+#: hive-wellness-chatbot.php:313
+msgid "The chatbot will automatically appear on all pages when enabled. You can also use the shortcode for custom placement:"
+msgstr ""
+
+#: hive-wellness-chatbot.php:316
+msgid "Shortcode Parameters"
+msgstr ""
+
+#: hive-wellness-chatbot.php:336
+msgid "Configure your Hive Wellness chatbot settings below."
+msgstr ""
+
+#: hive-wellness-chatbot.php:343
+msgid "Enable or disable the chatbot widget."
+msgstr ""
+
+#: hive-wellness-chatbot.php:350
+msgid "The API endpoint for the Hive Wellness chatbot service."
+msgstr ""
+
+#: hive-wellness-chatbot.php:357
+msgid "Bottom Right"
+msgstr ""
+
+#: hive-wellness-chatbot.php:358
+msgid "Bottom Left"
+msgstr ""
+
+#: hive-wellness-chatbot.php:359
+msgid "Top Right"
+msgstr ""
+
+#: hive-wellness-chatbot.php:360
+msgid "Top Left"
+msgstr ""
+
+#: hive-wellness-chatbot.php:368
+msgid "Choose where the chatbot widget appears on your site."
+msgstr ""
+
+#: hive-wellness-chatbot.php:375
+msgid "The primary color for the chatbot widget. Default is Hive Wellness purple (#9306B1)."
+msgstr ""
+
+#: hive-wellness-chatbot.php:382
+msgid "Show \"Powered by Hive Wellness\" branding."
+msgstr ""

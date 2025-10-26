@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+    <!-- This is a replit script which adds a banner on the top of the page when opened in development mode outside the replit environment -->
+    <script type="text/javascript" src="https://replit.com/public/js/replit-dev-banner.js" onerror="console.warn('Replit dev banner failed to load')"></script>
+    <script>
+      // Handle any uncaught errors from development tools
+      window.addEventListener('error', function(event) {
+        if (event.filename && event.filename.includes('eruda')) {
+          console.warn('Eruda development tool error (development only):', event.error);
+          event.preventDefault();
+          return true;
+        }
+      });
+      
+      // Handle unhandled promise rejections from development tools
+      window.addEventListener('unhandledrejection', function(event) {
+        if (event.reason && event.reason.stack && event.reason.stack.includes('eruda')) {
+          console.warn('Eruda development tool promise rejection (development only):', event.reason);
+          event.preventDefault();
+          return true;
+        }
+      });
+    </script>
+  </body>
+</html>

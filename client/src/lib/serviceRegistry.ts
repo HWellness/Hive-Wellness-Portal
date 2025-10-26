@@ -1,0 +1,64 @@
+export const serviceRegistry = {
+  client: [
+    { id: 'client-dashboard', name: 'Dashboard', icon: 'Home', description: 'Your personal wellness overview' },
+    { id: 'client-profile', name: 'Complete Profile', icon: 'User', description: 'Complete your personal profile and therapy preferences' },
+    { id: 'scheduling', name: 'Book Sessions', icon: 'Calendar', description: 'Schedule appointments with your assigned therapist' },
+    { id: 'video-sessions', name: 'Join Session', icon: 'Video', description: 'Access your video consultation' },
+    { id: 'messaging', name: 'Messaging', icon: 'MessageSquare', description: 'Secure messaging with your therapist' },
+    { id: 'payments', name: 'Payments', icon: 'CreditCard', description: 'Manage billing and payments' },
+    { id: 'consultation', name: 'My Progress', icon: 'TrendingUp', description: 'Track your therapy journey' },
+    { id: 'client-documents', name: 'Information Pack', icon: 'FileText', description: 'Access your client information pack' }
+  ],
+  therapist: [
+    { id: 'therapist-dashboard', name: 'Dashboard', icon: 'Home', description: 'Your practice overview' },
+    { id: 'therapist-earnings', name: 'Earnings & Payouts', icon: 'PoundSterling', description: 'View earnings and manage disbursements' },
+    { id: 'client-matching', name: 'Client Management', icon: 'Users', description: 'Review and manage client connections' },
+    { id: 'payment-setup', name: 'Payment Setup', icon: 'CreditCard', description: 'Configure payment processing with Hive Wellness' },
+    { id: 'video-sessions', name: 'Video Sessions', icon: 'Video', description: 'Conduct video consultations' },
+    { id: 'messaging', name: 'Messaging', icon: 'MessageSquare', description: 'Secure client communication' },
+    { id: 'therapist-notes-upload', name: 'Session Notes', icon: 'FileText', description: 'Upload secure session notes and therapy documents' },
+    { id: 'therapist-profile', name: 'Profile Settings', icon: 'Settings', description: 'Manage your professional profile' },
+    { id: 'therapist-documents', name: 'Information Packs', icon: 'Files', description: 'Access therapist information and safeguarding packs' }
+  ],
+  admin: [
+    { id: 'admin-console', name: 'Admin Console', icon: 'Settings', description: 'System administration' },
+    { id: 'admin-role-management', name: 'Role Management', icon: 'Shield', description: 'Manage user roles and permissions' },
+    { id: 'admin-data-reset', name: 'Data Reset', icon: 'Trash2', description: 'Reset demo and test data safely' },
+    { id: 'email-template-management', name: 'Email Templates', icon: 'Mail', description: 'Create and edit email templates for automated communications' },
+    { id: 'automated-email-engine', name: 'Email Automation', icon: 'Zap', description: 'Automated email workflows and triggers' },
+
+    { id: 'communications-reminders', name: 'Communications & Reminders', icon: 'MessageCircle', description: 'Multi-channel communication management including SMS, WhatsApp and automated reminders' },
+    { id: 'user-management', name: 'User Management', icon: 'Users', description: 'Manage all platform users' },
+    { id: 'security', name: 'Security', icon: 'Shield', description: 'Security settings and monitoring' },
+    { id: 'messaging-analytics', name: 'Messaging Analytics', icon: 'BarChart3', description: 'Communication analytics and insights' },
+    { id: 'wordpress-integration', name: 'WordPress Integration', icon: 'Globe', description: 'WordPress site integration management' },
+    { id: 'client-therapist-assignment', name: 'Client Assignment', icon: 'UserCheck', description: 'Assign clients to therapists' },
+    { id: 'assignment-notifications', name: 'Assignment Alerts', icon: 'Bell', description: 'Assignment notification management' },
+    { id: 'admin-therapist-availability', name: 'Therapist Availability', icon: 'CalendarDays', description: 'Manage when therapists are available for client bookings' },
+    { id: 'video-sessions', name: 'Video Sessions', icon: 'Video', description: 'video sessions monitoring' },
+    { id: 'messaging', name: 'Messaging', icon: 'MessageSquare', description: 'Platform messaging oversight' },
+    { id: 'payments', name: 'Payments', icon: 'CreditCard', description: 'Payment system administration' },
+    { id: 'analytics-reports', name: 'Analytics', icon: 'TrendingUp', description: 'Platform analytics and reporting' },
+    { id: 'system-health', name: 'System Health', icon: 'Activity', description: 'System monitoring and health checks' },
+    { id: 'admin-calendar', name: 'Calendar Management', icon: 'Calendar', description: 'Manage calendar availability and appointments' },
+    { id: 'admin-availability-settings', name: 'Availability Settings', icon: 'Clock', description: 'Configure your working hours, days off, and booking preferences' },
+    { id: 'forms', name: 'Gravity Forms', icon: 'FileText', description: 'Manage form submissions and lead capture' },
+    { id: 'form-submissions-dashboard', name: 'Form Submissions', icon: 'FileText', description: 'Review and manage all form submissions' },
+    { id: 'therapist-status-manager', name: 'Therapist Status Manager', icon: 'UserCheck', description: 'Manage therapist approval status and account creation' },
+    { id: 'client-questionnaires-dashboard', name: 'Client Questionnaires', icon: 'Brain', description: 'Review therapy intake assessments' },
+    { id: 'admin-session-notes-viewer', name: 'Session Notes Viewer', icon: 'FileText', description: 'View all therapist session notes for backup and oversight' }
+  ],
+  institution: [
+    { id: 'institutional-dashboard', name: 'Organisation', icon: 'Building', description: 'Institutional dashboard' },
+    { id: 'institutional-users', name: 'User Management', icon: 'Users', description: 'Manage organisation users and departments' },
+    { id: 'video-sessions', name: 'Video Sessions', icon: 'Video', description: 'Institutional video session monitoring' },
+    { id: 'messaging', name: 'Messaging', icon: 'MessageSquare', description: 'Institutional messaging oversight' },
+    { id: 'scheduling', name: 'Bulk Booking', icon: 'Calendar', description: 'Manage group bookings' },
+    { id: 'payments', name: 'Billing & Budget', icon: 'PoundSterling', description: 'Budget management and billing analytics' },
+    { id: 'documents', name: 'Documents', icon: 'FileText', description: 'Institutional document management' },
+    { id: 'reports', name: 'Reports', icon: 'BarChart3', description: 'Usage analytics and outcome reports' }
+  ]
+};
+
+export type ServiceRole = keyof typeof serviceRegistry;
+export type Service = typeof serviceRegistry[ServiceRole][number];

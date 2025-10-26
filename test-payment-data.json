@@ -1,0 +1,11 @@
+{
+  "id": "pi_test_branded_invoice",
+  "amount": "80.00",
+  "currency": "gbp",
+  "description": "Therapy Session - Dr. Sarah Johnson",
+  "date": "2025-07-26",
+  "status": "completed",
+  "paymentMethod": "Visa ending in 4242",
+  "clientName": "Demo Client",
+  "therapistName": "Dr. Sarah Johnson"
+}

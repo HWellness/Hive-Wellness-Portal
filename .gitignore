@@ -1,0 +1,137 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Build outputs
+dist/
+build/
+server/public
+*.tsbuildinfo
+
+# Environment Variables
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+security-audit.log
+audit-logs/
+
+# Testing
+test-results/
+playwright-report/
+coverage/
+E2E_TEST_RESULTS.json
+*-test-results.json
+test-results-*.json
+test-results-*.txt
+
+# Temporary development files
+*_cookies.txt
+*_session.txt
+cookies*.txt
+session*.txt
+*.tmp
+*.temp
+.cache
+admin_cookies*.txt
+admin_session*.txt
+demo_*_cookie.txt
+test-cookies.txt
+therapist_session*.txt
+
+# Test files in root
+test-*.js
+test-*.html
+*-test.js
+*-test.html
+comprehensive-*.js
+comprehensive-*.html
+*-debug.js
+*-verification.js
+debug-*.html
+wordpress-*.html
+wordpress-*.php
+
+# User data directories  
+user_exports/*
+!user_exports/.gitkeep
+
+# Database
+*.db
+*.sqlite
+
+# Editor directories and cache
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.local/
+.cache/
+.config/
+*.bin
+.nvim/
+nvim/
+.vim/
+vim/
+
+# OS files
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+
+# Miscellaneous
+*.tar.gz
+vite.config.ts.*
+GIT_REMOTE_INFO.txt
+logo_base64.txt
+response_headers.txt
+*.swp
+*.swo
+
+# Backup and temporary files
+*.backup
+*.backup.*
+*.original
+*.temp.*
+*~
+server/.routes.ts.*
+routes.ts.backup
+routes.ts.temp
+routes.ts.*-backup
+routes.backup.ts
+clean_chatbot_routes.txt
+remaining-routes.txt
+holly_*.txt
+calendar-reliability-verification.ts
+server/routes-pii-stats.txt
+
+# Large attached assets (development screenshots, etc.)
+attached_assets/*.png
+attached_assets/*.jpg
+attached_assets/*.jpeg
+attached_assets/*.gif
+attached_assets/*.log
+# But keep essential brand assets
+!attached_assets/Hive*.png
+!attached_assets/Hive*.pdf
+!attached_assets/HW*.pdf
