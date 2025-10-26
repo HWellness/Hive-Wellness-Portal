@@ -131,7 +131,15 @@ attached_assets/*.jpg
 attached_assets/*.jpeg
 attached_assets/*.gif
 attached_assets/*.log
+attached_assets/*.json
 # But keep essential brand assets
 !attached_assets/Hive*.png
 !attached_assets/Hive*.pdf
 !attached_assets/HW*.pdf
+
+# Google Cloud / Firebase credentials - NEVER commit these
+*-firebase-adminsdk-*.json
+*gserviceaccount*.json
+google-credentials*.json
+service-account*.json
+firebase-*.json
