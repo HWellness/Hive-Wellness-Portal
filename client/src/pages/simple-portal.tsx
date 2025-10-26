@@ -26,6 +26,15 @@ export default function SimplePortal() {
 
   return (
     <div className="min-h-screen relative bg-gradient-to-br from-purple-100 via-purple-50 to-indigo-100">
+      {/* Background Image with Overlay */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat pointer-events-none"
+        style={{ 
+          backgroundImage: `url(${backgroundImage})`,
+          opacity: 0.15
+        }}
+        aria-hidden="true"
+      ></div>
       {/* Enhanced overlay for better text readability */}
       <div className="absolute inset-0 bg-gradient-to-b from-purple-600/10 via-purple-400/5 to-transparent"></div>
       
@@ -33,19 +42,6 @@ export default function SimplePortal() {
         <div className="max-w-6xl mx-auto">
           {/* Header with Return Button */}
           <div className="text-center mb-12 relative">
-            {/* Header Background Image */}
-            <div className="mb-8 rounded-2xl overflow-hidden shadow-2xl">
-              <img 
-                src={backgroundImage} 
-                alt="Hive Wellness Portal" 
-                className="w-full h-64 object-cover"
-                onError={(e) => {
-                  // Hide image if it fails to load
-                  (e.target as HTMLImageElement).style.display = 'none';
-                }}
-              />
-            </div>
-
             <div className="absolute top-0 right-0">
               <Button
                 size="sm"

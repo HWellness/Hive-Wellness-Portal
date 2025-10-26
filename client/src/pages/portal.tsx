@@ -787,6 +787,15 @@ export default function Portal() {
   console.log('Portal: Reached login form section - user not authenticated');
   return (
     <div className="min-h-screen relative bg-gradient-to-br from-hive-purple/20 via-hive-blue/15 to-hive-light-blue/25">
+      {/* Background Image with Subtle Opacity */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat pointer-events-none"
+        style={{ 
+          backgroundImage: `url(${backgroundImage})`,
+          opacity: 0.15
+        }}
+        aria-hidden="true"
+      ></div>
       {/* Enhanced Brand Background with Hexagonal Pattern */}
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-gradient-to-br from-hive-purple/10 via-hive-blue/8 to-hive-light-blue/12"></div>
@@ -812,19 +821,6 @@ export default function Portal() {
       <div className="container mx-auto px-4 py-8 relative z-10">
         {/* Enhanced Header - Holly's Brand Guidelines Style */}
         <div className="text-center mb-12 relative">
-          {/* Header Background Image */}
-          <div className="mb-8 rounded-2xl overflow-hidden shadow-2xl">
-            <img 
-              src={backgroundImage} 
-              alt="Hive Wellness Portal" 
-              className="w-full h-64 object-cover"
-              onError={(e) => {
-                // Hide image if it fails to load
-                (e.target as HTMLImageElement).style.display = 'none';
-              }}
-            />
-          </div>
-          
           <div className="flex items-center justify-between mb-8">
             <div></div> {/* Spacer */}
             <img 
