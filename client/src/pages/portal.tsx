@@ -786,7 +786,7 @@ export default function Portal() {
 
   console.log('Portal: Reached login form section - user not authenticated');
   return (
-    <div className="min-h-screen relative bg-gradient-to-br from-hive-purple/20 via-hive-blue/15 to-hive-light-blue/25">
+    <div className="min-h-screen relative" style={{ backgroundColor: '#9306B1' }}>
       {/* Background Image with Subtle Opacity */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat pointer-events-none"
@@ -796,6 +796,8 @@ export default function Portal() {
         }}
         aria-hidden="true"
       ></div>
+      {/* Hive Purple overlay to align with brand guidelines - darker purple tint */}
+      <div className="absolute inset-0 bg-hive-purple/40 pointer-events-none" aria-hidden="true"></div>
       {/* Enhanced Brand Background with Hexagonal Pattern */}
       <div className="absolute inset-0">
         <div className="absolute inset-0 bg-gradient-to-br from-hive-purple/10 via-hive-blue/8 to-hive-light-blue/12"></div>

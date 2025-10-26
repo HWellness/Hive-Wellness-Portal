@@ -25,7 +25,7 @@ export default function SimplePortal() {
   const [bookingKey, setBookingKey] = useState(0); // Key to force remount only when needed
 
   return (
-    <div className="min-h-screen relative bg-gradient-to-br from-purple-100 via-purple-50 to-indigo-100">
+    <div className="min-h-screen relative" style={{ backgroundColor: '#9306B1' }}>
       {/* Background Image with Overlay */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat pointer-events-none"
@@ -35,8 +35,8 @@ export default function SimplePortal() {
         }}
         aria-hidden="true"
       ></div>
-      {/* Enhanced overlay for better text readability */}
-      <div className="absolute inset-0 bg-gradient-to-b from-purple-600/10 via-purple-400/5 to-transparent"></div>
+      {/* Hive Purple overlay to align with brand guidelines - darker purple tint */}
+      <div className="absolute inset-0 bg-hive-purple/40 pointer-events-none" aria-hidden="true"></div>
       
       <div className="container mx-auto px-4 py-8 relative z-10">
         <div className="max-w-6xl mx-auto">
