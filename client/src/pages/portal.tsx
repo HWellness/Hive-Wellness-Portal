@@ -812,6 +812,19 @@ export default function Portal() {
       <div className="container mx-auto px-4 py-8 relative z-10">
         {/* Enhanced Header - Holly's Brand Guidelines Style */}
         <div className="text-center mb-12 relative">
+          {/* Header Background Image */}
+          <div className="mb-8 rounded-2xl overflow-hidden shadow-2xl">
+            <img 
+              src={backgroundImage} 
+              alt="Hive Wellness Portal" 
+              className="w-full h-64 object-cover"
+              onError={(e) => {
+                // Hide image if it fails to load
+                (e.target as HTMLImageElement).style.display = 'none';
+              }}
+            />
+          </div>
+          
           <div className="flex items-center justify-between mb-8">
             <div></div> {/* Spacer */}
             <img 
