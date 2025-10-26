@@ -15,6 +15,9 @@ import { Link } from "wouter";
 import ChatbotWidget from "@/components/chatbot/chatbot-widget";
 import IntroductionCallBooking from "@/components/booking/introduction-call-booking";
 
+// Header background image
+const backgroundImage = "/header-bg.png";
+
 export default function SimplePortal() {
   const { toast } = useToast();
   const [showBookingDialog, setShowBookingDialog] = useState(false);
@@ -30,6 +33,19 @@ export default function SimplePortal() {
         <div className="max-w-6xl mx-auto">
           {/* Header with Return Button */}
           <div className="text-center mb-12 relative">
+            {/* Header Background Image */}
+            <div className="mb-8 rounded-2xl overflow-hidden shadow-2xl">
+              <img 
+                src={backgroundImage} 
+                alt="Hive Wellness Portal" 
+                className="w-full h-64 object-cover"
+                onError={(e) => {
+                  // Hide image if it fails to load
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
+              />
+            </div>
+
             <div className="absolute top-0 right-0">
               <Button
                 size="sm"
