@@ -56,10 +56,6 @@ DATABASE_URL=postgresql://user:password@host/database?sslmode=require
 ```
 
 ### Authentication
-```env
-REPL_ID=your-replit-id
-REPLIT_DOMAINS=your-domain.replit.dev
-```
 
 ### Email Services
 ```env
@@ -138,7 +134,6 @@ hive-wellness/
 
 ### User Management
 - **Multi-role authentication**: Client, Therapist, Admin, Institution
-- **Secure login**: Replit Auth integration with session management
 - **Password reset**: Automated email-based password recovery
 - **MFA support**: Optional two-factor authentication
 
@@ -294,7 +289,6 @@ All automated emails follow the brand guidelines with:
 
 ## 📖 Additional Documentation
 
-- `replit.md` - Comprehensive system architecture and technical decisions
 - `docs/GOOGLE_WORKSPACE_SETUP.md` - Google Calendar integration guide
 - `wordpress-chatbot-plugin/README.md` - WordPress plugin documentation
 
@@ -304,7 +298,6 @@ All automated emails follow the brand guidelines with:
 
 For technical support or questions:
 - **Email**: support@hive-wellness.co.uk
-- **Documentation**: Check `replit.md` for detailed technical information
 - **Issue Tracker**: Use GitHub Issues for bug reports and feature requests
 
 ---
