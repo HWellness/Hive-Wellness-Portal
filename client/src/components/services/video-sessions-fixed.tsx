@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { Video, VideoOff, Mic, MicOff, Phone } from "lucide-react";
+import { Video, VideoOff, Mic, MicOff } from "lucide-react";
 
 interface VideoSessionsProps {
   user: { id: string; role: string };

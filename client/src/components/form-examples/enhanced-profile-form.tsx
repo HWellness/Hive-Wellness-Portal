@@ -1,13 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  FormGuidance,
-  ValidatedInput,
-  PhoneInput,
-  PostcodeInput,
-  EmailInput,
-} from "@/components/ui/form-guidance";
+import { FormGuidance, ValidatedInput } from "@/components/ui/form-guidance";
 import {
   phoneValidation,
   postcodeValidation,

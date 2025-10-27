@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { Mail, User, FileText, Shield } from "lucide-react";
+import { Mail, FileText, Shield } from "lucide-react";
 import TherapistMatchingQuestionnaire from "./therapist-matching-questionnaire";
 import WorkWithUsForm from "./work-with-us-form";
 

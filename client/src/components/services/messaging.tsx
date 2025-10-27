@@ -21,7 +21,6 @@ import {
   Smile,
   MoreHorizontal,
   Search,
-  Filter,
   Archive,
   MessageCircle,
 } from "lucide-react";

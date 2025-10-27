@@ -28,22 +28,18 @@ import {
   Users,
   UserPlus,
   UserCheck,
-  UserX,
   Edit,
-  Trash2,
   Search,
   Filter,
   Shield,
   Lock,
   Unlock,
-  Mail,
   Phone,
   Calendar,
   MapPin,
   Activity,
   Settings,
   Download,
-  Upload,
 } from "lucide-react";
 import type { User } from "@shared/schema";
 

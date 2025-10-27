@@ -32,7 +32,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
@@ -45,19 +44,11 @@ import {
   Settings,
   Plus,
   Eye,
-  EyeOff,
   Calendar,
   CalendarIcon,
   TrendingUp,
-  Activity,
-  Users,
-  BarChart3,
-  Clock,
-  CheckCircle,
-  XCircle,
   AlertCircle,
   Edit,
-  Trash2,
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 

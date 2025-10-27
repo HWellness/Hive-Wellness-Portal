@@ -5,11 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { Calendar, Clock, UserIcon, Plus, ChevronLeft, ChevronRight } from "lucide-react";
 
-interface SchedulingProps {
-  user: any;
-}
-
-export default function SchedulingService({ user }: SchedulingProps) {
+export default function SchedulingService() {
   const { toast } = useToast();
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedTime, setSelectedTime] = useState<string | null>(null);

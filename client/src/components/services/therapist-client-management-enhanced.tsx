@@ -43,17 +43,6 @@ import {
   Star,
   Mail,
   Phone,
-  Calendar,
-  Clock,
-  Eye,
-  Edit3,
-  Trash2,
-  Download,
-  Upload,
-  RefreshCw,
-  AlertTriangle,
-  TrendingUp,
-  BarChart3,
 } from "lucide-react";
 import { User as UserType } from "@shared/schema";
 

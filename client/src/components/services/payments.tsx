@@ -3,15 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import {
-  CreditCard,
-  Plus,
-  PoundSterling,
-  Calendar,
-  CheckCircle,
-  Download,
-  FileText,
-} from "lucide-react";
+import { CreditCard, Plus, Calendar, Download } from "lucide-react";
 import type { User } from "@shared/schema";
 
 interface PaymentsProps {

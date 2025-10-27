@@ -28,13 +28,8 @@ import {
   AlertCircle,
   Eye,
   Reply,
-  Forward,
   Archive,
-  Trash2,
-  Star,
   Download,
-  Upload,
-  Settings,
 } from "lucide-react";
 import type { User } from "@shared/schema";
 

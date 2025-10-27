@@ -1,4 +1,4 @@
-import { useState, lazy, Suspense } from "react";
+import { lazy, Suspense } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import type { User } from "@shared/schema";
@@ -27,7 +27,6 @@ const TherapistAiAssistant = lazy(() => import("./therapist-ai-assistant"));
 const ClientProfileCompletion = lazy(() => import("./client-profile-completion"));
 const TherapistProfileCompletion = lazy(() => import("./therapist-profile-completion"));
 const AdminProfileCompletion = lazy(() => import("./admin-profile-completion"));
-const AdminEmailManagement = lazy(() => import("./admin-email-management"));
 const CommunicationsAndReminders = lazy(() => import("./communications-and-reminders"));
 const UserManagement = lazy(() => import("./user-management"));
 const SecurityDashboard = lazy(() => import("./security-dashboard"));
@@ -56,7 +55,6 @@ const TherapistAvailabilityEnhanced = lazy(() => import("./therapist-availabilit
 const PaymentSetup = lazy(() => import("./payment-setup"));
 const AdminCalendarManagement = lazy(() => import("../../pages/admin-calendar-management"));
 const TherapistOnboardingForm = lazy(() => import("../therapist-onboarding-form"));
-const MainWebsiteTherapistForm = lazy(() => import("../forms/main-website-therapist-form-new"));
 const ClientDocuments = lazy(() => import("./client-documents"));
 const TherapistDocuments = lazy(() => import("./therapist-documents"));
 const TherapistNotesUpload = lazy(() =>
@@ -64,9 +62,7 @@ const TherapistNotesUpload = lazy(() =>
 );
 const EmailTemplateManagement = lazy(() => import("../admin/email-template-management-simple"));
 const FormSubmissionsDashboard = lazy(() => import("../admin/form-submissions-dashboard"));
-const TherapistApplicationsDashboard = lazy(
-  () => import("../admin/therapist-applications-dashboard")
-);
+
 const ClientQuestionnairesDashboard = lazy(
   () => import("../admin/client-questionnaires-dashboard")
 );
