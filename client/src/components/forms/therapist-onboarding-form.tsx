@@ -9,9 +9,23 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -24,32 +38,45 @@ const therapistOnboardingSchema = z.object({
   lastName: z.string().min(1, "Last name is required"),
   email: z.string().email("Please enter a valid email address"),
   phone: z.string().min(10, "Please enter a valid phone number"),
-  
+
   // NEW COMPREHENSIVE QUESTIONS (matching main website)
   // Current location
   location: z.string().min(1, "Current location is required"),
-  
+
   // Religion
   religion: z.string().min(1, "Please specify your religion or belief system"),
-  
+
   // Limited company status
-  hasLimitedCompany: z.enum(["yes", "no"], { required_error: "Please specify if you have a limited company" }),
-  
+  hasLimitedCompany: z.enum(["yes", "no"], {
+    required_error: "Please specify if you have a limited company",
+  }),
+
   // Highest qualification level
-  highestQualification: z.string().min(1, "Please specify your highest psychology/therapy qualification"),
-  
+  highestQualification: z
+    .string()
+    .min(1, "Please specify your highest psychology/therapy qualification"),
+
   // Professional body registration
   professionalBody: z.string().min(1, "Please specify your professional body registration"),
-  
+
   // Therapy specialisations/approaches
-  therapySpecialisations: z.array(z.string()).min(1, "Please select at least one therapy specialisation"),
-  
+  therapySpecialisations: z
+    .array(z.string())
+    .min(1, "Please select at least one therapy specialisation"),
+
   // Personality description as therapist
-  personalityDescription: z.string().min(50, "Please provide a description of your personality as a therapist (minimum 50 characters)"),
-  
+  personalityDescription: z
+    .string()
+    .min(
+      50,
+      "Please provide a description of your personality as a therapist (minimum 50 characters)"
+    ),
+
   // Professional bio
-  professionalBio: z.string().min(50, "Please provide a professional biography (minimum 50 characters)"),
-  
+  professionalBio: z
+    .string()
+    .min(50, "Please provide a professional biography (minimum 50 characters)"),
+
   // Additional portal-specific fields
   dateOfBirth: z.string().min(1, "Date of birth is required"),
   profilePhoto: z.string().optional(),
@@ -69,7 +96,7 @@ const therapistOnboardingSchema = z.object({
   registrationNumber: z.string().optional(),
   enhancedDbsCertificate: z.enum(["yes", "no"], { required_error: "Please select an option" }),
   workingWithOtherPlatforms: z.enum(["yes", "no"], { required_error: "Please select an option" }),
-  
+
   // Availability
   availability: z.object({
     monday: z.array(z.string()).optional(),
@@ -80,11 +107,17 @@ const therapistOnboardingSchema = z.object({
     saturday: z.array(z.string()).optional(),
     sunday: z.array(z.string()).optional(),
   }),
-  sessionsPerWeek: z.enum(["1-5", "6-10", "11-20", "21+"], { required_error: "Please select an option" }),
+  sessionsPerWeek: z.enum(["1-5", "6-10", "11-20", "21+"], {
+    required_error: "Please select an option",
+  }),
 
   // Self-Employment & Legal Compliance
-  selfEmploymentAcknowledgment: z.boolean().refine(val => val === true, "You must acknowledge self-employment terms"),
-  taxResponsibilityAcknowledgment: z.boolean().refine(val => val === true, "You must acknowledge tax responsibility"),
+  selfEmploymentAcknowledgment: z
+    .boolean()
+    .refine((val) => val === true, "You must acknowledge self-employment terms"),
+  taxResponsibilityAcknowledgment: z
+    .boolean()
+    .refine((val) => val === true, "You must acknowledge tax responsibility"),
 
   // Document Uploads
   cvDocument: z.string().optional(),
@@ -94,11 +127,13 @@ const therapistOnboardingSchema = z.object({
   rightToWorkProof: z.string().optional(),
 
   // Legal Agreements
-  policiesAgreement: z.boolean().refine(val => val === true, "You must agree to the policies"),
+  policiesAgreement: z.boolean().refine((val) => val === true, "You must agree to the policies"),
   signature: z.string().min(1, "Signature is required"),
 
   // Stripe Connect Consent
-  stripeConnectConsent: z.boolean().refine(val => val === true, "You must consent to Stripe Connect setup"),
+  stripeConnectConsent: z
+    .boolean()
+    .refine((val) => val === true, "You must consent to Stripe Connect setup"),
 });
 
 type TherapistOnboardingFormData = z.infer<typeof therapistOnboardingSchema>;
@@ -193,34 +228,40 @@ export default function TherapistOnboardingForm({ onSuccess }: TherapistOnboardi
     const updated = [...qualificationsList];
     updated[index] = value;
     setQualificationsList(updated);
-    form.setValue("qualifications", updated.filter(q => q.trim() !== ""));
+    form.setValue(
+      "qualifications",
+      updated.filter((q) => q.trim() !== "")
+    );
   };
 
   const removeQualification = (index: number) => {
     const updated = qualificationsList.filter((_, i) => i !== index);
     setQualificationsList(updated);
-    form.setValue("qualifications", updated.filter(q => q.trim() !== ""));
+    form.setValue(
+      "qualifications",
+      updated.filter((q) => q.trim() !== "")
+    );
   };
 
   const handleAvailabilityChange = (day: string, timeSlot: string, checked: boolean) => {
     const currentAvailability = form.getValues(`availability.${day}` as any) || [];
     let updated: string[];
-    
+
     if (checked) {
       updated = [...currentAvailability, timeSlot];
     } else {
       updated = currentAvailability.filter((slot: string) => slot !== timeSlot);
     }
-    
+
     form.setValue(`availability.${day}` as any, updated);
   };
 
   const nextStep = () => {
-    setCurrentStep(prev => Math.min(prev + 1, 6));
+    setCurrentStep((prev) => Math.min(prev + 1, 6));
   };
 
   const prevStep = () => {
-    setCurrentStep(prev => Math.max(prev - 1, 1));
+    setCurrentStep((prev) => Math.max(prev - 1, 1));
   };
 
   const steps = [
@@ -237,13 +278,23 @@ export default function TherapistOnboardingForm({ onSuccess }: TherapistOnboardi
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 to-indigo-100 flex items-center justify-center p-4">
         <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
-          <CheckCircle className="h-16 w-16 mx-auto mb-6" style={{ color: '#9306B1' }} />
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Application Consultation Booked!</h1>
+          <CheckCircle className="h-16 w-16 mx-auto mb-6" style={{ color: "#9306B1" }} />
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+            Application Consultation Booked!
+          </h1>
           <p className="text-gray-600 mb-6">
-            Thanks for completing your onboarding! We'll review your details and then send over your contract and login information. While you wait, feel free to go back through your information booklet- and if you have any questions, just email us at admin@hive-wellness.co.uk.
+            Thanks for completing your onboarding! We'll review your details and then send over your
+            contract and login information. While you wait, feel free to go back through your
+            information booklet- and if you have any questions, just email us at
+            admin@hive-wellness.co.uk.
           </p>
-          <div className="border rounded-lg p-4 mb-6" style={{ backgroundColor: '#F3F4F6', borderColor: '#E5E7EB' }}>
-            <h3 className="font-semibold mb-2" style={{ color: '#9306B1' }}>What to Expect:</h3>
+          <div
+            className="border rounded-lg p-4 mb-6"
+            style={{ backgroundColor: "#F3F4F6", borderColor: "#E5E7EB" }}
+          >
+            <h3 className="font-semibold mb-2" style={{ color: "#9306B1" }}>
+              What to Expect:
+            </h3>
             <ul className="text-sm text-gray-700 space-y-1 text-left">
               <li>• Discussion of your qualifications and experience</li>
               <li>• Overview of our platform and client matching process</li>
@@ -252,7 +303,8 @@ export default function TherapistOnboardingForm({ onSuccess }: TherapistOnboardi
             </ul>
           </div>
           <p className="text-sm text-gray-500">
-            Questions? Contact us at <span style={{ color: '#9306B1' }}>admin@hive-wellness.co.uk</span>
+            Questions? Contact us at{" "}
+            <span style={{ color: "#9306B1" }}>admin@hive-wellness.co.uk</span>
           </p>
         </div>
       </div>
@@ -275,29 +327,27 @@ export default function TherapistOnboardingForm({ onSuccess }: TherapistOnboardi
           <div className="flex items-center justify-between mb-4">
             {steps.map((step, index) => (
               <div key={step.number} className="flex items-center">
-                <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all ${
-                  currentStep >= step.number 
-                    ? "bg-hive-purple border-hive-purple text-white" 
-                    : "border-gray-300 text-gray-400"
-                }`}>
-                  {currentStep > step.number ? (
-                    <CheckCircle className="w-5 h-5" />
-                  ) : (
-                    step.icon
-                  )}
+                <div
+                  className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all ${
+                    currentStep >= step.number
+                      ? "bg-hive-purple border-hive-purple text-white"
+                      : "border-gray-300 text-gray-400"
+                  }`}
+                >
+                  {currentStep > step.number ? <CheckCircle className="w-5 h-5" /> : step.icon}
                 </div>
                 {index < steps.length - 1 && (
-                  <div className={`flex-1 h-0.5 mx-2 ${
-                    currentStep > step.number ? "bg-hive-purple" : "bg-gray-300"
-                  }`} />
+                  <div
+                    className={`flex-1 h-0.5 mx-2 ${
+                      currentStep > step.number ? "bg-hive-purple" : "bg-gray-300"
+                    }`}
+                  />
                 )}
               </div>
             ))}
           </div>
           <div className="text-center">
-            <h2 className="text-xl font-semibold text-gray-900">
-              {steps[currentStep - 1].title}
-            </h2>
+            <h2 className="text-xl font-semibold text-gray-900">{steps[currentStep - 1].title}</h2>
           </div>
         </div>
 
@@ -392,9 +442,15 @@ export default function TherapistOnboardingForm({ onSuccess }: TherapistOnboardi
                         <FormItem>
                           <FormLabel>Profile Photo</FormLabel>
                           <FormControl>
-                            <Input type="file" accept="image/*" onChange={(e) => field.onChange(e.target.files?.[0]?.name)} />
+                            <Input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => field.onChange(e.target.files?.[0]?.name)}
+                            />
                           </FormControl>
-                          <FormDescription>Accepted file types: jpg, png. Max. file size: 2 MB.</FormDescription>
+                          <FormDescription>
+                            Accepted file types: jpg, png. Max. file size: 2 MB.
+                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -403,8 +459,10 @@ export default function TherapistOnboardingForm({ onSuccess }: TherapistOnboardi
 
                   {/* NEW COMPREHENSIVE QUESTIONS - matching main website */}
                   <div className="border-t pt-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Comprehensive Information</h3>
-                    
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                      Comprehensive Information
+                    </h3>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <FormField
                         control={form.control}
@@ -420,45 +478,85 @@ export default function TherapistOnboardingForm({ onSuccess }: TherapistOnboardi
                               </FormControl>
                               <SelectContent>
                                 <SelectItem value="London, England">London, England</SelectItem>
-                                <SelectItem value="Birmingham, England">Birmingham, England</SelectItem>
-                                <SelectItem value="Manchester, England">Manchester, England</SelectItem>
-                                <SelectItem value="Liverpool, England">Liverpool, England</SelectItem>
+                                <SelectItem value="Birmingham, England">
+                                  Birmingham, England
+                                </SelectItem>
+                                <SelectItem value="Manchester, England">
+                                  Manchester, England
+                                </SelectItem>
+                                <SelectItem value="Liverpool, England">
+                                  Liverpool, England
+                                </SelectItem>
                                 <SelectItem value="Leeds, England">Leeds, England</SelectItem>
-                                <SelectItem value="Sheffield, England">Sheffield, England</SelectItem>
+                                <SelectItem value="Sheffield, England">
+                                  Sheffield, England
+                                </SelectItem>
                                 <SelectItem value="Bristol, England">Bristol, England</SelectItem>
-                                <SelectItem value="Newcastle, England">Newcastle, England</SelectItem>
+                                <SelectItem value="Newcastle, England">
+                                  Newcastle, England
+                                </SelectItem>
                                 <SelectItem value="Brighton, England">Brighton, England</SelectItem>
-                                <SelectItem value="Nottingham, England">Nottingham, England</SelectItem>
-                                <SelectItem value="Leicester, England">Leicester, England</SelectItem>
+                                <SelectItem value="Nottingham, England">
+                                  Nottingham, England
+                                </SelectItem>
+                                <SelectItem value="Leicester, England">
+                                  Leicester, England
+                                </SelectItem>
                                 <SelectItem value="Coventry, England">Coventry, England</SelectItem>
                                 <SelectItem value="Hull, England">Hull, England</SelectItem>
                                 <SelectItem value="Plymouth, England">Plymouth, England</SelectItem>
-                                <SelectItem value="Stoke-on-Trent, England">Stoke-on-Trent, England</SelectItem>
+                                <SelectItem value="Stoke-on-Trent, England">
+                                  Stoke-on-Trent, England
+                                </SelectItem>
                                 <SelectItem value="Derby, England">Derby, England</SelectItem>
-                                <SelectItem value="Portsmouth, England">Portsmouth, England</SelectItem>
-                                <SelectItem value="Southampton, England">Southampton, England</SelectItem>
+                                <SelectItem value="Portsmouth, England">
+                                  Portsmouth, England
+                                </SelectItem>
+                                <SelectItem value="Southampton, England">
+                                  Southampton, England
+                                </SelectItem>
                                 <SelectItem value="Reading, England">Reading, England</SelectItem>
                                 <SelectItem value="Oxford, England">Oxford, England</SelectItem>
-                                <SelectItem value="Cambridge, England">Cambridge, England</SelectItem>
+                                <SelectItem value="Cambridge, England">
+                                  Cambridge, England
+                                </SelectItem>
                                 <SelectItem value="York, England">York, England</SelectItem>
                                 <SelectItem value="Bath, England">Bath, England</SelectItem>
-                                <SelectItem value="Canterbury, England">Canterbury, England</SelectItem>
+                                <SelectItem value="Canterbury, England">
+                                  Canterbury, England
+                                </SelectItem>
                                 <SelectItem value="Glasgow, Scotland">Glasgow, Scotland</SelectItem>
-                                <SelectItem value="Edinburgh, Scotland">Edinburgh, Scotland</SelectItem>
-                                <SelectItem value="Aberdeen, Scotland">Aberdeen, Scotland</SelectItem>
+                                <SelectItem value="Edinburgh, Scotland">
+                                  Edinburgh, Scotland
+                                </SelectItem>
+                                <SelectItem value="Aberdeen, Scotland">
+                                  Aberdeen, Scotland
+                                </SelectItem>
                                 <SelectItem value="Dundee, Scotland">Dundee, Scotland</SelectItem>
-                                <SelectItem value="Stirling, Scotland">Stirling, Scotland</SelectItem>
-                                <SelectItem value="Inverness, Scotland">Inverness, Scotland</SelectItem>
+                                <SelectItem value="Stirling, Scotland">
+                                  Stirling, Scotland
+                                </SelectItem>
+                                <SelectItem value="Inverness, Scotland">
+                                  Inverness, Scotland
+                                </SelectItem>
                                 <SelectItem value="Perth, Scotland">Perth, Scotland</SelectItem>
                                 <SelectItem value="Cardiff, Wales">Cardiff, Wales</SelectItem>
                                 <SelectItem value="Swansea, Wales">Swansea, Wales</SelectItem>
                                 <SelectItem value="Newport, Wales">Newport, Wales</SelectItem>
                                 <SelectItem value="Wrexham, Wales">Wrexham, Wales</SelectItem>
                                 <SelectItem value="Bangor, Wales">Bangor, Wales</SelectItem>
-                                <SelectItem value="Belfast, Northern Ireland">Belfast, Northern Ireland</SelectItem>
-                                <SelectItem value="Derry/Londonderry, Northern Ireland">Derry/Londonderry, Northern Ireland</SelectItem>
-                                <SelectItem value="Lisburn, Northern Ireland">Lisburn, Northern Ireland</SelectItem>
-                                <SelectItem value="Newry, Northern Ireland">Newry, Northern Ireland</SelectItem>
+                                <SelectItem value="Belfast, Northern Ireland">
+                                  Belfast, Northern Ireland
+                                </SelectItem>
+                                <SelectItem value="Derry/Londonderry, Northern Ireland">
+                                  Derry/Londonderry, Northern Ireland
+                                </SelectItem>
+                                <SelectItem value="Lisburn, Northern Ireland">
+                                  Lisburn, Northern Ireland
+                                </SelectItem>
+                                <SelectItem value="Newry, Northern Ireland">
+                                  Newry, Northern Ireland
+                                </SelectItem>
                               </SelectContent>
                             </Select>
                             <FormMessage />
@@ -472,7 +570,10 @@ export default function TherapistOnboardingForm({ onSuccess }: TherapistOnboardi
                           <FormItem>
                             <FormLabel>Religion/Belief System *</FormLabel>
                             <FormControl>
-                              <Input placeholder="e.g., Christian, Muslim, Atheist, etc." {...field} />
+                              <Input
+                                placeholder="e.g., Christian, Muslim, Atheist, etc."
+                                {...field}
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -514,7 +615,10 @@ export default function TherapistOnboardingForm({ onSuccess }: TherapistOnboardi
                         <FormItem>
                           <FormLabel>Highest Psychology/Therapy Qualification Level *</FormLabel>
                           <FormControl>
-                            <Input placeholder="e.g., Masters in Clinical Psychology, Diploma in Counselling" {...field} />
+                            <Input
+                              placeholder="e.g., Masters in Clinical Psychology, Diploma in Counselling"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -528,7 +632,10 @@ export default function TherapistOnboardingForm({ onSuccess }: TherapistOnboardi
                         <FormItem>
                           <FormLabel>Professional Body Registration *</FormLabel>
                           <FormControl>
-                            <Input placeholder="e.g., BACP Registered, HCPC Registered" {...field} />
+                            <Input
+                              placeholder="e.g., BACP Registered, HCPC Registered"
+                              {...field}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -554,14 +661,24 @@ export default function TherapistOnboardingForm({ onSuccess }: TherapistOnboardi
                                 <SelectValue placeholder="Select specialisations" />
                               </SelectTrigger>
                               <SelectContent>
-                                <SelectItem value="Anxiety and Depression">Anxiety and Depression</SelectItem>
-                                <SelectItem value="CBT">Cognitive Behavioural Therapy (CBT)</SelectItem>
+                                <SelectItem value="Anxiety and Depression">
+                                  Anxiety and Depression
+                                </SelectItem>
+                                <SelectItem value="CBT">
+                                  Cognitive Behavioural Therapy (CBT)
+                                </SelectItem>
                                 <SelectItem value="Trauma and PTSD">Trauma and PTSD</SelectItem>
-                                <SelectItem value="Relationship Issues">Relationship Issues</SelectItem>
+                                <SelectItem value="Relationship Issues">
+                                  Relationship Issues
+                                </SelectItem>
                                 <SelectItem value="Eating Disorders">Eating Disorders</SelectItem>
-                                <SelectItem value="Addiction">Addiction and Substance Abuse</SelectItem>
+                                <SelectItem value="Addiction">
+                                  Addiction and Substance Abuse
+                                </SelectItem>
                                 <SelectItem value="Family Therapy">Family Therapy</SelectItem>
-                                <SelectItem value="Child and Adolescent">Child and Adolescent</SelectItem>
+                                <SelectItem value="Child and Adolescent">
+                                  Child and Adolescent
+                                </SelectItem>
                                 <SelectItem value="LGBTQ+ Issues">LGBTQ+ Issues</SelectItem>
                                 <SelectItem value="Grief and Loss">Grief and Loss</SelectItem>
                               </SelectContent>
@@ -623,7 +740,9 @@ export default function TherapistOnboardingForm({ onSuccess }: TherapistOnboardi
                               {...field}
                             />
                           </FormControl>
-                          <FormDescription>This will be displayed to potential clients</FormDescription>
+                          <FormDescription>
+                            This will be displayed to potential clients
+                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -660,8 +779,10 @@ export default function TherapistOnboardingForm({ onSuccess }: TherapistOnboardi
 
                   {/* Emergency Contact Details */}
                   <div className="border-t pt-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Emergency Contact Details</h3>
-                    
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                      Emergency Contact Details
+                    </h3>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <FormField
                         control={form.control}
@@ -698,7 +819,10 @@ export default function TherapistOnboardingForm({ onSuccess }: TherapistOnboardi
                         <FormItem>
                           <FormLabel>Relationship To You *</FormLabel>
                           <FormControl>
-                            <Input placeholder="Enter your relationship to the emergency contact" {...field} />
+                            <Input
+                              placeholder="Enter your relationship to the emergency contact"
+                              {...field}
+                            />
                           </FormControl>
                           <FormDescription>(e.g., Partner, Parent, Friend)</FormDescription>
                           <FormMessage />
@@ -743,7 +867,9 @@ export default function TherapistOnboardingForm({ onSuccess }: TherapistOnboardi
                         <FormControl>
                           <Input placeholder="Enter your job title" {...field} />
                         </FormControl>
-                        <FormDescription>(e.g., Counsellor, Clinical Psychologist, CBT Therapist)</FormDescription>
+                        <FormDescription>
+                          (e.g., Counsellor, Clinical Psychologist, CBT Therapist)
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -751,7 +877,9 @@ export default function TherapistOnboardingForm({ onSuccess }: TherapistOnboardi
 
                   <div>
                     <Label>Qualifications *</Label>
-                    <p className="text-sm text-gray-500 mb-3">(List relevant degrees/certifications)</p>
+                    <p className="text-sm text-gray-500 mb-3">
+                      (List relevant degrees/certifications)
+                    </p>
                     {qualificationsList.map((qualification, index) => (
                       <div key={index} className="flex gap-2 mb-2">
                         <Input
@@ -791,10 +919,10 @@ export default function TherapistOnboardingForm({ onSuccess }: TherapistOnboardi
                       <FormItem>
                         <FormLabel>Years of Experience in Therapy *</FormLabel>
                         <FormControl>
-                          <Input 
-                            type="number" 
-                            min="1" 
-                            max="100" 
+                          <Input
+                            type="number"
+                            min="1"
+                            max="100"
                             placeholder="Enter number of years"
                             {...field}
                             onChange={(e) => field.onChange(parseInt(e.target.value))}
@@ -853,7 +981,10 @@ export default function TherapistOnboardingForm({ onSuccess }: TherapistOnboardi
                     name="workingWithOtherPlatforms"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Are you currently working with other therapy platforms or private clients? *</FormLabel>
+                        <FormLabel>
+                          Are you currently working with other therapy platforms or private clients?
+                          *
+                        </FormLabel>
                         <FormControl>
                           <RadioGroup
                             onValueChange={field.onChange}
@@ -877,10 +1008,20 @@ export default function TherapistOnboardingForm({ onSuccess }: TherapistOnboardi
 
                   {/* Availability Section */}
                   <div className="border-t pt-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Availability for Sessions (Days & Times)</h3>
-                    
+                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                      Availability for Sessions (Days & Times)
+                    </h3>
+
                     <div className="space-y-4">
-                      {["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"].map((day) => (
+                      {[
+                        "Monday",
+                        "Tuesday",
+                        "Wednesday",
+                        "Thursday",
+                        "Friday",
+                        "Saturday",
+                        "Sunday",
+                      ].map((day) => (
                         <div key={day} className="flex items-center gap-4">
                           <div className="w-20 text-sm font-medium">{day}</div>
                           <div className="flex gap-4">
@@ -888,11 +1029,18 @@ export default function TherapistOnboardingForm({ onSuccess }: TherapistOnboardi
                               <div key={timeSlot} className="flex items-center space-x-2">
                                 <Checkbox
                                   id={`${day.toLowerCase()}-${timeSlot.toLowerCase()}`}
-                                  onCheckedChange={(checked) => 
-                                    handleAvailabilityChange(day.toLowerCase(), timeSlot.toLowerCase(), checked as boolean)
+                                  onCheckedChange={(checked) =>
+                                    handleAvailabilityChange(
+                                      day.toLowerCase(),
+                                      timeSlot.toLowerCase(),
+                                      checked as boolean
+                                    )
                                   }
                                 />
-                                <Label htmlFor={`${day.toLowerCase()}-${timeSlot.toLowerCase()}`} className="text-sm">
+                                <Label
+                                  htmlFor={`${day.toLowerCase()}-${timeSlot.toLowerCase()}`}
+                                  className="text-sm"
+                                >
                                   {timeSlot}
                                 </Label>
                               </div>
@@ -908,7 +1056,9 @@ export default function TherapistOnboardingForm({ onSuccess }: TherapistOnboardi
                     name="sessionsPerWeek"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>How many sessions would you like to complete each week? *</FormLabel>
+                        <FormLabel>
+                          How many sessions would you like to complete each week? *
+                        </FormLabel>
                         <FormControl>
                           <RadioGroup
                             onValueChange={field.onChange}
@@ -965,7 +1115,7 @@ export default function TherapistOnboardingForm({ onSuccess }: TherapistOnboardi
 
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">Please Confirm:</h3>
-                    
+
                     <div className="space-y-4">
                       <FormField
                         control={form.control}
@@ -973,14 +1123,13 @@ export default function TherapistOnboardingForm({ onSuccess }: TherapistOnboardi
                         render={({ field }) => (
                           <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                             <FormControl>
-                              <Checkbox
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
+                              <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                             </FormControl>
                             <div className="space-y-1 leading-none">
                               <FormLabel>
-                                I acknowledge that I am applying to work as a self-employed therapist and understand that Hive Wellness does not employ therapists directly.
+                                I acknowledge that I am applying to work as a self-employed
+                                therapist and understand that Hive Wellness does not employ
+                                therapists directly.
                               </FormLabel>
                             </div>
                             <FormMessage />
@@ -994,14 +1143,12 @@ export default function TherapistOnboardingForm({ onSuccess }: TherapistOnboardi
                         render={({ field }) => (
                           <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                             <FormControl>
-                              <Checkbox
-                                checked={field.value}
-                                onCheckedChange={field.onChange}
-                              />
+                              <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                             </FormControl>
                             <div className="space-y-1 leading-none">
                               <FormLabel>
-                                I am responsible for my own tax, National Insurance, and pension contributions.
+                                I am responsible for my own tax, National Insurance, and pension
+                                contributions.
                               </FormLabel>
                             </div>
                             <FormMessage />
@@ -1026,7 +1173,7 @@ export default function TherapistOnboardingForm({ onSuccess }: TherapistOnboardi
                 <CardContent className="space-y-6">
                   {/* Document Upload Guidance */}
                   <DocumentUploadGuidance />
-                  
+
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">
                       (Upload the following documents)
@@ -1036,7 +1183,9 @@ export default function TherapistOnboardingForm({ onSuccess }: TherapistOnboardi
                       <li>📎 Enhanced DBS Certificate (Required)</li>
                       <li>📎 Professional Indemnity Insurance (Required)</li>
                       <li>📎 Proof of HCPC/BACP/UKCP Membership (If applicable)</li>
-                      <li>📎 Proof of Right to Work in the UK (Passport, Visa, or BRP) (Required)</li>
+                      <li>
+                        📎 Proof of Right to Work in the UK (Passport, Visa, or BRP) (Required)
+                      </li>
                     </ul>
                   </div>
 
@@ -1059,7 +1208,11 @@ export default function TherapistOnboardingForm({ onSuccess }: TherapistOnboardi
                         <FormItem>
                           <FormLabel>CV/Resume *</FormLabel>
                           <FormControl>
-                            <Input type="file" accept=".pdf,.doc,.docx" onChange={(e) => field.onChange(e.target.files?.[0]?.name)} />
+                            <Input
+                              type="file"
+                              accept=".pdf,.doc,.docx"
+                              onChange={(e) => field.onChange(e.target.files?.[0]?.name)}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -1073,7 +1226,11 @@ export default function TherapistOnboardingForm({ onSuccess }: TherapistOnboardi
                         <FormItem>
                           <FormLabel>Enhanced DBS Certificate *</FormLabel>
                           <FormControl>
-                            <Input type="file" accept=".pdf,.jpg,.png" onChange={(e) => field.onChange(e.target.files?.[0]?.name)} />
+                            <Input
+                              type="file"
+                              accept=".pdf,.jpg,.png"
+                              onChange={(e) => field.onChange(e.target.files?.[0]?.name)}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -1087,7 +1244,11 @@ export default function TherapistOnboardingForm({ onSuccess }: TherapistOnboardi
                         <FormItem>
                           <FormLabel>Professional Indemnity Insurance *</FormLabel>
                           <FormControl>
-                            <Input type="file" accept=".pdf,.jpg,.png" onChange={(e) => field.onChange(e.target.files?.[0]?.name)} />
+                            <Input
+                              type="file"
+                              accept=".pdf,.jpg,.png"
+                              onChange={(e) => field.onChange(e.target.files?.[0]?.name)}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -1101,7 +1262,11 @@ export default function TherapistOnboardingForm({ onSuccess }: TherapistOnboardi
                         <FormItem>
                           <FormLabel>Membership Proof (If applicable)</FormLabel>
                           <FormControl>
-                            <Input type="file" accept=".pdf,.jpg,.png" onChange={(e) => field.onChange(e.target.files?.[0]?.name)} />
+                            <Input
+                              type="file"
+                              accept=".pdf,.jpg,.png"
+                              onChange={(e) => field.onChange(e.target.files?.[0]?.name)}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -1115,7 +1280,11 @@ export default function TherapistOnboardingForm({ onSuccess }: TherapistOnboardi
                         <FormItem>
                           <FormLabel>Right to Work Proof *</FormLabel>
                           <FormControl>
-                            <Input type="file" accept=".pdf,.jpg,.png" onChange={(e) => field.onChange(e.target.files?.[0]?.name)} />
+                            <Input
+                              type="file"
+                              accept=".pdf,.jpg,.png"
+                              onChange={(e) => field.onChange(e.target.files?.[0]?.name)}
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
@@ -1173,21 +1342,19 @@ export default function TherapistOnboardingForm({ onSuccess }: TherapistOnboardi
 
                   <div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-4">Please Confirm:</h3>
-                    
+
                     <FormField
                       control={form.control}
                       name="policiesAgreement"
                       render={({ field }) => (
                         <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                           <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
+                            <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                           </FormControl>
                           <div className="space-y-1 leading-none">
                             <FormLabel>
-                              I confirm that I have read and agree to the Hive Wellness policies, terms, and conditions as a self-employed therapist.
+                              I confirm that I have read and agree to the Hive Wellness policies,
+                              terms, and conditions as a self-employed therapist.
                             </FormLabel>
                           </div>
                           <FormMessage />
@@ -1234,26 +1401,32 @@ export default function TherapistOnboardingForm({ onSuccess }: TherapistOnboardi
                 <CardContent className="space-y-6">
                   <div className="space-y-4">
                     <p className="text-gray-700">
-                      Hive Wellness processes all therapist payments securely through Stripe Connect.{" "}
+                      Hive Wellness processes all therapist payments securely through Stripe
+                      Connect.{" "}
                       <span className="text-hive-purple font-semibold">
                         To receive payments, you'll need to set up a Stripe Connect account.
                       </span>
                     </p>
-                    
+
                     <p className="text-gray-700">
-                      Once you've completed your onboarding form, you'll receive an email from us with a link to Stripe Connect, where you'll be asked to provide a few additional details — including your personal information and bank details.
+                      Once you've completed your onboarding form, you'll receive an email from us
+                      with a link to Stripe Connect, where you'll be asked to provide a few
+                      additional details — including your personal information and bank details.
                     </p>
-                    
+
                     <p className="text-gray-700">
-                      To support you through this process, we've also sent you an onboarding PDF guide. It's designed to make the setup as clear and stress-free as possible, and we recommend keeping it open while completing your Stripe registration.
+                      To support you through this process, we've also sent you an onboarding PDF
+                      guide. It's designed to make the setup as clear and stress-free as possible,
+                      and we recommend keeping it open while completing your Stripe registration.
                     </p>
-                    
+
                     <p className="text-gray-700">
                       At this stage, the only thing you'll need to have ready is your bank details.
                     </p>
-                    
+
                     <p className="text-gray-700">
-                      Setting up Stripe Connect also gives you greater control over your invoices and earnings, making it easier to manage your taxes and financial records.
+                      Setting up Stripe Connect also gives you greater control over your invoices
+                      and earnings, making it easier to manage your taxes and financial records.
                     </p>
                   </div>
 
@@ -1264,14 +1437,12 @@ export default function TherapistOnboardingForm({ onSuccess }: TherapistOnboardi
                       render={({ field }) => (
                         <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                           <FormControl>
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                            />
+                            <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                           </FormControl>
                           <div className="space-y-1 leading-none">
                             <FormLabel>
-                              I consent to the collection and processing of my health and religious information as part of this form, in accordance with your{" "}
+                              I consent to the collection and processing of my health and religious
+                              information as part of this form, in accordance with your{" "}
                               <Button variant="link" className="p-0 h-auto text-hive-purple">
                                 Privacy Policy
                               </Button>
@@ -1285,7 +1456,8 @@ export default function TherapistOnboardingForm({ onSuccess }: TherapistOnboardi
                   </div>
 
                   <p className="text-sm text-gray-600">
-                    The information you share with us through this form will be collected and processed in line with our{" "}
+                    The information you share with us through this form will be collected and
+                    processed in line with our{" "}
                     <Button variant="link" className="p-0 h-auto text-hive-purple">
                       Privacy Policy
                     </Button>
@@ -1305,7 +1477,7 @@ export default function TherapistOnboardingForm({ onSuccess }: TherapistOnboardi
               >
                 Previous
               </Button>
-              
+
               <div className="flex gap-2">
                 {currentStep < 6 ? (
                   <Button

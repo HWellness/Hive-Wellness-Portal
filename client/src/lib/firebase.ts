@@ -7,7 +7,7 @@ export interface HiveUser {
   email: string;
   firstName?: string;
   lastName?: string;
-  role: 'client' | 'therapist' | 'admin' | 'institution';
+  role: "client" | "therapist" | "admin" | "institution";
   profileComplete: boolean;
   createdAt: Date;
   lastLoginAt: Date;
@@ -15,30 +15,38 @@ export interface HiveUser {
 
 // Placeholder functions for backward compatibility
 export const signInWithGoogle = async (): Promise<any> => {
-  throw new Error('Firebase authentication has been removed. Please use Replit Auth or demo accounts.');
+  throw new Error(
+    "Firebase authentication has been removed. Please use Replit Auth or demo accounts."
+  );
 };
 
 export const signInWithEmail = async (email: string, password: string): Promise<any> => {
-  throw new Error('Firebase authentication has been removed. Please use Replit Auth or demo accounts.');
+  throw new Error(
+    "Firebase authentication has been removed. Please use Replit Auth or demo accounts."
+  );
 };
 
 export const signUpWithEmail = async (
-  email: string, 
-  password: string, 
-  firstName: string, 
+  email: string,
+  password: string,
+  firstName: string,
   lastName: string,
-  role: 'client' | 'therapist' = 'client'
+  role: "client" | "therapist" = "client"
 ): Promise<any> => {
-  throw new Error('Firebase authentication has been removed. Please use Replit Auth or demo accounts.');
+  throw new Error(
+    "Firebase authentication has been removed. Please use Replit Auth or demo accounts."
+  );
 };
 
 export const signOutUser = async (): Promise<void> => {
   // Redirect to logout page
-  window.location.href = '/api/auth/logout';
+  window.location.href = "/api/auth/logout";
 };
 
 export const resetPassword = async (email: string): Promise<void> => {
-  throw new Error('Firebase authentication has been removed. Please contact support for password reset.');
+  throw new Error(
+    "Firebase authentication has been removed. Please contact support for password reset."
+  );
 };
 
 export const getCurrentUser = (): Promise<any> => {

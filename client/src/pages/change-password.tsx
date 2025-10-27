@@ -58,16 +58,16 @@ export default function ChangePassword() {
       });
 
       const data = await response.json();
-      
+
       if (response.ok) {
         toast({
           title: "Password Changed Successfully",
           description: "Your password has been updated. You can now log in with your new password.",
         });
-        
+
         // Redirect to login page
         setTimeout(() => {
-          setLocation('/login');
+          setLocation("/login");
         }, 2000);
       } else {
         toast({
@@ -92,11 +92,7 @@ export default function ChangePassword() {
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 flex flex-col items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <img 
-            src={hiveWellnessLogo} 
-            alt="Hive Wellness Logo" 
-            className="h-16 mx-auto mb-4"
-          />
+          <img src={hiveWellnessLogo} alt="Hive Wellness Logo" className="h-16 mx-auto mb-4" />
           <h1 className="text-3xl font-bold text-hive-purple mb-2">Hive Wellness</h1>
           <p className="text-slate-600">Professional Therapy Services</p>
         </div>
@@ -106,7 +102,9 @@ export default function ChangePassword() {
             <div className="mx-auto w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center mb-4">
               <AlertTriangle className="w-6 h-6 text-yellow-600" />
             </div>
-            <CardTitle className="text-2xl font-bold text-hive-purple">Change Password Required</CardTitle>
+            <CardTitle className="text-2xl font-bold text-hive-purple">
+              Change Password Required
+            </CardTitle>
             <CardDescription className="text-slate-600">
               For security reasons, you must change your password before continuing.
             </CardDescription>
@@ -114,7 +112,9 @@ export default function ChangePassword() {
           <CardContent>
             <form onSubmit={handlePasswordChange} className="space-y-4">
               <div>
-                <Label htmlFor="currentPassword" className="text-slate-700">Current Password</Label>
+                <Label htmlFor="currentPassword" className="text-slate-700">
+                  Current Password
+                </Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-hive-purple/60" />
                   <Input
@@ -133,13 +133,19 @@ export default function ChangePassword() {
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-500 hover:text-slate-700"
                     data-testid="button-toggle-current-password"
                   >
-                    {showCurrentPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showCurrentPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </button>
                 </div>
               </div>
 
               <div>
-                <Label htmlFor="newPassword" className="text-slate-700">New Password</Label>
+                <Label htmlFor="newPassword" className="text-slate-700">
+                  New Password
+                </Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-hive-purple/60" />
                   <Input
@@ -166,7 +172,9 @@ export default function ChangePassword() {
               </div>
 
               <div>
-                <Label htmlFor="confirmPassword" className="text-slate-700">Confirm New Password</Label>
+                <Label htmlFor="confirmPassword" className="text-slate-700">
+                  Confirm New Password
+                </Label>
                 <div className="relative">
                   <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-hive-purple/60" />
                   <Input
@@ -186,7 +194,11 @@ export default function ChangePassword() {
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-500 hover:text-slate-700"
                     data-testid="button-toggle-confirm-password"
                   >
-                    {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showConfirmPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </button>
                 </div>
               </div>

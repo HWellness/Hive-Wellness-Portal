@@ -15,7 +15,9 @@ export default function DocumentUploadGuidance() {
           <FileText className="h-4 w-4 mt-0.5 flex-shrink-0" />
           <div className="space-y-2">
             <div>
-              <strong className="font-semibold text-base" data-testid="guidance-title">File Naming Guidance</strong>
+              <strong className="font-semibold text-base" data-testid="guidance-title">
+                File Naming Guidance
+              </strong>
               <p className="text-xs text-gray-600 mt-0.5">
                 Use this format to keep track of your progress with each client
               </p>
@@ -38,12 +40,17 @@ export default function DocumentUploadGuidance() {
                 </p>
                 <p className="flex items-center gap-2">
                   <span className="font-medium min-w-[100px]">Session Number:</span>
-                  <span className="text-gray-600">Current session count (e.g., Session01, Session12)</span>
+                  <span className="text-gray-600">
+                    Current session count (e.g., Session01, Session12)
+                  </span>
                 </p>
               </div>
             </div>
             <p className="text-xs text-gray-600 italic" data-testid="filename-example">
-              Example: <code className="px-1.5 py-0.5 bg-white rounded font-mono border border-gray-200">2025-10-06_JD_Session03.pdf</code>
+              Example:{" "}
+              <code className="px-1.5 py-0.5 bg-white rounded font-mono border border-gray-200">
+                2025-10-06_JD_Session03.pdf
+              </code>
             </p>
           </div>
         </div>

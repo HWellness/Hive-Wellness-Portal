@@ -1,22 +1,28 @@
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Calendar } from '@/components/ui/calendar';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/hooks/use-toast';
-import { apiRequest } from '@/lib/queryClient';
-import { Calendar as CalendarIcon, Clock, Users, Video } from 'lucide-react';
+import React, { useState, useCallback, useEffect, useMemo } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Calendar } from "@/components/ui/calendar";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import { Calendar as CalendarIcon, Clock, Users, Video } from "lucide-react";
 
 interface SchedulingEnhancedProps {
-  user: { 
-    id: string; 
-    role: string; 
-    firstName?: string; 
+  user: {
+    id: string;
+    role: string;
+    firstName?: string;
     lastName?: string;
     email?: string;
   };
@@ -28,12 +34,12 @@ interface Appointment {
   therapistId: string;
   scheduledAt: string;
   duration: number;
-  status: 'pending' | 'confirmed' | 'in_progress' | 'completed' | 'cancelled' | 'rescheduled';
-  sessionType: 'consultation' | 'therapy' | 'follow_up' | 'assessment';
+  status: "pending" | "confirmed" | "in_progress" | "completed" | "cancelled" | "rescheduled";
+  sessionType: "consultation" | "therapy" | "follow_up" | "assessment";
   notes?: string;
   price: number;
   currency: string;
-  paymentStatus: 'pending' | 'paid' | 'refunded';
+  paymentStatus: "pending" | "paid" | "refunded";
   videoRoomId?: string;
   therapistName?: string;
   clientName?: string;
@@ -67,7 +73,9 @@ interface TimeSlot {
   price?: number;
 }
 
-const SchedulingEnhanced = React.memo(function SchedulingEnhanced({ user }: SchedulingEnhancedProps) {
+const SchedulingEnhanced = React.memo(function SchedulingEnhanced({
+  user,
+}: SchedulingEnhancedProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -75,25 +83,30 @@ const SchedulingEnhanced = React.memo(function SchedulingEnhanced({ user }: Sche
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [selectedTherapist, setSelectedTherapist] = useState<string | null>(null);
-  const [sessionType, setSessionType] = useState<'consultation' | 'therapy' | 'follow_up' | 'assessment'>('therapy');
+  const [sessionType, setSessionType] = useState<
+    "consultation" | "therapy" | "follow_up" | "assessment"
+  >("therapy");
   const [showBookingDialog, setShowBookingDialog] = useState(false);
   const [showRescheduleDialog, setShowRescheduleDialog] = useState(false);
   const [selectedAppointment, setSelectedAppointment] = useState<Appointment | null>(null);
-  const [bookingNotes, setBookingNotes] = useState('');
-  const [currentView, setCurrentView] = useState<'calendar' | 'list'>('calendar');
-  const [filterStatus, setFilterStatus] = useState<string>('all');
-  const [searchQuery, setSearchQuery] = useState('');
-
+  const [bookingNotes, setBookingNotes] = useState("");
+  const [currentView, setCurrentView] = useState<"calendar" | "list">("calendar");
+  const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Fetch user appointments
-  const { data: appointments = [], isLoading: appointmentsLoading, refetch: refetchAppointments } = useQuery({
+  const {
+    data: appointments = [],
+    isLoading: appointmentsLoading,
+    refetch: refetchAppointments,
+  } = useQuery({
     queryKey: [`/api/appointments/${user.id}`],
     retry: false,
   });
 
   // Fetch therapist availability for selected date
   const { data: availability = [], isLoading: availabilityLoading } = useQuery({
-    queryKey: [`/api/therapist-availability`, selectedDate.toISOString().split('T')[0]],
+    queryKey: [`/api/therapist-availability`, selectedDate.toISOString().split("T")[0]],
     retry: false,
     enabled: !!selectedDate,
   });
@@ -107,7 +120,7 @@ const SchedulingEnhanced = React.memo(function SchedulingEnhanced({ user }: Sche
   // Create appointment mutation
   const createAppointmentMutation = useMutation({
     mutationFn: async (appointmentData: any) => {
-      return apiRequest('POST', '/api/appointments', appointmentData);
+      return apiRequest("POST", "/api/appointments", appointmentData);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/appointments/${user.id}`] });
@@ -131,7 +144,7 @@ const SchedulingEnhanced = React.memo(function SchedulingEnhanced({ user }: Sche
   // Update appointment mutation (for rescheduling/cancelling)
   const updateAppointmentMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: any }) => {
-      return apiRequest('PATCH', `/api/appointments/${id}`, updates);
+      return apiRequest("PATCH", `/api/appointments/${id}`, updates);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/appointments/${user.id}`] });
@@ -160,24 +173,26 @@ const SchedulingEnhanced = React.memo(function SchedulingEnhanced({ user }: Sche
     const slotDuration = 60; // 60 minutes
 
     // Normalize selected date to local date string for consistent comparison
-    const selectedDateLocal = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), selectedDate.getDate());
+    const selectedDateLocal = new Date(
+      selectedDate.getFullYear(),
+      selectedDate.getMonth(),
+      selectedDate.getDate()
+    );
     const selectedDateStr = selectedDateLocal.toDateString();
 
     // Get appointments for the selected date
     const bookedSlots = (appointments || []).filter((apt: Appointment) => {
       const aptDate = new Date(apt.scheduledAt);
       const aptDateLocal = new Date(aptDate.getFullYear(), aptDate.getMonth(), aptDate.getDate());
-      return aptDateLocal.toDateString() === selectedDateStr && apt.status !== 'cancelled';
+      return aptDateLocal.toDateString() === selectedDateStr && apt.status !== "cancelled";
     });
 
     for (let hour = startHour; hour < endHour; hour++) {
-      const time = `${hour.toString().padStart(2, '0')}:00`;
-      
+      const time = `${hour.toString().padStart(2, "0")}:00`;
+
       // Find available therapists for this time slot
       const availableTherapists = availability.filter((therapist: TherapistAvailability) =>
-        therapist.availableSlots.some(slot => 
-          slot.time === time && slot.isAvailable
-        )
+        therapist.availableSlots.some((slot) => slot.time === time && slot.isAvailable)
       );
 
       if (availableTherapists.length === 0) {
@@ -225,7 +240,7 @@ const SchedulingEnhanced = React.memo(function SchedulingEnhanced({ user }: Sche
   const resetBookingForm = useCallback(() => {
     setSelectedTime(null);
     setSelectedTherapist(null);
-    setBookingNotes('');
+    setBookingNotes("");
   }, []);
 
   // Handle appointment booking
@@ -240,10 +255,12 @@ const SchedulingEnhanced = React.memo(function SchedulingEnhanced({ user }: Sche
     }
 
     const appointmentDateTime = new Date(selectedDate);
-    const [hours, minutes] = selectedTime.split(':').map(Number);
+    const [hours, minutes] = selectedTime.split(":").map(Number);
     appointmentDateTime.setHours(hours, minutes, 0, 0);
 
-    const selectedTherapistData = availability.find((t: TherapistAvailability) => t.therapistId === selectedTherapist);
+    const selectedTherapistData = availability.find(
+      (t: TherapistAvailability) => t.therapistId === selectedTherapist
+    );
 
     const appointmentData = {
       clientId: user.id,
@@ -251,51 +268,64 @@ const SchedulingEnhanced = React.memo(function SchedulingEnhanced({ user }: Sche
       scheduledAt: appointmentDateTime.toISOString(),
       duration: 50, // Standard 50-minute session
       sessionType,
-      status: 'pending',
-      paymentStatus: 'pending',
+      status: "pending",
+      paymentStatus: "pending",
       price: selectedTherapistData?.hourlyRate || 85,
-      currency: 'GBP',
+      currency: "GBP",
       notes: bookingNotes,
-      clientName: `${user.firstName || 'Client'} ${user.lastName || ''}`.trim(),
-      therapistName: selectedTherapistData?.therapistName || 'Therapist',
+      clientName: `${user.firstName || "Client"} ${user.lastName || ""}`.trim(),
+      therapistName: selectedTherapistData?.therapistName || "Therapist",
     };
 
     createAppointmentMutation.mutate(appointmentData);
-  }, [selectedDate, selectedTime, selectedTherapist, sessionType, bookingNotes, user, availability, createAppointmentMutation]);
+  }, [
+    selectedDate,
+    selectedTime,
+    selectedTherapist,
+    sessionType,
+    bookingNotes,
+    user,
+    availability,
+    createAppointmentMutation,
+  ]);
 
   // Handle appointment cancellation
-  const handleCancelAppointment = useCallback((appointment: Appointment) => {
-    updateAppointmentMutation.mutate({
-      id: appointment.id,
-      updates: {
-        status: 'cancelled',
-        cancellationReason: 'Cancelled by client'
-      }
-    });
-  }, [updateAppointmentMutation]);
+  const handleCancelAppointment = useCallback(
+    (appointment: Appointment) => {
+      updateAppointmentMutation.mutate({
+        id: appointment.id,
+        updates: {
+          status: "cancelled",
+          cancellationReason: "Cancelled by client",
+        },
+      });
+    },
+    [updateAppointmentMutation]
+  );
 
   // Handle appointment rescheduling
   const handleRescheduleAppointment = useCallback(() => {
     if (!selectedAppointment || !selectedDate || !selectedTime) return;
 
     const newDateTime = new Date(selectedDate);
-    const [hours, minutes] = selectedTime.split(':').map(Number);
+    const [hours, minutes] = selectedTime.split(":").map(Number);
     newDateTime.setHours(hours, minutes, 0, 0);
 
     updateAppointmentMutation.mutate({
       id: selectedAppointment.id,
       updates: {
         scheduledAt: newDateTime.toISOString(),
-        status: 'rescheduled'
-      }
+        status: "rescheduled",
+      },
     });
   }, [selectedAppointment, selectedDate, selectedTime, updateAppointmentMutation]);
 
   // Filter appointments based on status and search (memoized for performance)
   const filteredAppointments = useMemo(() => {
     return appointments.filter((appointment: Appointment) => {
-      const matchesStatus = filterStatus === 'all' || appointment.status === filterStatus;
-      const matchesSearch = !searchQuery || 
+      const matchesStatus = filterStatus === "all" || appointment.status === filterStatus;
+      const matchesSearch =
+        !searchQuery ||
         appointment.therapistName?.toLowerCase().includes(searchQuery.toLowerCase()) ||
         appointment.sessionType.toLowerCase().includes(searchQuery.toLowerCase());
       return matchesStatus && matchesSearch;
@@ -305,24 +335,36 @@ const SchedulingEnhanced = React.memo(function SchedulingEnhanced({ user }: Sche
   // Get status color for badges
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'confirmed': return 'bg-green-100 text-green-800';
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'in_progress': return 'bg-blue-100 text-blue-800';
-      case 'completed': return 'bg-gray-100 text-gray-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
-      case 'rescheduled': return 'bg-purple-100 text-purple-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "confirmed":
+        return "bg-green-100 text-green-800";
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "in_progress":
+        return "bg-blue-100 text-blue-800";
+      case "completed":
+        return "bg-gray-100 text-gray-800";
+      case "cancelled":
+        return "bg-red-100 text-red-800";
+      case "rescheduled":
+        return "bg-purple-100 text-purple-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   // Get session type icon
   const getSessionTypeIcon = (type: string) => {
     switch (type) {
-      case 'consultation': return <User className="h-4 w-4" />;
-      case 'therapy': return <MessageSquare className="h-4 w-4" />;
-      case 'follow_up': return <RefreshCw className="h-4 w-4" />;
-      case 'assessment': return <CheckCircle className="h-4 w-4" />;
-      default: return <MessageSquare className="h-4 w-4" />;
+      case "consultation":
+        return <User className="h-4 w-4" />;
+      case "therapy":
+        return <MessageSquare className="h-4 w-4" />;
+      case "follow_up":
+        return <RefreshCw className="h-4 w-4" />;
+      case "assessment":
+        return <CheckCircle className="h-4 w-4" />;
+      default:
+        return <MessageSquare className="h-4 w-4" />;
     }
   };
 
@@ -342,24 +384,22 @@ const SchedulingEnhanced = React.memo(function SchedulingEnhanced({ user }: Sche
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Appointment Scheduling</h2>
-          <p className="text-muted-foreground">
-            Book, manage, and track your therapy sessions
-          </p>
+          <p className="text-muted-foreground">Book, manage, and track your therapy sessions</p>
         </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <Button
-              variant={currentView === 'calendar' ? 'default' : 'outline'}
+              variant={currentView === "calendar" ? "default" : "outline"}
               size="sm"
-              onClick={() => setCurrentView('calendar')}
+              onClick={() => setCurrentView("calendar")}
             >
               <CalendarIcon className="h-4 w-4 mr-2" />
               Calendar
             </Button>
             <Button
-              variant={currentView === 'list' ? 'default' : 'outline'}
+              variant={currentView === "list" ? "default" : "outline"}
               size="sm"
-              onClick={() => setCurrentView('list')}
+              onClick={() => setCurrentView("list")}
             >
               <Users className="h-4 w-4 mr-2" />
               List
@@ -372,7 +412,7 @@ const SchedulingEnhanced = React.memo(function SchedulingEnhanced({ user }: Sche
         </div>
       </div>
 
-      {currentView === 'calendar' ? (
+      {currentView === "calendar" ? (
         /* Calendar View */
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Calendar Selection */}
@@ -411,7 +451,7 @@ const SchedulingEnhanced = React.memo(function SchedulingEnhanced({ user }: Sche
                   {timeSlots.map((slot) => (
                     <Button
                       key={slot.time}
-                      variant={selectedTime === slot.time ? 'default' : 'outline'}
+                      variant={selectedTime === slot.time ? "default" : "outline"}
                       disabled={!slot.isAvailable}
                       onClick={() => setSelectedTime(slot.time)}
                       className="w-full justify-between"
@@ -425,7 +465,7 @@ const SchedulingEnhanced = React.memo(function SchedulingEnhanced({ user }: Sche
                       )}
                     </Button>
                   ))}
-                  {timeSlots.every(slot => !slot.isAvailable) && (
+                  {timeSlots.every((slot) => !slot.isAvailable) && (
                     <div className="text-center py-8 text-muted-foreground">
                       <AlertTriangle className="h-8 w-8 mx-auto mb-2" />
                       <p>No available slots for this date</p>
@@ -462,8 +502,8 @@ const SchedulingEnhanced = React.memo(function SchedulingEnhanced({ user }: Sche
                             {getSessionTypeIcon(appointment.sessionType)}
                             <span className="ml-2 font-medium">
                               {new Date(appointment.scheduledAt).toLocaleTimeString([], {
-                                hour: '2-digit',
-                                minute: '2-digit'
+                                hour: "2-digit",
+                                minute: "2-digit",
                               })}
                             </span>
                           </div>
@@ -474,7 +514,7 @@ const SchedulingEnhanced = React.memo(function SchedulingEnhanced({ user }: Sche
                         <p className="text-sm text-muted-foreground">
                           {appointment.therapistName} • {appointment.sessionType}
                         </p>
-                        {appointment.status === 'confirmed' && (
+                        {appointment.status === "confirmed" && (
                           <Button size="sm" className="mt-2 w-full">
                             <Video className="h-4 w-4 mr-2" />
                             Join Session
@@ -540,13 +580,13 @@ const SchedulingEnhanced = React.memo(function SchedulingEnhanced({ user }: Sche
                         </div>
                         <div>
                           <h3 className="font-semibold">
-                            {appointment.therapistName || 'Therapist'}
+                            {appointment.therapistName || "Therapist"}
                           </h3>
                           <p className="text-sm text-muted-foreground">
-                            {new Date(appointment.scheduledAt).toLocaleDateString()} at{' '}
+                            {new Date(appointment.scheduledAt).toLocaleDateString()} at{" "}
                             {new Date(appointment.scheduledAt).toLocaleTimeString([], {
-                              hour: '2-digit',
-                              minute: '2-digit'
+                              hour: "2-digit",
+                              minute: "2-digit",
                             })}
                           </p>
                           <p className="text-sm text-muted-foreground capitalize">
@@ -559,13 +599,14 @@ const SchedulingEnhanced = React.memo(function SchedulingEnhanced({ user }: Sche
                           {appointment.status}
                         </Badge>
                         <div className="flex space-x-2">
-                          {appointment.status === 'confirmed' && (
+                          {appointment.status === "confirmed" && (
                             <Button size="sm">
                               <Video className="h-4 w-4 mr-2" />
                               Join
                             </Button>
                           )}
-                          {(appointment.status === 'pending' || appointment.status === 'confirmed') && (
+                          {(appointment.status === "pending" ||
+                            appointment.status === "confirmed") && (
                             <>
                               <Button
                                 size="sm"
@@ -604,10 +645,9 @@ const SchedulingEnhanced = React.memo(function SchedulingEnhanced({ user }: Sche
                   <CalendarIcon className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                   <h3 className="text-lg font-semibold mb-2">No appointments found</h3>
                   <p className="text-muted-foreground mb-4">
-                    {filterStatus !== 'all' || searchQuery 
-                      ? 'Try adjusting your filters or search terms'
-                      : "You don't have any scheduled appointments"
-                    }
+                    {filterStatus !== "all" || searchQuery
+                      ? "Try adjusting your filters or search terms"
+                      : "You don't have any scheduled appointments"}
                   </p>
                   <Button onClick={() => setShowBookingDialog(true)}>
                     <Plus className="h-4 w-4 mr-2" />
@@ -644,7 +684,7 @@ const SchedulingEnhanced = React.memo(function SchedulingEnhanced({ user }: Sche
 
             <div>
               <Label htmlFor="therapist">Preferred Therapist</Label>
-              <Select value={selectedTherapist || ''} onValueChange={setSelectedTherapist}>
+              <Select value={selectedTherapist || ""} onValueChange={setSelectedTherapist}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select therapist" />
                 </SelectTrigger>
@@ -669,22 +709,22 @@ const SchedulingEnhanced = React.memo(function SchedulingEnhanced({ user }: Sche
               />
             </div>
 
-
-
             <div className="flex space-x-2 pt-4">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => setShowBookingDialog(false)}
                 className="flex-1"
               >
                 Cancel
               </Button>
-              <Button 
+              <Button
                 onClick={handleBookAppointment}
-                disabled={createAppointmentMutation.isPending || !selectedTime || !selectedTherapist}
+                disabled={
+                  createAppointmentMutation.isPending || !selectedTime || !selectedTherapist
+                }
                 className="flex-1"
               >
-                {createAppointmentMutation.isPending ? 'Booking...' : 'Book Appointment'}
+                {createAppointmentMutation.isPending ? "Booking..." : "Book Appointment"}
               </Button>
             </div>
           </div>
@@ -704,10 +744,10 @@ const SchedulingEnhanced = React.memo(function SchedulingEnhanced({ user }: Sche
                 <div className="p-3 border rounded-lg">
                   <p className="font-medium">{selectedAppointment.therapistName}</p>
                   <p className="text-sm text-muted-foreground">
-                    {new Date(selectedAppointment.scheduledAt).toLocaleDateString()} at{' '}
+                    {new Date(selectedAppointment.scheduledAt).toLocaleDateString()} at{" "}
                     {new Date(selectedAppointment.scheduledAt).toLocaleTimeString([], {
-                      hour: '2-digit',
-                      minute: '2-digit'
+                      hour: "2-digit",
+                      minute: "2-digit",
                     })}
                   </p>
                 </div>
@@ -731,7 +771,7 @@ const SchedulingEnhanced = React.memo(function SchedulingEnhanced({ user }: Sche
                 {timeSlots.map((slot) => (
                   <Button
                     key={slot.time}
-                    variant={selectedTime === slot.time ? 'default' : 'outline'}
+                    variant={selectedTime === slot.time ? "default" : "outline"}
                     disabled={!slot.isAvailable}
                     onClick={() => setSelectedTime(slot.time)}
                     size="sm"
@@ -743,19 +783,19 @@ const SchedulingEnhanced = React.memo(function SchedulingEnhanced({ user }: Sche
             </div>
 
             <div className="flex space-x-2 pt-4">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 onClick={() => setShowRescheduleDialog(false)}
                 className="flex-1"
               >
                 Cancel
               </Button>
-              <Button 
+              <Button
                 onClick={handleRescheduleAppointment}
                 disabled={updateAppointmentMutation.isPending || !selectedTime}
                 className="flex-1"
               >
-                {updateAppointmentMutation.isPending ? 'Rescheduling...' : 'Reschedule'}
+                {updateAppointmentMutation.isPending ? "Rescheduling..." : "Reschedule"}
               </Button>
             </div>
           </div>

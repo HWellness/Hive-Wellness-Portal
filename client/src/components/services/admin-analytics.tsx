@@ -3,10 +3,43 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
-import { TrendingUp, Users, MessageSquare, Calendar, PoundSterling, Activity, ArrowUp, ArrowDown, Download, Filter, RefreshCw } from "lucide-react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  PieChart,
+  Pie,
+  Cell,
+  AreaChart,
+  Area,
+} from "recharts";
+import {
+  TrendingUp,
+  Users,
+  MessageSquare,
+  Calendar,
+  PoundSterling,
+  Activity,
+  ArrowUp,
+  ArrowDown,
+  Download,
+  Filter,
+  RefreshCw,
+} from "lucide-react";
 import type { User } from "@shared/schema";
 
 interface AdminAnalyticsProps {
@@ -19,38 +52,38 @@ export default function AdminAnalytics({ user }: AdminAnalyticsProps) {
 
   // Demo analytics data
   const userGrowthData = [
-    { month: 'Jan', clients: 0, therapists: 0, institutions: 0 },
-    { month: 'Feb', clients: 0, therapists: 0, institutions: 0 },
-    { month: 'Mar', clients: 0, therapists: 0, institutions: 0 },
-    { month: 'Apr', clients: 0, therapists: 0, institutions: 0 },
-    { month: 'May', clients: 0, therapists: 0, institutions: 0 },
-    { month: 'Jun', clients: 0, therapists: 0, institutions: 0 }
+    { month: "Jan", clients: 0, therapists: 0, institutions: 0 },
+    { month: "Feb", clients: 0, therapists: 0, institutions: 0 },
+    { month: "Mar", clients: 0, therapists: 0, institutions: 0 },
+    { month: "Apr", clients: 0, therapists: 0, institutions: 0 },
+    { month: "May", clients: 0, therapists: 0, institutions: 0 },
+    { month: "Jun", clients: 0, therapists: 0, institutions: 0 },
   ];
 
   const sessionData = [
-    { day: 'Mon', sessions: 0, revenue: 0 },
-    { day: 'Tue', sessions: 0, revenue: 0 },
-    { day: 'Wed', sessions: 0, revenue: 0 },
-    { day: 'Thu', sessions: 0, revenue: 0 },
-    { day: 'Fri', sessions: 0, revenue: 0 },
-    { day: 'Sat', sessions: 0, revenue: 0 },
-    { day: 'Sun', sessions: 0, revenue: 0 }
+    { day: "Mon", sessions: 0, revenue: 0 },
+    { day: "Tue", sessions: 0, revenue: 0 },
+    { day: "Wed", sessions: 0, revenue: 0 },
+    { day: "Thu", sessions: 0, revenue: 0 },
+    { day: "Fri", sessions: 0, revenue: 0 },
+    { day: "Sat", sessions: 0, revenue: 0 },
+    { day: "Sun", sessions: 0, revenue: 0 },
   ];
 
   const userTypeData = [
-    { name: 'Individual Clients', value: 0, color: '#9306B1' },
-    { name: 'Institutional Clients', value: 0, color: '#B855E0' },
-    { name: 'Therapists', value: 0, color: '#7C3AED' },
-    { name: 'Admins', value: 0, color: '#5B21B6' }
+    { name: "Individual Clients", value: 0, color: "#9306B1" },
+    { name: "Institutional Clients", value: 0, color: "#B855E0" },
+    { name: "Therapists", value: 0, color: "#7C3AED" },
+    { name: "Admins", value: 0, color: "#5B21B6" },
   ];
 
   const revenueData = [
-    { month: 'Jan', revenue: 0, costs: 0, profit: 0 },
-    { month: 'Feb', revenue: 0, costs: 0, profit: 0 },
-    { month: 'Mar', revenue: 0, costs: 0, profit: 0 },
-    { month: 'Apr', revenue: 0, costs: 0, profit: 0 },
-    { month: 'May', revenue: 0, costs: 0, profit: 0 },
-    { month: 'Jun', revenue: 0, costs: 0, profit: 0 }
+    { month: "Jan", revenue: 0, costs: 0, profit: 0 },
+    { month: "Feb", revenue: 0, costs: 0, profit: 0 },
+    { month: "Mar", revenue: 0, costs: 0, profit: 0 },
+    { month: "Apr", revenue: 0, costs: 0, profit: 0 },
+    { month: "May", revenue: 0, costs: 0, profit: 0 },
+    { month: "Jun", revenue: 0, costs: 0, profit: 0 },
   ];
 
   return (
@@ -61,7 +94,7 @@ export default function AdminAnalytics({ user }: AdminAnalyticsProps) {
           <h1 className="text-3xl font-bold text-hive-black">Platform Analytics</h1>
           <p className="text-gray-600 mt-1">Comprehensive insights and performance metrics</p>
         </div>
-        
+
         <div className="flex items-center space-x-2">
           <Select value={selectedTimeframe} onValueChange={setSelectedTimeframe}>
             <SelectTrigger className="w-32">
@@ -74,12 +107,12 @@ export default function AdminAnalytics({ user }: AdminAnalyticsProps) {
               <SelectItem value="1y">Last year</SelectItem>
             </SelectContent>
           </Select>
-          
+
           <Button variant="outline">
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
-          
+
           <Button className="bg-hive-purple hover:bg-hive-purple/90 text-white">
             <RefreshCw className="h-4 w-4 mr-2" />
             Refresh
@@ -161,16 +194,28 @@ export default function AdminAnalytics({ user }: AdminAnalyticsProps) {
       {/* Charts Section */}
       <Tabs defaultValue="users" className="space-y-6">
         <TabsList className="grid w-full grid-cols-4">
-          <TabsTrigger value="users" className="data-[state=active]:bg-hive-purple data-[state=active]:text-white">
+          <TabsTrigger
+            value="users"
+            className="data-[state=active]:bg-hive-purple data-[state=active]:text-white"
+          >
             User Growth
           </TabsTrigger>
-          <TabsTrigger value="sessions" className="data-[state=active]:bg-hive-purple data-[state=active]:text-white">
+          <TabsTrigger
+            value="sessions"
+            className="data-[state=active]:bg-hive-purple data-[state=active]:text-white"
+          >
             Session Analytics
           </TabsTrigger>
-          <TabsTrigger value="revenue" className="data-[state=active]:bg-hive-purple data-[state=active]:text-white">
+          <TabsTrigger
+            value="revenue"
+            className="data-[state=active]:bg-hive-purple data-[state=active]:text-white"
+          >
             Revenue & Profit
           </TabsTrigger>
-          <TabsTrigger value="demographics" className="data-[state=active]:bg-hive-purple data-[state=active]:text-white">
+          <TabsTrigger
+            value="demographics"
+            className="data-[state=active]:bg-hive-purple data-[state=active]:text-white"
+          >
             User Demographics
           </TabsTrigger>
         </TabsList>
@@ -188,9 +233,30 @@ export default function AdminAnalytics({ user }: AdminAnalyticsProps) {
                     <XAxis dataKey="month" />
                     <YAxis />
                     <Tooltip />
-                    <Area type="monotone" dataKey="clients" stackId="1" stroke="#9306B1" fill="#9306B1" fillOpacity={0.6} />
-                    <Area type="monotone" dataKey="therapists" stackId="1" stroke="#7C3AED" fill="#7C3AED" fillOpacity={0.6} />
-                    <Area type="monotone" dataKey="institutions" stackId="1" stroke="#5B21B6" fill="#5B21B6" fillOpacity={0.6} />
+                    <Area
+                      type="monotone"
+                      dataKey="clients"
+                      stackId="1"
+                      stroke="#9306B1"
+                      fill="#9306B1"
+                      fillOpacity={0.6}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="therapists"
+                      stackId="1"
+                      stroke="#7C3AED"
+                      fill="#7C3AED"
+                      fillOpacity={0.6}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="institutions"
+                      stackId="1"
+                      stroke="#5B21B6"
+                      fill="#5B21B6"
+                      fillOpacity={0.6}
+                    />
                   </AreaChart>
                 </ResponsiveContainer>
               </div>
@@ -213,7 +279,13 @@ export default function AdminAnalytics({ user }: AdminAnalyticsProps) {
                     <YAxis yAxisId="right" orientation="right" />
                     <Tooltip />
                     <Bar yAxisId="left" dataKey="sessions" fill="#9306B1" />
-                    <Line yAxisId="right" type="monotone" dataKey="revenue" stroke="#7C3AED" strokeWidth={3} />
+                    <Line
+                      yAxisId="right"
+                      type="monotone"
+                      dataKey="revenue"
+                      stroke="#7C3AED"
+                      strokeWidth={3}
+                    />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -233,7 +305,7 @@ export default function AdminAnalytics({ user }: AdminAnalyticsProps) {
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="month" />
                     <YAxis />
-                    <Tooltip formatter={(value) => [`£${value}`, '']} />
+                    <Tooltip formatter={(value) => [`£${value}`, ""]} />
                     <Line type="monotone" dataKey="revenue" stroke="#9306B1" strokeWidth={3} />
                     <Line type="monotone" dataKey="costs" stroke="#EF4444" strokeWidth={2} />
                     <Line type="monotone" dataKey="profit" stroke="#10B981" strokeWidth={3} />
@@ -286,7 +358,7 @@ export default function AdminAnalytics({ user }: AdminAnalyticsProps) {
                     <span className="text-sm text-gray-600">0 (0%)</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-hive-purple h-2 rounded-full" style={{ width: '0%' }}></div>
+                    <div className="bg-hive-purple h-2 rounded-full" style={{ width: "0%" }}></div>
                   </div>
                 </div>
 
@@ -296,7 +368,7 @@ export default function AdminAnalytics({ user }: AdminAnalyticsProps) {
                     <span className="text-sm text-gray-600">0%</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-green-500 h-2 rounded-full" style={{ width: '0%' }}></div>
+                    <div className="bg-green-500 h-2 rounded-full" style={{ width: "0%" }}></div>
                   </div>
                 </div>
 
@@ -306,7 +378,7 @@ export default function AdminAnalytics({ user }: AdminAnalyticsProps) {
                     <span className="text-sm text-gray-600">0%</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-blue-500 h-2 rounded-full" style={{ width: '0%' }}></div>
+                    <div className="bg-blue-500 h-2 rounded-full" style={{ width: "0%" }}></div>
                   </div>
                 </div>
 
@@ -316,7 +388,7 @@ export default function AdminAnalytics({ user }: AdminAnalyticsProps) {
                     <span className="text-sm text-gray-600">0%</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div className="bg-purple-500 h-2 rounded-full" style={{ width: '0%' }}></div>
+                    <div className="bg-purple-500 h-2 rounded-full" style={{ width: "0%" }}></div>
                   </div>
                 </div>
               </CardContent>
@@ -334,7 +406,9 @@ export default function AdminAnalytics({ user }: AdminAnalyticsProps) {
           <div className="space-y-4">
             <div className="text-center py-8">
               <p className="text-gray-500">No recent activity</p>
-              <p className="text-sm text-gray-400">Platform activity will appear here once users start engaging</p>
+              <p className="text-sm text-gray-400">
+                Platform activity will appear here once users start engaging
+              </p>
             </div>
           </div>
         </CardContent>

@@ -1,6 +1,6 @@
 /**
  * Therapist Calendar Onboarding Service
- * 
+ *
  * Comprehensive calendar setup automation for new therapists including:
  * - Automatic calendar creation during registration
  * - Permission management and sharing
@@ -9,11 +9,11 @@
  * - Integration with existing onboarding workflow
  */
 
-import { nanoid } from 'nanoid';
-import { CalendarService, CalendarServiceError, CalendarNotFoundError } from './calendar-service';
-import { emailService } from './email-service';
-import type { IStorage } from '../storage';
-import type { TherapistProfile, User } from '../../shared/schema';
+import { nanoid } from "nanoid";
+import { CalendarService, CalendarServiceError, CalendarNotFoundError } from "./calendar-service";
+import { emailService } from "./email-service";
+import type { IStorage } from "../storage";
+import type { TherapistProfile, User } from "../../shared/schema";
 
 export interface CalendarSetupResult {
   success: boolean;
@@ -29,7 +29,7 @@ export interface CalendarSetupStatus {
   therapistId: string;
   calendarExists: boolean;
   permissionsConfigured: boolean;
-  integrationStatus: 'pending' | 'active' | 'error';
+  integrationStatus: "pending" | "active" | "error";
   sharePermissions?: {
     therapistEmail: string;
     role: string;
@@ -78,7 +78,7 @@ export class TherapistCalendarOnboardingService {
    * Delay utility for retry logic
    */
   private async delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**
@@ -88,101 +88,123 @@ export class TherapistCalendarOnboardingService {
     if (error instanceof CalendarServiceError) {
       return error.retryable;
     }
-    
+
     // Check for specific retryable error patterns
     const retryablePatterns = [
-      'quota exceeded',
-      'rate limit',
-      'temporarily unavailable',
-      'internal error',
-      'service unavailable',
-      'timeout',
-      'connection reset',
-      'network error'
+      "quota exceeded",
+      "rate limit",
+      "temporarily unavailable",
+      "internal error",
+      "service unavailable",
+      "timeout",
+      "connection reset",
+      "network error",
     ];
-    
-    const errorMessage = error.message?.toLowerCase() || '';
-    return retryablePatterns.some(pattern => errorMessage.includes(pattern));
+
+    const errorMessage = error.message?.toLowerCase() || "";
+    return retryablePatterns.some((pattern) => errorMessage.includes(pattern));
   }
 
   /**
    * Execute function with retry logic and exponential backoff
    */
-  private async setupWithRetry<T>(setupFn: () => Promise<T>, step: string, operationId?: string): Promise<T> {
+  private async setupWithRetry<T>(
+    setupFn: () => Promise<T>,
+    step: string,
+    operationId?: string
+  ): Promise<T> {
     let lastError: Error;
-    
+
     for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
       try {
         const result = await setupFn();
         if (attempt > 1) {
-          console.log(`✅ ${step} succeeded on attempt ${attempt}${operationId ? ` (${operationId})` : ''}`);
+          console.log(
+            `✅ ${step} succeeded on attempt ${attempt}${operationId ? ` (${operationId})` : ""}`
+          );
         }
         return result;
       } catch (error: any) {
         lastError = error;
-        
+
         if (attempt < this.maxRetries && this.isRetryable(error)) {
           const backoffMs = this.retryDelayMs * Math.pow(2, attempt - 1);
-          console.warn(`⚠️ ${step} failed on attempt ${attempt}${operationId ? ` (${operationId})` : ''}: ${error.message}. Retrying in ${backoffMs}ms...`);
+          console.warn(
+            `⚠️ ${step} failed on attempt ${attempt}${operationId ? ` (${operationId})` : ""}: ${error.message}. Retrying in ${backoffMs}ms...`
+          );
           await this.delay(backoffMs);
           continue;
         }
-        
+
         // Log final failure without sensitive info
-        const sanitizedError = error.message ? error.message.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, '[email]') : 'Unknown error';
-        console.error(`❌ ${step} failed after ${attempt} attempts${operationId ? ` (${operationId})` : ''}: ${sanitizedError}`);
+        const sanitizedError = error.message
+          ? error.message.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, "[email]")
+          : "Unknown error";
+        console.error(
+          `❌ ${step} failed after ${attempt} attempts${operationId ? ` (${operationId})` : ""}: ${sanitizedError}`
+        );
         throw error;
       }
     }
-    
+
     throw lastError!;
   }
 
   /**
    * Reconcile existing calendar that's not in active state
    */
-  private async reconcileExistingCalendar(existingCalendar: any, therapistEmail: string): Promise<CalendarSetupResult> {
-    console.log(`🔄 Reconciling existing calendar ${existingCalendar.id} for therapist ${existingCalendar.therapistId}`);
-    
+  private async reconcileExistingCalendar(
+    existingCalendar: any,
+    therapistEmail: string
+  ): Promise<CalendarSetupResult> {
+    console.log(
+      `🔄 Reconciling existing calendar ${existingCalendar.id} for therapist ${existingCalendar.therapistId}`
+    );
+
     try {
       // Try to verify the calendar still exists in Google
       const calendarExists = await this.setupWithRetry(
         () => this.calendarService.verifyCalendarAccess(existingCalendar.googleCalendarId),
-        'Calendar verification',
+        "Calendar verification",
         existingCalendar.therapistId
       );
-      
+
       if (calendarExists) {
         // Calendar exists, update status to active
         await this.storage.updateTherapistCalendar(existingCalendar.id, {
-          integrationStatus: 'active',
-          updatedAt: new Date()
+          integrationStatus: "active",
+          updatedAt: new Date(),
         });
-        
-        console.log(`✅ Reconciled existing calendar for therapist ${existingCalendar.therapistId}`);
+
+        console.log(
+          `✅ Reconciled existing calendar for therapist ${existingCalendar.therapistId}`
+        );
         return {
           success: true,
           calendarId: existingCalendar.id,
           googleCalendarId: existingCalendar.googleCalendarId,
-          setupStep: 'reconciled'
+          setupStep: "reconciled",
         };
       } else {
         // Calendar doesn't exist, mark as error and create new one
         await this.storage.updateTherapistCalendar(existingCalendar.id, {
-          integrationStatus: 'error',
-          updatedAt: new Date()
+          integrationStatus: "error",
+          updatedAt: new Date(),
         });
-        
+
         // Create new calendar
         return await this.createNewCalendar(existingCalendar.therapistId, therapistEmail);
       }
     } catch (error: any) {
-      console.error(`❌ Calendar reconciliation failed for therapist ${existingCalendar.therapistId}:`, error);
+      console.error(
+        `❌ Calendar reconciliation failed for therapist ${existingCalendar.therapistId}:`,
+        error
+      );
       return {
         success: false,
         error: error.message,
         retryable: this.isRetryable(error),
-        setupStep: 'reconciliation_failed'
+        setupStep: "reconciliation_failed",
       };
     }
   }
@@ -190,27 +212,30 @@ export class TherapistCalendarOnboardingService {
   /**
    * Create new calendar with retry logic
    */
-  private async createNewCalendar(therapistId: string, therapistEmail: string): Promise<CalendarSetupResult> {
+  private async createNewCalendar(
+    therapistId: string,
+    therapistEmail: string
+  ): Promise<CalendarSetupResult> {
     const result: CalendarSetupResult = {
       success: false,
-      setupStep: 'calendar_creation'
+      setupStep: "calendar_creation",
     };
-    
+
     try {
       const calendarData = await this.setupWithRetry(
         () => this.calendarService.createManagedCalendar(therapistId, therapistEmail),
-        'Calendar creation',
+        "Calendar creation",
         therapistId
       );
-      
+
       result.calendarId = calendarData.id;
       result.googleCalendarId = calendarData.googleCalendarId;
-      
+
       return {
         success: true,
         calendarId: calendarData.id,
         googleCalendarId: calendarData.googleCalendarId,
-        setupStep: 'calendar_created'
+        setupStep: "calendar_created",
       };
     } catch (error: any) {
       result.error = error.message;
@@ -224,50 +249,58 @@ export class TherapistCalendarOnboardingService {
    * Main calendar setup workflow for new therapists
    * Called during therapist registration/approval process
    */
-  async setupTherapistCalendar(therapistId: string, therapistEmail: string): Promise<CalendarSetupResult> {
+  async setupTherapistCalendar(
+    therapistId: string,
+    therapistEmail: string
+  ): Promise<CalendarSetupResult> {
     // Sanitize email for logging
-    const sanitizedEmail = therapistEmail.replace(/(.{2}).*(@.*)/, '$1***$2');
+    const sanitizedEmail = therapistEmail.replace(/(.{2}).*(@.*)/, "$1***$2");
     console.log(`🗓️ Starting calendar setup for therapist ${therapistId} (${sanitizedEmail})`);
-    
+
     const result: CalendarSetupResult = {
       success: false,
-      setupStep: 'initialization'
+      setupStep: "initialization",
     };
 
     try {
       // Step 1: Validate therapist exists and get details
-      result.setupStep = 'validation';
+      result.setupStep = "validation";
       const therapist = await this.setupWithRetry(
         () => this.validateTherapist(therapistId),
-        'Therapist validation',
+        "Therapist validation",
         therapistId
       );
-      
+
       if (!therapist) {
         return {
           ...result,
           error: `Therapist not found`,
-          retryable: false
+          retryable: false,
         };
       }
 
       // Step 2: Check if calendar already exists and handle idempotency
-      result.setupStep = 'existence_check';
+      result.setupStep = "existence_check";
       const existingCalendar = await this.storage.getTherapistCalendar(therapistId);
-      
+
       if (existingCalendar) {
-        if (existingCalendar.integrationStatus === 'active') {
+        if (existingCalendar.integrationStatus === "active") {
           console.log(`📅 Active calendar already exists for therapist ${therapistId}`);
           return {
             success: true,
             calendarId: existingCalendar.id,
             googleCalendarId: existingCalendar.googleCalendarId || undefined,
-            setupStep: 'already_exists'
+            setupStep: "already_exists",
           };
         } else {
           // Reconcile existing calendar that's not active
-          console.log(`🔄 Found existing calendar in ${existingCalendar.integrationStatus} state, reconciling...`);
-          const reconcileResult = await this.reconcileExistingCalendar(existingCalendar, therapistEmail);
+          console.log(
+            `🔄 Found existing calendar in ${existingCalendar.integrationStatus} state, reconciling...`
+          );
+          const reconcileResult = await this.reconcileExistingCalendar(
+            existingCalendar,
+            therapistEmail
+          );
           if (reconcileResult.success) {
             // Continue with profile update and notifications
             result.calendarId = reconcileResult.calendarId;
@@ -278,28 +311,33 @@ export class TherapistCalendarOnboardingService {
         }
       } else {
         // Step 3: Create new managed calendar
-        result.setupStep = 'calendar_creation';
+        result.setupStep = "calendar_creation";
         const createResult = await this.createNewCalendar(therapistId, therapistEmail);
         if (!createResult.success) {
           return createResult;
         }
-        
+
         result.calendarId = createResult.calendarId;
         result.googleCalendarId = createResult.googleCalendarId;
       }
 
       // Step 4: Update therapist profile with calendar ID
-      result.setupStep = 'profile_update';
+      result.setupStep = "profile_update";
       await this.setupWithRetry(
-        () => this.updateTherapistProfileWithCalendar(therapistId, { googleCalendarId: result.googleCalendarId }),
-        'Profile update',
+        () =>
+          this.updateTherapistProfileWithCalendar(therapistId, {
+            googleCalendarId: result.googleCalendarId,
+          }),
+        "Profile update",
         therapistId
       );
 
       // Step 5: Send welcome email with calendar instructions (non-critical)
-      result.setupStep = 'email_notification';
+      result.setupStep = "email_notification";
       try {
-        await this.sendCalendarWelcomeEmail(therapist, { googleCalendarId: result.googleCalendarId });
+        await this.sendCalendarWelcomeEmail(therapist, {
+          googleCalendarId: result.googleCalendarId,
+        });
       } catch (emailError: any) {
         console.warn(`⚠️ Welcome email failed for therapist ${therapistId}: ${emailError.message}`);
         // Don't fail the whole setup for email issues
@@ -307,25 +345,36 @@ export class TherapistCalendarOnboardingService {
 
       // Step 6: Send admin notification (non-critical)
       try {
-        await this.sendAdminNotification(therapist, { googleCalendarId: result.googleCalendarId }, true);
+        await this.sendAdminNotification(
+          therapist,
+          { googleCalendarId: result.googleCalendarId },
+          true
+        );
       } catch (notificationError: any) {
-        console.warn(`⚠️ Admin notification failed for therapist ${therapistId}: ${notificationError.message}`);
+        console.warn(
+          `⚠️ Admin notification failed for therapist ${therapistId}: ${notificationError.message}`
+        );
       }
 
       result.success = true;
-      result.setupStep = 'completed';
-      
+      result.setupStep = "completed";
+
       console.log(`✅ Calendar setup completed for therapist ${therapistId}`);
       return result;
-
     } catch (error: any) {
       // Sanitize error message
-      const sanitizedError = error.message ? error.message.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, '[email]') : 'Unknown error';
-      console.error(`❌ Calendar setup failed for therapist ${therapistId} at step ${result.setupStep}: ${sanitizedError}`);
-      
+      const sanitizedError = error.message
+        ? error.message.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, "[email]")
+        : "Unknown error";
+      console.error(
+        `❌ Calendar setup failed for therapist ${therapistId} at step ${result.setupStep}: ${sanitizedError}`
+      );
+
       result.error = sanitizedError;
       result.retryable = this.isRetryable(error);
-      result.rollbackRequired = ['calendar_creation', 'profile_update'].includes(result.setupStep || '');
+      result.rollbackRequired = ["calendar_creation", "profile_update"].includes(
+        result.setupStep || ""
+      );
 
       // Perform rollback if required
       if (result.rollbackRequired && result.calendarId) {
@@ -333,7 +382,9 @@ export class TherapistCalendarOnboardingService {
         try {
           await this.performRollback(therapistId, result.calendarId, result.googleCalendarId);
         } catch (rollbackError: any) {
-          console.error(`❌ Rollback failed for therapist ${therapistId}: ${rollbackError.message}`);
+          console.error(
+            `❌ Rollback failed for therapist ${therapistId}: ${rollbackError.message}`
+          );
         }
       }
 
@@ -341,7 +392,7 @@ export class TherapistCalendarOnboardingService {
       try {
         await this.sendAdminNotification(therapist, null, false, result.error);
       } catch (notificationError) {
-        console.error('Failed to send failure notification (non-critical)');
+        console.error("Failed to send failure notification (non-critical)");
       }
 
       return result;
@@ -351,11 +402,15 @@ export class TherapistCalendarOnboardingService {
   /**
    * Perform rollback of calendar setup on failure
    */
-  private async performRollback(therapistId: string, calendarId?: string, googleCalendarId?: string): Promise<void> {
+  private async performRollback(
+    therapistId: string,
+    calendarId?: string,
+    googleCalendarId?: string
+  ): Promise<void> {
     console.log(`🔄 Starting rollback for therapist ${therapistId}`);
-    
+
     const rollbackActions = [];
-    
+
     // 1. Delete Google Calendar if it was created
     if (googleCalendarId) {
       rollbackActions.push(
@@ -366,41 +421,49 @@ export class TherapistCalendarOnboardingService {
               console.log(`✅ Deleted Google calendar ${googleCalendarId}`);
             } catch (error: any) {
               // Don't fail rollback if calendar doesn't exist
-              if (error.message.includes('not found')) {
-                console.log(`📝 Google calendar ${googleCalendarId} already deleted or doesn't exist`);
+              if (error.message.includes("not found")) {
+                console.log(
+                  `📝 Google calendar ${googleCalendarId} already deleted or doesn't exist`
+                );
               } else {
                 throw error;
               }
             }
           },
-          'Google calendar deletion',
+          "Google calendar deletion",
           therapistId
         )
       );
     }
-    
+
     // 2. Remove calendar record from database
     if (calendarId) {
       rollbackActions.push(
-        this.storage.deleteTherapistCalendar(calendarId)
+        this.storage
+          .deleteTherapistCalendar(calendarId)
           .then(() => console.log(`✅ Deleted calendar record ${calendarId}`))
-          .catch((error: any) => console.warn(`⚠️ Failed to delete calendar record: ${error.message}`))
+          .catch((error: any) =>
+            console.warn(`⚠️ Failed to delete calendar record: ${error.message}`)
+          )
       );
     }
-    
+
     // 3. Clear calendar reference from therapist profile
     rollbackActions.push(
-      this.storage.updateTherapistProfile(therapistId, {
-        primaryCalendarId: null,
-        calendarPermissionsConfigured: false
-      })
+      this.storage
+        .updateTherapistProfile(therapistId, {
+          primaryCalendarId: null,
+          calendarPermissionsConfigured: false,
+        })
         .then(() => console.log(`✅ Cleared calendar reference from therapist profile`))
-        .catch((error: any) => console.warn(`⚠️ Failed to clear profile calendar reference: ${error.message}`))
+        .catch((error: any) =>
+          console.warn(`⚠️ Failed to clear profile calendar reference: ${error.message}`)
+        )
     );
-    
+
     // Execute all rollback actions concurrently (best effort)
     await Promise.allSettled(rollbackActions);
-    
+
     console.log(`✅ Rollback completed for therapist ${therapistId}`);
   }
 
@@ -410,7 +473,7 @@ export class TherapistCalendarOnboardingService {
   private createSemaphore(limit: number) {
     let count = 0;
     const waiting: Array<() => void> = [];
-    
+
     return {
       async acquire<T>(fn: () => Promise<T>): Promise<T> {
         return new Promise<T>((resolve, reject) => {
@@ -429,14 +492,14 @@ export class TherapistCalendarOnboardingService {
               }
             }
           };
-          
+
           if (count < limit) {
             execute();
           } else {
             waiting.push(execute);
           }
         });
-      }
+      },
     };
   }
 
@@ -455,29 +518,31 @@ export class TherapistCalendarOnboardingService {
       const status: CalendarSetupStatus = {
         therapistId,
         calendarExists: !!calendar,
-        permissionsConfigured: calendar?.aclRole === 'writer' && calendar?.integrationStatus === 'active',
-        integrationStatus: calendar?.integrationStatus || 'pending'
+        permissionsConfigured:
+          calendar?.aclRole === "writer" && calendar?.integrationStatus === "active",
+        integrationStatus: calendar?.integrationStatus || "pending",
       };
 
       if (calendar && therapist.email) {
         status.sharePermissions = {
           therapistEmail: calendar.therapistSharedEmail || therapist.email,
-          role: calendar.aclRole || 'writer',
-          verified: calendar.integrationStatus === 'active'
+          role: calendar.aclRole || "writer",
+          verified: calendar.integrationStatus === "active",
         };
         // Ensure consistent JSON serialization - convert Date to ISO string
-        status.lastSetupAttempt = calendar.updatedAt ? new Date(calendar.updatedAt).toISOString() : undefined;
+        status.lastSetupAttempt = calendar.updatedAt
+          ? new Date(calendar.updatedAt).toISOString()
+          : undefined;
       }
 
       return status;
-
     } catch (error: any) {
       return {
         therapistId,
         calendarExists: false,
         permissionsConfigured: false,
-        integrationStatus: 'error',
-        errorDetails: error.message
+        integrationStatus: "error",
+        errorDetails: error.message,
       };
     }
   }
@@ -486,92 +551,98 @@ export class TherapistCalendarOnboardingService {
    * Batch setup calendars for multiple therapists (admin operation)
    */
   async batchSetupCalendars(therapistIds?: string[]): Promise<BatchSetupResult> {
-    console.log('🔄 Starting batch calendar setup operation');
-    
+    console.log("🔄 Starting batch calendar setup operation");
+
     const result: BatchSetupResult = {
       totalTherapists: 0,
       successful: 0,
       failed: 0,
       skipped: 0,
-      results: []
+      results: [],
     };
 
     try {
       // Get all therapists or specified ones
-      const therapists = therapistIds 
-        ? await Promise.all(therapistIds.map(id => this.validateTherapist(id)))
+      const therapists = therapistIds
+        ? await Promise.all(therapistIds.map((id) => this.validateTherapist(id)))
         : await this.getAllTherapistsNeedingCalendars();
 
-      const validTherapists = therapists.filter(Boolean) as (User & { therapistProfile?: TherapistProfile })[];
+      const validTherapists = therapists.filter(Boolean) as (User & {
+        therapistProfile?: TherapistProfile;
+      })[];
       result.totalTherapists = validTherapists.length;
 
       console.log(`📊 Found ${result.totalTherapists} therapists for batch calendar setup`);
 
       if (validTherapists.length === 0) {
-        console.log('ℹ️ No therapists need calendar setup');
+        console.log("ℹ️ No therapists need calendar setup");
         return result;
       }
 
       // Process with concurrency control and rate limiting
       const semaphore = this.createSemaphore(this.concurrencyLimit);
       const batchStartTime = Date.now();
-      
-      const promises = validTherapists.map((therapist, index) => 
+
+      const promises = validTherapists.map((therapist, index) =>
         semaphore.acquire(async () => {
           // Stagger requests to avoid hitting rate limits
           const delayMs = Math.floor(index / this.concurrencyLimit) * 1500; // 1.5 seconds between batches
           if (delayMs > 0) {
             await this.delay(delayMs);
           }
-          
+
           const therapistName = `${therapist.firstName} ${therapist.lastName}`;
-          const sanitizedEmail = therapist.email?.replace(/(.{2}).*(@.*)/, '$1***$2') || '';
-          
+          const sanitizedEmail = therapist.email?.replace(/(.{2}).*(@.*)/, "$1***$2") || "";
+
           try {
             // Check if calendar already exists
             const existingCalendar = await this.storage.getTherapistCalendar(therapist.id);
-            
-            if (existingCalendar && existingCalendar.integrationStatus === 'active') {
+
+            if (existingCalendar && existingCalendar.integrationStatus === "active") {
               console.log(`⏭️ Skipped ${sanitizedEmail} - calendar already active`);
               return {
                 therapistId: therapist.id,
                 therapistName,
-                therapistEmail: therapist.email || '',
+                therapistEmail: therapist.email || "",
                 success: true,
                 skipped: true,
-                calendarId: existingCalendar.googleCalendarId || undefined
+                calendarId: existingCalendar.googleCalendarId || undefined,
               };
             }
 
             // Setup calendar with progress logging
             console.log(`🔄 Processing ${index + 1}/${validTherapists.length}: ${sanitizedEmail}`);
-            const setupResult = await this.setupTherapistCalendar(therapist.id, therapist.email || '');
-            
+            const setupResult = await this.setupTherapistCalendar(
+              therapist.id,
+              therapist.email || ""
+            );
+
             // Add rate limiting between individual operations
             await this.delay(1200); // 1.2 seconds minimum between operations
-            
+
             return {
               therapistId: therapist.id,
               therapistName,
-              therapistEmail: therapist.email || '',
+              therapistEmail: therapist.email || "",
               success: setupResult.success,
               error: setupResult.error,
               calendarId: setupResult.googleCalendarId,
-              skipped: false
+              skipped: false,
             };
-
           } catch (error: any) {
             // Sanitize error message
-            const sanitizedError = error.message ? error.message.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, '[email]') : 'Unknown error';
+            const sanitizedError = error.message
+              ? error.message.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, "[email]")
+              : "Unknown error";
             console.error(`❌ Error processing ${sanitizedEmail}: ${sanitizedError}`);
-            
+
             return {
               therapistId: therapist.id,
               therapistName,
-              therapistEmail: therapist.email || '',
+              therapistEmail: therapist.email || "",
               success: false,
               error: sanitizedError,
-              skipped: false
+              skipped: false,
             };
           }
         })
@@ -579,9 +650,9 @@ export class TherapistCalendarOnboardingService {
 
       // Wait for all operations to complete
       const results = await Promise.all(promises);
-      
+
       // Aggregate results
-      results.forEach(res => {
+      results.forEach((res) => {
         if (res.skipped) {
           result.skipped++;
         } else if (res.success) {
@@ -589,46 +660,52 @@ export class TherapistCalendarOnboardingService {
         } else {
           result.failed++;
         }
-        
+
         result.results.push({
           therapistId: res.therapistId,
           therapistName: res.therapistName,
           therapistEmail: res.therapistEmail,
           success: res.success,
           error: res.error,
-          calendarId: res.calendarId
+          calendarId: res.calendarId,
         });
       });
-      
+
       const duration = Math.round((Date.now() - batchStartTime) / 1000);
-      console.log(`🎯 Batch calendar setup completed in ${duration}s: ${result.successful} successful, ${result.failed} failed, ${result.skipped} skipped`);
-      
+      console.log(
+        `🎯 Batch calendar setup completed in ${duration}s: ${result.successful} successful, ${result.failed} failed, ${result.skipped} skipped`
+      );
+
       // Send admin summary email
       try {
         await this.sendBatchSetupSummaryEmail(result);
       } catch (emailError: any) {
         console.warn(`⚠️ Failed to send batch summary email: ${emailError.message}`);
       }
-      
-      return result;
 
+      return result;
     } catch (error: any) {
-      const sanitizedError = error.message ? error.message.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, '[email]') : 'Unknown error';
+      const sanitizedError = error.message
+        ? error.message.replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, "[email]")
+        : "Unknown error";
       console.error(`❌ Batch calendar setup failed: ${sanitizedError}`);
-      
+
       // Mark all as failed if we couldn't even start
       return {
         ...result,
         failed: result.totalTherapists,
-        results: result.results.length > 0 ? result.results : [
-          {
-            therapistId: 'batch',
-            therapistName: 'Batch Operation',
-            therapistEmail: '',
-            success: false,
-            error: sanitizedError
-          }
-        ]
+        results:
+          result.results.length > 0
+            ? result.results
+            : [
+                {
+                  therapistId: "batch",
+                  therapistName: "Batch Operation",
+                  therapistEmail: "",
+                  success: false,
+                  error: sanitizedError,
+                },
+              ],
       };
     }
   }
@@ -647,7 +724,7 @@ export class TherapistCalendarOnboardingService {
           // Note: We don't delete the actual Google calendar to avoid data loss
           // Instead, we mark it as error status
           await this.storage.updateTherapistCalendar(calendar.id, {
-            integrationStatus: 'error'
+            integrationStatus: "error",
           });
         }
       }
@@ -656,13 +733,12 @@ export class TherapistCalendarOnboardingService {
       const profile = await this.storage.getTherapistProfile(therapistId);
       if (profile) {
         await this.storage.updateTherapistProfile(therapistId, {
-          primaryCalendarId: null
+          primaryCalendarId: null,
         });
       }
 
       console.log(`✅ Calendar setup rollback completed for therapist ${therapistId}`);
       return true;
-
     } catch (error: any) {
       console.error(`❌ Calendar rollback failed for therapist ${therapistId}:`, error);
       return false;
@@ -672,16 +748,17 @@ export class TherapistCalendarOnboardingService {
   /**
    * Validate therapist exists and get details
    */
-  private async validateTherapist(therapistId: string): Promise<(User & { therapistProfile?: TherapistProfile }) | null> {
+  private async validateTherapist(
+    therapistId: string
+  ): Promise<(User & { therapistProfile?: TherapistProfile }) | null> {
     try {
       const user = await this.storage.getUser(therapistId);
-      if (!user || user.role !== 'therapist') {
+      if (!user || user.role !== "therapist") {
         return null;
       }
 
       const profile = await this.storage.getTherapistProfile(therapistId);
       return { ...user, therapistProfile: profile };
-      
     } catch (error) {
       console.error(`Error validating therapist ${therapistId}:`, error);
       return null;
@@ -691,11 +768,13 @@ export class TherapistCalendarOnboardingService {
   /**
    * Get all therapists who need calendar setup
    */
-  private async getAllTherapistsNeedingCalendars(): Promise<(User & { therapistProfile?: TherapistProfile })[]> {
+  private async getAllTherapistsNeedingCalendars(): Promise<
+    (User & { therapistProfile?: TherapistProfile })[]
+  > {
     try {
       // Get all active therapists
       const users = await this.storage.getAllUsers();
-      const therapists = users.filter(user => user.role === 'therapist' && user.isActive);
+      const therapists = users.filter((user) => user.role === "therapist" && user.isActive);
 
       const therapistsWithProfiles = await Promise.all(
         therapists.map(async (therapist) => {
@@ -708,15 +787,14 @@ export class TherapistCalendarOnboardingService {
       const therapistsNeedingCalendars = [];
       for (const therapist of therapistsWithProfiles) {
         const calendar = await this.storage.getTherapistCalendar(therapist.id);
-        if (!calendar || calendar.integrationStatus !== 'active') {
+        if (!calendar || calendar.integrationStatus !== "active") {
           therapistsNeedingCalendars.push(therapist);
         }
       }
 
       return therapistsNeedingCalendars;
-
     } catch (error: any) {
-      console.error('Error getting therapists needing calendars:', error);
+      console.error("Error getting therapists needing calendars:", error);
       return [];
     }
   }
@@ -724,14 +802,19 @@ export class TherapistCalendarOnboardingService {
   /**
    * Update therapist profile with calendar information
    */
-  private async updateTherapistProfileWithCalendar(therapistId: string, calendarData: any): Promise<void> {
+  private async updateTherapistProfileWithCalendar(
+    therapistId: string,
+    calendarData: any
+  ): Promise<void> {
     try {
       await this.storage.updateTherapistProfile(therapistId, {
         primaryCalendarId: calendarData.googleCalendarId,
-        calendarPermissionsConfigured: true
+        calendarPermissionsConfigured: true,
       });
-      
-      console.log(`✅ Updated therapist profile ${therapistId} with calendar ${calendarData.googleCalendarId}`);
+
+      console.log(
+        `✅ Updated therapist profile ${therapistId} with calendar ${calendarData.googleCalendarId}`
+      );
     } catch (error: any) {
       console.error(`❌ Failed to update therapist profile ${therapistId}:`, error);
       throw new Error(`Failed to update therapist profile: ${error.message}`);
@@ -745,28 +828,31 @@ export class TherapistCalendarOnboardingService {
     try {
       const calendarName = `Dr. ${therapist.firstName} ${therapist.lastName} - Therapy Sessions`;
       const calendarUrl = `https://calendar.google.com/calendar/embed?src=${encodeURIComponent(calendarData.googleCalendarId)}`;
-      
+
       const emailData: CalendarWelcomeEmailData = {
         therapistName: `${therapist.firstName} ${therapist.lastName}`,
-        therapistEmail: therapist.email || '',
+        therapistEmail: therapist.email || "",
         calendarName,
         calendarUrl,
         googleCalendarId: calendarData.googleCalendarId,
-        accessInstructions: this.generateAccessInstructions(therapist.email || '', calendarData.googleCalendarId),
-        supportEmail: 'support@hive-wellness.co.uk'
+        accessInstructions: this.generateAccessInstructions(
+          therapist.email || "",
+          calendarData.googleCalendarId
+        ),
+        supportEmail: "support@hive-wellness.co.uk",
       };
 
       const emailResult = await emailService.sendEmail({
-        to: therapist.email || '',
-        subject: '📅 Your Therapy Calendar is Ready - Hive Wellness',
+        to: therapist.email || "",
+        subject: "📅 Your Therapy Calendar is Ready - Hive Wellness",
         body: this.generateCalendarWelcomeEmailTemplate(emailData),
         isHtml: true,
-        templateId: 'therapist_calendar_welcome',
+        templateId: "therapist_calendar_welcome",
         metadata: {
           therapistId: therapist.id,
           calendarId: calendarData.googleCalendarId,
-          type: 'calendar_setup_welcome'
-        }
+          type: "calendar_setup_welcome",
+        },
       });
 
       if (emailResult.success) {
@@ -774,7 +860,6 @@ export class TherapistCalendarOnboardingService {
       } else {
         console.error(`❌ Failed to send welcome email to ${therapist.email}:`, emailResult.error);
       }
-
     } catch (error: any) {
       console.error(`❌ Error sending calendar welcome email to ${therapist.email}:`, error);
       // Don't throw - email failure shouldn't stop the calendar setup
@@ -784,20 +869,24 @@ export class TherapistCalendarOnboardingService {
   /**
    * Send admin notification about calendar setup
    */
-  private async sendAdminNotification(therapist: User, calendarData: any | null, success: boolean, error?: string): Promise<void> {
+  private async sendAdminNotification(
+    therapist: User,
+    calendarData: any | null,
+    success: boolean,
+    error?: string
+  ): Promise<void> {
     try {
-      const subject = success 
+      const subject = success
         ? `✅ Calendar Setup Successful - ${therapist.firstName} ${therapist.lastName}`
         : `❌ Calendar Setup Failed - ${therapist.firstName} ${therapist.lastName}`;
 
       const body = success
         ? this.generateSuccessAdminNotification(therapist, calendarData)
-        : this.generateFailureAdminNotification(therapist, error || 'Unknown error');
+        : this.generateFailureAdminNotification(therapist, error || "Unknown error");
 
       await emailService.sendAdminNotification(subject, body, true);
-      
-      console.log(`📧 Admin notification sent for ${therapist.email} calendar setup`);
 
+      console.log(`📧 Admin notification sent for ${therapist.email} calendar setup`);
     } catch (error: any) {
       console.error(`❌ Failed to send admin notification:`, error);
     }
@@ -812,11 +901,10 @@ export class TherapistCalendarOnboardingService {
       const body = this.generateBatchSummaryEmailTemplate(result);
 
       await emailService.sendAdminNotification(subject, body, true);
-      
-      console.log('📧 Batch setup summary email sent to admins');
 
+      console.log("📧 Batch setup summary email sent to admins");
     } catch (error: any) {
-      console.error('❌ Failed to send batch summary email:', error);
+      console.error("❌ Failed to send batch summary email:", error);
     }
   }
 
@@ -970,14 +1058,20 @@ You can now view and manage your therapy appointments from your personal Google 
    */
   private generateBatchSummaryEmailTemplate(result: BatchSetupResult): string {
     const successRows = result.results
-      .filter(r => r.success)
-      .map(r => `<tr><td>${r.therapistName}</td><td>${r.therapistEmail}</td><td style="color: #28a745;">✅ Success</td><td>${r.calendarId || 'N/A'}</td></tr>`)
-      .join('\n');
+      .filter((r) => r.success)
+      .map(
+        (r) =>
+          `<tr><td>${r.therapistName}</td><td>${r.therapistEmail}</td><td style="color: #28a745;">✅ Success</td><td>${r.calendarId || "N/A"}</td></tr>`
+      )
+      .join("\n");
 
     const failureRows = result.results
-      .filter(r => !r.success)
-      .map(r => `<tr><td>${r.therapistName}</td><td>${r.therapistEmail}</td><td style="color: #dc3545;">❌ Failed</td><td>${r.error || 'Unknown error'}</td></tr>`)
-      .join('\n');
+      .filter((r) => !r.success)
+      .map(
+        (r) =>
+          `<tr><td>${r.therapistName}</td><td>${r.therapistEmail}</td><td style="color: #dc3545;">❌ Failed</td><td>${r.error || "Unknown error"}</td></tr>`
+      )
+      .join("\n");
 
     return `
 <div style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto;">
@@ -992,7 +1086,9 @@ You can now view and manage your therapy appointments from your personal Google 
     <p><strong>Success Rate:</strong> ${result.totalTherapists > 0 ? Math.round((result.successful / result.totalTherapists) * 100) : 0}%</p>
   </div>
   
-  ${result.successful > 0 ? `
+  ${
+    result.successful > 0
+      ? `
   <div style="margin: 30px 0;">
     <h3 style="color: #28a745;">✅ Successful Setups (${result.successful})</h3>
     <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
@@ -1009,9 +1105,13 @@ You can now view and manage your therapy appointments from your personal Google 
       </tbody>
     </table>
   </div>
-  ` : ''}
+  `
+      : ""
+  }
   
-  ${result.failed > 0 ? `
+  ${
+    result.failed > 0
+      ? `
   <div style="margin: 30px 0;">
     <h3 style="color: #dc3545;">❌ Failed Setups (${result.failed})</h3>
     <table style="width: 100%; border-collapse: collapse; margin: 10px 0;">
@@ -1028,7 +1128,9 @@ You can now view and manage your therapy appointments from your personal Google 
       </tbody>
     </table>
   </div>
-  ` : ''}
+  `
+      : ""
+  }
   
   <p><strong>Completed:</strong> ${new Date().toISOString()}</p>
 </div>
@@ -1036,5 +1138,5 @@ You can now view and manage your therapy appointments from your personal Google 
   }
 }
 
-import { storage } from '../storage';
+import { storage } from "../storage";
 export const therapistCalendarOnboardingService = new TherapistCalendarOnboardingService(storage);

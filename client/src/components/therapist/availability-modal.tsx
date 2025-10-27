@@ -1,5 +1,11 @@
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -38,20 +44,20 @@ export default function AvailabilityModal({ userId, trigger }: AvailabilityModal
   // Initialize default availability structure
   useEffect(() => {
     const defaultAvailability: DayAvailability[] = [
-      { dayOfWeek: 1, dayName: 'Monday', isAvailable: false, timeSlots: [] },
-      { dayOfWeek: 2, dayName: 'Tuesday', isAvailable: false, timeSlots: [] },
-      { dayOfWeek: 3, dayName: 'Wednesday', isAvailable: false, timeSlots: [] },
-      { dayOfWeek: 4, dayName: 'Thursday', isAvailable: false, timeSlots: [] },
-      { dayOfWeek: 5, dayName: 'Friday', isAvailable: false, timeSlots: [] },
-      { dayOfWeek: 6, dayName: 'Saturday', isAvailable: false, timeSlots: [] },
-      { dayOfWeek: 0, dayName: 'Sunday', isAvailable: false, timeSlots: [] }
+      { dayOfWeek: 1, dayName: "Monday", isAvailable: false, timeSlots: [] },
+      { dayOfWeek: 2, dayName: "Tuesday", isAvailable: false, timeSlots: [] },
+      { dayOfWeek: 3, dayName: "Wednesday", isAvailable: false, timeSlots: [] },
+      { dayOfWeek: 4, dayName: "Thursday", isAvailable: false, timeSlots: [] },
+      { dayOfWeek: 5, dayName: "Friday", isAvailable: false, timeSlots: [] },
+      { dayOfWeek: 6, dayName: "Saturday", isAvailable: false, timeSlots: [] },
+      { dayOfWeek: 0, dayName: "Sunday", isAvailable: false, timeSlots: [] },
     ];
     setAvailability(defaultAvailability);
   }, []);
 
   // Fetch existing availability
   const { data: existingAvailability, isLoading } = useQuery({
-    queryKey: ['/api/therapist/availability', userId],
+    queryKey: ["/api/therapist/availability", userId],
     enabled: isOpen,
     retry: false,
   });
@@ -59,13 +65,13 @@ export default function AvailabilityModal({ userId, trigger }: AvailabilityModal
   // Update availability when data is loaded
   useEffect(() => {
     if (existingAvailability && existingAvailability.length > 0) {
-      const updatedAvailability = availability.map(day => {
+      const updatedAvailability = availability.map((day) => {
         const existing = existingAvailability.find((a: any) => a.dayOfWeek === day.dayOfWeek);
         if (existing) {
           return {
             ...day,
             isAvailable: existing.isAvailable,
-            timeSlots: existing.timeSlots || []
+            timeSlots: existing.timeSlots || [],
           };
         }
         return day;
@@ -77,13 +83,13 @@ export default function AvailabilityModal({ userId, trigger }: AvailabilityModal
   // Save availability mutation
   const saveAvailabilityMutation = useMutation({
     mutationFn: async (availabilityData: DayAvailability[]) => {
-      return await apiRequest('POST', '/api/therapist/availability', {
+      return await apiRequest("POST", "/api/therapist/availability", {
         userId,
-        availability: availabilityData
+        availability: availabilityData,
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/therapist/availability', userId] });
+      queryClient.invalidateQueries({ queryKey: ["/api/therapist/availability", userId] });
       toast({
         title: "Availability Updated",
         description: "Your availability has been saved successfully.",
@@ -96,7 +102,7 @@ export default function AvailabilityModal({ userId, trigger }: AvailabilityModal
         description: error.message || "Failed to save availability",
         variant: "destructive",
       });
-    }
+    },
   });
 
   const toggleDayAvailability = (dayIndex: number) => {
@@ -107,11 +113,13 @@ export default function AvailabilityModal({ userId, trigger }: AvailabilityModal
           newDay.timeSlots = []; // Clear time slots when day is disabled
         } else if (newDay.timeSlots.length === 0) {
           // Add default time slot when enabling a day
-          newDay.timeSlots = [{
-            id: `${Date.now()}`,
-            startTime: '09:00',
-            endTime: '17:00'
-          }];
+          newDay.timeSlots = [
+            {
+              id: `${Date.now()}`,
+              startTime: "09:00",
+              endTime: "17:00",
+            },
+          ];
         }
         return newDay;
       }
@@ -126,12 +134,12 @@ export default function AvailabilityModal({ userId, trigger }: AvailabilityModal
       if (index === dayIndex) {
         const newTimeSlot: TimeSlot = {
           id: `${Date.now()}`,
-          startTime: '09:00',
-          endTime: '17:00'
+          startTime: "09:00",
+          endTime: "17:00",
         };
         return {
           ...day,
-          timeSlots: [...day.timeSlots, newTimeSlot]
+          timeSlots: [...day.timeSlots, newTimeSlot],
         };
       }
       return day;
@@ -145,7 +153,7 @@ export default function AvailabilityModal({ userId, trigger }: AvailabilityModal
       if (index === dayIndex) {
         return {
           ...day,
-          timeSlots: day.timeSlots.filter(slot => slot.id !== slotId)
+          timeSlots: day.timeSlots.filter((slot) => slot.id !== slotId),
         };
       }
       return day;
@@ -154,14 +162,19 @@ export default function AvailabilityModal({ userId, trigger }: AvailabilityModal
     setHasChanges(true);
   };
 
-  const updateTimeSlot = (dayIndex: number, slotId: string, field: 'startTime' | 'endTime', value: string) => {
+  const updateTimeSlot = (
+    dayIndex: number,
+    slotId: string,
+    field: "startTime" | "endTime",
+    value: string
+  ) => {
     const updated = availability.map((day, index) => {
       if (index === dayIndex) {
         return {
           ...day,
-          timeSlots: day.timeSlots.map(slot => 
+          timeSlots: day.timeSlots.map((slot) =>
             slot.id === slotId ? { ...slot, [field]: value } : slot
-          )
+          ),
         };
       }
       return day;
@@ -176,9 +189,9 @@ export default function AvailabilityModal({ userId, trigger }: AvailabilityModal
 
   const getTotalHours = () => {
     let total = 0;
-    availability.forEach(day => {
+    availability.forEach((day) => {
       if (day.isAvailable) {
-        day.timeSlots.forEach(slot => {
+        day.timeSlots.forEach((slot) => {
           const start = new Date(`1970-01-01T${slot.startTime}:00`);
           const end = new Date(`1970-01-01T${slot.endTime}:00`);
           total += (end.getTime() - start.getTime()) / (1000 * 60 * 60);
@@ -190,9 +203,7 @@ export default function AvailabilityModal({ userId, trigger }: AvailabilityModal
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        {trigger}
-      </DialogTrigger>
+      <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center">
@@ -200,7 +211,7 @@ export default function AvailabilityModal({ userId, trigger }: AvailabilityModal
             My Availability
           </DialogTitle>
         </DialogHeader>
-        
+
         <div className="space-y-6">
           {/* Summary Card */}
           <Card className="bg-hive-light-blue">
@@ -212,7 +223,7 @@ export default function AvailabilityModal({ userId, trigger }: AvailabilityModal
                 </div>
                 <div className="text-right">
                   <p className="text-sm text-gray-600">
-                    {availability.filter(day => day.isAvailable).length} days active
+                    {availability.filter((day) => day.isAvailable).length} days active
                   </p>
                   <Badge variant="outline" className="mt-1">
                     <Clock className="w-3 h-3 mr-1" />
@@ -231,7 +242,9 @@ export default function AvailabilityModal({ userId, trigger }: AvailabilityModal
                   <Calendar className="w-8 h-8 text-gray-400" />
                   <div>
                     <p className="font-medium text-gray-700">Google Calendar Sync</p>
-                    <p className="text-sm text-gray-500">Automatically sync your availability with Google Calendar</p>
+                    <p className="text-sm text-gray-500">
+                      Automatically sync your availability with Google Calendar
+                    </p>
                   </div>
                 </div>
                 <Button variant="outline" disabled className="text-gray-500">
@@ -245,7 +258,7 @@ export default function AvailabilityModal({ userId, trigger }: AvailabilityModal
           {/* Day by Day Availability */}
           <div className="space-y-4">
             <h3 className="text-lg font-semibold text-hive-black">Weekly Schedule</h3>
-            
+
             {isLoading ? (
               <div className="flex items-center justify-center py-8">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-hive-purple"></div>
@@ -269,25 +282,32 @@ export default function AvailabilityModal({ userId, trigger }: AvailabilityModal
                       />
                     </div>
                   </CardHeader>
-                  
+
                   {day.isAvailable && (
                     <CardContent>
                       <div className="space-y-3">
                         {day.timeSlots.map((slot) => (
-                          <div key={slot.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                          <div
+                            key={slot.id}
+                            className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg"
+                          >
                             <div className="flex items-center space-x-2">
                               <Clock className="w-4 h-4 text-gray-500" />
                               <input
                                 type="time"
                                 value={slot.startTime}
-                                onChange={(e) => updateTimeSlot(dayIndex, slot.id, 'startTime', e.target.value)}
+                                onChange={(e) =>
+                                  updateTimeSlot(dayIndex, slot.id, "startTime", e.target.value)
+                                }
                                 className="px-2 py-1 border rounded text-sm"
                               />
                               <span className="text-gray-500">to</span>
                               <input
                                 type="time"
                                 value={slot.endTime}
-                                onChange={(e) => updateTimeSlot(dayIndex, slot.id, 'endTime', e.target.value)}
+                                onChange={(e) =>
+                                  updateTimeSlot(dayIndex, slot.id, "endTime", e.target.value)
+                                }
                                 className="px-2 py-1 border rounded text-sm"
                               />
                             </div>
@@ -301,7 +321,7 @@ export default function AvailabilityModal({ userId, trigger }: AvailabilityModal
                             </Button>
                           </div>
                         ))}
-                        
+
                         <Button
                           variant="outline"
                           size="sm"
@@ -332,7 +352,7 @@ export default function AvailabilityModal({ userId, trigger }: AvailabilityModal
               className="bg-hive-purple hover:bg-hive-purple/90"
             >
               <Save className="w-4 h-4 mr-2" />
-              {saveAvailabilityMutation.isPending ? 'Saving...' : 'Save Availability'}
+              {saveAvailabilityMutation.isPending ? "Saving..." : "Save Availability"}
             </Button>
           </div>
         </div>

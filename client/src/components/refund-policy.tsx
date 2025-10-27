@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,13 +21,13 @@ export function RefundPolicyComponent() {
   useEffect(() => {
     const fetchPolicy = async () => {
       try {
-        const response = await fetch('/api/refunds/policy');
+        const response = await fetch("/api/refunds/policy");
         if (response.ok) {
           const data = await response.json();
           setPolicyData(data);
         }
       } catch (error) {
-        console.error('Failed to fetch refund policy:', error);
+        console.error("Failed to fetch refund policy:", error);
       } finally {
         setIsLoading(false);
       }
@@ -84,9 +84,7 @@ export function RefundPolicyComponent() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600 mb-2">Full Refund</div>
-            <p className="text-sm text-muted-foreground">
-              {policyData.summary.hours48Plus}
-            </p>
+            <p className="text-sm text-muted-foreground">{policyData.summary.hours48Plus}</p>
             <Badge variant="secondary" className="mt-2 bg-green-50 text-green-700 border-green-200">
               Recommended
             </Badge>
@@ -102,10 +100,11 @@ export function RefundPolicyComponent() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-yellow-600 mb-2">50% Refund</div>
-            <p className="text-sm text-muted-foreground">
-              {policyData.summary.hours24To48}
-            </p>
-            <Badge variant="secondary" className="mt-2 bg-yellow-50 text-yellow-700 border-yellow-200">
+            <p className="text-sm text-muted-foreground">{policyData.summary.hours24To48}</p>
+            <Badge
+              variant="secondary"
+              className="mt-2 bg-yellow-50 text-yellow-700 border-yellow-200"
+            >
               Partial
             </Badge>
           </CardContent>
@@ -120,9 +119,7 @@ export function RefundPolicyComponent() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600 mb-2">No Refund</div>
-            <p className="text-sm text-muted-foreground">
-              {policyData.summary.hoursUnder24}
-            </p>
+            <p className="text-sm text-muted-foreground">{policyData.summary.hoursUnder24}</p>
             <Badge variant="destructive" className="mt-2">
               No refund
             </Badge>
@@ -150,7 +147,7 @@ export function RefundPolicyComponent() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div 
+          <div
             className="prose prose-sm max-w-none text-muted-foreground leading-relaxed"
             dangerouslySetInnerHTML={{ __html: policyData.policy }}
           />
@@ -162,7 +159,8 @@ export function RefundPolicyComponent() {
         <CardContent className="p-6">
           <div className="text-center space-y-4">
             <p className="text-sm text-muted-foreground">
-              By booking a session, you acknowledge that you have read and agree to our refund policy.
+              By booking a session, you acknowledge that you have read and agree to our refund
+              policy.
             </p>
             <p className="text-xs text-muted-foreground italic">
               This policy applies to all therapy sessions booked through the Hive Wellness platform.

@@ -1,7 +1,7 @@
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { 
+import {
   Building,
   Users,
   Calendar,
@@ -11,7 +11,7 @@ import {
   FileText,
   CreditCard,
   UserCheck,
-  MessageSquare
+  MessageSquare,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
@@ -25,30 +25,30 @@ export default function InstitutionDashboard() {
     try {
       const response = await apiRequest("POST", "/api/auth/logout");
       const data = await response.json();
-      
+
       // Clear all authentication data
       queryClient.clear();
       toast({
         title: "Logged Out",
         description: "You have been successfully logged out.",
       });
-      
+
       // Use the redirect path from backend based on user role
       if (data.success && data.redirect) {
         window.location.href = data.redirect;
       } else {
         // Fallback for institution role
-        window.location.href = '/institution-login';
+        window.location.href = "/institution-login";
       }
     } catch (error) {
       console.error("Logout error:", error);
       // Force logout even if API fails
       queryClient.clear();
-      window.location.href = '/institution-login';
+      window.location.href = "/institution-login";
     }
   };
 
-  if (!user || (user as any).role !== 'institution') {
+  if (!user || (user as any).role !== "institution") {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -67,44 +67,47 @@ export default function InstitutionDashboard() {
       title: "Staff Management",
       description: "Manage staff accounts and therapy access",
       icon: Users,
-      action: () => window.location.href = '/admin-dashboard',
-      color: "bg-hive-purple"
+      action: () => (window.location.href = "/admin-dashboard"),
+      color: "bg-hive-purple",
     },
     {
       title: "Appointment Overview",
       description: "View all institutional therapy appointments",
       icon: Calendar,
-      action: () => window.location.href = '/admin-dashboard',
-      color: "bg-hive-blue"
+      action: () => (window.location.href = "/admin-dashboard"),
+      color: "bg-hive-blue",
     },
     {
       title: "Usage Analytics",
       description: "Track therapy utilisation and outcomes",
       icon: BarChart3,
-      action: () => window.location.href = '/#/admin-dashboard',
-      color: "bg-hive-light-blue"
+      action: () => (window.location.href = "/#/admin-dashboard"),
+      color: "bg-hive-light-blue",
     },
     {
       title: "Billing & Invoicing",
       description: "Manage institutional billing and payments",
       icon: CreditCard,
-      action: () => toast({ title: "Coming Soon", description: "Billing management will be available soon" }),
-      color: "bg-green-600"
+      action: () =>
+        toast({ title: "Coming Soon", description: "Billing management will be available soon" }),
+      color: "bg-green-600",
     },
     {
       title: "Therapist Network",
       description: "Access and assign institutional therapists",
       icon: UserCheck,
-      action: () => toast({ title: "Coming Soon", description: "Therapist network will be available soon" }),
-      color: "bg-orange-600"
+      action: () =>
+        toast({ title: "Coming Soon", description: "Therapist network will be available soon" }),
+      color: "bg-orange-600",
     },
     {
       title: "Reports & Compliance",
       description: "Generate compliance and progress reports",
       icon: FileText,
-      action: () => toast({ title: "Coming Soon", description: "Reporting tools will be available soon" }),
-      color: "bg-purple-600"
-    }
+      action: () =>
+        toast({ title: "Coming Soon", description: "Reporting tools will be available soon" }),
+      color: "bg-purple-600",
+    },
   ];
 
   return (
@@ -113,11 +116,10 @@ export default function InstitutionDashboard() {
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-primary text-hive-purple mb-2">
-              Institution Dashboard
-            </h1>
+            <h1 className="text-3xl font-primary text-hive-purple mb-2">Institution Dashboard</h1>
             <p className="text-hive-black/70 font-secondary">
-              Welcome, {(user as any).firstName || 'Institution'} - Organisational Therapy Management
+              Welcome, {(user as any).firstName || "Institution"} - Organisational Therapy
+              Management
             </p>
           </div>
           <div className="flex items-center gap-4">
@@ -189,13 +191,15 @@ export default function InstitutionDashboard() {
           <div className="lg:col-span-2">
             <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
               <CardHeader>
-                <CardTitle className="font-primary text-hive-purple">Institution Management</CardTitle>
+                <CardTitle className="font-primary text-hive-purple">
+                  Institution Management
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {institutionTools.map((tool, index) => (
-                    <Card 
-                      key={index} 
+                    <Card
+                      key={index}
                       className="bg-gradient-to-br from-white to-gray-50 border-0 shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
                       onClick={tool.action}
                     >
@@ -225,7 +229,9 @@ export default function InstitutionDashboard() {
           <div className="space-y-6">
             <Card className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
               <CardHeader>
-                <CardTitle className="font-primary text-hive-purple">Organisation Profile</CardTitle>
+                <CardTitle className="font-primary text-hive-purple">
+                  Organisation Profile
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-4 mb-4">
@@ -233,10 +239,10 @@ export default function InstitutionDashboard() {
                     <Building className="w-8 h-8 text-hive-purple" />
                   </div>
                   <div>
-                    <h3 className="font-primary text-hive-black font-semibold">
-                      Demo Institution
-                    </h3>
-                    <p className="text-sm font-secondary text-hive-black/70">{(user as any).email}</p>
+                    <h3 className="font-primary text-hive-black font-semibold">Demo Institution</h3>
+                    <p className="text-sm font-secondary text-hive-black/70">
+                      {(user as any).email}
+                    </p>
                     <p className="text-xs font-secondary text-hive-purple">Institution Account</p>
                   </div>
                 </div>
@@ -259,15 +265,21 @@ export default function InstitutionDashboard() {
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
-                    <span className="text-sm font-secondary text-hive-black/70">Add Staff Members</span>
+                    <span className="text-sm font-secondary text-hive-black/70">
+                      Add Staff Members
+                    </span>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
-                    <span className="text-sm font-secondary text-hive-black/70">Configure Billing</span>
+                    <span className="text-sm font-secondary text-hive-black/70">
+                      Configure Billing
+                    </span>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
-                    <span className="text-sm font-secondary text-hive-black/70">First Appointments</span>
+                    <span className="text-sm font-secondary text-hive-black/70">
+                      First Appointments
+                    </span>
                   </div>
                 </div>
                 <Button className="w-full mt-4 bg-hive-purple hover:bg-hive-purple/90">

@@ -6,23 +6,29 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import { 
-  phoneValidation, 
-  postcodeValidation, 
-  nameValidation, 
+import {
+  phoneValidation,
+  postcodeValidation,
+  nameValidation,
   emailValidation,
   formatPhoneNumber,
   formatPostcode,
-  VALIDATION_MESSAGES 
+  VALIDATION_MESSAGES,
 } from "@/lib/form-validation";
 import { apiRequest } from "@/lib/queryClient";
-import { 
+import {
   User,
   MapPin,
   Calendar,
@@ -38,7 +44,7 @@ import {
   Save,
   Settings,
   Users,
-  Building
+  Building,
 } from "lucide-react";
 import type { User as UserType } from "@shared/schema";
 
@@ -90,20 +96,45 @@ interface AdminProfileData {
 }
 
 const DEPARTMENTS = [
-  'Clinical Operations', 'Technology', 'Customer Support', 'Quality Assurance',
-  'Compliance', 'Business Development', 'Finance', 'Human Resources', 'Marketing'
+  "Clinical Operations",
+  "Technology",
+  "Customer Support",
+  "Quality Assurance",
+  "Compliance",
+  "Business Development",
+  "Finance",
+  "Human Resources",
+  "Marketing",
 ];
 
 const RESPONSIBILITIES = [
-  'User Management', 'System Administration', 'Data Management', 'Compliance Monitoring',
-  'Quality Assurance', 'Customer Support', 'Technical Support', 'Training & Education',
-  'Report Generation', 'Security Management', 'Billing & Payments', 'Therapist Onboarding'
+  "User Management",
+  "System Administration",
+  "Data Management",
+  "Compliance Monitoring",
+  "Quality Assurance",
+  "Customer Support",
+  "Technical Support",
+  "Training & Education",
+  "Report Generation",
+  "Security Management",
+  "Billing & Payments",
+  "Therapist Onboarding",
 ];
 
 const SYSTEMS_ACCESS = [
-  'User Management Dashboard', 'Therapist Portal', 'Client Portal', 'Payment System',
-  'Messaging System', 'Video Sessions', 'Reporting Engine', 'Admin Console',
-  'Security Dashboard', 'Automation Engine', 'WordPress Integration', 'Database Access'
+  "User Management Dashboard",
+  "Therapist Portal",
+  "Client Portal",
+  "Payment System",
+  "Messaging System",
+  "Video Sessions",
+  "Reporting Engine",
+  "Admin Console",
+  "Security Dashboard",
+  "Automation Engine",
+  "WordPress Integration",
+  "Database Access",
 ];
 
 export default function AdminProfileCompletion({ user }: AdminProfileCompletionProps) {
@@ -113,52 +144,52 @@ export default function AdminProfileCompletion({ user }: AdminProfileCompletionP
   const [currentSection, setCurrentSection] = useState(0);
   const [profileData, setProfileData] = useState<AdminProfileData>({
     personalInfo: {
-      firstName: user.firstName || '',
-      lastName: user.lastName || '',
-      dateOfBirth: '',
-      gender: '',
-      phone: '',
-      address: '',
-      city: '',
-      postcode: '',
-      emergencyContact: '',
-      emergencyPhone: ''
+      firstName: user.firstName || "",
+      lastName: user.lastName || "",
+      dateOfBirth: "",
+      gender: "",
+      phone: "",
+      address: "",
+      city: "",
+      postcode: "",
+      emergencyContact: "",
+      emergencyPhone: "",
     },
     adminInfo: {
-      department: '',
-      jobTitle: '',
-      employeeId: '',
-      startDate: '',
-      managerName: '',
-      managerEmail: '',
+      department: "",
+      jobTitle: "",
+      employeeId: "",
+      startDate: "",
+      managerName: "",
+      managerEmail: "",
       responsibilities: [],
-      accessLevel: '',
+      accessLevel: "",
       trainingCompleted: [],
-      certifications: []
+      certifications: [],
     },
     systemAccess: {
       systemsAccess: [],
       adminRights: [],
-      dataAccessLevel: '',
+      dataAccessLevel: "",
       reportingAccess: [],
       auditTrail: true,
       twoFactorAuth: false,
-      lastSecurityTraining: '',
-      passwordPolicy: true
+      lastSecurityTraining: "",
+      passwordPolicy: true,
     },
     privacy: {
       dataProcessingConsent: false,
       adminStandardsConsent: false,
       confidentialityAgreement: false,
-      systemSecurityConsent: false
-    }
+      systemSecurityConsent: false,
+    },
   });
 
   const sections = [
-    { id: 'personal', title: 'Personal Information', icon: User, color: 'bg-blue-500' },
-    { id: 'admin', title: 'Administrative Details', icon: Building, color: 'bg-green-500' },
-    { id: 'system', title: 'System Access', icon: Settings, color: 'bg-purple-500' },
-    { id: 'privacy', title: 'Privacy & Compliance', icon: Shield, color: 'bg-red-500' }
+    { id: "personal", title: "Personal Information", icon: User, color: "bg-blue-500" },
+    { id: "admin", title: "Administrative Details", icon: Building, color: "bg-green-500" },
+    { id: "system", title: "System Access", icon: Settings, color: "bg-purple-500" },
+    { id: "privacy", title: "Privacy & Compliance", icon: Shield, color: "bg-red-500" },
   ];
 
   const calculateProgress = () => {
@@ -168,7 +199,7 @@ export default function AdminProfileCompletion({ user }: AdminProfileCompletionP
     // Personal Info (10 required fields)
     const personalFields = Object.values(profileData.personalInfo);
     totalFields += personalFields.length;
-    completedFields += personalFields.filter(field => field.trim() !== '').length;
+    completedFields += personalFields.filter((field) => field.trim() !== "").length;
 
     // Admin Info (10 required fields)
     totalFields += 10;
@@ -206,7 +237,7 @@ export default function AdminProfileCompletion({ user }: AdminProfileCompletionP
 
   const saveProfileMutation = useMutation({
     mutationFn: async (data: AdminProfileData) => {
-      const response = await apiRequest('POST', `/api/admin/profile/${user.id}`, data);
+      const response = await apiRequest("POST", `/api/admin/profile/${user.id}`, data);
       return await response.json();
     },
     onSuccess: (data) => {
@@ -222,14 +253,18 @@ export default function AdminProfileCompletion({ user }: AdminProfileCompletionP
         description: error.message,
         variant: "destructive",
       });
-    }
+    },
   });
 
   const handleCompleteProfile = () => {
     const progressPercentage = calculateProgress();
-    
-    if (!profileData.privacy.dataProcessingConsent || !profileData.privacy.adminStandardsConsent || 
-        !profileData.privacy.confidentialityAgreement || !profileData.privacy.systemSecurityConsent) {
+
+    if (
+      !profileData.privacy.dataProcessingConsent ||
+      !profileData.privacy.adminStandardsConsent ||
+      !profileData.privacy.confidentialityAgreement ||
+      !profileData.privacy.systemSecurityConsent
+    ) {
       toast({
         title: "Consent Required",
         description: "All compliance consents are required for administrative access.",
@@ -237,7 +272,7 @@ export default function AdminProfileCompletion({ user }: AdminProfileCompletionP
       });
       return;
     }
-    
+
     if (progressPercentage < 95) {
       toast({
         title: "Profile Incomplete",
@@ -246,12 +281,12 @@ export default function AdminProfileCompletion({ user }: AdminProfileCompletionP
       });
       return;
     }
-    
+
     saveProfileMutation.mutate(profileData);
-    
+
     // Auto-redirect after completion
     setTimeout(() => {
-      setLocation('/portal');
+      setLocation("/portal");
     }, 2000);
   };
 
@@ -261,8 +296,12 @@ export default function AdminProfileCompletion({ user }: AdminProfileCompletionP
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-century font-bold text-hive-black">Complete Your Administrative Profile</h2>
-          <p className="text-gray-600 mt-2">Set up your administrative access and system permissions</p>
+          <h2 className="text-3xl font-century font-bold text-hive-black">
+            Complete Your Administrative Profile
+          </h2>
+          <p className="text-gray-600 mt-2">
+            Set up your administrative access and system permissions
+          </p>
         </div>
         <div className="text-right">
           <div className="text-sm text-gray-600 mb-2">Profile Progress</div>
@@ -279,17 +318,17 @@ export default function AdminProfileCompletion({ user }: AdminProfileCompletionP
           const Icon = section.icon;
           const isActive = index === currentSection;
           const isCompleted = index < currentSection;
-          
+
           return (
             <button
               key={section.id}
               onClick={() => setCurrentSection(index)}
               className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors min-w-fit ${
-                isActive 
-                  ? 'bg-hive-purple text-white' 
+                isActive
+                  ? "bg-hive-purple text-white"
                   : isCompleted
-                  ? 'bg-green-100 text-green-700'
-                  : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    ? "bg-green-100 text-green-700"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
             >
               <Icon className="w-4 h-4" />
@@ -317,10 +356,12 @@ export default function AdminProfileCompletion({ user }: AdminProfileCompletionP
                   <Input
                     id="firstName"
                     value={profileData.personalInfo.firstName}
-                    onChange={(e) => setProfileData(prev => ({
-                      ...prev,
-                      personalInfo: { ...prev.personalInfo, firstName: e.target.value }
-                    }))}
+                    onChange={(e) =>
+                      setProfileData((prev) => ({
+                        ...prev,
+                        personalInfo: { ...prev.personalInfo, firstName: e.target.value },
+                      }))
+                    }
                     placeholder="Enter your first name"
                   />
                 </div>
@@ -329,10 +370,12 @@ export default function AdminProfileCompletion({ user }: AdminProfileCompletionP
                   <Input
                     id="lastName"
                     value={profileData.personalInfo.lastName}
-                    onChange={(e) => setProfileData(prev => ({
-                      ...prev,
-                      personalInfo: { ...prev.personalInfo, lastName: e.target.value }
-                    }))}
+                    onChange={(e) =>
+                      setProfileData((prev) => ({
+                        ...prev,
+                        personalInfo: { ...prev.personalInfo, lastName: e.target.value },
+                      }))
+                    }
                     placeholder="Enter your last name"
                   />
                 </div>
@@ -345,20 +388,25 @@ export default function AdminProfileCompletion({ user }: AdminProfileCompletionP
                     id="dateOfBirth"
                     type="date"
                     value={profileData.personalInfo.dateOfBirth}
-                    onChange={(e) => setProfileData(prev => ({
-                      ...prev,
-                      personalInfo: { ...prev.personalInfo, dateOfBirth: e.target.value }
-                    }))}
+                    onChange={(e) =>
+                      setProfileData((prev) => ({
+                        ...prev,
+                        personalInfo: { ...prev.personalInfo, dateOfBirth: e.target.value },
+                      }))
+                    }
                   />
                 </div>
                 <div>
                   <Label htmlFor="gender">Gender *</Label>
-                  <Select value={profileData.personalInfo.gender} onValueChange={(value) => 
-                    setProfileData(prev => ({
-                      ...prev,
-                      personalInfo: { ...prev.personalInfo, gender: value }
-                    }))
-                  }>
+                  <Select
+                    value={profileData.personalInfo.gender}
+                    onValueChange={(value) =>
+                      setProfileData((prev) => ({
+                        ...prev,
+                        personalInfo: { ...prev.personalInfo, gender: value },
+                      }))
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select gender" />
                     </SelectTrigger>
@@ -379,10 +427,15 @@ export default function AdminProfileCompletion({ user }: AdminProfileCompletionP
                   <Input
                     id="phone"
                     value={profileData.personalInfo.phone}
-                    onChange={(e) => setProfileData(prev => ({
-                      ...prev,
-                      personalInfo: { ...prev.personalInfo, phone: formatPhoneNumber(e.target.value) }
-                    }))}
+                    onChange={(e) =>
+                      setProfileData((prev) => ({
+                        ...prev,
+                        personalInfo: {
+                          ...prev.personalInfo,
+                          phone: formatPhoneNumber(e.target.value),
+                        },
+                      }))
+                    }
                     placeholder="+44 7XXX XXXXXX"
                   />
                 </div>
@@ -391,10 +444,15 @@ export default function AdminProfileCompletion({ user }: AdminProfileCompletionP
                   <Input
                     id="postcode"
                     value={profileData.personalInfo.postcode}
-                    onChange={(e) => setProfileData(prev => ({
-                      ...prev,
-                      personalInfo: { ...prev.personalInfo, postcode: formatPostcode(e.target.value) }
-                    }))}
+                    onChange={(e) =>
+                      setProfileData((prev) => ({
+                        ...prev,
+                        personalInfo: {
+                          ...prev.personalInfo,
+                          postcode: formatPostcode(e.target.value),
+                        },
+                      }))
+                    }
                     placeholder="SW1A 1AA"
                   />
                 </div>
@@ -407,18 +465,23 @@ export default function AdminProfileCompletion({ user }: AdminProfileCompletionP
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="department">Department *</Label>
-                  <Select value={profileData.adminInfo.department} onValueChange={(value) => 
-                    setProfileData(prev => ({
-                      ...prev,
-                      adminInfo: { ...prev.adminInfo, department: value }
-                    }))
-                  }>
+                  <Select
+                    value={profileData.adminInfo.department}
+                    onValueChange={(value) =>
+                      setProfileData((prev) => ({
+                        ...prev,
+                        adminInfo: { ...prev.adminInfo, department: value },
+                      }))
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select department" />
                     </SelectTrigger>
                     <SelectContent>
-                      {DEPARTMENTS.map(dept => (
-                        <SelectItem key={dept} value={dept}>{dept}</SelectItem>
+                      {DEPARTMENTS.map((dept) => (
+                        <SelectItem key={dept} value={dept}>
+                          {dept}
+                        </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -428,10 +491,12 @@ export default function AdminProfileCompletion({ user }: AdminProfileCompletionP
                   <Input
                     id="jobTitle"
                     value={profileData.adminInfo.jobTitle}
-                    onChange={(e) => setProfileData(prev => ({
-                      ...prev,
-                      adminInfo: { ...prev.adminInfo, jobTitle: e.target.value }
-                    }))}
+                    onChange={(e) =>
+                      setProfileData((prev) => ({
+                        ...prev,
+                        adminInfo: { ...prev.adminInfo, jobTitle: e.target.value },
+                      }))
+                    }
                     placeholder="e.g., Clinical Operations Manager"
                   />
                 </div>
@@ -443,10 +508,12 @@ export default function AdminProfileCompletion({ user }: AdminProfileCompletionP
                   <Input
                     id="employeeId"
                     value={profileData.adminInfo.employeeId}
-                    onChange={(e) => setProfileData(prev => ({
-                      ...prev,
-                      adminInfo: { ...prev.adminInfo, employeeId: e.target.value }
-                    }))}
+                    onChange={(e) =>
+                      setProfileData((prev) => ({
+                        ...prev,
+                        adminInfo: { ...prev.adminInfo, employeeId: e.target.value },
+                      }))
+                    }
                     placeholder="HW001"
                   />
                 </div>
@@ -456,10 +523,12 @@ export default function AdminProfileCompletion({ user }: AdminProfileCompletionP
                     id="startDate"
                     type="date"
                     value={profileData.adminInfo.startDate}
-                    onChange={(e) => setProfileData(prev => ({
-                      ...prev,
-                      adminInfo: { ...prev.adminInfo, startDate: e.target.value }
-                    }))}
+                    onChange={(e) =>
+                      setProfileData((prev) => ({
+                        ...prev,
+                        adminInfo: { ...prev.adminInfo, startDate: e.target.value },
+                      }))
+                    }
                   />
                 </div>
               </div>
@@ -473,18 +542,23 @@ export default function AdminProfileCompletion({ user }: AdminProfileCompletionP
                         id={responsibility}
                         checked={profileData.adminInfo.responsibilities.includes(responsibility)}
                         onCheckedChange={(checked) => {
-                          setProfileData(prev => ({
+                          setProfileData((prev) => ({
                             ...prev,
                             adminInfo: {
                               ...prev.adminInfo,
                               responsibilities: checked
                                 ? [...prev.adminInfo.responsibilities, responsibility]
-                                : prev.adminInfo.responsibilities.filter(r => r !== responsibility)
-                            }
+                                : prev.adminInfo.responsibilities.filter(
+                                    (r) => r !== responsibility
+                                  ),
+                            },
                           }));
                         }}
                       />
-                      <label htmlFor={responsibility} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                      <label
+                        htmlFor={responsibility}
+                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      >
                         {responsibility}
                       </label>
                     </div>
@@ -496,9 +570,9 @@ export default function AdminProfileCompletion({ user }: AdminProfileCompletionP
 
           {/* Navigation Buttons */}
           <div className="flex justify-between pt-6 border-t">
-            <Button 
+            <Button
               variant="outline"
-              onClick={() => setCurrentSection(prev => Math.max(0, prev - 1))}
+              onClick={() => setCurrentSection((prev) => Math.max(0, prev - 1))}
               disabled={currentSection === 0}
             >
               Previous
@@ -518,16 +592,22 @@ export default function AdminProfileCompletion({ user }: AdminProfileCompletionP
               {currentSection === sections.length - 1 ? (
                 <Button
                   onClick={handleCompleteProfile}
-                  disabled={saveProfileMutation.isPending || !profileData.privacy.dataProcessingConsent || 
-                           !profileData.privacy.adminStandardsConsent || !profileData.privacy.confidentialityAgreement || 
-                           !profileData.privacy.systemSecurityConsent}
+                  disabled={
+                    saveProfileMutation.isPending ||
+                    !profileData.privacy.dataProcessingConsent ||
+                    !profileData.privacy.adminStandardsConsent ||
+                    !profileData.privacy.confidentialityAgreement ||
+                    !profileData.privacy.systemSecurityConsent
+                  }
                   className="bg-hive-purple hover:bg-hive-purple/90"
                 >
                   Complete Profile
                 </Button>
               ) : (
                 <Button
-                  onClick={() => setCurrentSection(prev => Math.min(sections.length - 1, prev + 1))}
+                  onClick={() =>
+                    setCurrentSection((prev) => Math.min(sections.length - 1, prev + 1))
+                  }
                   className="bg-hive-purple hover:bg-hive-purple/90"
                 >
                   Next

@@ -22,45 +22,48 @@ export default function MessagingService({ user }: MessagingProps) {
       role: "therapist",
       lastMessage: "How are you feeling about our last session?",
       timestamp: "2 hours ago",
-      unread: 2
+      unread: 2,
     },
     {
-      id: "2", 
+      id: "2",
       name: "Wellness Team",
       role: "support",
       lastMessage: "Your appointment reminder for tomorrow",
       timestamp: "1 day ago",
-      unread: 0
-    }
+      unread: 0,
+    },
   ];
 
   const demoMessages = [
     {
       id: "1",
       sender: "Dr. Sarah Johnson",
-      content: "Hi! How are you feeling about our last session? Any thoughts or reflections you'd like to share?",
+      content:
+        "Hi! How are you feeling about our last session? Any thoughts or reflections you'd like to share?",
       timestamp: "2:30 PM",
-      isOwn: false
+      isOwn: false,
     },
     {
       id: "2",
       sender: "You",
-      content: "I've been thinking about what we discussed regarding mindfulness. I tried the breathing exercise you suggested.",
-      timestamp: "2:45 PM", 
-      isOwn: true
+      content:
+        "I've been thinking about what we discussed regarding mindfulness. I tried the breathing exercise you suggested.",
+      timestamp: "2:45 PM",
+      isOwn: true,
     },
     {
       id: "3",
       sender: "Dr. Sarah Johnson",
-      content: "That's wonderful! How did it feel? Did you notice any difference in your stress levels?",
+      content:
+        "That's wonderful! How did it feel? Did you notice any difference in your stress levels?",
       timestamp: "3:00 PM",
-      isOwn: false
-    }
+      isOwn: false,
+    },
   ];
 
   const sendMessage = () => {
     if (!messageText.trim()) return;
-    
+
     toast({
       title: "Message Sent",
       description: "Your message has been sent successfully.",
@@ -81,12 +84,11 @@ export default function MessagingService({ user }: MessagingProps) {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-display font-bold text-gray-900">Messaging</h1>
-          <p className="text-gray-600 font-body mt-2">Secure communication with your therapy team</p>
+          <p className="text-gray-600 font-body mt-2">
+            Secure communication with your therapy team
+          </p>
         </div>
-        <Button 
-          className="button-primary"
-          onClick={startNewConversation}
-        >
+        <Button className="button-primary" onClick={startNewConversation}>
           <MessageCircle className="w-4 h-4 mr-2" />
           New Message
         </Button>
@@ -106,8 +108,8 @@ export default function MessagingService({ user }: MessagingProps) {
                 onClick={() => setSelectedChat(conversation.id)}
                 className={`p-4 rounded-xl cursor-pointer transition-all ${
                   selectedChat === conversation.id
-                    ? 'bg-hive-purple/10 border border-hive-purple/30'
-                    : 'hover:bg-gray-50 border border-transparent'
+                    ? "bg-hive-purple/10 border border-hive-purple/30"
+                    : "hover:bg-gray-50 border border-transparent"
                 }`}
               >
                 <div className="flex items-center gap-3">
@@ -118,9 +120,7 @@ export default function MessagingService({ user }: MessagingProps) {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <h4 className="font-semibold text-gray-900 truncate">
-                        {conversation.name}
-                      </h4>
+                      <h4 className="font-semibold text-gray-900 truncate">{conversation.name}</h4>
                       {conversation.unread > 0 && (
                         <span className="bg-red-500 text-white text-xs rounded-full px-2 py-1 min-w-[20px] text-center">
                           {conversation.unread}
@@ -130,9 +130,7 @@ export default function MessagingService({ user }: MessagingProps) {
                     <p className="text-sm text-gray-600 truncate mt-1">
                       {conversation.lastMessage}
                     </p>
-                    <p className="text-xs text-gray-500 mt-1">
-                      {conversation.timestamp}
-                    </p>
+                    <p className="text-xs text-gray-500 mt-1">{conversation.timestamp}</p>
                   </div>
                 </div>
               </div>
@@ -162,22 +160,20 @@ export default function MessagingService({ user }: MessagingProps) {
                 {demoMessages.map((message) => (
                   <div
                     key={message.id}
-                    className={`flex ${message.isOwn ? 'justify-end' : 'justify-start'}`}
+                    className={`flex ${message.isOwn ? "justify-end" : "justify-start"}`}
                   >
-                    <div className={`max-w-sm ${message.isOwn ? 'order-2' : 'order-1'}`}>
+                    <div className={`max-w-sm ${message.isOwn ? "order-2" : "order-1"}`}>
                       <div className="text-xs text-gray-500 mb-1 px-1">
                         {message.sender} • {message.timestamp}
                       </div>
                       <div
                         className={`px-4 py-3 rounded-2xl ${
                           message.isOwn
-                            ? 'bg-hive-purple text-white rounded-br-md'
-                            : 'bg-gray-100 text-gray-900 rounded-bl-md'
+                            ? "bg-hive-purple text-white rounded-br-md"
+                            : "bg-gray-100 text-gray-900 rounded-bl-md"
                         }`}
                       >
-                        <p className="text-sm leading-relaxed">
-                          {message.content}
-                        </p>
+                        <p className="text-sm leading-relaxed">{message.content}</p>
                       </div>
                     </div>
                   </div>
@@ -217,7 +213,8 @@ export default function MessagingService({ user }: MessagingProps) {
                   Start a conversation
                 </h3>
                 <p className="text-gray-600 font-body mb-6 leading-relaxed">
-                  Select a conversation from the left panel to view messages, or click "New Message" to start communicating with your therapy team.
+                  Select a conversation from the left panel to view messages, or click "New Message"
+                  to start communicating with your therapy team.
                 </p>
                 <div className="bg-hive-purple/5 border border-hive-purple/20 rounded-lg p-4">
                   <h4 className="font-medium text-hive-purple mb-2">Secure messaging features:</h4>
@@ -242,7 +239,9 @@ export default function MessagingService({ user }: MessagingProps) {
               <MessageCircle className="w-6 h-6 text-hive-purple" />
             </div>
             <h3 className="font-display font-semibold text-gray-900 mb-2">Secure Messaging</h3>
-            <p className="text-sm text-gray-600 mb-4">GDPR & UK Data Protection compliant messaging with your therapy team</p>
+            <p className="text-sm text-gray-600 mb-4">
+              GDPR & UK Data Protection compliant messaging with your therapy team
+            </p>
           </CardContent>
         </Card>
 
@@ -252,7 +251,9 @@ export default function MessagingService({ user }: MessagingProps) {
               <Users className="w-6 h-6 text-green-600" />
             </div>
             <h3 className="font-display font-semibold text-gray-900 mb-2">24/7 Support</h3>
-            <p className="text-sm text-gray-600 mb-4">Get help when you need it from our wellness team</p>
+            <p className="text-sm text-gray-600 mb-4">
+              Get help when you need it from our wellness team
+            </p>
           </CardContent>
         </Card>
 
@@ -262,7 +263,9 @@ export default function MessagingService({ user }: MessagingProps) {
               <Send className="w-6 h-6 text-purple-600" />
             </div>
             <h3 className="font-display font-semibold text-gray-900 mb-2">Instant Delivery</h3>
-            <p className="text-sm text-gray-600 mb-4">Messages are delivered instantly and securely</p>
+            <p className="text-sm text-gray-600 mb-4">
+              Messages are delivered instantly and securely
+            </p>
           </CardContent>
         </Card>
       </div>

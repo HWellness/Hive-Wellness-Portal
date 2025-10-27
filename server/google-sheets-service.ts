@@ -1,5 +1,5 @@
-import { google } from 'googleapis';
-import { GmailService } from './gmail-service.js';
+import { google } from "googleapis";
+import { GmailService } from "./gmail-service.js";
 
 export interface FormResponse {
   id: string;
@@ -8,7 +8,7 @@ export interface FormResponse {
   timestamp: Date;
   ipAddress?: string;
   userAgent?: string;
-  status: 'pending' | 'processed' | 'archived';
+  status: "pending" | "processed" | "archived";
 }
 
 export interface SheetConfig {
@@ -19,49 +19,83 @@ export interface SheetConfig {
 }
 
 export class GoogleSheetsService {
-  private static sheets = google.sheets({ version: 'v4' });
-  
+  private static sheets = google.sheets({ version: "v4" });
+
   // Default sheet configurations for different form types
   private static sheetConfigs: Record<string, SheetConfig> = {
-    'introduction-call': {
-      spreadsheetId: '', // Will be set from environment
-      worksheetName: 'Introduction Calls',
+    "introduction-call": {
+      spreadsheetId: "", // Will be set from environment
+      worksheetName: "Introduction Calls",
       headers: [
-        'Timestamp', 'Full Name', 'Email', 'Phone', 'Preferred Date', 
-        'Preferred Time', 'Concerns', 'Therapy Type', 'Urgency', 
-        'Status', 'Booking ID', 'Source'
+        "Timestamp",
+        "Full Name",
+        "Email",
+        "Phone",
+        "Preferred Date",
+        "Preferred Time",
+        "Concerns",
+        "Therapy Type",
+        "Urgency",
+        "Status",
+        "Booking ID",
+        "Source",
       ],
-      formType: 'introduction-call'
+      formType: "introduction-call",
     },
-    'therapist-application': {
-      spreadsheetId: '',
-      worksheetName: 'Therapist Applications',
+    "therapist-application": {
+      spreadsheetId: "",
+      worksheetName: "Therapist Applications",
       headers: [
-        'Timestamp', 'First Name', 'Last Name', 'Email', 'Phone',
-        'Qualifications', 'Experience Years', 'Specializations',
-        'Hourly Rate', 'Availability', 'Status', 'Application ID'
+        "Timestamp",
+        "First Name",
+        "Last Name",
+        "Email",
+        "Phone",
+        "Qualifications",
+        "Experience Years",
+        "Specializations",
+        "Hourly Rate",
+        "Availability",
+        "Status",
+        "Application ID",
       ],
-      formType: 'therapist-application'
+      formType: "therapist-application",
     },
-    'client-intake': {
-      spreadsheetId: '',
-      worksheetName: 'Client Intake',
+    "client-intake": {
+      spreadsheetId: "",
+      worksheetName: "Client Intake",
       headers: [
-        'Timestamp', 'Full Name', 'Email', 'Phone', 'Age',
-        'Previous Therapy', 'Current Concerns', 'Preferred Therapist Gender',
-        'Session Preference', 'Emergency Contact', 'Status', 'Client ID'
+        "Timestamp",
+        "Full Name",
+        "Email",
+        "Phone",
+        "Age",
+        "Previous Therapy",
+        "Current Concerns",
+        "Preferred Therapist Gender",
+        "Session Preference",
+        "Emergency Contact",
+        "Status",
+        "Client ID",
       ],
-      formType: 'client-intake'
+      formType: "client-intake",
     },
-    'contact-form': {
-      spreadsheetId: '',
-      worksheetName: 'Contact Inquiries',
+    "contact-form": {
+      spreadsheetId: "",
+      worksheetName: "Contact Inquiries",
       headers: [
-        'Timestamp', 'Name', 'Email', 'Phone', 'Subject',
-        'Message', 'Inquiry Type', 'Status', 'Response Sent'
+        "Timestamp",
+        "Name",
+        "Email",
+        "Phone",
+        "Subject",
+        "Message",
+        "Inquiry Type",
+        "Status",
+        "Response Sent",
       ],
-      formType: 'contact-form'
-    }
+      formType: "contact-form",
+    },
   };
 
   /**
@@ -72,10 +106,10 @@ export class GoogleSheetsService {
       // Try to get authenticated client
       let auth;
       try {
-        auth = await GmailService['getAuthClient']();
+        auth = await GmailService["getAuthClient"]();
         this.sheets.context._options.auth = auth;
       } catch (authError) {
-        console.error('Google authentication failed for Sheets API:', authError);
+        console.error("Google authentication failed for Sheets API:", authError);
         // Return false but don't throw - this allows the frontend to show appropriate error
         return false;
       }
@@ -86,9 +120,11 @@ export class GoogleSheetsService {
       }
 
       // Use provided spreadsheet ID or environment variable
-      const sheetId = spreadsheetId || process.env.GOOGLE_SHEETS_ID || '';
+      const sheetId = spreadsheetId || process.env.GOOGLE_SHEETS_ID || "";
       if (!sheetId) {
-        console.error('No Google Sheets ID configured - please set GOOGLE_SHEETS_ID environment variable');
+        console.error(
+          "No Google Sheets ID configured - please set GOOGLE_SHEETS_ID environment variable"
+        );
         return false;
       }
 
@@ -96,11 +132,11 @@ export class GoogleSheetsService {
 
       // Check if worksheet exists, create if not
       const spreadsheet = await this.sheets.spreadsheets.get({
-        spreadsheetId: sheetId
+        spreadsheetId: sheetId,
       });
 
       const existingSheet = spreadsheet.data.sheets?.find(
-        sheet => sheet.properties?.title === config.worksheetName
+        (sheet) => sheet.properties?.title === config.worksheetName
       );
 
       if (!existingSheet) {
@@ -108,18 +144,20 @@ export class GoogleSheetsService {
         await this.sheets.spreadsheets.batchUpdate({
           spreadsheetId: sheetId,
           requestBody: {
-            requests: [{
-              addSheet: {
-                properties: {
-                  title: config.worksheetName,
-                  gridProperties: {
-                    rowCount: 1000,
-                    columnCount: config.headers.length
-                  }
-                }
-              }
-            }]
-          }
+            requests: [
+              {
+                addSheet: {
+                  properties: {
+                    title: config.worksheetName,
+                    gridProperties: {
+                      rowCount: 1000,
+                      columnCount: config.headers.length,
+                    },
+                  },
+                },
+              },
+            ],
+          },
         });
 
         console.log(`Created new worksheet: ${config.worksheetName}`);
@@ -129,54 +167,57 @@ export class GoogleSheetsService {
       await this.sheets.spreadsheets.values.update({
         spreadsheetId: sheetId,
         range: `${config.worksheetName}!A1:${String.fromCharCode(64 + config.headers.length)}1`,
-        valueInputOption: 'RAW',
+        valueInputOption: "RAW",
         requestBody: {
-          values: [config.headers]
-        }
+          values: [config.headers],
+        },
       });
 
       // Format headers (make them bold)
       await this.sheets.spreadsheets.batchUpdate({
         spreadsheetId: sheetId,
         requestBody: {
-          requests: [{
-            repeatCell: {
-              range: {
-                sheetId: existingSheet?.properties?.sheetId || 0,
-                startRowIndex: 0,
-                endRowIndex: 1,
-                startColumnIndex: 0,
-                endColumnIndex: config.headers.length
-              },
-              cell: {
-                userEnteredFormat: {
-                  textFormat: {
-                    bold: true
+          requests: [
+            {
+              repeatCell: {
+                range: {
+                  sheetId: existingSheet?.properties?.sheetId || 0,
+                  startRowIndex: 0,
+                  endRowIndex: 1,
+                  startColumnIndex: 0,
+                  endColumnIndex: config.headers.length,
+                },
+                cell: {
+                  userEnteredFormat: {
+                    textFormat: {
+                      bold: true,
+                    },
+                    backgroundColor: {
+                      red: 0.9,
+                      green: 0.9,
+                      blue: 0.9,
+                    },
                   },
-                  backgroundColor: {
-                    red: 0.9,
-                    green: 0.9,
-                    blue: 0.9
-                  }
-                }
+                },
+                fields: "userEnteredFormat(textFormat,backgroundColor)",
               },
-              fields: 'userEnteredFormat(textFormat,backgroundColor)'
-            }
-          }]
-        }
+            },
+          ],
+        },
       });
 
       console.log(`Initialized Google Sheet for ${formType}: ${config.worksheetName}`);
       return true;
-
     } catch (error) {
       console.error(`Failed to initialize sheet for ${formType}:`, error);
-      
+
       // Check if it's an authentication error
-      if (error.message?.includes('invalid_grant') || error.message?.includes('unauthorized')) {
-        console.error('Google OAuth token expired or invalid. Please re-authenticate in Google Cloud Console.');
+      if (error.message?.includes("invalid_grant") || error.message?.includes("unauthorized")) {
+        console.error(
+          "Google OAuth token expired or invalid. Please re-authenticate in Google Cloud Console."
+        );
       }
-      
+
       return false;
     }
   }
@@ -184,9 +225,12 @@ export class GoogleSheetsService {
   /**
    * Add form response to Google Sheet
    */
-  static async addFormResponse(formType: string, responseData: Record<string, any>): Promise<boolean> {
+  static async addFormResponse(
+    formType: string,
+    responseData: Record<string, any>
+  ): Promise<boolean> {
     try {
-      const auth = await GmailService['getAuthClient']();
+      const auth = await GmailService["getAuthClient"]();
       this.sheets.context._options.auth = auth;
 
       const config = this.sheetConfigs[formType];
@@ -197,75 +241,78 @@ export class GoogleSheetsService {
 
       // Prepare row data based on headers
       const rowData: any[] = [];
-      
-      config.headers.forEach(header => {
+
+      config.headers.forEach((header) => {
         switch (header) {
-          case 'Timestamp':
+          case "Timestamp":
             rowData.push(new Date().toISOString());
             break;
-          case 'Full Name':
-            rowData.push(responseData.fullName || `${responseData.firstName || ''} ${responseData.lastName || ''}`.trim());
+          case "Full Name":
+            rowData.push(
+              responseData.fullName ||
+                `${responseData.firstName || ""} ${responseData.lastName || ""}`.trim()
+            );
             break;
-          case 'First Name':
-            rowData.push(responseData.firstName || '');
+          case "First Name":
+            rowData.push(responseData.firstName || "");
             break;
-          case 'Last Name':
-            rowData.push(responseData.lastName || '');
+          case "Last Name":
+            rowData.push(responseData.lastName || "");
             break;
-          case 'Email':
-            rowData.push(responseData.email || '');
+          case "Email":
+            rowData.push(responseData.email || "");
             break;
-          case 'Phone':
-            rowData.push(responseData.phone || '');
+          case "Phone":
+            rowData.push(responseData.phone || "");
             break;
-          case 'Preferred Date':
-            rowData.push(responseData.preferredDate || '');
+          case "Preferred Date":
+            rowData.push(responseData.preferredDate || "");
             break;
-          case 'Preferred Time':
-            rowData.push(responseData.preferredTime || '');
+          case "Preferred Time":
+            rowData.push(responseData.preferredTime || "");
             break;
-          case 'Concerns':
-            rowData.push(responseData.concerns || responseData.message || '');
+          case "Concerns":
+            rowData.push(responseData.concerns || responseData.message || "");
             break;
-          case 'Therapy Type':
-            rowData.push(responseData.therapyType || '');
+          case "Therapy Type":
+            rowData.push(responseData.therapyType || "");
             break;
-          case 'Urgency':
-            rowData.push(responseData.urgency || 'medium');
+          case "Urgency":
+            rowData.push(responseData.urgency || "medium");
             break;
-          case 'Status':
-            rowData.push(responseData.status || 'pending');
+          case "Status":
+            rowData.push(responseData.status || "pending");
             break;
-          case 'Booking ID':
-            rowData.push(responseData.bookingId || responseData.id || '');
+          case "Booking ID":
+            rowData.push(responseData.bookingId || responseData.id || "");
             break;
-          case 'Application ID':
-            rowData.push(responseData.applicationId || responseData.id || '');
+          case "Application ID":
+            rowData.push(responseData.applicationId || responseData.id || "");
             break;
-          case 'Client ID':
-            rowData.push(responseData.clientId || responseData.id || '');
+          case "Client ID":
+            rowData.push(responseData.clientId || responseData.id || "");
             break;
-          case 'Source':
-            rowData.push(responseData.source || 'web-form');
+          case "Source":
+            rowData.push(responseData.source || "web-form");
             break;
-          case 'Subject':
-            rowData.push(responseData.subject || '');
+          case "Subject":
+            rowData.push(responseData.subject || "");
             break;
-          case 'Message':
-            rowData.push(responseData.message || '');
+          case "Message":
+            rowData.push(responseData.message || "");
             break;
-          case 'Inquiry Type':
-            rowData.push(responseData.inquiryType || 'general');
+          case "Inquiry Type":
+            rowData.push(responseData.inquiryType || "general");
             break;
-          case 'Response Sent':
-            rowData.push(responseData.responseSent ? 'Yes' : 'No');
+          case "Response Sent":
+            rowData.push(responseData.responseSent ? "Yes" : "No");
             break;
           default:
             // Try to match by key name (case insensitive)
-            const key = Object.keys(responseData).find(k => 
-              k.toLowerCase() === header.toLowerCase().replace(/\s+/g, '')
+            const key = Object.keys(responseData).find(
+              (k) => k.toLowerCase() === header.toLowerCase().replace(/\s+/g, "")
             );
-            rowData.push(key ? responseData[key] : '');
+            rowData.push(key ? responseData[key] : "");
         }
       });
 
@@ -273,16 +320,18 @@ export class GoogleSheetsService {
       await this.sheets.spreadsheets.values.append({
         spreadsheetId: config.spreadsheetId,
         range: `${config.worksheetName}!A:${String.fromCharCode(64 + config.headers.length)}`,
-        valueInputOption: 'RAW',
-        insertDataOption: 'INSERT_ROWS',
+        valueInputOption: "RAW",
+        insertDataOption: "INSERT_ROWS",
         requestBody: {
-          values: [rowData]
-        }
+          values: [rowData],
+        },
       });
 
-      console.log(`Added form response to ${config.worksheetName}:`, responseData.email || responseData.id);
+      console.log(
+        `Added form response to ${config.worksheetName}:`,
+        responseData.email || responseData.id
+      );
       return true;
-
     } catch (error) {
       console.error(`Failed to add form response to sheet:`, error);
       return false;
@@ -294,7 +343,7 @@ export class GoogleSheetsService {
    */
   static async getFormResponses(formType: string, limit?: number): Promise<any[]> {
     try {
-      const auth = await GmailService['getAuthClient']();
+      const auth = await GmailService["getAuthClient"]();
       this.sheets.context._options.auth = auth;
 
       const config = this.sheetConfigs[formType];
@@ -303,13 +352,13 @@ export class GoogleSheetsService {
         return [];
       }
 
-      const range = limit 
+      const range = limit
         ? `${config.worksheetName}!A1:${String.fromCharCode(64 + config.headers.length)}${limit + 1}`
         : `${config.worksheetName}!A:${String.fromCharCode(64 + config.headers.length)}`;
 
       const response = await this.sheets.spreadsheets.values.get({
         spreadsheetId: config.spreadsheetId,
-        range
+        range,
       });
 
       const rows = response.data.values || [];
@@ -318,14 +367,13 @@ export class GoogleSheetsService {
       const headers = rows[0];
       const dataRows = rows.slice(1);
 
-      return dataRows.map(row => {
+      return dataRows.map((row) => {
         const record: any = {};
         headers.forEach((header, index) => {
-          record[header] = row[index] || '';
+          record[header] = row[index] || "";
         });
         return record;
       });
-
     } catch (error) {
       console.error(`Failed to get form responses from sheet:`, error);
       return [];
@@ -335,9 +383,13 @@ export class GoogleSheetsService {
   /**
    * Update form response status in Google Sheet
    */
-  static async updateResponseStatus(formType: string, identifier: string, status: string): Promise<boolean> {
+  static async updateResponseStatus(
+    formType: string,
+    identifier: string,
+    status: string
+  ): Promise<boolean> {
     try {
-      const auth = await GmailService['getAuthClient']();
+      const auth = await GmailService["getAuthClient"]();
       this.sheets.context._options.auth = auth;
 
       const config = this.sheetConfigs[formType];
@@ -347,11 +399,12 @@ export class GoogleSheetsService {
 
       // Get all data to find the row
       const responses = await this.getFormResponses(formType);
-      const rowIndex = responses.findIndex(response => 
-        response['Email'] === identifier || 
-        response['Booking ID'] === identifier ||
-        response['Application ID'] === identifier ||
-        response['Client ID'] === identifier
+      const rowIndex = responses.findIndex(
+        (response) =>
+          response["Email"] === identifier ||
+          response["Booking ID"] === identifier ||
+          response["Application ID"] === identifier ||
+          response["Client ID"] === identifier
       );
 
       if (rowIndex === -1) {
@@ -359,29 +412,28 @@ export class GoogleSheetsService {
         return false;
       }
 
-      const statusColumnIndex = config.headers.indexOf('Status');
+      const statusColumnIndex = config.headers.indexOf("Status");
       if (statusColumnIndex === -1) {
-        console.error('Status column not found in sheet configuration');
+        console.error("Status column not found in sheet configuration");
         return false;
       }
 
       // Update the status (row index + 2 because of header row and 0-based index)
       const cellRange = `${config.worksheetName}!${String.fromCharCode(65 + statusColumnIndex)}${rowIndex + 2}`;
-      
+
       await this.sheets.spreadsheets.values.update({
         spreadsheetId: config.spreadsheetId,
         range: cellRange,
-        valueInputOption: 'RAW',
+        valueInputOption: "RAW",
         requestBody: {
-          values: [[status]]
-        }
+          values: [[status]],
+        },
       });
 
       console.log(`Updated status for ${identifier} to ${status}`);
       return true;
-
     } catch (error) {
-      console.error('Failed to update response status:', error);
+      console.error("Failed to update response status:", error);
       return false;
     }
   }
@@ -389,36 +441,37 @@ export class GoogleSheetsService {
   /**
    * Create a new Google Spreadsheet for form responses
    */
-  static async createFormSpreadsheet(title: string = 'Hive Wellness Form Responses'): Promise<string | null> {
+  static async createFormSpreadsheet(
+    title: string = "Hive Wellness Form Responses"
+  ): Promise<string | null> {
     try {
-      const auth = await GmailService['getAuthClient']();
+      const auth = await GmailService["getAuthClient"]();
       this.sheets.context._options.auth = auth;
 
       const response = await this.sheets.spreadsheets.create({
         requestBody: {
           properties: {
-            title
-          }
-        }
+            title,
+          },
+        },
       });
 
       const spreadsheetId = response.data.spreadsheetId;
-      
+
       if (spreadsheetId) {
         console.log(`Created new spreadsheet: ${title} (${spreadsheetId})`);
-        
+
         // Initialize all form types in this spreadsheet
         for (const formType of Object.keys(this.sheetConfigs)) {
           await this.initializeSheet(formType, spreadsheetId);
         }
-        
+
         return spreadsheetId;
       }
-      
-      return null;
 
+      return null;
     } catch (error) {
-      console.error('Failed to create spreadsheet:', error);
+      console.error("Failed to create spreadsheet:", error);
       return null;
     }
   }
@@ -440,10 +493,10 @@ export class GoogleSheetsService {
   /**
    * Add custom form type configuration
    */
-  static addCustomFormType(formType: string, config: Omit<SheetConfig, 'formType'>): void {
+  static addCustomFormType(formType: string, config: Omit<SheetConfig, "formType">): void {
     this.sheetConfigs[formType] = {
       ...config,
-      formType
+      formType,
     };
   }
 }

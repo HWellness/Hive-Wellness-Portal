@@ -5,7 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Eye, EyeOff, LogIn, Mail, Lock, AlertTriangle } from "lucide-react";
 import { useLocation, Link } from "wouter";
@@ -21,50 +27,50 @@ export default function TherapistLogin() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [showPasswordChangeModal, setShowPasswordChangeModal] = useState(false);
   const [passwordChangeData, setPasswordChangeData] = useState<any>(null);
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [isChangingPassword, setIsChangingPassword] = useState(false);
-  
+
   // Forgot Password state
   const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
-  const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
   const [isRequestingReset, setIsRequestingReset] = useState(false);
-  const [resetToken, setResetToken] = useState('');
-  const [resetUid, setResetUid] = useState('');
-  const [newPasswordForReset, setNewPasswordForReset] = useState('');
-  const [confirmPasswordForReset, setConfirmPasswordForReset] = useState('');
+  const [resetToken, setResetToken] = useState("");
+  const [resetUid, setResetUid] = useState("");
+  const [newPasswordForReset, setNewPasswordForReset] = useState("");
+  const [confirmPasswordForReset, setConfirmPasswordForReset] = useState("");
   const [isResettingPassword, setIsResettingPassword] = useState(false);
-  const [resetStep, setResetStep] = useState<'request' | 'confirm'>('request');
+  const [resetStep, setResetStep] = useState<"request" | "confirm">("request");
 
   // Check for reset token in URL on component mount
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const tokenFromUrl = urlParams.get('token');
-    const uidFromUrl = urlParams.get('uid');
-    
+    const tokenFromUrl = urlParams.get("token");
+    const uidFromUrl = urlParams.get("uid");
+
     if (tokenFromUrl && uidFromUrl) {
       // Auto-open reset password modal with token and uid
       setResetToken(tokenFromUrl);
       setResetUid(uidFromUrl);
       setShowForgotPasswordModal(true);
-      setResetStep('confirm');
-      
+      setResetStep("confirm");
+
       // Clean up URL to remove the token for security
-      window.history.replaceState({}, '', window.location.pathname);
+      window.history.replaceState({}, "", window.location.pathname);
     }
   }, []);
 
   // Performance: Remove debug logs for faster loading
 
-  // Redirect if already authenticated as therapist  
+  // Redirect if already authenticated as therapist
   useEffect(() => {
-    if (isAuthenticated && (user as any)?.role === 'therapist') {
-      setLocation('/portal');
+    if (isAuthenticated && (user as any)?.role === "therapist") {
+      setLocation("/portal");
     }
   }, [isAuthenticated, user, setLocation]);
 
   // Fast redirect without loading spinner for better performance
-  if (isAuthenticated && (user as any)?.role === 'therapist') {
+  if (isAuthenticated && (user as any)?.role === "therapist") {
     return null;
   }
 
@@ -73,12 +79,12 @@ export default function TherapistLogin() {
       await apiRequest("POST", "/api/auth/logout");
       // Clear all authentication data
       queryClient.clear();
-      window.location.href = '/';
+      window.location.href = "/";
     } catch (error) {
       console.error("Logout error:", error);
       // Force logout even if API fails
       queryClient.clear();
-      window.location.href = '/';
+      window.location.href = "/";
     }
   };
 
@@ -89,40 +95,39 @@ export default function TherapistLogin() {
     try {
       const response = await apiRequest("POST", "/api/auth/login", { email, password });
       const result = await response.json();
-      
+
       if (!response.ok) {
-        throw new Error(result.message || 'Invalid email or password');
+        throw new Error(result.message || "Invalid email or password");
       }
-      
+
       // Check if MFA is required
       if (result.requiresMfa) {
         toast({
           title: "MFA Required",
           description: "Please complete multi-factor authentication.",
         });
-        setLocation('/mfa-verify');
+        setLocation("/mfa-verify");
         return;
       }
-      
+
       // Check if password change is required
       if (result.forcePasswordChange) {
         setPasswordChangeData(result);
         setShowPasswordChangeModal(true);
         return;
       }
-      
-      // Force immediate cache update and invalidation  
-      await queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
-      queryClient.setQueryData(['/api/auth/user'], result.user);
-      
+
+      // Force immediate cache update and invalidation
+      await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      queryClient.setQueryData(["/api/auth/user"], result.user);
+
       toast({
-        title: "Login Successful", 
+        title: "Login Successful",
         description: "Welcome to your therapist dashboard.",
       });
-      
+
       // Immediate redirect - let React Query handle the state update
-      setLocation('/portal');
-      
+      setLocation("/portal");
     } catch (error: any) {
       console.error("Login error:", error);
       toast({
@@ -137,7 +142,7 @@ export default function TherapistLogin() {
 
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (newPassword !== confirmPassword) {
       toast({
         title: "Password Mismatch",
@@ -146,7 +151,7 @@ export default function TherapistLogin() {
       });
       return;
     }
-    
+
     if (newPassword.length < 8) {
       toast({
         title: "Password Too Short",
@@ -155,50 +160,49 @@ export default function TherapistLogin() {
       });
       return;
     }
-    
+
     setIsChangingPassword(true);
-    
+
     try {
       const response = await apiRequest("POST", "/api/auth/change-password", {
         userId: passwordChangeData.id,
-        newPassword: newPassword
+        newPassword: newPassword,
       });
-      
+
       const result = await response.json();
-      
+
       if (!response.ok) {
-        throw new Error(result.message || 'Failed to change password');
+        throw new Error(result.message || "Failed to change password");
       }
-      
+
       // Check if MFA is required
       if (result.requiresMfa) {
         toast({
           title: "MFA Required",
           description: "Please complete multi-factor authentication.",
         });
-        setLocation('/mfa-verify');
+        setLocation("/mfa-verify");
         return;
       }
-      
+
       // Password changed successfully, user is now logged in
-      await queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
-      queryClient.setQueryData(['/api/auth/user'], result.user);
-      
+      await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      queryClient.setQueryData(["/api/auth/user"], result.user);
+
       toast({
         title: "Password Changed",
         description: "Your password has been updated successfully. Welcome!",
       });
-      
+
       // Clear forms and close modal
-      setNewPassword('');
-      setConfirmPassword('');
-      setPassword('');
+      setNewPassword("");
+      setConfirmPassword("");
+      setPassword("");
       setShowPasswordChangeModal(false);
       setPasswordChangeData(null);
-      
+
       // Redirect to portal
-      setLocation('/portal');
-      
+      setLocation("/portal");
     } catch (error: any) {
       console.error("Password change error:", error);
       toast({
@@ -224,17 +228,17 @@ export default function TherapistLogin() {
     setIsRequestingReset(true);
     try {
       const response = await apiRequest("POST", "/api/auth/reset-password", {
-        email: forgotPasswordEmail
+        email: forgotPasswordEmail,
       });
 
       const data = await response.json();
-      
+
       if (response.ok) {
         toast({
           title: "Reset instructions sent",
           description: data.message,
         });
-        
+
         // Success - user should check their email and click the reset link
         // Note: In production, users will click the link in their email which contains the real token
       } else {
@@ -289,25 +293,25 @@ export default function TherapistLogin() {
       const response = await apiRequest("POST", "/api/auth/confirm-password-reset", {
         token: resetToken,
         uid: resetUid,
-        newPassword: newPasswordForReset
+        newPassword: newPasswordForReset,
       });
 
       const data = await response.json();
-      
+
       if (response.ok) {
         toast({
           title: "Password reset successful",
           description: data.message || "Your password has been updated. You can now log in.",
         });
-        
+
         // Close modal and reset form
         setShowForgotPasswordModal(false);
-        setForgotPasswordEmail('');
-        setResetToken('');
-        setResetUid('');
-        setNewPasswordForReset('');
-        setConfirmPasswordForReset('');
-        setResetStep('request');
+        setForgotPasswordEmail("");
+        setResetToken("");
+        setResetUid("");
+        setNewPasswordForReset("");
+        setConfirmPasswordForReset("");
+        setResetStep("request");
       } else {
         toast({
           title: "Password reset failed",
@@ -327,18 +331,13 @@ export default function TherapistLogin() {
     }
   };
 
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Header with Horizontal Logo */}
         <div className="text-center mb-8">
           <div className="flex justify-center items-center">
-            <img 
-              src={hiveWellnessLogo}
-              alt="Hive Wellness"
-              className="h-96 w-auto mx-auto"
-            />
+            <img src={hiveWellnessLogo} alt="Hive Wellness" className="h-96 w-auto mx-auto" />
           </div>
           <h1 className="text-4xl font-century font-bold text-hive-purple mb-3 tracking-tight -mt-20">
             Therapist Portal
@@ -359,7 +358,10 @@ export default function TherapistLogin() {
             <form onSubmit={handleLogin} className="space-y-4">
               {/* Email Field */}
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-sm font-secondary font-semibold text-hive-black">
+                <Label
+                  htmlFor="email"
+                  className="text-sm font-secondary font-semibold text-hive-black"
+                >
                   Email Address
                 </Label>
                 <div className="relative">
@@ -378,7 +380,10 @@ export default function TherapistLogin() {
 
               {/* Password Field */}
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-sm font-secondary font-semibold text-hive-black">
+                <Label
+                  htmlFor="password"
+                  className="text-sm font-secondary font-semibold text-hive-black"
+                >
                   Password
                 </Label>
                 <div className="relative">
@@ -440,8 +445,15 @@ export default function TherapistLogin() {
                   Completed your therapist questionnaire but don't have login credentials yet?
                 </p>
                 <p className="text-xs font-secondary text-hive-black/60">
-                  Our admin team will create your account and send you login details once your application is approved.
-                  Check your email for updates or contact <a href="mailto:support@hive-wellness.co.uk" className="text-hive-purple underline">support@hive-wellness.co.uk</a> for assistance.
+                  Our admin team will create your account and send you login details once your
+                  application is approved. Check your email for updates or contact{" "}
+                  <a
+                    href="mailto:support@hive-wellness.co.uk"
+                    className="text-hive-purple underline"
+                  >
+                    support@hive-wellness.co.uk
+                  </a>{" "}
+                  for assistance.
                 </p>
               </div>
             </div>
@@ -449,8 +461,8 @@ export default function TherapistLogin() {
             {/* Footer Links */}
             <div className="mt-6 text-center space-y-2">
               <div className="flex justify-center">
-                <a 
-                  href="https://hive-wellness.co.uk/" 
+                <a
+                  href="https://hive-wellness.co.uk/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-sm text-hive-purple hover:text-hive-purple/80 font-secondary"
@@ -459,12 +471,14 @@ export default function TherapistLogin() {
                 </a>
               </div>
               <div className="text-xs text-hive-gray">
-                Need help? Contact <a href="mailto:support@hive-wellness.co.uk" className="text-hive-purple">support@hive-wellness.co.uk</a>
+                Need help? Contact{" "}
+                <a href="mailto:support@hive-wellness.co.uk" className="text-hive-purple">
+                  support@hive-wellness.co.uk
+                </a>
               </div>
             </div>
           </CardContent>
         </Card>
-
 
         {/* Additional Info */}
         <div className="mt-6 text-center">
@@ -475,7 +489,10 @@ export default function TherapistLogin() {
       </div>
 
       {/* Password Change Modal */}
-      <Dialog open={showPasswordChangeModal} onOpenChange={(open) => !open && setShowPasswordChangeModal(false)}>
+      <Dialog
+        open={showPasswordChangeModal}
+        onOpenChange={(open) => !open && setShowPasswordChangeModal(false)}
+      >
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-hive-purple flex items-center gap-2">
@@ -486,10 +503,11 @@ export default function TherapistLogin() {
           <div className="space-y-4">
             <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
               <p className="text-sm text-amber-800">
-                <strong>Security Notice:</strong> You must change your temporary password before accessing your account.
+                <strong>Security Notice:</strong> You must change your temporary password before
+                accessing your account.
               </p>
             </div>
-            
+
             <form onSubmit={handlePasswordChange} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="newPassword">New Password</Label>
@@ -517,7 +535,7 @@ export default function TherapistLogin() {
                   </button>
                 </div>
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="confirmPassword">Confirm New Password</Label>
                 <Input
@@ -530,7 +548,7 @@ export default function TherapistLogin() {
                   disabled={isChangingPassword}
                 />
               </div>
-              
+
               <div className="flex gap-3 justify-end pt-2">
                 <Button
                   type="button"
@@ -538,8 +556,8 @@ export default function TherapistLogin() {
                   onClick={() => {
                     setShowPasswordChangeModal(false);
                     setPasswordChangeData(null);
-                    setNewPassword('');
-                    setConfirmPassword('');
+                    setNewPassword("");
+                    setConfirmPassword("");
                   }}
                   disabled={isChangingPassword}
                 >
@@ -556,7 +574,7 @@ export default function TherapistLogin() {
                       Changing...
                     </>
                   ) : (
-                    'Change Password'
+                    "Change Password"
                   )}
                 </Button>
               </div>
@@ -570,21 +588,23 @@ export default function TherapistLogin() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="font-century text-hive-black">
-              {resetStep === 'request' ? 'Forgot Password' : 'Reset Your Password'}
+              {resetStep === "request" ? "Forgot Password" : "Reset Your Password"}
             </DialogTitle>
             <DialogDescription className="font-secondary text-hive-black/70">
-              {resetStep === 'request' 
+              {resetStep === "request"
                 ? "Enter your email address and we'll send you instructions to reset your password."
-                : "Enter your new password."
-              }
+                : "Enter your new password."}
             </DialogDescription>
           </DialogHeader>
-          
+
           <div className="space-y-4">
-            {resetStep === 'request' ? (
+            {resetStep === "request" ? (
               <>
                 <div className="space-y-2">
-                  <Label htmlFor="forgotPasswordEmail" className="font-secondary font-semibold text-hive-black">
+                  <Label
+                    htmlFor="forgotPasswordEmail"
+                    className="font-secondary font-semibold text-hive-black"
+                  >
                     Email Address
                   </Label>
                   <div className="relative">
@@ -601,15 +621,15 @@ export default function TherapistLogin() {
                     />
                   </div>
                 </div>
-                
+
                 <div className="flex gap-3 justify-end pt-2">
                   <Button
                     type="button"
                     variant="outline"
                     onClick={() => {
                       setShowForgotPasswordModal(false);
-                      setForgotPasswordEmail('');
-                      setResetStep('request');
+                      setForgotPasswordEmail("");
+                      setResetStep("request");
                     }}
                     disabled={isRequestingReset}
                   >
@@ -627,7 +647,7 @@ export default function TherapistLogin() {
                         Sending...
                       </>
                     ) : (
-                      'Send Reset Instructions'
+                      "Send Reset Instructions"
                     )}
                   </Button>
                 </div>
@@ -635,7 +655,10 @@ export default function TherapistLogin() {
             ) : (
               <>
                 <div className="space-y-2">
-                  <Label htmlFor="newPasswordForReset" className="font-secondary font-semibold text-hive-black">
+                  <Label
+                    htmlFor="newPasswordForReset"
+                    className="font-secondary font-semibold text-hive-black"
+                  >
                     New Password
                   </Label>
                   <div className="relative">
@@ -660,9 +683,12 @@ export default function TherapistLogin() {
                     </button>
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
-                  <Label htmlFor="confirmPasswordForReset" className="font-secondary font-semibold text-hive-black">
+                  <Label
+                    htmlFor="confirmPasswordForReset"
+                    className="font-secondary font-semibold text-hive-black"
+                  >
                     Confirm New Password
                   </Label>
                   <Input
@@ -676,16 +702,16 @@ export default function TherapistLogin() {
                     disabled={isResettingPassword}
                   />
                 </div>
-                
+
                 <div className="flex gap-3 justify-end pt-2">
                   <Button
                     type="button"
                     variant="outline"
                     onClick={() => {
-                      setResetStep('request');
-                      setResetToken('');
-                      setNewPasswordForReset('');
-                      setConfirmPasswordForReset('');
+                      setResetStep("request");
+                      setResetToken("");
+                      setNewPasswordForReset("");
+                      setConfirmPasswordForReset("");
                     }}
                     disabled={isResettingPassword}
                   >
@@ -694,7 +720,9 @@ export default function TherapistLogin() {
                   <Button
                     type="button"
                     onClick={handleConfirmPasswordReset}
-                    disabled={isResettingPassword || !newPasswordForReset || !confirmPasswordForReset}
+                    disabled={
+                      isResettingPassword || !newPasswordForReset || !confirmPasswordForReset
+                    }
                     className="bg-hive-purple hover:bg-hive-purple/90"
                   >
                     {isResettingPassword ? (
@@ -703,7 +731,7 @@ export default function TherapistLogin() {
                         Resetting...
                       </>
                     ) : (
-                      'Reset Password'
+                      "Reset Password"
                     )}
                   </Button>
                 </div>

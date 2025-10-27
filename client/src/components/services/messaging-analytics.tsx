@@ -5,14 +5,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import type { User } from "@shared/schema";
 import { useQuery } from "@tanstack/react-query";
-import { 
-  MessageSquare, 
-  Mail, 
-  Smartphone, 
-  TrendingUp, 
-  Users, 
-  Clock, 
-  CheckCircle, 
+import {
+  MessageSquare,
+  Mail,
+  Smartphone,
+  TrendingUp,
+  Users,
+  Clock,
+  CheckCircle,
   XCircle,
   AlertCircle,
   BarChart3,
@@ -20,9 +20,15 @@ import {
   Calendar,
   Filter,
   Download,
-  RefreshCw
+  RefreshCw,
 } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface MessagingStats {
   sms: {
@@ -56,11 +62,11 @@ interface MessagingStats {
 
 interface MessageActivity {
   id: string;
-  type: 'sms' | 'whatsapp' | 'email';
+  type: "sms" | "whatsapp" | "email";
   recipient: string;
   subject?: string;
   content: string;
-  status: 'sent' | 'delivered' | 'read' | 'failed' | 'pending' | 'opened';
+  status: "sent" | "delivered" | "read" | "failed" | "pending" | "opened";
   timestamp: string;
   campaign?: string;
   cost?: number;
@@ -75,8 +81,8 @@ export default function MessagingAnalytics({ user }: MessagingAnalyticsProps) {
   const [selectedType, setSelectedType] = useState("all");
 
   // Admin-only access control
-  const isAdmin = user?.role === 'admin';
-  
+  const isAdmin = user?.role === "admin";
+
   if (!isAdmin) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -104,13 +110,13 @@ export default function MessagingAnalytics({ user }: MessagingAnalyticsProps) {
       delivered: 0,
       failed: 0,
       pending: 0,
-      totalCost: 0.00
+      totalCost: 0.0,
     },
     whatsapp: {
       sent: 0,
       delivered: 0,
       read: 0,
-      failed: 0
+      failed: 0,
     },
     email: {
       sent: 0,
@@ -118,44 +124,44 @@ export default function MessagingAnalytics({ user }: MessagingAnalyticsProps) {
       opened: 0,
       clicked: 0,
       bounced: 0,
-      spam: 0
+      spam: 0,
     },
     total: {
       messages: 0,
       users: 0,
       campaigns: 0,
-      automationRules: 0
-    }
+      automationRules: 0,
+    },
   };
 
   const mockActivity: MessageActivity[] = [];
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'delivered':
-      case 'sent':
-        return 'bg-green-500';
-      case 'read':
-      case 'opened':
-        return 'bg-blue-500';
-      case 'failed':
-      case 'bounced':
-      case 'spam':
-        return 'bg-red-500';
-      case 'pending':
-        return 'bg-yellow-500';
+      case "delivered":
+      case "sent":
+        return "bg-green-500";
+      case "read":
+      case "opened":
+        return "bg-blue-500";
+      case "failed":
+      case "bounced":
+      case "spam":
+        return "bg-red-500";
+      case "pending":
+        return "bg-yellow-500";
       default:
-        return 'bg-gray-500';
+        return "bg-gray-500";
     }
   };
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case 'sms':
+      case "sms":
         return <Smartphone className="h-4 w-4" />;
-      case 'whatsapp':
+      case "whatsapp":
         return <MessageSquare className="h-4 w-4" />;
-      case 'email':
+      case "email":
         return <Mail className="h-4 w-4" />;
       default:
         return <MessageSquare className="h-4 w-4" />;
@@ -203,9 +209,7 @@ export default function MessagingAnalytics({ user }: MessagingAnalyticsProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{mockStats.total.messages.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">
-              +0% from last period
-            </p>
+            <p className="text-xs text-muted-foreground">+0% from last period</p>
           </CardContent>
         </Card>
 
@@ -216,9 +220,7 @@ export default function MessagingAnalytics({ user }: MessagingAnalyticsProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{mockStats.total.users.toLocaleString()}</div>
-            <p className="text-xs text-muted-foreground">
-              +0% from last period
-            </p>
+            <p className="text-xs text-muted-foreground">+0% from last period</p>
           </CardContent>
         </Card>
 
@@ -229,9 +231,7 @@ export default function MessagingAnalytics({ user }: MessagingAnalyticsProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">£{mockStats.sms.totalCost.toFixed(2)}</div>
-            <p className="text-xs text-muted-foreground">
-              {mockStats.sms.sent} messages sent
-            </p>
+            <p className="text-xs text-muted-foreground">{mockStats.sms.sent} messages sent</p>
           </CardContent>
         </Card>
 
@@ -242,9 +242,7 @@ export default function MessagingAnalytics({ user }: MessagingAnalyticsProps) {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">0%</div>
-            <p className="text-xs text-muted-foreground">
-              Across all channels
-            </p>
+            <p className="text-xs text-muted-foreground">Across all channels</p>
           </CardContent>
         </Card>
       </div>
@@ -310,7 +308,9 @@ export default function MessagingAnalytics({ user }: MessagingAnalyticsProps) {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Delivered</span>
-                  <span className="font-semibold text-green-600">{mockStats.whatsapp.delivered}</span>
+                  <span className="font-semibold text-green-600">
+                    {mockStats.whatsapp.delivered}
+                  </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm text-gray-600">Read</span>
@@ -323,7 +323,9 @@ export default function MessagingAnalytics({ user }: MessagingAnalyticsProps) {
                 <div className="pt-2 border-t">
                   <div className="flex justify-between">
                     <span className="text-sm font-medium">Read Rate</span>
-                    <span className="font-bold">{((mockStats.whatsapp.read / mockStats.whatsapp.delivered) * 100).toFixed(1)}%</span>
+                    <span className="font-bold">
+                      {((mockStats.whatsapp.read / mockStats.whatsapp.delivered) * 100).toFixed(1)}%
+                    </span>
                   </div>
                 </div>
               </CardContent>
@@ -357,7 +359,9 @@ export default function MessagingAnalytics({ user }: MessagingAnalyticsProps) {
                 <div className="pt-2 border-t">
                   <div className="flex justify-between">
                     <span className="text-sm font-medium">Open Rate</span>
-                    <span className="font-bold">{((mockStats.email.opened / mockStats.email.delivered) * 100).toFixed(1)}%</span>
+                    <span className="font-bold">
+                      {((mockStats.email.opened / mockStats.email.delivered) * 100).toFixed(1)}%
+                    </span>
                   </div>
                 </div>
               </CardContent>
@@ -375,17 +379,18 @@ export default function MessagingAnalytics({ user }: MessagingAnalyticsProps) {
               <div className="space-y-4">
                 {mockActivity.length > 0 ? (
                   mockActivity.map((activity) => (
-                    <div key={activity.id} className="flex items-start space-x-4 p-4 border rounded-lg">
-                      <div className="flex-shrink-0">
-                        {getTypeIcon(activity.type)}
-                      </div>
+                    <div
+                      key={activity.id}
+                      className="flex items-start space-x-4 p-4 border rounded-lg"
+                    >
+                      <div className="flex-shrink-0">{getTypeIcon(activity.type)}</div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
-                          <p className="text-sm font-medium text-gray-900">
-                            {activity.recipient}
-                          </p>
+                          <p className="text-sm font-medium text-gray-900">{activity.recipient}</p>
                           <div className="flex items-center space-x-2">
-                            <Badge variant={activity.status === 'failed' ? 'destructive' : 'secondary'}>
+                            <Badge
+                              variant={activity.status === "failed" ? "destructive" : "secondary"}
+                            >
                               {activity.status}
                             </Badge>
                             <span className="text-xs text-gray-500">
@@ -398,9 +403,7 @@ export default function MessagingAnalytics({ user }: MessagingAnalyticsProps) {
                             {activity.subject}
                           </p>
                         )}
-                        <p className="text-sm text-gray-500 mt-1 truncate">
-                          {activity.content}
-                        </p>
+                        <p className="text-sm text-gray-500 mt-1 truncate">{activity.content}</p>
                         <div className="flex items-center justify-between mt-2">
                           <div className="flex items-center space-x-4 text-xs text-gray-500">
                             <span className="capitalize">{activity.type}</span>
@@ -415,7 +418,9 @@ export default function MessagingAnalytics({ user }: MessagingAnalyticsProps) {
                   <div className="text-center py-8">
                     <MessageSquare className="h-12 w-12 text-gray-300 mx-auto mb-4" />
                     <p className="text-gray-500">No messaging activity yet</p>
-                    <p className="text-sm text-gray-400">Messages sent through the platform will appear here</p>
+                    <p className="text-sm text-gray-400">
+                      Messages sent through the platform will appear here
+                    </p>
                   </div>
                 )}
               </div>
@@ -433,8 +438,12 @@ export default function MessagingAnalytics({ user }: MessagingAnalyticsProps) {
             <CardContent>
               <div className="text-center py-8">
                 <BarChart3 className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500">Detailed SMS analytics charts would be displayed here</p>
-                <p className="text-sm text-gray-400 mt-2">Including delivery rates, cost analysis, and usage trends</p>
+                <p className="text-gray-500">
+                  Detailed SMS analytics charts would be displayed here
+                </p>
+                <p className="text-sm text-gray-400 mt-2">
+                  Including delivery rates, cost analysis, and usage trends
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -444,13 +453,19 @@ export default function MessagingAnalytics({ user }: MessagingAnalyticsProps) {
           <Card>
             <CardHeader>
               <CardTitle>WhatsApp Analytics Dashboard</CardTitle>
-              <CardDescription>Detailed WhatsApp messaging statistics and engagement</CardDescription>
+              <CardDescription>
+                Detailed WhatsApp messaging statistics and engagement
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="text-center py-8">
                 <PieChart className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500">Detailed WhatsApp analytics charts would be displayed here</p>
-                <p className="text-sm text-gray-400 mt-2">Including read rates, response times, and user engagement</p>
+                <p className="text-gray-500">
+                  Detailed WhatsApp analytics charts would be displayed here
+                </p>
+                <p className="text-sm text-gray-400 mt-2">
+                  Including read rates, response times, and user engagement
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -465,8 +480,12 @@ export default function MessagingAnalytics({ user }: MessagingAnalyticsProps) {
             <CardContent>
               <div className="text-center py-8">
                 <TrendingUp className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-                <p className="text-gray-500">Detailed email analytics charts would be displayed here</p>
-                <p className="text-sm text-gray-400 mt-2">Including open rates, click-through rates, and campaign performance</p>
+                <p className="text-gray-500">
+                  Detailed email analytics charts would be displayed here
+                </p>
+                <p className="text-sm text-gray-400 mt-2">
+                  Including open rates, click-through rates, and campaign performance
+                </p>
               </div>
             </CardContent>
           </Card>

@@ -1,8 +1,13 @@
-import twilio, { Twilio } from 'twilio';
-import { db } from '../db.js';
-import { notifications, twilioWebhooks, userCommunicationPreferences, optOutLogs } from '../../shared/schema.js';
-import { eq, and } from 'drizzle-orm';
-import { nanoid } from 'nanoid';
+import twilio, { Twilio } from "twilio";
+import { db } from "../db.js";
+import {
+  notifications,
+  twilioWebhooks,
+  userCommunicationPreferences,
+  optOutLogs,
+} from "../../shared/schema.js";
+import { eq, and } from "drizzle-orm";
+import { nanoid } from "nanoid";
 
 export interface TwilioConfig {
   accountSid: string;
@@ -14,7 +19,7 @@ export interface TwilioConfig {
 export interface SendMessageOptions {
   to: string;
   body: string;
-  channel: 'sms' | 'whatsapp';
+  channel: "sms" | "whatsapp";
   userId?: string;
   templateId?: string;
   appointmentId?: string;
@@ -26,7 +31,7 @@ export interface MessageResponse {
   messageSid?: string;
   error?: string;
   fallbackUsed?: boolean;
-  channel: 'sms' | 'whatsapp';
+  channel: "sms" | "whatsapp";
 }
 
 export class TwilioService {
@@ -46,7 +51,9 @@ export class TwilioService {
       const whatsappNumber = process.env.TWILIO_WHATSAPP_NUMBER || fromNumber;
 
       if (!accountSid || !authToken || !fromNumber) {
-        console.warn('Twilio credentials not configured. SMS and WhatsApp services will be disabled.');
+        console.warn(
+          "Twilio credentials not configured. SMS and WhatsApp services will be disabled."
+        );
         return;
       }
 
@@ -59,9 +66,9 @@ export class TwilioService {
 
       this.client = twilio(accountSid, authToken);
       this.initialized = true;
-      console.log('Twilio service initialized successfully');
+      console.log("Twilio service initialized successfully");
     } catch (error) {
-      console.error('Failed to initialize Twilio service:', error);
+      console.error("Failed to initialize Twilio service:", error);
     }
   }
 
@@ -69,7 +76,7 @@ export class TwilioService {
     if (!this.initialized || !this.client || !this.config) {
       return {
         success: false,
-        error: 'Twilio service not initialized',
+        error: "Twilio service not initialized",
         channel: options.channel,
       };
     }
@@ -81,7 +88,7 @@ export class TwilioService {
         if (hasOptedOut) {
           return {
             success: false,
-            error: 'User has opted out of this communication channel',
+            error: "User has opted out of this communication channel",
             channel: options.channel,
           };
         }
@@ -89,29 +96,29 @@ export class TwilioService {
 
       // Format phone number for international use
       const formattedNumber = this.formatPhoneNumber(options.to);
-      
+
       // Determine from number based on channel
-      const fromNumber = options.channel === 'whatsapp' 
-        ? `whatsapp:${this.config.whatsappNumber}`
-        : this.config.fromNumber;
-      
-      const toNumber = options.channel === 'whatsapp' 
-        ? `whatsapp:${formattedNumber}`
-        : formattedNumber;
+      const fromNumber =
+        options.channel === "whatsapp"
+          ? `whatsapp:${this.config.whatsappNumber}`
+          : this.config.fromNumber;
+
+      const toNumber =
+        options.channel === "whatsapp" ? `whatsapp:${formattedNumber}` : formattedNumber;
 
       // Create notification record
       const notificationId = nanoid();
       await db.insert(notifications).values({
         id: notificationId,
-        userId: options.userId || 'system',
+        userId: options.userId || "system",
         channel: options.channel,
-        type: 'custom',
+        type: "custom",
         templateId: options.templateId,
         recipient: options.to,
         message: options.body,
-        status: 'pending',
+        status: "pending",
         appointmentId: options.appointmentId,
-        sentBy: 'system',
+        sentBy: "system",
         createdAt: new Date(),
       });
 
@@ -120,13 +127,14 @@ export class TwilioService {
         body: options.body,
         from: fromNumber,
         to: toNumber,
-        statusCallback: `${process.env.BASE_URL || 'https://localhost:5000'}/api/twilio/webhook`,
+        statusCallback: `${process.env.BASE_URL || "https://localhost:5000"}/api/twilio/webhook`,
       });
 
       // Update notification with success status
-      await db.update(notifications)
+      await db
+        .update(notifications)
         .set({
-          status: 'sent',
+          status: "sent",
           sentAt: new Date(),
           metadata: {
             messageSid: message.sid,
@@ -142,30 +150,29 @@ export class TwilioService {
         messageSid: message.sid,
         channel: options.channel,
       };
-
     } catch (error: any) {
       console.error(`Failed to send ${options.channel} message:`, error);
 
       // Update notification with error status
       if (options.userId) {
-        await db.update(notifications)
+        await db
+          .update(notifications)
           .set({
-            status: 'failed',
+            status: "failed",
             errorMessage: error.message,
             updatedAt: new Date(),
           })
-          .where(and(
-            eq(notifications.userId, options.userId),
-            eq(notifications.message, options.body)
-          ));
+          .where(
+            and(eq(notifications.userId, options.userId), eq(notifications.message, options.body))
+          );
       }
 
       // Try fallback to SMS if WhatsApp fails
-      if (options.channel === 'whatsapp' && options.fallbackToSms) {
-        console.log('WhatsApp failed, attempting SMS fallback...');
+      if (options.channel === "whatsapp" && options.fallbackToSms) {
+        console.log("WhatsApp failed, attempting SMS fallback...");
         const fallbackResult = await this.sendMessage({
           ...options,
-          channel: 'sms',
+          channel: "sms",
           fallbackToSms: false, // Prevent infinite recursion
         });
 
@@ -185,9 +192,13 @@ export class TwilioService {
     }
   }
 
-  async sendBulkMessage(recipients: string[], message: string, channel: 'sms' | 'whatsapp'): Promise<MessageResponse[]> {
+  async sendBulkMessage(
+    recipients: string[],
+    message: string,
+    channel: "sms" | "whatsapp"
+  ): Promise<MessageResponse[]> {
     const results: MessageResponse[] = [];
-    
+
     for (const recipient of recipients) {
       const result = await this.sendMessage({
         to: recipient,
@@ -195,11 +206,11 @@ export class TwilioService {
         channel,
       });
       results.push(result);
-      
+
       // Add delay between messages to respect rate limits
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
     }
-    
+
     return results;
   }
 
@@ -245,14 +256,15 @@ export class TwilioService {
       });
 
       if (notification) {
-        let status = 'sent';
-        if (MessageStatus === 'delivered') status = 'delivered';
-        if (MessageStatus === 'failed' || MessageStatus === 'undelivered') status = 'failed';
+        let status = "sent";
+        if (MessageStatus === "delivered") status = "delivered";
+        if (MessageStatus === "failed" || MessageStatus === "undelivered") status = "failed";
 
-        await db.update(notifications)
+        await db
+          .update(notifications)
           .set({
             status: status as any,
-            deliveredAt: MessageStatus === 'delivered' ? new Date() : null,
+            deliveredAt: MessageStatus === "delivered" ? new Date() : null,
             errorMessage: ErrorMessage,
             updatedAt: new Date(),
           })
@@ -260,16 +272,18 @@ export class TwilioService {
       }
 
       // Handle opt-out requests
-      if (Body && (Body.toLowerCase().includes('stop') || Body.toLowerCase().includes('unsubscribe'))) {
-        await this.handleOptOut(From, Body, 'sms_reply');
+      if (
+        Body &&
+        (Body.toLowerCase().includes("stop") || Body.toLowerCase().includes("unsubscribe"))
+      ) {
+        await this.handleOptOut(From, Body, "sms_reply");
       }
-
     } catch (error) {
-      console.error('Error processing Twilio webhook:', error);
+      console.error("Error processing Twilio webhook:", error);
     }
   }
 
-  private async checkOptOutStatus(userId: string, channel: 'sms' | 'whatsapp'): Promise<boolean> {
+  private async checkOptOutStatus(userId: string, channel: "sms" | "whatsapp"): Promise<boolean> {
     try {
       const preferences = await db.query.userCommunicationPreferences.findFirst({
         where: (prefs, { eq }) => eq(prefs.userId, userId),
@@ -277,21 +291,23 @@ export class TwilioService {
 
       if (!preferences) return false;
 
-      return channel === 'sms' ? preferences.smsOptOut : preferences.whatsappOptOut;
+      return channel === "sms" ? preferences.smsOptOut : preferences.whatsappOptOut;
     } catch (error) {
-      console.error('Error checking opt-out status:', error);
+      console.error("Error checking opt-out status:", error);
       return false;
     }
   }
 
-  private async handleOptOut(phoneNumber: string, originalMessage: string, method: string): Promise<void> {
+  private async handleOptOut(
+    phoneNumber: string,
+    originalMessage: string,
+    method: string
+  ): Promise<void> {
     try {
       // Find user by phone number
       const preferences = await db.query.userCommunicationPreferences.findFirst({
-        where: (prefs, { or, eq }) => or(
-          eq(prefs.phoneNumber, phoneNumber),
-          eq(prefs.whatsappNumber, phoneNumber)
-        ),
+        where: (prefs, { or, eq }) =>
+          or(eq(prefs.phoneNumber, phoneNumber), eq(prefs.whatsappNumber, phoneNumber)),
       });
 
       if (!preferences) {
@@ -300,12 +316,13 @@ export class TwilioService {
       }
 
       // Determine channel based on phone number format
-      const channel = phoneNumber.includes('whatsapp:') ? 'whatsapp' : 'sms';
+      const channel = phoneNumber.includes("whatsapp:") ? "whatsapp" : "sms";
 
       // Update preferences
-      await db.update(userCommunicationPreferences)
+      await db
+        .update(userCommunicationPreferences)
         .set({
-          [channel === 'sms' ? 'smsOptOut' : 'whatsappOptOut']: true,
+          [channel === "sms" ? "smsOptOut" : "whatsappOptOut"]: true,
           lastOptOutDate: new Date(),
           updatedAt: new Date(),
         })
@@ -316,7 +333,7 @@ export class TwilioService {
         id: nanoid(),
         userId: preferences.userId,
         channel,
-        action: 'opt_out',
+        action: "opt_out",
         method: method as any,
         originalMessage,
         createdAt: new Date(),
@@ -324,25 +341,25 @@ export class TwilioService {
 
       console.log(`User ${preferences.userId} opted out of ${channel} notifications`);
     } catch (error) {
-      console.error('Error handling opt-out:', error);
+      console.error("Error handling opt-out:", error);
     }
   }
 
   private formatPhoneNumber(phoneNumber: string): string {
-    // Remove any non-digit characters except + 
-    let formatted = phoneNumber.replace(/[^\d+]/g, '');
-    
+    // Remove any non-digit characters except +
+    let formatted = phoneNumber.replace(/[^\d+]/g, "");
+
     // Add + if not present and doesn't start with country code
-    if (!formatted.startsWith('+')) {
-      formatted = '+' + formatted;
+    if (!formatted.startsWith("+")) {
+      formatted = "+" + formatted;
     }
-    
+
     return formatted;
   }
 
   async getDeliveryStatus(messageSid: string): Promise<any> {
     if (!this.client) {
-      throw new Error('Twilio client not initialized');
+      throw new Error("Twilio client not initialized");
     }
 
     try {
@@ -360,7 +377,7 @@ export class TwilioService {
         dateSent: message.dateSent,
       };
     } catch (error) {
-      console.error('Error fetching message status:', error);
+      console.error("Error fetching message status:", error);
       throw error;
     }
   }

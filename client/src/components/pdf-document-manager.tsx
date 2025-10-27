@@ -1,29 +1,35 @@
-import { useState, useRef } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useToast } from '@/hooks/use-toast';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient';
-import { 
-  Upload, 
-  FileText, 
-  Download, 
-  Eye, 
-  Trash2, 
-  CheckCircle, 
+import { useState, useRef } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useToast } from "@/hooks/use-toast";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import {
+  Upload,
+  FileText,
+  Download,
+  Eye,
+  Trash2,
+  CheckCircle,
   AlertCircle,
   Shield,
   Users,
-  User
-} from 'lucide-react';
-import { useAuth } from '@/hooks/use-auth';
+  User,
+} from "lucide-react";
+import { useAuth } from "@/hooks/use-auth";
 
 interface PDFDocumentManagerProps {
-  userRole: 'admin' | 'therapist' | 'client';
+  userRole: "admin" | "therapist" | "client";
 }
 
 export function PDFDocumentManager({ userRole }: PDFDocumentManagerProps) {
@@ -31,113 +37,111 @@ export function PDFDocumentManager({ userRole }: PDFDocumentManagerProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [documentType, setDocumentType] = useState('');
+  const [documentType, setDocumentType] = useState("");
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
 
   // Document type configurations
   const documentTypes = {
     therapist_info_pack: {
-      label: 'Therapist Information Pack',
-      description: 'Comprehensive guide for therapists joining Hive Wellness',
-      accessLevel: 'therapist_only',
+      label: "Therapist Information Pack",
+      description: "Comprehensive guide for therapists joining Hive Wellness",
+      accessLevel: "therapist_only",
       icon: User,
-      allowedRoles: ['admin'],
+      allowedRoles: ["admin"],
     },
     therapist_safeguarding_pack: {
-      label: 'Therapist Safeguarding Pack',
-      description: 'Essential safeguarding policies and procedures',
-      accessLevel: 'therapist_only',
+      label: "Therapist Safeguarding Pack",
+      description: "Essential safeguarding policies and procedures",
+      accessLevel: "therapist_only",
       icon: Shield,
-      allowedRoles: ['admin'],
+      allowedRoles: ["admin"],
     },
     client_info_pack: {
-      label: 'Client Information Pack',
-      description: 'Information pack for new Hive Wellness clients',
-      accessLevel: 'client_only',
+      label: "Client Information Pack",
+      description: "Information pack for new Hive Wellness clients",
+      accessLevel: "client_only",
       icon: Users,
-      allowedRoles: ['admin'],
+      allowedRoles: ["admin"],
     },
   };
 
   // Get available documents based on user role
   const getAvailableDocumentTypes = () => {
-    if (userRole === 'admin') {
+    if (userRole === "admin") {
       return Object.entries(documentTypes);
-    } else if (userRole === 'therapist') {
-      return Object.entries(documentTypes).filter(([key]) => 
-        key === 'therapist_info_pack' || key === 'therapist_safeguarding_pack'
+    } else if (userRole === "therapist") {
+      return Object.entries(documentTypes).filter(
+        ([key]) => key === "therapist_info_pack" || key === "therapist_safeguarding_pack"
       );
-    } else if (userRole === 'client') {
-      return Object.entries(documentTypes).filter(([key]) => 
-        key === 'client_info_pack'
-      );
+    } else if (userRole === "client") {
+      return Object.entries(documentTypes).filter(([key]) => key === "client_info_pack");
     }
     return [];
   };
 
   // Fetch existing documents
   const { data: documents, isLoading } = useQuery({
-    queryKey: ['/api/documents/pdf', userRole],
+    queryKey: ["/api/documents/pdf", userRole],
     queryFn: async () => {
-      const response = await apiRequest('GET', `/api/documents/pdf?role=${userRole}`);
+      const response = await apiRequest("GET", `/api/documents/pdf?role=${userRole}`);
       return response.json();
     },
   });
 
   // Upload document mutation
   const uploadMutation = useMutation({
-    mutationFn: async ({ file, type }: { file: File, type: string }) => {
+    mutationFn: async ({ file, type }: { file: File; type: string }) => {
       setIsUploading(true);
       setUploadProgress(0);
 
       // Get upload URL
-      const uploadResponse = await apiRequest('POST', '/api/objects/upload');
+      const uploadResponse = await apiRequest("POST", "/api/objects/upload");
       const { uploadURL } = await uploadResponse.json();
 
       // Upload file to object storage
       const uploadFormData = new FormData();
-      uploadFormData.append('file', file);
+      uploadFormData.append("file", file);
 
       const xhr = new XMLHttpRequest();
-      
+
       return new Promise((resolve, reject) => {
-        xhr.upload.addEventListener('progress', (e) => {
+        xhr.upload.addEventListener("progress", (e) => {
           if (e.lengthComputable) {
             const progress = (e.loaded / e.total) * 100;
             setUploadProgress(progress);
           }
         });
 
-        xhr.addEventListener('load', async () => {
+        xhr.addEventListener("load", async () => {
           if (xhr.status === 200) {
             try {
               // Register document metadata
-              const metadataResponse = await apiRequest('POST', '/api/documents/pdf/register', {
+              const metadataResponse = await apiRequest("POST", "/api/documents/pdf/register", {
                 documentType: type,
                 fileName: file.name,
                 fileSize: file.size,
                 mimeType: file.type,
                 uploadUrl: uploadURL,
               });
-              
+
               const result = await metadataResponse.json();
               resolve(result);
             } catch (error) {
               reject(error);
             }
           } else {
-            reject(new Error('Upload failed'));
+            reject(new Error("Upload failed"));
           }
         });
 
-        xhr.addEventListener('error', () => {
-          reject(new Error('Upload failed'));
+        xhr.addEventListener("error", () => {
+          reject(new Error("Upload failed"));
         });
 
-        xhr.open('PUT', uploadURL);
+        xhr.open("PUT", uploadURL);
         xhr.send(file);
       });
     },
@@ -147,12 +151,12 @@ export function PDFDocumentManager({ userRole }: PDFDocumentManagerProps) {
         description: "The PDF document has been uploaded and is now available for download.",
       });
       setSelectedFile(null);
-      setDocumentType('');
+      setDocumentType("");
       setUploadProgress(0);
       setIsUploading(false);
-      
+
       // Invalidate and refetch documents
-      queryClient.invalidateQueries({ queryKey: ['/api/documents/pdf'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/documents/pdf"] });
     },
     onError: (error: any) => {
       toast({
@@ -168,7 +172,7 @@ export function PDFDocumentManager({ userRole }: PDFDocumentManagerProps) {
   // Delete document mutation
   const deleteMutation = useMutation({
     mutationFn: async (documentId: string) => {
-      const response = await apiRequest('DELETE', `/api/documents/pdf/${documentId}`);
+      const response = await apiRequest("DELETE", `/api/documents/pdf/${documentId}`);
       return response.json();
     },
     onSuccess: () => {
@@ -176,7 +180,7 @@ export function PDFDocumentManager({ userRole }: PDFDocumentManagerProps) {
         title: "Document Deleted",
         description: "The document has been removed successfully.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/documents/pdf'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/documents/pdf"] });
     },
     onError: (error: any) => {
       toast({
@@ -190,7 +194,7 @@ export function PDFDocumentManager({ userRole }: PDFDocumentManagerProps) {
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      if (file.type !== 'application/pdf') {
+      if (file.type !== "application/pdf") {
         toast({
           title: "Invalid File Type",
           description: "Please select a PDF file only.",
@@ -198,8 +202,9 @@ export function PDFDocumentManager({ userRole }: PDFDocumentManagerProps) {
         });
         return;
       }
-      
-      if (file.size > 10 * 1024 * 1024) { // 10MB limit
+
+      if (file.size > 10 * 1024 * 1024) {
+        // 10MB limit
         toast({
           title: "File Too Large",
           description: "Please select a file smaller than 10MB.",
@@ -207,7 +212,7 @@ export function PDFDocumentManager({ userRole }: PDFDocumentManagerProps) {
         });
         return;
       }
-      
+
       setSelectedFile(file);
     }
   };
@@ -227,12 +232,12 @@ export function PDFDocumentManager({ userRole }: PDFDocumentManagerProps) {
 
   const downloadDocument = async (documentId: string, fileName: string) => {
     try {
-      const response = await apiRequest('GET', `/api/documents/pdf/${documentId}/download`);
+      const response = await apiRequest("GET", `/api/documents/pdf/${documentId}/download`);
       const blob = await response.blob();
-      
+
       // Create download link
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
+      const a = document.createElement("a");
       a.href = url;
       a.download = fileName;
       document.body.appendChild(a);
@@ -250,7 +255,7 @@ export function PDFDocumentManager({ userRole }: PDFDocumentManagerProps) {
 
   const previewDocument = (documentId: string) => {
     const previewUrl = `/api/documents/pdf/${documentId}/view`;
-    window.open(previewUrl, '_blank');
+    window.open(previewUrl, "_blank");
   };
 
   return (
@@ -267,8 +272,8 @@ export function PDFDocumentManager({ userRole }: PDFDocumentManagerProps) {
           <Alert>
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>
-              <strong>Critical Launch Requirement:</strong> This system manages the three essential 
-              PDF documents required for the Hive Wellness platform: Therapist Information Pack, 
+              <strong>Critical Launch Requirement:</strong> This system manages the three essential
+              PDF documents required for the Hive Wellness platform: Therapist Information Pack,
               Therapist Safeguarding Pack, and Client Information Pack.
             </AlertDescription>
           </Alert>
@@ -276,7 +281,7 @@ export function PDFDocumentManager({ userRole }: PDFDocumentManagerProps) {
       </Card>
 
       {/* Upload Section (Admin Only) */}
-      {userRole === 'admin' && (
+      {userRole === "admin" && (
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -317,11 +322,13 @@ export function PDFDocumentManager({ userRole }: PDFDocumentManagerProps) {
             {selectedFile && (
               <div className="bg-blue-50 p-3 rounded-lg">
                 <p className="text-sm">
-                  <strong>Selected:</strong> {selectedFile.name} ({(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
+                  <strong>Selected:</strong> {selectedFile.name} (
+                  {(selectedFile.size / 1024 / 1024).toFixed(2)} MB)
                 </p>
                 {documentType && (
                   <p className="text-sm text-blue-700 mt-1">
-                    <strong>Type:</strong> {documentTypes[documentType as keyof typeof documentTypes]?.label}
+                    <strong>Type:</strong>{" "}
+                    {documentTypes[documentType as keyof typeof documentTypes]?.label}
                   </p>
                 )}
               </div>
@@ -334,7 +341,7 @@ export function PDFDocumentManager({ userRole }: PDFDocumentManagerProps) {
                   <span>{Math.round(uploadProgress)}%</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
-                  <div 
+                  <div
                     className="bg-purple-600 h-2 rounded-full transition-all duration-300"
                     style={{ width: `${uploadProgress}%` }}
                   />
@@ -372,7 +379,7 @@ export function PDFDocumentManager({ userRole }: PDFDocumentManagerProps) {
               {documents.map((doc: any) => {
                 const config = documentTypes[doc.documentType as keyof typeof documentTypes];
                 const IconComponent = config?.icon || FileText;
-                
+
                 return (
                   <div
                     key={doc.id}
@@ -384,19 +391,15 @@ export function PDFDocumentManager({ userRole }: PDFDocumentManagerProps) {
                         <h3 className="font-semibold">{config?.label}</h3>
                         <p className="text-sm text-gray-600">{config?.description}</p>
                         <p className="text-xs text-gray-500">
-                          Uploaded: {new Date(doc.createdAt).toLocaleDateString()} | 
-                          Size: {(doc.fileSize / 1024 / 1024).toFixed(2)} MB |
-                          Downloads: {doc.downloadCount}
+                          Uploaded: {new Date(doc.createdAt).toLocaleDateString()} | Size:{" "}
+                          {(doc.fileSize / 1024 / 1024).toFixed(2)} MB | Downloads:{" "}
+                          {doc.downloadCount}
                         </p>
                       </div>
                     </div>
 
                     <div className="flex space-x-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => previewDocument(doc.id)}
-                      >
+                      <Button variant="outline" size="sm" onClick={() => previewDocument(doc.id)}>
                         <Eye className="w-4 h-4" />
                       </Button>
                       <Button
@@ -406,7 +409,7 @@ export function PDFDocumentManager({ userRole }: PDFDocumentManagerProps) {
                       >
                         <Download className="w-4 h-4" />
                       </Button>
-                      {userRole === 'admin' && (
+                      {userRole === "admin" && (
                         <Button
                           variant="outline"
                           size="sm"
@@ -426,10 +429,9 @@ export function PDFDocumentManager({ userRole }: PDFDocumentManagerProps) {
               <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-gray-600 mb-2">No Documents Available</h3>
               <p className="text-gray-500">
-                {userRole === 'admin' 
+                {userRole === "admin"
                   ? "Upload your first document using the form above."
-                  : "Documents will appear here when they're uploaded by the admin team."
-                }
+                  : "Documents will appear here when they're uploaded by the admin team."}
               </p>
             </div>
           )}
@@ -453,7 +455,7 @@ export function PDFDocumentManager({ userRole }: PDFDocumentManagerProps) {
                   </div>
                   <p className="text-sm text-purple-800 mb-2">{config.description}</p>
                   <div className="text-xs text-purple-700">
-                    <strong>Access Level:</strong> {config.accessLevel.replace('_', ' ')}
+                    <strong>Access Level:</strong> {config.accessLevel.replace("_", " ")}
                   </div>
                 </div>
               );

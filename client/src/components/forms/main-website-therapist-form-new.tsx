@@ -8,9 +8,22 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { User, CheckCircle } from "lucide-react";
@@ -24,11 +37,15 @@ const therapistEnquirySchema = z.object({
   phone: z.string().min(10, "Please enter a valid phone number"),
   location: z.string().min(2, "Current location is required"),
   religion: z.string().min(1, "Religion field is required"),
-  hasLimitedCompany: z.enum(["yes", "no"], { required_error: "Please indicate if you have a registered limited company" }),
+  hasLimitedCompany: z.enum(["yes", "no"], {
+    required_error: "Please indicate if you have a registered limited company",
+  }),
   highestQualification: z.string().min(1, "Highest qualification is required"),
   professionalBody: z.string().min(1, "Professional body registration is required"),
   therapySpecialisations: z.array(z.string()).min(1, "Please select at least one specialisation"),
-  personalityDescription: z.string().min(50, "Please provide at least 50 characters describing your personality as a therapist"),
+  personalityDescription: z
+    .string()
+    .min(50, "Please provide at least 50 characters describing your personality as a therapist"),
   professionalBio: z.string().min(50, "Please provide a professional bio (minimum 50 characters)"),
 });
 
@@ -37,7 +54,7 @@ type TherapistEnquiryData = z.infer<typeof therapistEnquirySchema>;
 // Specializations matching the main website exactly
 const therapySpecialisations = [
   "Anxiety and Depression",
-  "Trauma and PTSD", 
+  "Trauma and PTSD",
   "Relationship Counselling",
   "Family Therapy",
   "Cognitive Behavioural Therapy (CBT)",
@@ -50,7 +67,7 @@ const therapySpecialisations = [
   "Couples Therapy",
   "Career Counselling",
   "Stress Management",
-  "Other"
+  "Other",
 ];
 
 export default function MainWebsiteTherapistForm() {
@@ -81,18 +98,21 @@ export default function MainWebsiteTherapistForm() {
 
   // Check for existing application when email changes
   const watchedEmail = form.watch("email");
-  
+
   const checkExistingApplication = async (email: string) => {
-    if (!email || !email.includes('@')) return;
-    
+    if (!email || !email.includes("@")) return;
+
     setIsLoading(true);
     try {
-      const response = await apiRequest("GET", `/api/therapist-applications/check/${encodeURIComponent(email)}`);
+      const response = await apiRequest(
+        "GET",
+        `/api/therapist-applications/check/${encodeURIComponent(email)}`
+      );
       const result = await response.json();
-      
+
       if (result.exists && result.application) {
         setExistingApplication(result.application);
-        
+
         // Pre-populate form with existing data
         form.reset({
           firstName: result.application.firstName || "",
@@ -108,7 +128,7 @@ export default function MainWebsiteTherapistForm() {
           personalityDescription: result.application.personalityDescription || "",
           professionalBio: result.application.professionalBio || "",
         });
-        
+
         toast({
           title: "Application Found",
           description: "We found your previous application and have pre-filled the form.",
@@ -127,7 +147,7 @@ export default function MainWebsiteTherapistForm() {
   // Debounced email check
   React.useEffect(() => {
     const timeoutId = setTimeout(() => {
-      if (watchedEmail && watchedEmail.includes('@')) {
+      if (watchedEmail && watchedEmail.includes("@")) {
         checkExistingApplication(watchedEmail);
       }
     }, 1000);
@@ -137,7 +157,7 @@ export default function MainWebsiteTherapistForm() {
 
   const onSubmit = async (data: TherapistEnquiryData) => {
     setIsSubmitting(true);
-    
+
     try {
       // Ensure all required fields are included with proper naming
       const submissionData = {
@@ -145,16 +165,16 @@ export default function MainWebsiteTherapistForm() {
         therapySpecialisations: data.therapySpecialisations || [],
         areasOfSpecialism: data.therapySpecialisations || [], // Legacy compatibility
       };
-      
+
       const response = await apiRequest("POST", "/api/therapist/enquiry", submissionData);
       const result = await response.json();
-      
+
       if (result.success) {
         toast({
           title: "Application Submitted Successfully!",
           description: "Thank you for your interest. We'll be in touch within 2 business days.",
         });
-        
+
         setIsSubmitted(true);
         setSubmittedEnquiry(result);
       } else {
@@ -162,7 +182,7 @@ export default function MainWebsiteTherapistForm() {
       }
     } catch (error: any) {
       console.error("Submission error:", error);
-      
+
       // Handle duplicate application error
       if (error.status === 409) {
         toast({
@@ -173,7 +193,8 @@ export default function MainWebsiteTherapistForm() {
       } else {
         toast({
           title: "Submission Failed",
-          description: error.message || "There was an error submitting your application. Please try again.",
+          description:
+            error.message || "There was an error submitting your application. Please try again.",
           variant: "destructive",
         });
       }
@@ -183,11 +204,14 @@ export default function MainWebsiteTherapistForm() {
   };
 
   const handleSpecialisationChange = (value: string, checked: boolean) => {
-    const currentValues = form.getValues('therapySpecialisations');
+    const currentValues = form.getValues("therapySpecialisations");
     if (checked) {
-      form.setValue('therapySpecialisations', [...currentValues, value]);
+      form.setValue("therapySpecialisations", [...currentValues, value]);
     } else {
-      form.setValue('therapySpecialisations', currentValues.filter(v => v !== value));
+      form.setValue(
+        "therapySpecialisations",
+        currentValues.filter((v) => v !== value)
+      );
     }
   };
 
@@ -200,10 +224,12 @@ export default function MainWebsiteTherapistForm() {
               <div className="w-12 h-12 bg-hive-purple rounded-full flex items-center justify-center mx-auto mb-4">
                 <CheckCircle className="w-6 h-6 text-white" />
               </div>
-              <h1 className="text-2xl font-semibold text-gray-900 mb-2">Application Submitted Successfully!</h1>
+              <h1 className="text-2xl font-semibold text-gray-900 mb-2">
+                Application Submitted Successfully!
+              </h1>
               <p className="text-gray-600">Thank you for your interest in joining Hive Wellness</p>
             </div>
-            
+
             <div className="space-y-4 mb-8">
               <div className="flex items-start space-x-3">
                 <div className="w-6 h-6 bg-hive-purple/10 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
@@ -211,7 +237,9 @@ export default function MainWebsiteTherapistForm() {
                 </div>
                 <div>
                   <h4 className="font-medium text-gray-900">Application Review</h4>
-                  <p className="text-gray-600 text-sm">Our team will review your application within 2 business days</p>
+                  <p className="text-gray-600 text-sm">
+                    Our team will review your application within 2 business days
+                  </p>
                 </div>
               </div>
               <div className="flex items-start space-x-3">
@@ -220,12 +248,14 @@ export default function MainWebsiteTherapistForm() {
                 </div>
                 <div>
                   <h4 className="font-medium text-gray-900">Introduction Call</h4>
-                  <p className="text-gray-600 text-sm">If approved, we'll schedule a brief introduction call</p>
+                  <p className="text-gray-600 text-sm">
+                    If approved, we'll schedule a brief introduction call
+                  </p>
                 </div>
               </div>
             </div>
-            
-            <IntroductionCallBooking 
+
+            <IntroductionCallBooking
               enquiryId={submittedEnquiry.id}
               therapistEmail={submittedEnquiry.email}
               therapistName={`${submittedEnquiry.firstName} ${submittedEnquiry.lastName}`}
@@ -250,7 +280,7 @@ export default function MainWebsiteTherapistForm() {
               <p className="text-gray-600">Help clients find their perfect therapeutic match</p>
             </div>
           </div>
-          
+
           {/* Existing Application Alert */}
           {existingApplication && (
             <div className="mx-6 -mt-2 mb-6">
@@ -262,23 +292,24 @@ export default function MainWebsiteTherapistForm() {
                   <div>
                     <h4 className="font-medium text-blue-900">Previous Application Found</h4>
                     <p className="text-blue-700 text-sm">
-                      Submitted on {new Date(existingApplication.submittedAt).toLocaleDateString('en-GB')}. 
-                      Status: <span className="font-medium capitalize">{existingApplication.status}</span>
+                      Submitted on{" "}
+                      {new Date(existingApplication.submittedAt).toLocaleDateString("en-GB")}.
+                      Status:{" "}
+                      <span className="font-medium capitalize">{existingApplication.status}</span>
                     </p>
                   </div>
                 </div>
               </div>
             </div>
           )}
-          
+
           <div className="p-6">
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-                
                 {/* Personal Information */}
                 <div className="space-y-6">
                   <h2 className="text-lg font-semibold text-gray-900">Personal Information</h2>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
@@ -299,7 +330,7 @@ export default function MainWebsiteTherapistForm() {
                         </FormItem>
                       )}
                     />
-                    
+
                     <FormField
                       control={form.control}
                       name="lastName"
@@ -320,7 +351,7 @@ export default function MainWebsiteTherapistForm() {
                       )}
                     />
                   </div>
-                  
+
                   <FormField
                     control={form.control}
                     name="email"
@@ -362,7 +393,7 @@ export default function MainWebsiteTherapistForm() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="location"
@@ -392,10 +423,14 @@ export default function MainWebsiteTherapistForm() {
                             <SelectItem value="Coventry, England">Coventry, England</SelectItem>
                             <SelectItem value="Hull, England">Hull, England</SelectItem>
                             <SelectItem value="Plymouth, England">Plymouth, England</SelectItem>
-                            <SelectItem value="Stoke-on-Trent, England">Stoke-on-Trent, England</SelectItem>
+                            <SelectItem value="Stoke-on-Trent, England">
+                              Stoke-on-Trent, England
+                            </SelectItem>
                             <SelectItem value="Derby, England">Derby, England</SelectItem>
                             <SelectItem value="Portsmouth, England">Portsmouth, England</SelectItem>
-                            <SelectItem value="Southampton, England">Southampton, England</SelectItem>
+                            <SelectItem value="Southampton, England">
+                              Southampton, England
+                            </SelectItem>
                             <SelectItem value="Reading, England">Reading, England</SelectItem>
                             <SelectItem value="Oxford, England">Oxford, England</SelectItem>
                             <SelectItem value="Cambridge, England">Cambridge, England</SelectItem>
@@ -414,17 +449,25 @@ export default function MainWebsiteTherapistForm() {
                             <SelectItem value="Newport, Wales">Newport, Wales</SelectItem>
                             <SelectItem value="Wrexham, Wales">Wrexham, Wales</SelectItem>
                             <SelectItem value="Bangor, Wales">Bangor, Wales</SelectItem>
-                            <SelectItem value="Belfast, Northern Ireland">Belfast, Northern Ireland</SelectItem>
-                            <SelectItem value="Derry/Londonderry, Northern Ireland">Derry/Londonderry, Northern Ireland</SelectItem>
-                            <SelectItem value="Lisburn, Northern Ireland">Lisburn, Northern Ireland</SelectItem>
-                            <SelectItem value="Newry, Northern Ireland">Newry, Northern Ireland</SelectItem>
+                            <SelectItem value="Belfast, Northern Ireland">
+                              Belfast, Northern Ireland
+                            </SelectItem>
+                            <SelectItem value="Derry/Londonderry, Northern Ireland">
+                              Derry/Londonderry, Northern Ireland
+                            </SelectItem>
+                            <SelectItem value="Lisburn, Northern Ireland">
+                              Lisburn, Northern Ireland
+                            </SelectItem>
+                            <SelectItem value="Newry, Northern Ireland">
+                              Newry, Northern Ireland
+                            </SelectItem>
                           </SelectContent>
                         </Select>
                         <FormMessage className="text-sm text-red-600 mt-1" />
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="religion"
@@ -445,11 +488,11 @@ export default function MainWebsiteTherapistForm() {
                     )}
                   />
                 </div>
-                
+
                 {/* Business Information */}
                 <div className="space-y-6">
                   <h2 className="text-lg font-semibold text-gray-900">Business Information</h2>
-                  
+
                   <FormField
                     control={form.control}
                     name="hasLimitedCompany"
@@ -479,11 +522,13 @@ export default function MainWebsiteTherapistForm() {
                     )}
                   />
                 </div>
-                
+
                 {/* Professional Qualifications */}
                 <div className="space-y-6">
-                  <h2 className="text-lg font-semibold text-gray-900">Professional Qualifications</h2>
-                  
+                  <h2 className="text-lg font-semibold text-gray-900">
+                    Professional Qualifications
+                  </h2>
+
                   <FormField
                     control={form.control}
                     name="highestQualification"
@@ -499,11 +544,21 @@ export default function MainWebsiteTherapistForm() {
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="phd">PhD in Psychology/Therapy</SelectItem>
-                              <SelectItem value="doctorate">Professional Doctorate (PsychD/ClinPsyD)</SelectItem>
-                              <SelectItem value="masters">Masters Degree in Psychology/Therapy</SelectItem>
-                              <SelectItem value="postgraduate">Postgraduate Diploma in Counselling/Therapy</SelectItem>
-                              <SelectItem value="diploma">Professional Diploma in Counselling</SelectItem>
-                              <SelectItem value="certificate">Certificate in Counselling/Therapy</SelectItem>
+                              <SelectItem value="doctorate">
+                                Professional Doctorate (PsychD/ClinPsyD)
+                              </SelectItem>
+                              <SelectItem value="masters">
+                                Masters Degree in Psychology/Therapy
+                              </SelectItem>
+                              <SelectItem value="postgraduate">
+                                Postgraduate Diploma in Counselling/Therapy
+                              </SelectItem>
+                              <SelectItem value="diploma">
+                                Professional Diploma in Counselling
+                              </SelectItem>
+                              <SelectItem value="certificate">
+                                Certificate in Counselling/Therapy
+                              </SelectItem>
                               <SelectItem value="other">Other</SelectItem>
                             </SelectContent>
                           </Select>
@@ -512,7 +567,7 @@ export default function MainWebsiteTherapistForm() {
                       </FormItem>
                     )}
                   />
-                  
+
                   <FormField
                     control={form.control}
                     name="professionalBody"
@@ -527,12 +582,25 @@ export default function MainWebsiteTherapistForm() {
                               <SelectValue placeholder="Select your professional body" />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="bacp">BACP (British Association for Counselling and Psychotherapy)</SelectItem>
-                              <SelectItem value="bps">BPS (British Psychological Society)</SelectItem>
-                              <SelectItem value="hcpc">HCPC (Health and Care Professions Council)</SelectItem>
-                              <SelectItem value="ukcp">UKCP (United Kingdom Council for Psychotherapy)</SelectItem>
-                              <SelectItem value="cosrt">COSRT (College of Sexual and Relationship Therapists)</SelectItem>
-                              <SelectItem value="babcp">BABCP (British Association for Behavioural & Cognitive Psychotherapies)</SelectItem>
+                              <SelectItem value="bacp">
+                                BACP (British Association for Counselling and Psychotherapy)
+                              </SelectItem>
+                              <SelectItem value="bps">
+                                BPS (British Psychological Society)
+                              </SelectItem>
+                              <SelectItem value="hcpc">
+                                HCPC (Health and Care Professions Council)
+                              </SelectItem>
+                              <SelectItem value="ukcp">
+                                UKCP (United Kingdom Council for Psychotherapy)
+                              </SelectItem>
+                              <SelectItem value="cosrt">
+                                COSRT (College of Sexual and Relationship Therapists)
+                              </SelectItem>
+                              <SelectItem value="babcp">
+                                BABCP (British Association for Behavioural & Cognitive
+                                Psychotherapies)
+                              </SelectItem>
                               <SelectItem value="other">Other</SelectItem>
                               <SelectItem value="none">Not currently registered</SelectItem>
                             </SelectContent>
@@ -547,10 +615,14 @@ export default function MainWebsiteTherapistForm() {
                 {/* Therapy Specialisations */}
                 <div className="space-y-6">
                   <div>
-                    <h2 className="text-lg font-semibold text-gray-900 mb-2">Therapy Specialisations *</h2>
-                    <p className="text-sm text-gray-600 mb-4">Select all areas you specialise in:</p>
+                    <h2 className="text-lg font-semibold text-gray-900 mb-2">
+                      Therapy Specialisations *
+                    </h2>
+                    <p className="text-sm text-gray-600 mb-4">
+                      Select all areas you specialise in:
+                    </p>
                   </div>
-                  
+
                   <FormField
                     control={form.control}
                     name="therapySpecialisations"
@@ -561,7 +633,7 @@ export default function MainWebsiteTherapistForm() {
                             <div key={specialisation} className="flex items-center space-x-2">
                               <Checkbox
                                 id={specialisation}
-                                onCheckedChange={(checked) => 
+                                onCheckedChange={(checked) =>
                                   handleSpecialisationChange(specialisation, checked as boolean)
                                 }
                                 className="data-[state=checked]:bg-hive-purple data-[state=checked]:border-hive-purple"
@@ -580,7 +652,7 @@ export default function MainWebsiteTherapistForm() {
                     )}
                   />
                 </div>
-                
+
                 {/* Personality Description */}
                 <div className="space-y-4">
                   <FormField
@@ -606,9 +678,13 @@ export default function MainWebsiteTherapistForm() {
 
                 {/* Experience & Qualifications */}
                 <div className="space-y-6">
-                  <h2 className="text-lg font-semibold text-gray-900">Experience & Qualifications</h2>
-                  <p className="text-sm text-gray-600">Tell us about your therapy experience, qualifications, and training</p>
-                  
+                  <h2 className="text-lg font-semibold text-gray-900">
+                    Experience & Qualifications
+                  </h2>
+                  <p className="text-sm text-gray-600">
+                    Tell us about your therapy experience, qualifications, and training
+                  </p>
+
                   <FormField
                     control={form.control}
                     name="professionalBio"

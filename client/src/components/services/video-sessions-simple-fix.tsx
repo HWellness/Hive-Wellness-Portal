@@ -1,10 +1,10 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { toast } from '@/hooks/use-toast';
-import { Video, VideoOff, Mic, MicOff, Users, Clock, Play, Phone, PhoneOff } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import React, { useState, useRef, useEffect, useCallback } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { toast } from "@/hooks/use-toast";
+import { Video, VideoOff, Mic, MicOff, Users, Clock, Play, Phone, PhoneOff } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 interface VideoSession {
   id: string;
@@ -22,13 +22,15 @@ export default function VideoSessionsSimpleFix() {
   const { user } = useAuth();
   const [hasMediaAccess, setHasMediaAccess] = useState(false);
   const [isRequestingMedia, setIsRequestingMedia] = useState(false);
-  const [connectionStatus, setConnectionStatus] = useState<'disconnected' | 'connecting' | 'connected'>('disconnected');
+  const [connectionStatus, setConnectionStatus] = useState<
+    "disconnected" | "connecting" | "connected"
+  >("disconnected");
   const [currentSession, setCurrentSession] = useState<VideoSession | null>(null);
   const [participants, setParticipants] = useState(1);
   const [sessionDuration, setSessionDuration] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoOff, setIsVideoOff] = useState(false);
-  
+
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
@@ -40,35 +42,35 @@ export default function VideoSessionsSimpleFix() {
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
   // Request media access
   const requestMediaAccess = useCallback(async () => {
     if (hasMediaAccess) return;
-    
+
     setIsRequestingMedia(true);
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { width: 640, height: 480 },
-        audio: { echoCancellation: true, noiseSuppression: true }
+        audio: { echoCancellation: true, noiseSuppression: true },
       });
-      
+
       localStreamRef.current = stream;
       setHasMediaAccess(true);
-      
+
       if (localVideoRef.current) {
         localVideoRef.current.srcObject = stream;
         localVideoRef.current.muted = true;
         await localVideoRef.current.play();
       }
-      
+
       toast({
         title: "Camera Access Granted",
         description: "Your camera and microphone are now active.",
       });
     } catch (error) {
-      console.error('Media access error:', error);
+      console.error("Media access error:", error);
       toast({
         title: "Camera Access Denied",
         description: "Please allow camera and microphone access to use video sessions.",
@@ -83,51 +85,56 @@ export default function VideoSessionsSimpleFix() {
   const createPeerConnection = useCallback(() => {
     const pc = new RTCPeerConnection({
       iceServers: [
-        { urls: 'stun:stun.l.google.com:19302' },
-        { urls: 'stun:stun1.l.google.com:19302' }
-      ]
+        { urls: "stun:stun.l.google.com:19302" },
+        { urls: "stun:stun1.l.google.com:19302" },
+      ],
     });
 
     // Add local stream
     if (localStreamRef.current) {
-      localStreamRef.current.getTracks().forEach(track => {
+      localStreamRef.current.getTracks().forEach((track) => {
         pc.addTrack(track, localStreamRef.current!);
       });
     }
 
     // Handle remote stream
     pc.ontrack = (event) => {
-      console.log('✅ Remote stream received');
+      console.log("✅ Remote stream received");
       const remoteStream = event.streams[0];
-      
+
       if (remoteVideoRef.current) {
         remoteVideoRef.current.srcObject = remoteStream;
-        remoteVideoRef.current.play().then(() => {
-          console.log('✅ Remote video playing');
-          setParticipants(2);
-          toast({
-            title: "Peer Connected",
-            description: "You can now see each other's video feed!",
-          });
-        }).catch(console.error);
+        remoteVideoRef.current
+          .play()
+          .then(() => {
+            console.log("✅ Remote video playing");
+            setParticipants(2);
+            toast({
+              title: "Peer Connected",
+              description: "You can now see each other's video feed!",
+            });
+          })
+          .catch(console.error);
       }
     };
 
     // Handle ICE candidates
     pc.onicecandidate = (event) => {
       if (event.candidate && wsRef.current?.readyState === WebSocket.OPEN) {
-        wsRef.current.send(JSON.stringify({
-          type: 'ice-candidate',
-          candidate: event.candidate,
-          sessionId: currentSession?.id || 'demo-session'
-        }));
+        wsRef.current.send(
+          JSON.stringify({
+            type: "ice-candidate",
+            candidate: event.candidate,
+            sessionId: currentSession?.id || "demo-session",
+          })
+        );
       }
     };
 
     pc.onconnectionstatechange = () => {
-      console.log('Connection state:', pc.connectionState);
-      if (pc.connectionState === 'connected') {
-        setConnectionStatus('connected');
+      console.log("Connection state:", pc.connectionState);
+      if (pc.connectionState === "connected") {
+        setConnectionStatus("connected");
       }
     };
 
@@ -138,91 +145,97 @@ export default function VideoSessionsSimpleFix() {
   const connectWebSocket = useCallback(() => {
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const wsUrl = `${protocol}//${window.location.host}/ws`;
-    
+
     wsRef.current = new WebSocket(wsUrl);
-    
+
     wsRef.current.onopen = () => {
-      console.log('✅ WebSocket connected');
+      console.log("✅ WebSocket connected");
       if (currentSession) {
-        wsRef.current?.send(JSON.stringify({
-          type: 'join-session',
-          sessionId: currentSession.id,
-          userId: user.id,
-          userName: user.firstName || 'User',
-          role: user.role
-        }));
+        wsRef.current?.send(
+          JSON.stringify({
+            type: "join-session",
+            sessionId: currentSession.id,
+            userId: user.id,
+            userName: user.firstName || "User",
+            role: user.role,
+          })
+        );
       }
     };
 
     wsRef.current.onmessage = async (event) => {
       try {
         const message = JSON.parse(event.data);
-        
+
         switch (message.type) {
-          case 'participant-joined':
-            console.log('👤 Participant joined');
+          case "participant-joined":
+            console.log("👤 Participant joined");
             setParticipants(message.participantCount || 2);
-            
+
             // Start connection if we have 2 participants
             if (message.participantCount === 2 && hasMediaAccess) {
               // Only user with smaller ID creates offer
-              if (user.id < (message.userId || 'zzz')) {
-                console.log('📞 Creating offer...');
+              if (user.id < (message.userId || "zzz")) {
+                console.log("📞 Creating offer...");
                 setTimeout(async () => {
                   peerConnectionRef.current = createPeerConnection();
                   const offer = await peerConnectionRef.current.createOffer();
                   await peerConnectionRef.current.setLocalDescription(offer);
-                  
-                  wsRef.current?.send(JSON.stringify({
-                    type: 'offer',
-                    offer: offer,
-                    sessionId: currentSession?.id || 'demo-session'
-                  }));
+
+                  wsRef.current?.send(
+                    JSON.stringify({
+                      type: "offer",
+                      offer: offer,
+                      sessionId: currentSession?.id || "demo-session",
+                    })
+                  );
                 }, 1000);
               }
             }
             break;
-            
-          case 'offer':
-            console.log('📞 Received offer');
+
+          case "offer":
+            console.log("📞 Received offer");
             if (!peerConnectionRef.current) {
               peerConnectionRef.current = createPeerConnection();
             }
-            
+
             await peerConnectionRef.current.setRemoteDescription(message.offer);
             const answer = await peerConnectionRef.current.createAnswer();
             await peerConnectionRef.current.setLocalDescription(answer);
-            
-            wsRef.current?.send(JSON.stringify({
-              type: 'answer',
-              answer: answer,
-              sessionId: currentSession?.id || 'demo-session'
-            }));
+
+            wsRef.current?.send(
+              JSON.stringify({
+                type: "answer",
+                answer: answer,
+                sessionId: currentSession?.id || "demo-session",
+              })
+            );
             break;
-            
-          case 'answer':
-            console.log('📞 Received answer');
+
+          case "answer":
+            console.log("📞 Received answer");
             await peerConnectionRef.current?.setRemoteDescription(message.answer);
             break;
-            
-          case 'ice-candidate':
-            console.log('🧊 Received ICE candidate');
+
+          case "ice-candidate":
+            console.log("🧊 Received ICE candidate");
             await peerConnectionRef.current?.addIceCandidate(message.candidate);
             break;
-            
-          case 'session-joined':
-            console.log('✅ Joined session');
-            setConnectionStatus('connected');
+
+          case "session-joined":
+            console.log("✅ Joined session");
+            setConnectionStatus("connected");
             break;
         }
       } catch (error) {
-        console.error('WebSocket message error:', error);
+        console.error("WebSocket message error:", error);
       }
     };
 
     wsRef.current.onclose = () => {
-      console.log('WebSocket closed');
-      setConnectionStatus('disconnected');
+      console.log("WebSocket closed");
+      setConnectionStatus("disconnected");
     };
   }, [currentSession, user.id, hasMediaAccess, createPeerConnection]);
 
@@ -238,28 +251,28 @@ export default function VideoSessionsSimpleFix() {
     }
 
     const session: VideoSession = {
-      id: 'demo-session',
-      sessionType: 'demo',
-      clientId: 'demo-client',
-      therapistId: 'demo-therapist',
+      id: "demo-session",
+      sessionType: "demo",
+      clientId: "demo-client",
+      therapistId: "demo-therapist",
       scheduledAt: new Date().toISOString(),
       duration: 60,
-      status: 'active',
-      clientName: 'Demo Client',
-      therapistName: 'Demo Therapist'
+      status: "active",
+      clientName: "Demo Client",
+      therapistName: "Demo Therapist",
     };
 
     setCurrentSession(session);
-    setConnectionStatus('connecting');
+    setConnectionStatus("connecting");
     setSessionDuration(0);
-    
+
     // Start session timer
     sessionTimerRef.current = setInterval(() => {
-      setSessionDuration(prev => prev + 1);
+      setSessionDuration((prev) => prev + 1);
     }, 1000);
 
     connectWebSocket();
-    
+
     toast({
       title: "Demo Session Started",
       description: "Connecting to peer...",
@@ -271,26 +284,26 @@ export default function VideoSessionsSimpleFix() {
     if (sessionTimerRef.current) {
       clearInterval(sessionTimerRef.current);
     }
-    
+
     if (peerConnectionRef.current) {
       peerConnectionRef.current.close();
       peerConnectionRef.current = null;
     }
-    
+
     if (wsRef.current) {
       wsRef.current.close();
       wsRef.current = null;
     }
-    
+
     setCurrentSession(null);
-    setConnectionStatus('disconnected');
+    setConnectionStatus("disconnected");
     setParticipants(1);
     setSessionDuration(0);
-    
+
     if (remoteVideoRef.current) {
       remoteVideoRef.current.srcObject = null;
     }
-    
+
     toast({
       title: "Session Ended",
       description: "Video session has been terminated",
@@ -322,9 +335,8 @@ export default function VideoSessionsSimpleFix() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-        </div>
-        <Badge variant={connectionStatus === 'connected' ? 'default' : 'secondary'}>
+        <div className="flex items-center gap-3"></div>
+        <Badge variant={connectionStatus === "connected" ? "default" : "secondary"}>
           {connectionStatus}
         </Badge>
       </div>
@@ -357,22 +369,22 @@ export default function VideoSessionsSimpleFix() {
                   </div>
                 )}
               </div>
-              
+
               <div className="space-y-2">
                 <Button
                   onClick={requestMediaAccess}
                   disabled={isRequestingMedia || hasMediaAccess}
                   className="w-full"
                 >
-                  {isRequestingMedia ? 'Requesting...' : hasMediaAccess ? 'Camera Active' : 'Grant Camera Access'}
+                  {isRequestingMedia
+                    ? "Requesting..."
+                    : hasMediaAccess
+                      ? "Camera Active"
+                      : "Grant Camera Access"}
                 </Button>
-                
+
                 {hasMediaAccess && (
-                  <Button
-                    onClick={startDemoSession}
-                    variant="outline"
-                    className="w-full"
-                  >
+                  <Button onClick={startDemoSession} variant="outline" className="w-full">
                     <Play className="h-4 w-4 mr-2" />
                     Start Demo Session
                   </Button>
@@ -392,7 +404,7 @@ export default function VideoSessionsSimpleFix() {
                   <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
                     <div className="flex items-center gap-1">
                       <Users className="h-4 w-4" />
-                      {participants} participant{participants !== 1 ? 's' : ''}
+                      {participants} participant{participants !== 1 ? "s" : ""}
                     </div>
                     <div className="flex items-center gap-1">
                       <Clock className="h-4 w-4" />

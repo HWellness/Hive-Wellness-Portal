@@ -3,7 +3,7 @@ import { AuthUser } from "@/types/auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { 
+import {
   Settings as SettingsIcon,
   ArrowLeft,
   User,
@@ -14,7 +14,7 @@ import {
   Mail,
   Download,
   Trash2,
-  AlertTriangle
+  AlertTriangle,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { MFASettings } from "@/components/mfa/MFASettings";
@@ -45,31 +45,31 @@ export default function Settings() {
 
   const handleBackToPortal = () => {
     // Navigate to portal and ensure we show the main dashboard (not a service)
-    setLocation('/portal');
+    setLocation("/portal");
     // Clear any hash or query params that might select a service
-    window.history.replaceState(null, '', '/portal');
+    window.history.replaceState(null, "", "/portal");
   };
 
   const handleLogout = async () => {
     try {
       const response = await apiRequest("POST", "/api/auth/logout");
       const data = await response.json();
-      
+
       toast({
         title: "Logged Out",
         description: "You have been successfully logged out.",
       });
-      
+
       // Use the redirect path from backend based on user role
       if (data.success && data.redirect) {
         window.location.href = data.redirect;
       } else {
         // Fallback
-        window.location.href = '/portal';
+        window.location.href = "/portal";
       }
     } catch (error) {
       console.error("Logout error:", error);
-      window.location.href = '/portal';
+      window.location.href = "/portal";
     }
   };
 
@@ -78,10 +78,11 @@ export default function Settings() {
     try {
       const response = await apiRequest("POST", "/api/user/export-data");
       const data = await response.json();
-      
+
       toast({
         title: "Export Requested",
-        description: "Your data export has been prepared. You will receive an email with a download link shortly.",
+        description:
+          "Your data export has been prepared. You will receive an email with a download link shortly.",
       });
     } catch (error) {
       console.error("Export error:", error);
@@ -100,12 +101,13 @@ export default function Settings() {
     try {
       const response = await apiRequest("POST", "/api/user/request-deletion");
       const data = await response.json();
-      
+
       toast({
         title: "Deletion Requested",
-        description: "Your account deletion has been scheduled. You will receive a confirmation email with details.",
+        description:
+          "Your account deletion has been scheduled. You will receive a confirmation email with details.",
       });
-      
+
       setShowDeleteDialog(false);
     } catch (error) {
       console.error("Deletion request error:", error);
@@ -128,13 +130,9 @@ export default function Settings() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-hive-light-blue to-hive-white">
         <Card className="w-full max-w-md">
           <CardContent className="pt-6">
-            <p className="text-center text-hive-black/70">
-              Please log in to access settings.
-            </p>
+            <p className="text-center text-hive-black/70">Please log in to access settings.</p>
             <Link href="/portal">
-              <Button className="w-full mt-4 bg-hive-purple hover:bg-hive-purple/90">
-                Login
-              </Button>
+              <Button className="w-full mt-4 bg-hive-purple hover:bg-hive-purple/90">Login</Button>
             </Link>
           </CardContent>
         </Card>
@@ -148,9 +146,9 @@ export default function Settings() {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-4 mb-4">
-            <Button 
-              variant="outline" 
-              size="sm" 
+            <Button
+              variant="outline"
+              size="sm"
               onClick={handleBackToPortal}
               data-testid="button-back-to-portal"
             >
@@ -158,13 +156,11 @@ export default function Settings() {
               Back to Portal
             </Button>
           </div>
-          
+
           <div className="flex items-center gap-3">
             <SettingsIcon className="h-8 w-8 text-hive-purple" />
             <div>
-              <h1 className="text-3xl font-century font-bold text-hive-purple">
-                Account Settings
-              </h1>
+              <h1 className="text-3xl font-century font-bold text-hive-purple">Account Settings</h1>
               <p className="text-hive-black/70 font-secondary">
                 Manage your account preferences and security
               </p>
@@ -204,7 +200,7 @@ export default function Settings() {
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Member Since</label>
                   <p className="font-medium">
-                    {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
+                    {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "N/A"}
                   </p>
                 </div>
               </div>
@@ -236,7 +232,7 @@ export default function Settings() {
                   </div>
                   <Badge variant="outline">Enabled</Badge>
                 </div>
-                
+
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="font-medium">SMS Notifications</p>
@@ -254,7 +250,7 @@ export default function Settings() {
           <ConsentManagement />
 
           {/* Billing Information (for clients) */}
-          {user.role === 'client' && (
+          {user.role === "client" && (
             <Card data-testid="card-billing">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -275,7 +271,7 @@ export default function Settings() {
                       Manage
                     </Button>
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="font-medium">Billing History</p>
@@ -305,15 +301,13 @@ export default function Settings() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="font-medium">Contact Support</p>
-                    <p className="text-sm text-muted-foreground">
-                      Get help from our support team
-                    </p>
+                    <p className="text-sm text-muted-foreground">Get help from our support team</p>
                   </div>
                   <Button variant="outline" size="sm" data-testid="button-contact-support">
                     Contact
                   </Button>
                 </div>
-                
+
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="font-medium">Privacy Policy</p>
@@ -356,7 +350,7 @@ export default function Settings() {
                   {isExporting ? "Processing..." : "Export Data"}
                 </Button>
               </div>
-              
+
               <div className="flex items-center justify-between border-t pt-4">
                 <div>
                   <p className="font-medium text-destructive">Delete Account</p>
@@ -415,9 +409,7 @@ export default function Settings() {
               Delete Account
             </AlertDialogTitle>
             <AlertDialogDescription className="space-y-3">
-              <p>
-                Are you sure you want to delete your account? This action will:
-              </p>
+              <p>Are you sure you want to delete your account? This action will:</p>
               <ul className="list-disc list-inside space-y-1 text-sm">
                 <li>Schedule your account for deletion in 30 days</li>
                 <li>Send you a confirmation email with a cancellation link</li>
@@ -430,9 +422,7 @@ export default function Settings() {
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel data-testid="button-cancel-delete">
-              Cancel
-            </AlertDialogCancel>
+            <AlertDialogCancel data-testid="button-cancel-delete">Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={handleRequestDeletion}
               disabled={isDeleting}

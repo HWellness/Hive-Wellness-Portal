@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,11 +6,17 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { 
+import {
   Globe,
   FileText,
   BarChart3,
@@ -27,10 +33,10 @@ import {
   Phone,
   Mail,
   Filter,
-  Search
+  Search,
 } from "lucide-react";
-import ServiceNavigation from '@/components/ui/service-navigation';
-import type { User } from '@shared/schema';
+import ServiceNavigation from "@/components/ui/service-navigation";
+import type { User } from "@shared/schema";
 
 interface WordPressFormSubmission {
   id: string;
@@ -65,49 +71,52 @@ interface WordPressFormsDashboardProps {
   user?: User;
 }
 
-export default function WordPressFormsDashboard({ onBackToDashboard, user }: WordPressFormsDashboardProps) {
+export default function WordPressFormsDashboard({
+  onBackToDashboard,
+  user,
+}: WordPressFormsDashboardProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
-  const [activeTab, setActiveTab] = useState('overview');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterForm, setFilterForm] = useState('all');
-  const [filterStatus, setFilterStatus] = useState('all');
+
+  const [activeTab, setActiveTab] = useState("overview");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterForm, setFilterForm] = useState("all");
+  const [filterStatus, setFilterStatus] = useState("all");
   const [testSubmission, setTestSubmission] = useState({
-    form_id: '1',
-    form_title: 'Test Form',
-    entry_id: '123',
+    form_id: "1",
+    form_title: "Test Form",
+    entry_id: "123",
     entry_data: {
-      email: 'test@example.com',
-      first_name: 'Test',
-      last_name: 'User'
-    }
+      email: "test@example.com",
+      first_name: "Test",
+      last_name: "User",
+    },
   });
 
   // Get WordPress forms statistics
   const { data: stats, isLoading: statsLoading } = useQuery<WordPressFormsStats>({
-    queryKey: ['/api/admin/wordpress-forms/stats'],
+    queryKey: ["/api/admin/wordpress-forms/stats"],
     refetchInterval: 30000,
   });
 
   // Get form submissions
   const { data: submissions, isLoading: submissionsLoading } = useQuery<WordPressFormSubmission[]>({
-    queryKey: ['/api/admin/wordpress-forms/submissions', searchTerm, filterForm, filterStatus],
+    queryKey: ["/api/admin/wordpress-forms/submissions", searchTerm, filterForm, filterStatus],
     refetchInterval: 15000,
   });
 
   // Test WordPress webhook mutation
   const testWebhookMutation = useMutation({
     mutationFn: async (data: any) => {
-      return await apiRequest('POST', '/api/external/gravity-forms', data);
+      return await apiRequest("POST", "/api/external/gravity-forms", data);
     },
     onSuccess: (data: any) => {
       toast({
         title: "Test Successful",
         description: `Form submission processed: ${data.action} (User ID: ${data.userId})`,
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/wordpress-forms/submissions'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/wordpress-forms/stats'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/wordpress-forms/submissions"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/wordpress-forms/stats"] });
     },
     onError: (error: any) => {
       toast({
@@ -120,27 +129,27 @@ export default function WordPressFormsDashboard({ onBackToDashboard, user }: Wor
 
   // Export submissions mutation
   const exportMutation = useMutation({
-    mutationFn: async (format: 'csv' | 'json') => {
+    mutationFn: async (format: "csv" | "json") => {
       const response = await fetch(`/api/admin/wordpress-forms/export?format=${format}`, {
-        method: 'GET',
-        credentials: 'include',
+        method: "GET",
+        credentials: "include",
       });
-      
+
       if (!response.ok) {
-        throw new Error('Export failed');
+        throw new Error("Export failed");
       }
-      
+
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.style.display = 'none';
+      const a = document.createElement("a");
+      a.style.display = "none";
       a.href = url;
-      a.download = `wordpress-forms-${new Date().toISOString().split('T')[0]}.${format}`;
+      a.download = `wordpress-forms-${new Date().toISOString().split("T")[0]}.${format}`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
       document.body.removeChild(a);
-      
+
       return { success: true };
     },
     onSuccess: () => {
@@ -162,56 +171,64 @@ export default function WordPressFormsDashboard({ onBackToDashboard, user }: Wor
     testWebhookMutation.mutate(testSubmission);
   };
 
-  const handleExport = (format: 'csv' | 'json') => {
+  const handleExport = (format: "csv" | "json") => {
     exportMutation.mutate(format);
   };
 
-  const filteredSubmissions = submissions?.filter(submission => {
-    const matchesSearch = !searchTerm || 
+  const filteredSubmissions = submissions?.filter((submission) => {
+    const matchesSearch =
+      !searchTerm ||
       submission.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       submission.formTitle.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      `${submission.firstName} ${submission.lastName}`.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesForm = filterForm === 'all' || submission.formId === filterForm;
-    const matchesStatus = filterStatus === 'all' || 
-      (filterStatus === 'processed' && submission.processed) ||
-      (filterStatus === 'pending' && !submission.processed);
-    
+      `${submission.firstName} ${submission.lastName}`
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+
+    const matchesForm = filterForm === "all" || submission.formId === filterForm;
+    const matchesStatus =
+      filterStatus === "all" ||
+      (filterStatus === "processed" && submission.processed) ||
+      (filterStatus === "pending" && !submission.processed);
+
     return matchesSearch && matchesForm && matchesStatus;
   });
 
-  const uniqueForms = submissions ? Array.from(new Set(submissions.map(s => s.formId))) : [];
+  const uniqueForms = submissions ? Array.from(new Set(submissions.map((s) => s.formId))) : [];
 
   return (
     <>
       {/* Navigation Bar */}
       {onBackToDashboard && user && (
-        <ServiceNavigation 
+        <ServiceNavigation
           serviceName="WordPress Forms Integration Dashboard"
           onBackToDashboard={onBackToDashboard}
           user={user}
         />
       )}
-      
+
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-display font-bold text-hive-black">WordPress Forms Dashboard</h1>
-            <p className="text-gray-600 font-secondary">Manage Gravity Forms integration and submissions</p>
+            <h1 className="text-3xl font-display font-bold text-hive-black">
+              WordPress Forms Dashboard
+            </h1>
+            <p className="text-gray-600 font-secondary">
+              Manage Gravity Forms integration and submissions
+            </p>
           </div>
-          
+
           <div className="flex items-center space-x-2">
-            <Button 
-              variant="outline" 
-              onClick={() => handleExport('csv')}
+            <Button
+              variant="outline"
+              onClick={() => handleExport("csv")}
               disabled={exportMutation.isPending}
             >
               <Download className="w-4 h-4 mr-2" />
               Export CSV
             </Button>
-            <Button 
-              variant="outline" 
-              onClick={() => handleExport('json')}
+            <Button
+              variant="outline"
+              onClick={() => handleExport("json")}
               disabled={exportMutation.isPending}
             >
               <Download className="w-4 h-4 mr-2" />
@@ -249,7 +266,7 @@ export default function WordPressFormsDashboard({ onBackToDashboard, user }: Wor
                     <div>
                       <p className="text-sm font-medium text-gray-600">Total Submissions</p>
                       <p className="text-2xl font-bold text-hive-purple">
-                        {statsLoading ? '...' : stats?.totalSubmissions || 0}
+                        {statsLoading ? "..." : stats?.totalSubmissions || 0}
                       </p>
                     </div>
                     <FileText className="w-8 h-8 text-hive-purple opacity-60" />
@@ -263,7 +280,7 @@ export default function WordPressFormsDashboard({ onBackToDashboard, user }: Wor
                     <div>
                       <p className="text-sm font-medium text-gray-600">Today</p>
                       <p className="text-2xl font-bold text-green-600">
-                        {statsLoading ? '...' : stats?.todaySubmissions || 0}
+                        {statsLoading ? "..." : stats?.todaySubmissions || 0}
                       </p>
                     </div>
                     <Calendar className="w-8 h-8 text-green-600 opacity-60" />
@@ -277,7 +294,7 @@ export default function WordPressFormsDashboard({ onBackToDashboard, user }: Wor
                     <div>
                       <p className="text-sm font-medium text-gray-600">This Week</p>
                       <p className="text-2xl font-bold text-blue-600">
-                        {statsLoading ? '...' : stats?.weekSubmissions || 0}
+                        {statsLoading ? "..." : stats?.weekSubmissions || 0}
                       </p>
                     </div>
                     <BarChart3 className="w-8 h-8 text-blue-600 opacity-60" />
@@ -291,7 +308,7 @@ export default function WordPressFormsDashboard({ onBackToDashboard, user }: Wor
                     <div>
                       <p className="text-sm font-medium text-gray-600">Active Forms</p>
                       <p className="text-2xl font-bold text-orange-600">
-                        {statsLoading ? '...' : stats?.activeFormsCount || 0}
+                        {statsLoading ? "..." : stats?.activeFormsCount || 0}
                       </p>
                     </div>
                     <Globe className="w-8 h-8 text-orange-600 opacity-60" />
@@ -350,14 +367,14 @@ export default function WordPressFormsDashboard({ onBackToDashboard, user }: Wor
                       />
                     </div>
                   </div>
-                  
+
                   <Select value={filterForm} onValueChange={setFilterForm}>
                     <SelectTrigger className="w-[150px]">
                       <SelectValue placeholder="All Forms" />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Forms</SelectItem>
-                      {uniqueForms.map(formId => (
+                      {uniqueForms.map((formId) => (
                         <SelectItem key={formId} value={formId}>
                           Form {formId}
                         </SelectItem>
@@ -379,9 +396,9 @@ export default function WordPressFormsDashboard({ onBackToDashboard, user }: Wor
                   <Button
                     variant="outline"
                     onClick={() => {
-                      setSearchTerm('');
-                      setFilterForm('all');
-                      setFilterStatus('all');
+                      setSearchTerm("");
+                      setFilterForm("all");
+                      setFilterStatus("all");
                     }}
                   >
                     <Filter className="w-4 h-4 mr-2" />
@@ -396,9 +413,7 @@ export default function WordPressFormsDashboard({ onBackToDashboard, user }: Wor
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
                   <span>Form Submissions</span>
-                  <Badge variant="secondary">
-                    {filteredSubmissions?.length || 0} results
-                  </Badge>
+                  <Badge variant="secondary">{filteredSubmissions?.length || 0} results</Badge>
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -420,10 +435,10 @@ export default function WordPressFormsDashboard({ onBackToDashboard, user }: Wor
                             <Badge variant="outline">Form {submission.formId}</Badge>
                           </div>
                           <p className="text-sm text-gray-500">
-                            {new Date(submission.submittedAt).toLocaleString('en-GB')}
+                            {new Date(submission.submittedAt).toLocaleString("en-GB")}
                           </p>
                         </div>
-                        
+
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
                           <div className="flex items-center space-x-2">
                             <Mail className="w-4 h-4 text-gray-400" />
@@ -432,7 +447,9 @@ export default function WordPressFormsDashboard({ onBackToDashboard, user }: Wor
                           {submission.firstName && submission.lastName && (
                             <div className="flex items-center space-x-2">
                               <Users className="w-4 h-4 text-gray-400" />
-                              <span>{submission.firstName} {submission.lastName}</span>
+                              <span>
+                                {submission.firstName} {submission.lastName}
+                              </span>
                             </div>
                           )}
                           {submission.phone && (
@@ -458,9 +475,9 @@ export default function WordPressFormsDashboard({ onBackToDashboard, user }: Wor
                     <FileText className="w-12 h-12 mx-auto mb-4 text-gray-300" />
                     <h3 className="text-lg font-medium text-gray-900 mb-2">No submissions found</h3>
                     <p className="text-gray-600">
-                      {searchTerm || filterForm !== 'all' || filterStatus !== 'all' 
-                        ? 'Try adjusting your filters to see more results.'
-                        : 'Form submissions will appear here once they are received from WordPress.'}
+                      {searchTerm || filterForm !== "all" || filterStatus !== "all"
+                        ? "Try adjusting your filters to see more results."
+                        : "Form submissions will appear here once they are received from WordPress."}
                     </p>
                   </div>
                 )}
@@ -481,7 +498,8 @@ export default function WordPressFormsDashboard({ onBackToDashboard, user }: Wor
                 <Alert>
                   <AlertTriangle className="w-4 h-4" />
                   <AlertDescription>
-                    Use this tool to test the WordPress Gravity Forms webhook integration. This will simulate a form submission from your WordPress site.
+                    Use this tool to test the WordPress Gravity Forms webhook integration. This will
+                    simulate a form submission from your WordPress site.
                   </AlertDescription>
                 </Alert>
 
@@ -491,10 +509,12 @@ export default function WordPressFormsDashboard({ onBackToDashboard, user }: Wor
                     <Input
                       id="test-form-id"
                       value={testSubmission.form_id}
-                      onChange={(e) => setTestSubmission({
-                        ...testSubmission,
-                        form_id: e.target.value
-                      })}
+                      onChange={(e) =>
+                        setTestSubmission({
+                          ...testSubmission,
+                          form_id: e.target.value,
+                        })
+                      }
                     />
                   </div>
 
@@ -503,10 +523,12 @@ export default function WordPressFormsDashboard({ onBackToDashboard, user }: Wor
                     <Input
                       id="test-form-title"
                       value={testSubmission.form_title}
-                      onChange={(e) => setTestSubmission({
-                        ...testSubmission,
-                        form_title: e.target.value
-                      })}
+                      onChange={(e) =>
+                        setTestSubmission({
+                          ...testSubmission,
+                          form_title: e.target.value,
+                        })
+                      }
                     />
                   </div>
 
@@ -515,10 +537,12 @@ export default function WordPressFormsDashboard({ onBackToDashboard, user }: Wor
                     <Input
                       id="test-entry-id"
                       value={testSubmission.entry_id}
-                      onChange={(e) => setTestSubmission({
-                        ...testSubmission,
-                        entry_id: e.target.value
-                      })}
+                      onChange={(e) =>
+                        setTestSubmission({
+                          ...testSubmission,
+                          entry_id: e.target.value,
+                        })
+                      }
                     />
                   </div>
 
@@ -528,13 +552,15 @@ export default function WordPressFormsDashboard({ onBackToDashboard, user }: Wor
                       id="test-email"
                       type="email"
                       value={testSubmission.entry_data.email}
-                      onChange={(e) => setTestSubmission({
-                        ...testSubmission,
-                        entry_data: {
-                          ...testSubmission.entry_data,
-                          email: e.target.value
-                        }
-                      })}
+                      onChange={(e) =>
+                        setTestSubmission({
+                          ...testSubmission,
+                          entry_data: {
+                            ...testSubmission.entry_data,
+                            email: e.target.value,
+                          },
+                        })
+                      }
                     />
                   </div>
 
@@ -543,13 +569,15 @@ export default function WordPressFormsDashboard({ onBackToDashboard, user }: Wor
                     <Input
                       id="test-first-name"
                       value={testSubmission.entry_data.first_name}
-                      onChange={(e) => setTestSubmission({
-                        ...testSubmission,
-                        entry_data: {
-                          ...testSubmission.entry_data,
-                          first_name: e.target.value
-                        }
-                      })}
+                      onChange={(e) =>
+                        setTestSubmission({
+                          ...testSubmission,
+                          entry_data: {
+                            ...testSubmission.entry_data,
+                            first_name: e.target.value,
+                          },
+                        })
+                      }
                     />
                   </div>
 
@@ -558,13 +586,15 @@ export default function WordPressFormsDashboard({ onBackToDashboard, user }: Wor
                     <Input
                       id="test-last-name"
                       value={testSubmission.entry_data.last_name}
-                      onChange={(e) => setTestSubmission({
-                        ...testSubmission,
-                        entry_data: {
-                          ...testSubmission.entry_data,
-                          last_name: e.target.value
-                        }
-                      })}
+                      onChange={(e) =>
+                        setTestSubmission({
+                          ...testSubmission,
+                          entry_data: {
+                            ...testSubmission.entry_data,
+                            last_name: e.target.value,
+                          },
+                        })
+                      }
                     />
                   </div>
                 </div>
@@ -572,16 +602,18 @@ export default function WordPressFormsDashboard({ onBackToDashboard, user }: Wor
                 <div className="flex justify-end space-x-2">
                   <Button
                     variant="outline"
-                    onClick={() => setTestSubmission({
-                      form_id: '1',
-                      form_title: 'Test Form',
-                      entry_id: Math.random().toString(36).substring(7),
-                      entry_data: {
-                        email: 'test@example.com',
-                        first_name: 'Test',
-                        last_name: 'User'
-                      }
-                    })}
+                    onClick={() =>
+                      setTestSubmission({
+                        form_id: "1",
+                        form_title: "Test Form",
+                        entry_id: Math.random().toString(36).substring(7),
+                        entry_data: {
+                          email: "test@example.com",
+                          first_name: "Test",
+                          last_name: "User",
+                        },
+                      })
+                    }
                   >
                     <RefreshCw className="w-4 h-4 mr-2" />
                     Reset
@@ -660,8 +692,9 @@ export default function WordPressFormsDashboard({ onBackToDashboard, user }: Wor
                 <Alert>
                   <AlertTriangle className="w-4 h-4" />
                   <AlertDescription>
-                    WordPress Forms integration is managed through the main WordPress Integration service. 
-                    Use the WordPress Integration service from the admin dashboard to configure API keys and connection settings.
+                    WordPress Forms integration is managed through the main WordPress Integration
+                    service. Use the WordPress Integration service from the admin dashboard to
+                    configure API keys and connection settings.
                   </AlertDescription>
                 </Alert>
 

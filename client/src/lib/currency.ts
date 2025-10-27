@@ -2,7 +2,7 @@
  * Currency formatting utilities for consistent display across the application
  */
 
-export type SupportedCurrency = 'GBP' | 'USD';
+export type SupportedCurrency = "GBP" | "USD";
 
 export interface CurrencyAmount {
   amount: number;
@@ -13,34 +13,34 @@ export interface CurrencyAmount {
  * Format a currency amount using Intl.NumberFormat for proper localization
  */
 export function formatCurrency(
-  amount: number | CurrencyAmount, 
+  amount: number | CurrencyAmount,
   currency?: SupportedCurrency,
-  locale: string = 'en-GB'
+  locale: string = "en-GB"
 ): string {
   // Handle CurrencyAmount object
-  if (typeof amount === 'object' && amount.amount !== undefined) {
+  if (typeof amount === "object" && amount.amount !== undefined) {
     currency = amount.currency;
     amount = amount.amount;
   }
 
   // Default to GBP if no currency specified
-  const targetCurrency = currency || 'GBP';
-  
+  const targetCurrency = currency || "GBP";
+
   // Ensure amount is a valid number
-  const numericAmount = typeof amount === 'number' && !isNaN(amount) ? amount : 0;
+  const numericAmount = typeof amount === "number" && !isNaN(amount) ? amount : 0;
 
   try {
     const formatter = new Intl.NumberFormat(locale, {
-      style: 'currency',
+      style: "currency",
       currency: targetCurrency,
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     });
-    
+
     return formatter.format(numericAmount);
   } catch (error) {
     // Fallback formatting if Intl.NumberFormat fails
-    const symbol = targetCurrency === 'GBP' ? '£' : '$';
+    const symbol = targetCurrency === "GBP" ? "£" : "$";
     return `${symbol}${numericAmount.toFixed(2)}`;
   }
 }
@@ -49,33 +49,33 @@ export function formatCurrency(
  * Format a currency amount with abbreviated units (K, M, etc.)
  */
 export function formatCurrencyCompact(
-  amount: number | CurrencyAmount, 
+  amount: number | CurrencyAmount,
   currency?: SupportedCurrency,
-  locale: string = 'en-GB'
+  locale: string = "en-GB"
 ): string {
   // Handle CurrencyAmount object
-  if (typeof amount === 'object' && amount.amount !== undefined) {
+  if (typeof amount === "object" && amount.amount !== undefined) {
     currency = amount.currency;
     amount = amount.amount;
   }
 
-  const targetCurrency = currency || 'GBP';
-  const numericAmount = typeof amount === 'number' && !isNaN(amount) ? amount : 0;
+  const targetCurrency = currency || "GBP";
+  const numericAmount = typeof amount === "number" && !isNaN(amount) ? amount : 0;
 
   try {
     const formatter = new Intl.NumberFormat(locale, {
-      style: 'currency',
+      style: "currency",
       currency: targetCurrency,
-      notation: 'compact',
+      notation: "compact",
       minimumFractionDigits: 0,
       maximumFractionDigits: 1,
     });
-    
+
     return formatter.format(numericAmount);
   } catch (error) {
     // Fallback with manual abbreviation
-    const symbol = targetCurrency === 'GBP' ? '£' : '$';
-    
+    const symbol = targetCurrency === "GBP" ? "£" : "$";
+
     if (numericAmount >= 1000000) {
       return `${symbol}${(numericAmount / 1000000).toFixed(1)}M`;
     } else if (numericAmount >= 1000) {
@@ -91,12 +91,12 @@ export function formatCurrencyCompact(
  */
 export function getCurrencySymbol(currency: SupportedCurrency): string {
   switch (currency) {
-    case 'GBP':
-      return '£';
-    case 'USD':
-      return '$';
+    case "GBP":
+      return "£";
+    case "USD":
+      return "$";
     default:
-      return '£'; // Default to GBP
+      return "£"; // Default to GBP
   }
 }
 
@@ -105,7 +105,7 @@ export function getCurrencySymbol(currency: SupportedCurrency): string {
  */
 export function parseCurrencyString(currencyString: string): number {
   // Remove currency symbols and spaces, then parse as float
-  const numericString = currencyString.replace(/[£$,\s]/g, '');
+  const numericString = currencyString.replace(/[£$,\s]/g, "");
   return parseFloat(numericString) || 0;
 }
 
@@ -113,7 +113,7 @@ export function parseCurrencyString(currencyString: string): number {
  * Determine the default currency for the application
  */
 export function getDefaultCurrency(): SupportedCurrency {
-  return 'GBP'; // Default to GBP for UK-based business
+  return "GBP"; // Default to GBP for UK-based business
 }
 
 /**
@@ -132,11 +132,11 @@ export function formatCostPerUnit(
   unitLabel: string,
   currency?: SupportedCurrency
 ): string {
-  const amount = typeof totalAmount === 'object' ? totalAmount.amount : totalAmount;
-  const targetCurrency = currency || 
-    (typeof totalAmount === 'object' ? totalAmount.currency : 'GBP');
-  
+  const amount = typeof totalAmount === "object" ? totalAmount.amount : totalAmount;
+  const targetCurrency =
+    currency || (typeof totalAmount === "object" ? totalAmount.currency : "GBP");
+
   const perUnitCost = units > 0 ? amount / units : 0;
-  
+
   return `${formatCurrency(perUnitCost, targetCurrency)} per ${unitLabel}`;
 }

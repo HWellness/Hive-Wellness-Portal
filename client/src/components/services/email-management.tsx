@@ -1,17 +1,23 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useToast } from '@/hooks/use-toast';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Mail, Send, Plus, Settings } from 'lucide-react';
-import { Label } from '@/components/ui/label';
-import type { User } from '@shared/schema';
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Mail, Send, Plus, Settings } from "lucide-react";
+import { Label } from "@/components/ui/label";
+import type { User } from "@shared/schema";
 
 interface EmailStats {
   total: number;
@@ -31,8 +37,8 @@ interface EmailQueueItem {
   type: string;
   to: string;
   subject: string;
-  status: 'queued' | 'processing' | 'sent' | 'failed';
-  priority: 'high' | 'normal' | 'low';
+  status: "queued" | "processing" | "sent" | "failed";
+  priority: "high" | "normal" | "low";
   attempts: number;
   error?: string;
   scheduledFor: string;
@@ -47,13 +53,13 @@ interface EmailManagementProps {
 const EmailManagement: React.FC<EmailManagementProps> = ({ user }) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [selectedStatus, setSelectedStatus] = useState<string>('all');
-  const [testEmail, setTestEmail] = useState('');
-  const [testEmailType, setTestEmailType] = useState('welcome');
+  const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  const [testEmail, setTestEmail] = useState("");
+  const [testEmailType, setTestEmailType] = useState("welcome");
 
   // Admin-only access control
-  const isAdmin = user?.role === 'admin';
-  
+  const isAdmin = user?.role === "admin";
+
   if (!isAdmin) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -66,46 +72,47 @@ const EmailManagement: React.FC<EmailManagementProps> = ({ user }) => {
               Email management and SendGrid configuration are restricted to admin users only.
             </p>
             <p className="text-sm text-gray-500">
-              Therapist accounts cannot access messaging automation controls for security and compliance reasons.
+              Therapist accounts cannot access messaging automation controls for security and
+              compliance reasons.
             </p>
           </CardContent>
         </Card>
       </div>
     );
   }
-  
+
   // Email compose form state
   const [emailForm, setEmailForm] = useState({
-    recipientType: 'individual',
-    to: '',
-    cc: '',
-    subject: '',
-    body: '',
-    priority: 'normal',
-    template: ''
+    recipientType: "individual",
+    to: "",
+    cc: "",
+    subject: "",
+    body: "",
+    priority: "normal",
+    template: "",
   });
-  
+
   // Preview modal state
   const [showPreview, setShowPreview] = useState(false);
 
   // Get email statistics
   const { data: stats, isLoading: statsLoading } = useQuery<EmailStats>({
-    queryKey: ['/api/emails/stats'],
+    queryKey: ["/api/emails/stats"],
     refetchInterval: 180000, // Refresh every 3 minutes
-    staleTime: 120000 // Keep data fresh for 2 minutes
+    staleTime: 120000, // Keep data fresh for 2 minutes
   });
 
   // Get email queue
   const { data: emailQueue = [], isLoading: queueLoading } = useQuery<EmailQueueItem[]>({
-    queryKey: ['/api/emails/queue', selectedStatus],
+    queryKey: ["/api/emails/queue", selectedStatus],
     refetchInterval: 180000, // Refresh every 3 minutes
-    staleTime: 120000 // Keep data fresh for 2 minutes
+    staleTime: 120000, // Keep data fresh for 2 minutes
   });
 
   // Process email queue mutation
   const processQueueMutation = useMutation({
     mutationFn: async (batchSize: number) => {
-      const response = await apiRequest('POST', '/api/emails/process-queue', { batchSize });
+      const response = await apiRequest("POST", "/api/emails/process-queue", { batchSize });
       return response as unknown as { processed: number };
     },
     onSuccess: (data) => {
@@ -113,8 +120,8 @@ const EmailManagement: React.FC<EmailManagementProps> = ({ user }) => {
         title: "Email Queue Processed",
         description: `Successfully processed ${data.processed} emails`,
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/emails/stats'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/emails/queue'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/emails/stats"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/emails/queue"] });
     },
     onError: (error) => {
       toast({
@@ -122,21 +129,21 @@ const EmailManagement: React.FC<EmailManagementProps> = ({ user }) => {
         description: error.message,
         variant: "destructive",
       });
-    }
+    },
   });
 
   // Send test email mutation
   const sendTestEmailMutation = useMutation({
-    mutationFn: (data: { type: string; to: string; testData?: any }) => 
-      apiRequest('POST', '/api/emails/send-test', data),
+    mutationFn: (data: { type: string; to: string; testData?: any }) =>
+      apiRequest("POST", "/api/emails/send-test", data),
     onSuccess: () => {
       toast({
         title: "Test Email Sent",
         description: "Test email has been queued successfully",
       });
-      setTestEmail('');
-      queryClient.invalidateQueries({ queryKey: ['/api/emails/stats'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/emails/queue'] });
+      setTestEmail("");
+      queryClient.invalidateQueries({ queryKey: ["/api/emails/stats"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/emails/queue"] });
     },
     onError: (error) => {
       toast({
@@ -144,19 +151,19 @@ const EmailManagement: React.FC<EmailManagementProps> = ({ user }) => {
         description: error.message,
         variant: "destructive",
       });
-    }
+    },
   });
 
   // Schedule reminders mutation
   const scheduleRemindersMutation = useMutation({
-    mutationFn: () => apiRequest('POST', '/api/emails/schedule-reminders'),
+    mutationFn: () => apiRequest("POST", "/api/emails/schedule-reminders"),
     onSuccess: () => {
       toast({
         title: "Reminders Scheduled",
         description: "Automated reminders have been scheduled",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/emails/stats'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/emails/queue'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/emails/stats"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/emails/queue"] });
     },
     onError: (error) => {
       toast({
@@ -164,16 +171,16 @@ const EmailManagement: React.FC<EmailManagementProps> = ({ user }) => {
         description: error.message,
         variant: "destructive",
       });
-    }
+    },
   });
 
   // Send direct email mutation
   const sendEmailMutation = useMutation({
     mutationFn: (emailData: typeof emailForm) => {
-      if (emailForm.recipientType === 'individual') {
-        return apiRequest('POST', '/api/emails/send-direct', emailData);
+      if (emailForm.recipientType === "individual") {
+        return apiRequest("POST", "/api/emails/send-direct", emailData);
       } else {
-        return apiRequest('POST', '/api/emails/send-to-users', emailData);
+        return apiRequest("POST", "/api/emails/send-to-users", emailData);
       }
     },
     onSuccess: () => {
@@ -183,16 +190,16 @@ const EmailManagement: React.FC<EmailManagementProps> = ({ user }) => {
       });
       // Reset form
       setEmailForm({
-        recipientType: 'individual',
-        to: '',
-        cc: '',
-        subject: '',
-        body: '',
-        priority: 'normal',
-        template: ''
+        recipientType: "individual",
+        to: "",
+        cc: "",
+        subject: "",
+        body: "",
+        priority: "normal",
+        template: "",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/emails/stats'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/emails/queue'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/emails/stats"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/emails/queue"] });
     },
     onError: (error: any) => {
       toast({
@@ -200,12 +207,12 @@ const EmailManagement: React.FC<EmailManagementProps> = ({ user }) => {
         description: error.message || "Failed to send email",
         variant: "destructive",
       });
-    }
+    },
   });
 
   // Button handlers
   const handleSendEmail = () => {
-    if (!emailForm.to && emailForm.recipientType === 'individual') {
+    if (!emailForm.to && emailForm.recipientType === "individual") {
       toast({
         title: "Validation Error",
         description: "Please enter a recipient email address",
@@ -213,10 +220,10 @@ const EmailManagement: React.FC<EmailManagementProps> = ({ user }) => {
       });
       return;
     }
-    
+
     if (!emailForm.subject || !emailForm.body) {
       toast({
-        title: "Validation Error", 
+        title: "Validation Error",
         description: "Please fill in both subject and message",
         variant: "destructive",
       });
@@ -238,106 +245,120 @@ const EmailManagement: React.FC<EmailManagementProps> = ({ user }) => {
   };
 
   const updateEmailForm = (field: string, value: string) => {
-    setEmailForm(prev => ({ ...prev, [field]: value }));
+    setEmailForm((prev) => ({ ...prev, [field]: value }));
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'queued': return 'bg-yellow-100 text-yellow-800';
-      case 'processing': return 'bg-blue-100 text-blue-800';
-      case 'sent': return 'bg-green-100 text-green-800';
-      case 'failed': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "queued":
+        return "bg-yellow-100 text-yellow-800";
+      case "processing":
+        return "bg-blue-100 text-blue-800";
+      case "sent":
+        return "bg-green-100 text-green-800";
+      case "failed":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getPriorityColor = (priority: string) => {
     switch (priority) {
-      case 'high': return 'bg-red-100 text-red-800';
-      case 'normal': return 'bg-blue-100 text-blue-800';
-      case 'low': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "high":
+        return "bg-red-100 text-red-800";
+      case "normal":
+        return "bg-blue-100 text-blue-800";
+      case "low":
+        return "bg-gray-100 text-gray-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   // Get role-specific recipient options
   const getRecipientOptions = () => {
-    const userRole = user?.role || 'admin';
-    
-    if (userRole === 'admin') {
+    const userRole = user?.role || "admin";
+
+    if (userRole === "admin") {
       return [
-        { value: 'individual', label: 'Individual' },
-        { value: 'all-clients', label: 'All Clients' },
-        { value: 'all-therapists', label: 'All Therapists' },
-        { value: 'all-institutions', label: 'All Institutions' },
-        { value: 'custom-group', label: 'Custom Group' },
-        { value: 'external', label: 'External' }
+        { value: "individual", label: "Individual" },
+        { value: "all-clients", label: "All Clients" },
+        { value: "all-therapists", label: "All Therapists" },
+        { value: "all-institutions", label: "All Institutions" },
+        { value: "custom-group", label: "Custom Group" },
+        { value: "external", label: "External" },
       ];
-    } else if (userRole === 'therapist') {
+    } else if (userRole === "therapist") {
       return [
-        { value: 'individual', label: 'Individual Client' },
-        { value: 'my-clients', label: 'All My Clients' },
-        { value: 'colleagues', label: 'Fellow Therapists' },
-        { value: 'admin', label: 'Platform Admin' },
-        { value: 'external', label: 'External' }
+        { value: "individual", label: "Individual Client" },
+        { value: "my-clients", label: "All My Clients" },
+        { value: "colleagues", label: "Fellow Therapists" },
+        { value: "admin", label: "Platform Admin" },
+        { value: "external", label: "External" },
       ];
-    } else if (userRole === 'institution') {
+    } else if (userRole === "institution") {
       return [
-        { value: 'individual', label: 'Individual' },
-        { value: 'organisation-staff', label: 'Organisation Staff' },
-        { value: 'organisation-therapists', label: 'Our Therapists' },
-        { value: 'organisation-students', label: 'Students/Users' },
-        { value: 'platform-admin', label: 'Platform Admin' },
-        { value: 'external', label: 'External' }
+        { value: "individual", label: "Individual" },
+        { value: "organisation-staff", label: "Organisation Staff" },
+        { value: "organisation-therapists", label: "Our Therapists" },
+        { value: "organisation-students", label: "Students/Users" },
+        { value: "platform-admin", label: "Platform Admin" },
+        { value: "external", label: "External" },
       ];
     }
-    
-    return [{ value: 'individual', label: 'Individual' }];
+
+    return [{ value: "individual", label: "Individual" }];
   };
 
   // Get role-specific page title
   const getPageTitle = () => {
-    const userRole = user?.role || 'admin';
-    
-    if (userRole === 'therapist') {
-      return 'Client Communications';
-    } else if (userRole === 'institution') {
-      return 'Institutional Communications';
+    const userRole = user?.role || "admin";
+
+    if (userRole === "therapist") {
+      return "Client Communications";
+    } else if (userRole === "institution") {
+      return "Institutional Communications";
     }
-    
-    return 'Email Management System';
+
+    return "Email Management System";
   };
 
   // Get role-specific description
   const getPageDescription = () => {
-    const userRole = user?.role || 'admin';
-    
-    if (userRole === 'therapist') {
-      return 'Send emails to your clients and colleagues';
-    } else if (userRole === 'institution') {
-      return 'Manage communications for your organisation';
+    const userRole = user?.role || "admin";
+
+    if (userRole === "therapist") {
+      return "Send emails to your clients and colleagues";
+    } else if (userRole === "institution") {
+      return "Manage communications for your organisation";
     }
-    
-    return 'Comprehensive email system for platform-wide communications';
+
+    return "Comprehensive email system for platform-wide communications";
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'queued': return <Clock className="w-4 h-4" />;
-      case 'processing': return <RefreshCw className="w-4 h-4 animate-spin" />;
-      case 'sent': return <CheckCircle className="w-4 h-4" />;
-      case 'failed': return <XCircle className="w-4 h-4" />;
-      default: return <AlertCircle className="w-4 h-4" />;
+      case "queued":
+        return <Clock className="w-4 h-4" />;
+      case "processing":
+        return <RefreshCw className="w-4 h-4 animate-spin" />;
+      case "sent":
+        return <CheckCircle className="w-4 h-4" />;
+      case "failed":
+        return <XCircle className="w-4 h-4" />;
+      default:
+        return <AlertCircle className="w-4 h-4" />;
     }
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString('en-GB', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Date(dateString).toLocaleString("en-GB", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -357,7 +378,7 @@ const EmailManagement: React.FC<EmailManagementProps> = ({ user }) => {
           <h2 className="text-2xl font-bold text-gray-900">{getPageTitle()}</h2>
           <p className="text-gray-600">{getPageDescription()}</p>
         </div>
-        <Button 
+        <Button
           onClick={() => scheduleRemindersMutation.mutate()}
           disabled={scheduleRemindersMutation.isPending}
           className="bg-primary hover:bg-primary/90"
@@ -451,7 +472,7 @@ const EmailManagement: React.FC<EmailManagementProps> = ({ user }) => {
                       <SelectItem value="failed">Failed</SelectItem>
                     </SelectContent>
                   </Select>
-                  <Button 
+                  <Button
                     onClick={() => processQueueMutation.mutate(10)}
                     disabled={processQueueMutation.isPending}
                     size="sm"
@@ -475,16 +496,14 @@ const EmailManagement: React.FC<EmailManagementProps> = ({ user }) => {
                 <div className="space-y-3">
                   {emailQueue && emailQueue.length > 0 ? (
                     emailQueue.map((email) => (
-                      <div 
-                        key={email.id} 
+                      <div
+                        key={email.id}
                         className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
                       >
                         <div className="flex items-center space-x-4">
                           <div className="flex items-center space-x-2">
                             {getStatusIcon(email.status)}
-                            <Badge className={getStatusColor(email.status)}>
-                              {email.status}
-                            </Badge>
+                            <Badge className={getStatusColor(email.status)}>{email.status}</Badge>
                           </div>
                           <div>
                             <p className="font-medium text-gray-900">{email.subject}</p>
@@ -492,9 +511,7 @@ const EmailManagement: React.FC<EmailManagementProps> = ({ user }) => {
                               To: {email.to} • Type: {email.type}
                             </p>
                             {email.error && (
-                              <p className="text-sm text-red-600 mt-1">
-                                Error: {email.error}
-                              </p>
+                              <p className="text-sm text-red-600 mt-1">Error: {email.error}</p>
                             )}
                           </div>
                         </div>
@@ -504,12 +521,11 @@ const EmailManagement: React.FC<EmailManagementProps> = ({ user }) => {
                           </Badge>
                           <div className="text-right">
                             <p className="text-sm text-gray-600">
-                              {email.sentAt ? `Sent: ${formatDate(email.sentAt)}` : 
-                               `Scheduled: ${formatDate(email.scheduledFor)}`}
+                              {email.sentAt
+                                ? `Sent: ${formatDate(email.sentAt)}`
+                                : `Scheduled: ${formatDate(email.scheduledFor)}`}
                             </p>
-                            <p className="text-xs text-gray-500">
-                              Attempts: {email.attempts}
-                            </p>
+                            <p className="text-xs text-gray-500">Attempts: {email.attempts}</p>
                           </div>
                         </div>
                       </div>
@@ -539,44 +555,52 @@ const EmailManagement: React.FC<EmailManagementProps> = ({ user }) => {
                 <div className="space-y-4">
                   <div>
                     <Label htmlFor="recipient-type">Recipient Type</Label>
-                    <Select value={emailForm.recipientType} onValueChange={(value) => updateEmailForm('recipientType', value)}>
+                    <Select
+                      value={emailForm.recipientType}
+                      onValueChange={(value) => updateEmailForm("recipientType", value)}
+                    >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {getRecipientOptions().filter(option => option && option.value && option.value.length > 0).map(option => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
+                        {getRecipientOptions()
+                          .filter((option) => option && option.value && option.value.length > 0)
+                          .map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
                       </SelectContent>
                     </Select>
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="email-to">To</Label>
-                    <Input 
-                      id="email-to" 
+                    <Input
+                      id="email-to"
                       placeholder="Enter email addresses (comma-separated)"
                       className="h-20"
                       value={emailForm.to}
-                      onChange={(e) => updateEmailForm('to', e.target.value)}
+                      onChange={(e) => updateEmailForm("to", e.target.value)}
                     />
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="email-cc">CC (Optional)</Label>
-                    <Input 
-                      id="email-cc" 
+                    <Input
+                      id="email-cc"
                       placeholder="CC recipients"
                       value={emailForm.cc}
-                      onChange={(e) => updateEmailForm('cc', e.target.value)}
+                      onChange={(e) => updateEmailForm("cc", e.target.value)}
                     />
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="email-priority">Priority</Label>
-                    <Select value={emailForm.priority} onValueChange={(value) => updateEmailForm('priority', value)}>
+                    <Select
+                      value={emailForm.priority}
+                      onValueChange={(value) => updateEmailForm("priority", value)}
+                    >
                       <SelectTrigger>
                         <SelectValue />
                       </SelectTrigger>
@@ -593,17 +617,20 @@ const EmailManagement: React.FC<EmailManagementProps> = ({ user }) => {
                 <div className="lg:col-span-2 space-y-4">
                   <div>
                     <Label htmlFor="email-subject">Subject</Label>
-                    <Input 
-                      id="email-subject" 
+                    <Input
+                      id="email-subject"
                       placeholder="Email subject"
                       value={emailForm.subject}
-                      onChange={(e) => updateEmailForm('subject', e.target.value)}
+                      onChange={(e) => updateEmailForm("subject", e.target.value)}
                     />
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="email-template">Use Template</Label>
-                    <Select value={emailForm.template} onValueChange={(value) => updateEmailForm('template', value)}>
+                    <Select
+                      value={emailForm.template}
+                      onValueChange={(value) => updateEmailForm("template", value)}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Select template (optional)" />
                       </SelectTrigger>
@@ -618,20 +645,20 @@ const EmailManagement: React.FC<EmailManagementProps> = ({ user }) => {
                       </SelectContent>
                     </Select>
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="email-body">Message</Label>
-                    <textarea 
+                    <textarea
                       id="email-body"
                       className="w-full h-64 p-3 border rounded-md resize-none"
                       placeholder="Compose your email message..."
                       value={emailForm.body}
-                      onChange={(e) => updateEmailForm('body', e.target.value)}
+                      onChange={(e) => updateEmailForm("body", e.target.value)}
                     />
                   </div>
-                  
+
                   <div className="flex items-center space-x-4">
-                    <Button 
+                    <Button
                       className="bg-blue-600 hover:bg-blue-700"
                       onClick={handleSendEmail}
                       disabled={sendEmailMutation.isPending}
@@ -639,17 +666,11 @@ const EmailManagement: React.FC<EmailManagementProps> = ({ user }) => {
                       <Send className="w-4 h-4 mr-2" />
                       {sendEmailMutation.isPending ? "Sending..." : "Send Email"}
                     </Button>
-                    <Button 
-                      variant="outline"
-                      onClick={handleSaveDraft}
-                    >
+                    <Button variant="outline" onClick={handleSaveDraft}>
                       <Archive className="w-4 h-4 mr-2" />
                       Save Draft
                     </Button>
-                    <Button 
-                      variant="outline"
-                      onClick={handlePreview}
-                    >
+                    <Button variant="outline" onClick={handlePreview}>
                       <Eye className="w-4 h-4 mr-2" />
                       Preview
                     </Button>
@@ -680,14 +701,22 @@ const EmailManagement: React.FC<EmailManagementProps> = ({ user }) => {
                   </div>
                   <Badge className="bg-green-100 text-green-800">Active</Badge>
                 </div>
-                
+
                 <div className="space-y-2">
-                  <p className="text-sm"><strong>API Status:</strong> ✅ Operational</p>
-                  <p className="text-sm"><strong>Monthly Quota:</strong> 15,000 / 25,000 emails</p>
-                  <p className="text-sm"><strong>Delivery Rate:</strong> 98.7%</p>
-                  <p className="text-sm"><strong>Last Sync:</strong> 2 minutes ago</p>
+                  <p className="text-sm">
+                    <strong>API Status:</strong> ✅ Operational
+                  </p>
+                  <p className="text-sm">
+                    <strong>Monthly Quota:</strong> 15,000 / 25,000 emails
+                  </p>
+                  <p className="text-sm">
+                    <strong>Delivery Rate:</strong> 98.7%
+                  </p>
+                  <p className="text-sm">
+                    <strong>Last Sync:</strong> 2 minutes ago
+                  </p>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Button variant="outline" size="sm" className="w-full">
                     <Settings className="w-4 h-4 mr-2" />
@@ -718,7 +747,7 @@ const EmailManagement: React.FC<EmailManagementProps> = ({ user }) => {
                   </div>
                   <Badge variant="outline">Configure</Badge>
                 </div>
-                
+
                 <div className="space-y-2">
                   <p className="text-sm text-gray-600">Connect your Google Workspace account to:</p>
                   <ul className="text-sm text-gray-600 space-y-1 ml-4">
@@ -728,7 +757,7 @@ const EmailManagement: React.FC<EmailManagementProps> = ({ user }) => {
                     <li>• Enable SSO for staff</li>
                   </ul>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Button className="w-full bg-red-600 hover:bg-red-700">
                     <Settings className="w-4 h-4 mr-2" />
@@ -799,7 +828,7 @@ const EmailManagement: React.FC<EmailManagementProps> = ({ user }) => {
                       </SelectContent>
                     </Select>
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="test-email">Test Email Address</Label>
                     <Input
@@ -810,7 +839,7 @@ const EmailManagement: React.FC<EmailManagementProps> = ({ user }) => {
                       onChange={(e) => setTestEmail(e.target.value)}
                     />
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="test-environment">Environment</Label>
                     <Select defaultValue="development">
@@ -824,13 +853,15 @@ const EmailManagement: React.FC<EmailManagementProps> = ({ user }) => {
                       </SelectContent>
                     </Select>
                   </div>
-                  
+
                   <div className="grid grid-cols-2 gap-2">
-                    <Button 
-                      onClick={() => sendTestEmailMutation.mutate({ 
-                        type: testEmailType, 
-                        to: testEmail 
-                      })}
+                    <Button
+                      onClick={() =>
+                        sendTestEmailMutation.mutate({
+                          type: testEmailType,
+                          to: testEmail,
+                        })
+                      }
                       disabled={sendTestEmailMutation.isPending || !testEmail}
                       variant="outline"
                     >
@@ -841,7 +872,7 @@ const EmailManagement: React.FC<EmailManagementProps> = ({ user }) => {
                       )}
                       Send Test
                     </Button>
-                    
+
                     <Button variant="outline">
                       <Eye className="w-4 h-4 mr-2" />
                       Preview
@@ -871,7 +902,7 @@ const EmailManagement: React.FC<EmailManagementProps> = ({ user }) => {
                       <p className="text-xs text-gray-600 mt-1">Sent to test@example.com</p>
                       <p className="text-xs text-green-600">✓ Delivered successfully</p>
                     </div>
-                    
+
                     <div className="p-3 border rounded-lg bg-yellow-50">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
@@ -883,7 +914,7 @@ const EmailManagement: React.FC<EmailManagementProps> = ({ user }) => {
                       <p className="text-xs text-gray-600 mt-1">Sent to admin@demo.hive</p>
                       <p className="text-xs text-yellow-600">⏳ Processing...</p>
                     </div>
-                    
+
                     <div className="p-3 border rounded-lg bg-red-50">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-2">
@@ -896,7 +927,7 @@ const EmailManagement: React.FC<EmailManagementProps> = ({ user }) => {
                       <p className="text-xs text-red-600">✗ Invalid email format</p>
                     </div>
                   </div>
-                  
+
                   <div className="grid grid-cols-3 gap-2 text-center">
                     <div className="p-2 bg-green-50 rounded">
                       <p className="text-lg font-bold text-green-600">24</p>
@@ -911,7 +942,7 @@ const EmailManagement: React.FC<EmailManagementProps> = ({ user }) => {
                       <p className="text-xs text-gray-600">Failed</p>
                     </div>
                   </div>
-                  
+
                   <Button variant="outline" size="sm" className="w-full">
                     <RefreshCw className="w-4 h-4 mr-2" />
                     Refresh Results
@@ -920,7 +951,7 @@ const EmailManagement: React.FC<EmailManagementProps> = ({ user }) => {
               </CardContent>
             </Card>
           </div>
-          
+
           {/* Advanced Testing */}
           <Card>
             <CardHeader>
@@ -936,7 +967,7 @@ const EmailManagement: React.FC<EmailManagementProps> = ({ user }) => {
                     Configure Bulk Test
                   </Button>
                 </div>
-                
+
                 <div className="p-4 border rounded-lg text-center">
                   <Calendar className="w-8 h-8 text-purple-500 mx-auto mb-2" />
                   <h3 className="font-medium">Scheduled Test</h3>
@@ -945,7 +976,7 @@ const EmailManagement: React.FC<EmailManagementProps> = ({ user }) => {
                     Schedule Test
                   </Button>
                 </div>
-                
+
                 <div className="p-4 border rounded-lg text-center">
                   <Settings className="w-8 h-8 text-orange-500 mx-auto mb-2" />
                   <h3 className="font-medium">Load Test</h3>
@@ -986,7 +1017,7 @@ const EmailManagement: React.FC<EmailManagementProps> = ({ user }) => {
                   <Badge className="mt-2 bg-green-100 text-green-800">Active</Badge>
                 </div>
               </div>
-              
+
               <div className="space-y-4">
                 <h3 className="font-medium">Priority Distribution</h3>
                 <div className="grid grid-cols-3 gap-4">
@@ -995,7 +1026,9 @@ const EmailManagement: React.FC<EmailManagementProps> = ({ user }) => {
                     <p className="text-sm text-gray-600">High Priority</p>
                   </div>
                   <div className="text-center p-3 border rounded">
-                    <p className="text-2xl font-bold text-blue-600">{stats?.byPriority.normal || 0}</p>
+                    <p className="text-2xl font-bold text-blue-600">
+                      {stats?.byPriority.normal || 0}
+                    </p>
                     <p className="text-sm text-gray-600">Normal Priority</p>
                   </div>
                   <div className="text-center p-3 border rounded">
@@ -1018,15 +1051,25 @@ const EmailManagement: React.FC<EmailManagementProps> = ({ user }) => {
           <div className="space-y-4">
             <div className="p-4 border rounded-lg bg-gray-50">
               <div className="space-y-2 mb-4">
-                <p><strong>To:</strong> {emailForm.to || 'No recipient specified'}</p>
-                {emailForm.cc && <p><strong>CC:</strong> {emailForm.cc}</p>}
-                <p><strong>Subject:</strong> {emailForm.subject || 'No subject'}</p>
-                <p><strong>Priority:</strong> {emailForm.priority}</p>
+                <p>
+                  <strong>To:</strong> {emailForm.to || "No recipient specified"}
+                </p>
+                {emailForm.cc && (
+                  <p>
+                    <strong>CC:</strong> {emailForm.cc}
+                  </p>
+                )}
+                <p>
+                  <strong>Subject:</strong> {emailForm.subject || "No subject"}
+                </p>
+                <p>
+                  <strong>Priority:</strong> {emailForm.priority}
+                </p>
               </div>
               <div className="border-t pt-4">
                 <h4 className="font-medium mb-2">Message:</h4>
                 <div className="whitespace-pre-wrap p-3 bg-white border rounded">
-                  {emailForm.body || 'No message content'}
+                  {emailForm.body || "No message content"}
                 </div>
               </div>
             </div>
@@ -1034,10 +1077,12 @@ const EmailManagement: React.FC<EmailManagementProps> = ({ user }) => {
               <Button variant="outline" onClick={() => setShowPreview(false)}>
                 Close Preview
               </Button>
-              <Button onClick={() => {
-                setShowPreview(false);
-                handleSendEmail();
-              }}>
+              <Button
+                onClick={() => {
+                  setShowPreview(false);
+                  handleSendEmail();
+                }}
+              >
                 Send Email
               </Button>
             </div>

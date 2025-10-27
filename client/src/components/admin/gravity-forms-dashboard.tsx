@@ -1,13 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Separator } from '@/components/ui/separator';
-import { Progress } from '@/components/ui/progress';
-import { 
-  FileText, 
-  Users, 
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Separator } from "@/components/ui/separator";
+import { Progress } from "@/components/ui/progress";
+import {
+  FileText,
+  Users,
   Calendar,
   CheckCircle,
   AlertCircle,
@@ -19,19 +19,19 @@ import {
   MapPin,
   Clock,
   Filter,
-  Search
-} from 'lucide-react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient';
-import { useToast } from '@/hooks/use-toast';
-import type { User } from '@shared/schema';
+  Search,
+} from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import type { User } from "@shared/schema";
 
 interface FormSubmission {
   id: string;
   formId: string;
   formName: string;
   submittedAt: string;
-  status: 'pending' | 'processed' | 'contacted' | 'assigned';
+  status: "pending" | "processed" | "contacted" | "assigned";
   data: {
     name?: string;
     email?: string;
@@ -42,7 +42,7 @@ interface FormSubmission {
     preferredContact?: string;
     [key: string]: any;
   };
-  source: 'gravity_forms' | 'contact_form' | 'therapist_application';
+  source: "gravity_forms" | "contact_form" | "therapist_application";
   processedBy?: string;
   assignedTherapist?: string;
   notes?: string;
@@ -53,29 +53,33 @@ interface GravityFormsDashboardProps {
 }
 
 const GravityFormsDashboard: React.FC<GravityFormsDashboardProps> = ({ user }) => {
-  const [filter, setFilter] = useState<'all' | 'pending' | 'processed'>('all');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [filter, setFilter] = useState<"all" | "pending" | "processed">("all");
+  const [searchTerm, setSearchTerm] = useState("");
   const [selectedForm, setSelectedForm] = useState<FormSubmission | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   // Fetch form submissions
-  const { data: submissions = [], isLoading, error } = useQuery<FormSubmission[]>({
-    queryKey: ['/api/admin/gravity-forms-submissions'],
-    refetchInterval: 30000 // Refresh every 30 seconds
+  const {
+    data: submissions = [],
+    isLoading,
+    error,
+  } = useQuery<FormSubmission[]>({
+    queryKey: ["/api/admin/gravity-forms-submissions"],
+    refetchInterval: 30000, // Refresh every 30 seconds
   });
 
   // Update submission status
   const updateStatusMutation = useMutation({
     mutationFn: async ({ id, status, notes }: { id: string; status: string; notes?: string }) => {
-      return apiRequest(`/api/admin/gravity-forms-submissions/${id}`, 'PATCH', { 
-        status, 
-        notes, 
-        processedBy: user.id 
+      return apiRequest(`/api/admin/gravity-forms-submissions/${id}`, "PATCH", {
+        status,
+        notes,
+        processedBy: user.id,
       });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/gravity-forms-submissions'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/gravity-forms-submissions"] });
       toast({
         title: "Status updated",
         description: "Form submission status has been updated successfully.",
@@ -88,84 +92,101 @@ const GravityFormsDashboard: React.FC<GravityFormsDashboardProps> = ({ user }) =
         title: "Update failed",
         description: "Unable to update submission status. Please try again.",
       });
-    }
+    },
   });
 
   // Sync with WordPress
   const syncMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest('/api/admin/sync-gravity-forms', 'POST');
+      return apiRequest("/api/admin/sync-gravity-forms", "POST");
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/gravity-forms-submissions'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/gravity-forms-submissions"] });
       toast({
         title: "Sync completed",
         description: "WordPress Gravity Forms have been synchronized.",
       });
-    }
+    },
   });
 
   // Export submissions
   const exportSubmissions = () => {
     const csvData = submissions.map((sub) => ({
-      'Submission ID': sub.id,
-      'Form Name': sub.formName,
-      'Name': sub.data.name || '',
-      'Email': sub.data.email || '',
-      'Phone': sub.data.phone || '',
-      'Status': sub.status,
-      'Submitted': new Date(sub.submittedAt).toLocaleDateString(),
-      'Therapy Type': sub.data.therapyType || '',
-      'Urgency': sub.data.urgency || '',
-      'Message': sub.data.message || ''
+      "Submission ID": sub.id,
+      "Form Name": sub.formName,
+      Name: sub.data.name || "",
+      Email: sub.data.email || "",
+      Phone: sub.data.phone || "",
+      Status: sub.status,
+      Submitted: new Date(sub.submittedAt).toLocaleDateString(),
+      "Therapy Type": sub.data.therapyType || "",
+      Urgency: sub.data.urgency || "",
+      Message: sub.data.message || "",
     }));
 
     const csv = [
-      Object.keys(csvData[0]).join(','),
-      ...csvData.map(row => Object.values(row).map(val => `"${val}"`).join(','))
-    ].join('\n');
+      Object.keys(csvData[0]).join(","),
+      ...csvData.map((row) =>
+        Object.values(row)
+          .map((val) => `"${val}"`)
+          .join(",")
+      ),
+    ].join("\n");
 
-    const blob = new Blob([csv], { type: 'text/csv' });
+    const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = `hive-wellness-submissions-${new Date().toISOString().split('T')[0]}.csv`;
+    a.download = `hive-wellness-submissions-${new Date().toISOString().split("T")[0]}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   };
 
   // Filter submissions
   const filteredSubmissions = submissions.filter((sub) => {
-    if (filter !== 'all' && sub.status !== filter) return false;
-    if (searchTerm && !sub.data.name?.toLowerCase().includes(searchTerm.toLowerCase()) && 
-        !sub.data.email?.toLowerCase().includes(searchTerm.toLowerCase())) return false;
+    if (filter !== "all" && sub.status !== filter) return false;
+    if (
+      searchTerm &&
+      !sub.data.name?.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      !sub.data.email?.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+      return false;
     return true;
   });
 
   // Stats
   const stats = {
     total: submissions.length,
-    pending: submissions.filter((s) => s.status === 'pending').length,
-    processed: submissions.filter((s) => s.status === 'processed').length,
-    contacted: submissions.filter((s) => s.status === 'contacted').length
+    pending: submissions.filter((s) => s.status === "pending").length,
+    processed: submissions.filter((s) => s.status === "processed").length,
+    contacted: submissions.filter((s) => s.status === "contacted").length,
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-      case 'processed': return 'bg-blue-100 text-blue-800 border-blue-200';
-      case 'contacted': return 'bg-green-100 text-green-800 border-green-200';
-      case 'assigned': return 'bg-purple-100 text-purple-800 border-purple-200';
-      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+      case "pending":
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      case "processed":
+        return "bg-blue-100 text-blue-800 border-blue-200";
+      case "contacted":
+        return "bg-green-100 text-green-800 border-green-200";
+      case "assigned":
+        return "bg-purple-100 text-purple-800 border-purple-200";
+      default:
+        return "bg-gray-100 text-gray-800 border-gray-200";
     }
   };
 
   const getPriorityColor = (urgency: string) => {
     switch (urgency?.toLowerCase()) {
-      case 'urgent': return 'text-red-600';
-      case 'high': return 'text-orange-600';
-      case 'medium': return 'text-yellow-600';
-      default: return 'text-green-600';
+      case "urgent":
+        return "text-red-600";
+      case "high":
+        return "text-orange-600";
+      case "medium":
+        return "text-yellow-600";
+      default:
+        return "text-green-600";
     }
   };
 
@@ -185,10 +206,14 @@ const GravityFormsDashboard: React.FC<GravityFormsDashboardProps> = ({ user }) =
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-display font-bold text-gray-900">WordPress Forms Dashboard</h1>
-          <p className="text-gray-600 mt-1">Manage Gravity Forms submissions from your WordPress site</p>
+          <h1 className="text-3xl font-display font-bold text-gray-900">
+            WordPress Forms Dashboard
+          </h1>
+          <p className="text-gray-600 mt-1">
+            Manage Gravity Forms submissions from your WordPress site
+          </p>
         </div>
-        
+
         <div className="flex gap-3">
           <Button
             onClick={() => syncMutation.mutate()}
@@ -196,15 +221,11 @@ const GravityFormsDashboard: React.FC<GravityFormsDashboardProps> = ({ user }) =
             variant="outline"
             className="flex items-center gap-2"
           >
-            <RefreshCw className={`w-4 h-4 ${syncMutation.isPending ? 'animate-spin' : ''}`} />
+            <RefreshCw className={`w-4 h-4 ${syncMutation.isPending ? "animate-spin" : ""}`} />
             Sync Forms
           </Button>
-          
-          <Button
-            onClick={exportSubmissions}
-            variant="outline"
-            className="flex items-center gap-2"
-          >
+
+          <Button onClick={exportSubmissions} variant="outline" className="flex items-center gap-2">
             <Download className="w-4 h-4" />
             Export CSV
           </Button>
@@ -268,28 +289,28 @@ const GravityFormsDashboard: React.FC<GravityFormsDashboardProps> = ({ user }) =
           <div className="flex flex-col sm:flex-row gap-4 items-center">
             <div className="flex gap-2">
               <Button
-                variant={filter === 'all' ? 'default' : 'outline'}
-                onClick={() => setFilter('all')}
+                variant={filter === "all" ? "default" : "outline"}
+                onClick={() => setFilter("all")}
                 size="sm"
               >
                 All ({stats.total})
               </Button>
               <Button
-                variant={filter === 'pending' ? 'default' : 'outline'}
-                onClick={() => setFilter('pending')}
+                variant={filter === "pending" ? "default" : "outline"}
+                onClick={() => setFilter("pending")}
                 size="sm"
               >
                 Pending ({stats.pending})
               </Button>
               <Button
-                variant={filter === 'processed' ? 'default' : 'outline'}
-                onClick={() => setFilter('processed')}
+                variant={filter === "processed" ? "default" : "outline"}
+                onClick={() => setFilter("processed")}
                 size="sm"
               >
                 Processed ({stats.processed})
               </Button>
             </div>
-            
+
             <div className="flex-1 max-w-sm">
               <div className="relative">
                 <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -330,20 +351,23 @@ const GravityFormsDashboard: React.FC<GravityFormsDashboardProps> = ({ user }) =
                   <div className="flex-1">
                     <div className="flex items-center gap-3 mb-2">
                       <h3 className="text-lg font-semibold text-gray-900">
-                        {submission.data.name || 'Anonymous Submission'}
+                        {submission.data.name || "Anonymous Submission"}
                       </h3>
                       <Badge className={getStatusColor(submission.status)}>
                         {submission.status}
                       </Badge>
                       {submission.data.urgency && (
-                        <Badge variant="outline" className={getPriorityColor(submission.data.urgency)}>
+                        <Badge
+                          variant="outline"
+                          className={getPriorityColor(submission.data.urgency)}
+                        >
                           {submission.data.urgency}
                         </Badge>
                       )}
                     </div>
-                    
+
                     <p className="text-sm text-gray-600 mb-3">{submission.formName}</p>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                       {submission.data.email && (
                         <div className="flex items-center gap-2">
@@ -351,14 +375,14 @@ const GravityFormsDashboard: React.FC<GravityFormsDashboardProps> = ({ user }) =
                           <span className="text-gray-700">{submission.data.email}</span>
                         </div>
                       )}
-                      
+
                       {submission.data.phone && (
                         <div className="flex items-center gap-2">
                           <Phone className="w-4 h-4 text-gray-400" />
                           <span className="text-gray-700">{submission.data.phone}</span>
                         </div>
                       )}
-                      
+
                       <div className="flex items-center gap-2">
                         <Calendar className="w-4 h-4 text-gray-400" />
                         <span className="text-gray-700">
@@ -366,30 +390,30 @@ const GravityFormsDashboard: React.FC<GravityFormsDashboardProps> = ({ user }) =
                         </span>
                       </div>
                     </div>
-                    
+
                     {submission.data.message && (
                       <div className="mt-3 p-3 bg-gray-50 rounded-md">
-                        <p className="text-sm text-gray-700 line-clamp-2">{submission.data.message}</p>
+                        <p className="text-sm text-gray-700 line-clamp-2">
+                          {submission.data.message}
+                        </p>
                       </div>
                     )}
                   </div>
-                  
+
                   <div className="flex gap-2 ml-4">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setSelectedForm(submission)}
-                    >
+                    <Button variant="outline" size="sm" onClick={() => setSelectedForm(submission)}>
                       View Details
                     </Button>
-                    
-                    {submission.status === 'pending' && (
+
+                    {submission.status === "pending" && (
                       <Button
                         size="sm"
-                        onClick={() => updateStatusMutation.mutate({
-                          id: submission.id,
-                          status: 'processed'
-                        })}
+                        onClick={() =>
+                          updateStatusMutation.mutate({
+                            id: submission.id,
+                            status: "processed",
+                          })
+                        }
                         disabled={updateStatusMutation.isPending}
                         className="bg-hive-purple hover:bg-hive-purple/90"
                       >
@@ -411,16 +435,12 @@ const GravityFormsDashboard: React.FC<GravityFormsDashboardProps> = ({ user }) =
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 Form Submission Details
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setSelectedForm(null)}
-                >
+                <Button variant="outline" size="sm" onClick={() => setSelectedForm(null)}>
                   Close
                 </Button>
               </CardTitle>
             </CardHeader>
-            
+
             <CardContent className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -434,40 +454,44 @@ const GravityFormsDashboard: React.FC<GravityFormsDashboardProps> = ({ user }) =
                   </Badge>
                 </div>
               </div>
-              
+
               <Separator />
-              
+
               <div className="space-y-3">
                 <h4 className="font-medium text-gray-900">Submission Data</h4>
                 {Object.entries(selectedForm.data).map(([key, value]) => (
                   <div key={key}>
                     <p className="font-medium text-gray-700 capitalize">
-                      {key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase())}
+                      {key.replace(/([A-Z])/g, " $1").replace(/^./, (str) => str.toUpperCase())}
                     </p>
                     <p className="text-gray-600">{String(value)}</p>
                   </div>
                 ))}
               </div>
-              
+
               <Separator />
-              
+
               <div className="flex gap-3">
                 <Button
-                  onClick={() => updateStatusMutation.mutate({
-                    id: selectedForm.id,
-                    status: 'contacted'
-                  })}
+                  onClick={() =>
+                    updateStatusMutation.mutate({
+                      id: selectedForm.id,
+                      status: "contacted",
+                    })
+                  }
                   disabled={updateStatusMutation.isPending}
                   className="flex-1"
                 >
                   Mark as Contacted
                 </Button>
-                
+
                 <Button
-                  onClick={() => updateStatusMutation.mutate({
-                    id: selectedForm.id,
-                    status: 'assigned'
-                  })}
+                  onClick={() =>
+                    updateStatusMutation.mutate({
+                      id: selectedForm.id,
+                      status: "assigned",
+                    })
+                  }
                   disabled={updateStatusMutation.isPending}
                   variant="outline"
                   className="flex-1"

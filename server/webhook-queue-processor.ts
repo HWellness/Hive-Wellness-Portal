@@ -19,7 +19,7 @@ export class WebhookQueueProcessor {
    * Start the background queue processor
    */
   start(): void {
-    console.log('🚀 Starting webhook queue processor...');
+    console.log("🚀 Starting webhook queue processor...");
 
     // Process queue every 30 seconds
     this.processInterval = setInterval(() => {
@@ -27,11 +27,11 @@ export class WebhookQueueProcessor {
     }, 30000);
 
     // Also run a cron job every minute for reliability
-    cron.schedule('*/1 * * * *', () => {
+    cron.schedule("*/1 * * * *", () => {
       this.processQueue();
     });
 
-    console.log('✅ Webhook queue processor started');
+    console.log("✅ Webhook queue processor started");
   }
 
   /**
@@ -42,7 +42,7 @@ export class WebhookQueueProcessor {
       clearInterval(this.processInterval);
       this.processInterval = null;
     }
-    console.log('⏹️ Webhook queue processor stopped');
+    console.log("⏹️ Webhook queue processor stopped");
   }
 
   /**
@@ -58,7 +58,7 @@ export class WebhookQueueProcessor {
     try {
       await this.webhookProcessor.processQueuedOperations(20); // Process up to 20 items
     } catch (error) {
-      console.error('❌ Error processing webhook queue:', error);
+      console.error("❌ Error processing webhook queue:", error);
     } finally {
       this.isProcessing = false;
     }
@@ -76,6 +76,6 @@ export class WebhookQueueProcessor {
 export const webhookQueueProcessor = new WebhookQueueProcessor();
 
 // Auto-start in production
-if (process.env.NODE_ENV === 'production') {
+if (process.env.NODE_ENV === "production") {
   webhookQueueProcessor.start();
 }

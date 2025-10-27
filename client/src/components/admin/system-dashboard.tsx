@@ -1,13 +1,13 @@
-import { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AlertTriangle, Activity, Database } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AlertTriangle, Activity, Database } from "lucide-react";
 
 interface SystemHealth {
-  overall: 'healthy' | 'degraded' | 'unhealthy';
+  overall: "healthy" | "degraded" | "unhealthy";
   services: {
     total: number;
     healthy: number;
@@ -19,7 +19,7 @@ interface SystemHealth {
 
 interface ServiceMetrics {
   name: string;
-  status: 'healthy' | 'degraded' | 'unhealthy';
+  status: "healthy" | "degraded" | "unhealthy";
   metrics: {
     uptime: number;
     responseTime: number;
@@ -34,7 +34,7 @@ interface DetailedHealth {
   system: SystemHealth;
   services: ServiceMetrics[];
   alerts: Array<{
-    level: 'critical' | 'warning';
+    level: "critical" | "warning";
     service: string;
     message: string;
     timestamp: number;
@@ -43,9 +43,9 @@ interface DetailedHealth {
 
 interface ApiStatus {
   name: string;
-  status: 'healthy' | 'degraded' | 'unhealthy';
+  status: "healthy" | "degraded" | "unhealthy";
   failures: number;
-  circuitBreakerState: 'CLOSED' | 'OPEN' | 'HALF_OPEN';
+  circuitBreakerState: "CLOSED" | "OPEN" | "HALF_OPEN";
   responseTime: number;
   successCount: number;
   errorCount: number;
@@ -77,37 +77,45 @@ export default function SystemDashboard() {
 
   // Fetch system health data
   const { data: healthData, refetch: refetchHealth } = useQuery<DetailedHealth>({
-    queryKey: ['/api/health/detailed'],
+    queryKey: ["/api/health/detailed"],
     refetchInterval: refreshInterval,
   });
 
   // Fetch API status data
   const { data: apiData, refetch: refetchApi } = useQuery<{ apis: Record<string, ApiStatus> }>({
-    queryKey: ['/api/health/services'],
+    queryKey: ["/api/health/services"],
     refetchInterval: refreshInterval,
   });
 
   // Fetch performance metrics
   const { data: metricsData, refetch: refetchMetrics } = useQuery<PerformanceMetrics>({
-    queryKey: ['/api/metrics'],
+    queryKey: ["/api/metrics"],
     refetchInterval: refreshInterval,
   });
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'healthy': return 'text-green-600 bg-green-50';
-      case 'degraded': return 'text-yellow-600 bg-yellow-50';
-      case 'unhealthy': return 'text-red-600 bg-red-50';
-      default: return 'text-gray-600 bg-gray-50';
+      case "healthy":
+        return "text-green-600 bg-green-50";
+      case "degraded":
+        return "text-yellow-600 bg-yellow-50";
+      case "unhealthy":
+        return "text-red-600 bg-red-50";
+      default:
+        return "text-gray-600 bg-gray-50";
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'healthy': return <CheckCircle className="h-4 w-4 text-green-600" />;
-      case 'degraded': return <AlertTriangle className="h-4 w-4 text-yellow-600" />;
-      case 'unhealthy': return <XCircle className="h-4 w-4 text-red-600" />;
-      default: return <Activity className="h-4 w-4 text-gray-600" />;
+      case "healthy":
+        return <CheckCircle className="h-4 w-4 text-green-600" />;
+      case "degraded":
+        return <AlertTriangle className="h-4 w-4 text-yellow-600" />;
+      case "unhealthy":
+        return <XCircle className="h-4 w-4 text-red-600" />;
+      default:
+        return <Activity className="h-4 w-4 text-gray-600" />;
     }
   };
 
@@ -133,9 +141,12 @@ export default function SystemDashboard() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Badge variant="outline" className={getStatusColor(healthData?.system.overall || 'unknown')}>
-            {getStatusIcon(healthData?.system.overall || 'unknown')}
-            <span className="ml-1 capitalize">{healthData?.system.overall || 'Loading...'}</span>
+          <Badge
+            variant="outline"
+            className={getStatusColor(healthData?.system.overall || "unknown")}
+          >
+            {getStatusIcon(healthData?.system.overall || "unknown")}
+            <span className="ml-1 capitalize">{healthData?.system.overall || "Loading..."}</span>
           </Badge>
         </div>
       </div>
@@ -150,7 +161,8 @@ export default function SystemDashboard() {
           <CardContent>
             <div className="text-2xl font-bold">{healthData?.system.services.total || 0}</div>
             <p className="text-xs text-muted-foreground">
-              {healthData?.system.services.healthy || 0} healthy, {healthData?.system.services.degraded || 0} degraded
+              {healthData?.system.services.healthy || 0} healthy,{" "}
+              {healthData?.system.services.degraded || 0} degraded
             </p>
           </CardContent>
         </Card>
@@ -161,10 +173,10 @@ export default function SystemDashboard() {
             <CheckCircle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{formatUptime((metricsData?.uptime || 0) * 1000)}</div>
-            <p className="text-xs text-muted-foreground">
-              Since last restart
-            </p>
+            <div className="text-2xl font-bold">
+              {formatUptime((metricsData?.uptime || 0) * 1000)}
+            </div>
+            <p className="text-xs text-muted-foreground">Since last restart</p>
           </CardContent>
         </Card>
 
@@ -174,10 +186,10 @@ export default function SystemDashboard() {
             <Zap className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{metricsData?.performance.averageResponseTime || 0}ms</div>
-            <p className="text-xs text-muted-foreground">
-              Average across all services
-            </p>
+            <div className="text-2xl font-bold">
+              {metricsData?.performance.averageResponseTime || 0}ms
+            </div>
+            <p className="text-xs text-muted-foreground">Average across all services</p>
           </CardContent>
         </Card>
 
@@ -187,9 +199,12 @@ export default function SystemDashboard() {
             <Shield className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{metricsData?.performance.errorRate.toFixed(2) || 0}%</div>
+            <div className="text-2xl font-bold">
+              {metricsData?.performance.errorRate.toFixed(2) || 0}%
+            </div>
             <p className="text-xs text-muted-foreground">
-              {metricsData?.performance.errorCount || 0} errors out of {metricsData?.performance.totalRequests || 0} requests
+              {metricsData?.performance.errorCount || 0} errors out of{" "}
+              {metricsData?.performance.totalRequests || 0} requests
             </p>
           </CardContent>
         </Card>
@@ -258,37 +273,50 @@ export default function SystemDashboard() {
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {apiData && Object.entries(apiData.apis).map(([name, api]) => (
-                  <div key={name} className="border rounded-lg p-4">
-                    <div className="flex items-center justify-between mb-2">
-                      <h4 className="font-medium capitalize">{name}</h4>
-                      <Badge variant="outline" className={getStatusColor(api.status)}>
-                        {getStatusIcon(api.status)}
-                        <span className="ml-1 capitalize">{api.status}</span>
-                      </Badge>
-                    </div>
-                    <div className="space-y-2 text-xs text-muted-foreground">
-                      <div className="flex justify-between">
-                        <span>Circuit Breaker:</span>
-                        <Badge variant={api.circuitBreakerState === 'CLOSED' ? 'default' : 'destructive'}>
-                          {api.circuitBreakerState}
+                {apiData &&
+                  Object.entries(apiData.apis).map(([name, api]) => (
+                    <div key={name} className="border rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-medium capitalize">{name}</h4>
+                        <Badge variant="outline" className={getStatusColor(api.status)}>
+                          {getStatusIcon(api.status)}
+                          <span className="ml-1 capitalize">{api.status}</span>
                         </Badge>
                       </div>
-                      <div className="flex justify-between">
-                        <span>Success Rate:</span>
-                        <span>{api.successCount > 0 ? ((api.successCount / (api.successCount + api.errorCount)) * 100).toFixed(1) : 0}%</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Response Time:</span>
-                        <span>{api.responseTime}ms</span>
-                      </div>
-                      <div className="flex justify-between">
-                        <span>Failures:</span>
-                        <span>{api.failures}</span>
+                      <div className="space-y-2 text-xs text-muted-foreground">
+                        <div className="flex justify-between">
+                          <span>Circuit Breaker:</span>
+                          <Badge
+                            variant={
+                              api.circuitBreakerState === "CLOSED" ? "default" : "destructive"
+                            }
+                          >
+                            {api.circuitBreakerState}
+                          </Badge>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Success Rate:</span>
+                          <span>
+                            {api.successCount > 0
+                              ? (
+                                  (api.successCount / (api.successCount + api.errorCount)) *
+                                  100
+                                ).toFixed(1)
+                              : 0}
+                            %
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Response Time:</span>
+                          <span>{api.responseTime}ms</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Failures:</span>
+                          <span>{api.failures}</span>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
               </div>
             </CardContent>
           </Card>
@@ -310,7 +338,7 @@ export default function SystemDashboard() {
                       <span>Memory Usage</span>
                       <span>{metricsData?.system.memoryUsage}</span>
                     </div>
-                    <Progress value={parseInt(metricsData?.system.memoryUsage || '0')} />
+                    <Progress value={parseInt(metricsData?.system.memoryUsage || "0")} />
                   </div>
                   <div>
                     <div className="flex justify-between text-sm mb-2">
@@ -331,11 +359,15 @@ export default function SystemDashboard() {
                   <div className="grid grid-cols-2 gap-4 text-sm">
                     <div>
                       <div className="font-medium">Total Requests</div>
-                      <div className="text-2xl font-bold">{metricsData?.performance.totalRequests || 0}</div>
+                      <div className="text-2xl font-bold">
+                        {metricsData?.performance.totalRequests || 0}
+                      </div>
                     </div>
                     <div>
                       <div className="font-medium">Error Count</div>
-                      <div className="text-2xl font-bold text-red-600">{metricsData?.performance.errorCount || 0}</div>
+                      <div className="text-2xl font-bold text-red-600">
+                        {metricsData?.performance.errorCount || 0}
+                      </div>
                     </div>
                     <div>
                       <div className="font-medium">Node Version</div>
@@ -356,22 +388,26 @@ export default function SystemDashboard() {
           <Card>
             <CardHeader>
               <CardTitle>System Alerts</CardTitle>
-              <CardDescription>
-                Current alerts and warnings across all services
-              </CardDescription>
+              <CardDescription>Current alerts and warnings across all services</CardDescription>
             </CardHeader>
             <CardContent>
               {healthData?.alerts && healthData.alerts.length > 0 ? (
                 <div className="space-y-2">
                   {healthData.alerts.map((alert, index) => (
-                    <div key={index} className={`border rounded-lg p-3 ${
-                      alert.level === 'critical' ? 'border-red-200 bg-red-50' : 'border-yellow-200 bg-yellow-50'
-                    }`}>
+                    <div
+                      key={index}
+                      className={`border rounded-lg p-3 ${
+                        alert.level === "critical"
+                          ? "border-red-200 bg-red-50"
+                          : "border-yellow-200 bg-yellow-50"
+                      }`}
+                    >
                       <div className="flex items-center gap-2">
-                        {alert.level === 'critical' ? 
-                          <XCircle className="h-4 w-4 text-red-600" /> : 
+                        {alert.level === "critical" ? (
+                          <XCircle className="h-4 w-4 text-red-600" />
+                        ) : (
                           <AlertTriangle className="h-4 w-4 text-yellow-600" />
-                        }
+                        )}
                         <span className="font-medium capitalize">{alert.level}</span>
                         <span className="text-muted-foreground">•</span>
                         <span className="text-sm">{alert.service}</span>

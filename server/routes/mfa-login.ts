@@ -1,31 +1,31 @@
-import { Router, type Request, type Response } from 'express';
-import { storage } from '../storage';
-import { MFAService } from '../services/mfa-service';
-import { SMSMFAService } from '../services/sms-mfa-service';
-import { EmailMFAService } from '../services/email-mfa-service';
+import { Router, type Request, type Response } from "express";
+import { storage } from "../storage";
+import { MFAService } from "../services/mfa-service";
+import { SMSMFAService } from "../services/sms-mfa-service";
+import { EmailMFAService } from "../services/email-mfa-service";
 
 const router = Router();
 
 // MFA Verification during login flow
-router.post('/verify-login', async (req: Request, res: Response) => {
+router.post("/verify-login", async (req: Request, res: Response) => {
   try {
     const { token, method } = req.body;
     const session = req.session as any;
 
     // Check if MFA verification is needed
     if (!session.needsMfaVerification || !session.mfaUserId) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'MFA verification not required' 
+      return res.status(400).json({
+        success: false,
+        message: "MFA verification not required",
       });
     }
 
     // Get user from database
     const user = await storage.getUserById(session.mfaUserId);
     if (!user || !user.mfaEnabled) {
-      return res.status(400).json({ 
-        success: false, 
-        message: 'MFA not enabled for this user' 
+      return res.status(400).json({
+        success: false,
+        message: "MFA not enabled for this user",
       });
     }
 
@@ -44,9 +44,9 @@ router.post('/verify-login', async (req: Request, res: Response) => {
     );
 
     if (!verificationResult.isValid) {
-      return res.status(401).json({ 
-        success: false, 
-        message: 'Invalid MFA code' 
+      return res.status(401).json({
+        success: false,
+        message: "Invalid MFA code",
       });
     }
 
@@ -83,52 +83,52 @@ router.post('/verify-login', async (req: Request, res: Response) => {
     delete session.mfaUserId;
     session.mfaVerifiedAt = Date.now();
 
-    res.json({ 
-      success: true, 
-      message: 'MFA verification successful',
+    res.json({
+      success: true,
+      message: "MFA verification successful",
       user: sessionUser,
-      usedBackupCode: verificationResult.usedBackupCode || false
+      usedBackupCode: verificationResult.usedBackupCode || false,
     });
   } catch (error) {
-    console.error('MFA verification error:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'MFA verification failed' 
+    console.error("MFA verification error:", error);
+    res.status(500).json({
+      success: false,
+      message: "MFA verification failed",
     });
   }
 });
 
 // Get MFA status for current session
-router.get('/status', async (req: Request, res: Response) => {
+router.get("/status", async (req: Request, res: Response) => {
   try {
     const session = req.session as any;
-    
+
     if (!session.needsMfaVerification) {
       return res.json({
         required: false,
-        verified: true
+        verified: true,
       });
     }
 
     const user = await storage.getUserById(session.mfaUserId);
     if (!user) {
-      return res.status(404).json({ 
-        success: false, 
-        message: 'User not found' 
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
       });
     }
 
     res.json({
       required: true,
       verified: false,
-      availableMethods: user.mfaMethods || ['totp'],
-      preferredMethod: user.mfaMethods?.[0] || 'totp'
+      availableMethods: user.mfaMethods || ["totp"],
+      preferredMethod: user.mfaMethods?.[0] || "totp",
     });
   } catch (error) {
-    console.error('MFA status check error:', error);
-    res.status(500).json({ 
-      success: false, 
-      message: 'Failed to check MFA status' 
+    console.error("MFA status check error:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to check MFA status",
     });
   }
 });

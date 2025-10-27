@@ -1,12 +1,18 @@
-import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar, Clock, Users, Video, Search, Filter } from 'lucide-react';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import React, { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Calendar, Clock, Users, Video, Search, Filter } from "lucide-react";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 interface VideoSession {
   id: string;
@@ -15,66 +21,80 @@ interface VideoSession {
   sessionDate: string;
   sessionTime: string;
   duration: number;
-  status: 'scheduled' | 'in-progress' | 'completed' | 'cancelled';
+  status: "scheduled" | "in-progress" | "completed" | "cancelled";
   meetingUrl: string;
   sessionType: string;
   notes?: string;
 }
 
 export default function AdminVideoSessions() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<string>('all');
-  const [dateFilter, setDateFilter] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [dateFilter, setDateFilter] = useState<string>("all");
 
-  const { data: sessions = [], isLoading, error } = useQuery({
-    queryKey: ['/api/admin/video-sessions'],
+  const {
+    data: sessions = [],
+    isLoading,
+    error,
+  } = useQuery({
+    queryKey: ["/api/admin/video-sessions"],
     queryFn: async () => {
-      const response = await fetch('/api/admin/video-sessions');
+      const response = await fetch("/api/admin/video-sessions");
       if (!response.ok) {
-        throw new Error('Failed to fetch video sessions');
+        throw new Error("Failed to fetch video sessions");
       }
       return response.json();
-    }
+    },
   });
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'scheduled': return 'bg-blue-100 text-blue-800';
-      case 'in-progress': return 'bg-green-100 text-green-800';
-      case 'completed': return 'bg-gray-100 text-gray-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "scheduled":
+        return "bg-blue-100 text-blue-800";
+      case "in-progress":
+        return "bg-green-100 text-green-800";
+      case "completed":
+        return "bg-gray-100 text-gray-800";
+      case "cancelled":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const filteredSessions = sessions.filter((session: VideoSession) => {
-    const matchesSearch = searchTerm === '' || 
+    const matchesSearch =
+      searchTerm === "" ||
       session.clientName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       session.therapistName.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesStatus = statusFilter === 'all' || session.status === statusFilter;
-    
-    const matchesDate = dateFilter === 'all' || (() => {
-      const sessionDate = new Date(session.sessionDate);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      
-      switch (dateFilter) {
-        case 'today':
-          return sessionDate.toDateString() === today.toDateString();
-        case 'this-week':
-          const weekStart = new Date(today);
-          weekStart.setDate(today.getDate() - today.getDay());
-          const weekEnd = new Date(weekStart);
-          weekEnd.setDate(weekStart.getDate() + 6);
-          return sessionDate >= weekStart && sessionDate <= weekEnd;
-        case 'this-month':
-          return sessionDate.getMonth() === today.getMonth() && 
-                 sessionDate.getFullYear() === today.getFullYear();
-        default:
-          return true;
-      }
-    })();
+
+    const matchesStatus = statusFilter === "all" || session.status === statusFilter;
+
+    const matchesDate =
+      dateFilter === "all" ||
+      (() => {
+        const sessionDate = new Date(session.sessionDate);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+
+        switch (dateFilter) {
+          case "today":
+            return sessionDate.toDateString() === today.toDateString();
+          case "this-week":
+            const weekStart = new Date(today);
+            weekStart.setDate(today.getDate() - today.getDay());
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekStart.getDate() + 6);
+            return sessionDate >= weekStart && sessionDate <= weekEnd;
+          case "this-month":
+            return (
+              sessionDate.getMonth() === today.getMonth() &&
+              sessionDate.getFullYear() === today.getFullYear()
+            );
+          default:
+            return true;
+        }
+      })();
 
     return matchesSearch && matchesStatus && matchesDate;
   });
@@ -87,11 +107,11 @@ export default function AdminVideoSessions() {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
         <div className="text-center">
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Unable to load video sessions</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            Unable to load video sessions
+          </h3>
           <p className="text-gray-600 mb-4">There was an error loading the video sessions data.</p>
-          <Button onClick={() => window.location.reload()}>
-            Try Again
-          </Button>
+          <Button onClick={() => window.location.reload()}>Try Again</Button>
         </div>
       </div>
     );
@@ -122,9 +142,12 @@ export default function AdminVideoSessions() {
               <div>
                 <p className="text-sm font-medium text-gray-600">Today's Sessions</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {sessions.filter((s: VideoSession) => 
-                    new Date(s.sessionDate).toDateString() === new Date().toDateString()
-                  ).length}
+                  {
+                    sessions.filter(
+                      (s: VideoSession) =>
+                        new Date(s.sessionDate).toDateString() === new Date().toDateString()
+                    ).length
+                  }
                 </p>
               </div>
             </div>
@@ -138,7 +161,7 @@ export default function AdminVideoSessions() {
               <div>
                 <p className="text-sm font-medium text-gray-600">In Progress</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {sessions.filter((s: VideoSession) => s.status === 'in-progress').length}
+                  {sessions.filter((s: VideoSession) => s.status === "in-progress").length}
                 </p>
               </div>
             </div>
@@ -152,10 +175,13 @@ export default function AdminVideoSessions() {
               <div>
                 <p className="text-sm font-medium text-gray-600">Completed Today</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {sessions.filter((s: VideoSession) => 
-                    s.status === 'completed' && 
-                    new Date(s.sessionDate).toDateString() === new Date().toDateString()
-                  ).length}
+                  {
+                    sessions.filter(
+                      (s: VideoSession) =>
+                        s.status === "completed" &&
+                        new Date(s.sessionDate).toDateString() === new Date().toDateString()
+                    ).length
+                  }
                 </p>
               </div>
             </div>
@@ -169,7 +195,7 @@ export default function AdminVideoSessions() {
               <div>
                 <p className="text-sm font-medium text-gray-600">Scheduled</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {sessions.filter((s: VideoSession) => s.status === 'scheduled').length}
+                  {sessions.filter((s: VideoSession) => s.status === "scheduled").length}
                 </p>
               </div>
             </div>
@@ -233,10 +259,9 @@ export default function AdminVideoSessions() {
               <Video className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-gray-900 mb-2">No video sessions found</h3>
               <p className="text-gray-600">
-                {searchTerm || statusFilter !== 'all' || dateFilter !== 'all' 
-                  ? 'Try adjusting your filters to see more sessions.'
-                  : 'No video sessions have been scheduled yet.'
-                }
+                {searchTerm || statusFilter !== "all" || dateFilter !== "all"
+                  ? "Try adjusting your filters to see more sessions."
+                  : "No video sessions have been scheduled yet."}
               </p>
             </CardContent>
           </Card>
@@ -251,10 +276,10 @@ export default function AdminVideoSessions() {
                         {session.clientName} ↔ {session.therapistName}
                       </h3>
                       <Badge className={getStatusColor(session.status)}>
-                        {session.status.replace('-', ' ')}
+                        {session.status.replace("-", " ")}
                       </Badge>
                     </div>
-                    
+
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
                       <div className="flex items-center space-x-2">
                         <Calendar className="h-4 w-4" />
@@ -262,7 +287,9 @@ export default function AdminVideoSessions() {
                       </div>
                       <div className="flex items-center space-x-2">
                         <Clock className="h-4 w-4" />
-                        <span>{session.sessionTime} ({session.duration} min)</span>
+                        <span>
+                          {session.sessionTime} ({session.duration} min)
+                        </span>
                       </div>
                       <div className="flex items-center space-x-2">
                         <Video className="h-4 w-4" />
@@ -282,7 +309,7 @@ export default function AdminVideoSessions() {
                       <Button
                         variant="outline"
                         size="sm"
-                        onClick={() => window.open(session.meetingUrl, '_blank')}
+                        onClick={() => window.open(session.meetingUrl, "_blank")}
                       >
                         <Video className="h-4 w-4 mr-2" />
                         Join Meeting

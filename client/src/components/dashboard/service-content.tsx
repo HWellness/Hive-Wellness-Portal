@@ -22,9 +22,7 @@ export default function ServiceContent({ serviceId, user }: ServiceContentProps)
       <Card className="bg-hive-white">
         <CardContent className="p-8 text-center">
           <div className="animate-spin w-10 h-10 border-4 border-gray-300 border-t-hive-purple rounded-full mx-auto mb-4"></div>
-          <h3 className="font-century font-bold text-hive-black text-xl mb-2">
-            Select Service
-          </h3>
+          <h3 className="font-century font-bold text-hive-black text-xl mb-2">Select Service</h3>
           <p className="text-gray-600">Choose a service from the sidebar to get started.</p>
         </CardContent>
       </Card>
@@ -33,25 +31,25 @@ export default function ServiceContent({ serviceId, user }: ServiceContentProps)
 
   // Render specific service components
   switch (serviceId) {
-    case 'client-dashboard':
+    case "client-dashboard":
       return <ClientDashboard user={user} />;
-    case 'therapist-dashboard':
+    case "therapist-dashboard":
       return <TherapistDashboard user={user} />;
-    case 'admin-console':
+    case "admin-console":
       return <AdminConsole user={user} />;
-    case 'institutional-dashboard':
+    case "institutional-dashboard":
       return <InstitutionalDashboard user={user} />;
-    case 'user-management':
+    case "user-management":
       return <UserManagement user={user} />;
-    case 'analytics-reports':
+    case "analytics-reports":
       return <AnalyticsReports user={user} />;
-    case 'billing-budget':
+    case "billing-budget":
       return <BillingBudget user={user} />;
-    case 'scheduling':
+    case "scheduling":
       return <Scheduling user={user} />;
-    case 'video-sessions':
+    case "video-sessions":
       return <VideoSessions user={user} />;
-    case 'payments':
+    case "payments":
       return <Payments user={user} />;
     default:
       return (
@@ -61,13 +59,11 @@ export default function ServiceContent({ serviceId, user }: ServiceContentProps)
             <h3 className="font-century font-bold text-hive-black text-xl mb-2">
               Service Coming Soon
             </h3>
-            <p className="text-gray-600 mb-6">
-              We're working on bringing you this feature.
-            </p>
+            <p className="text-gray-600 mb-6">We're working on bringing you this feature.</p>
             <div className="bg-hive-light-blue p-4 rounded-lg">
               <div className="text-sm text-hive-black">
-                <strong>Implementation Note:</strong> This service ({serviceId}) is part of the 
-                unified platform architecture and will be fully integrated with shared 
+                <strong>Implementation Note:</strong> This service ({serviceId}) is part of the
+                unified platform architecture and will be fully integrated with shared
                 authentication and data management.
               </div>
             </div>

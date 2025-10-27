@@ -5,7 +5,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -22,7 +28,7 @@ import {
   Pie,
   Cell,
   Area,
-  AreaChart
+  AreaChart,
 } from "recharts";
 import {
   TrendingUp,
@@ -37,7 +43,7 @@ import {
   Download,
   Filter,
   BarChart3,
-  Shield
+  Shield,
 } from "lucide-react";
 import type { User } from "@shared/schema";
 
@@ -58,50 +64,55 @@ export default function ReportingEngine({ user }: ReportingEngineProps) {
 
   // Fetch system metrics
   const { data: systemMetrics, isLoading: systemLoading } = useQuery({
-    queryKey: ['/api/reports/system', startDate.toISOString(), endDate.toISOString()],
-    enabled: user.role === 'admin',
+    queryKey: ["/api/reports/system", startDate.toISOString(), endDate.toISOString()],
+    enabled: user.role === "admin",
   });
 
   // Fetch therapist metrics (for admin or specific therapist)
   const { data: therapistMetrics, isLoading: therapistLoading } = useQuery({
-    queryKey: ['/api/reports/therapist', user.role === 'therapist' ? user.id : selectedTherapist, startDate.toISOString(), endDate.toISOString()],
-    enabled: user.role === 'admin' || user.role === 'therapist',
+    queryKey: [
+      "/api/reports/therapist",
+      user.role === "therapist" ? user.id : selectedTherapist,
+      startDate.toISOString(),
+      endDate.toISOString(),
+    ],
+    enabled: user.role === "admin" || user.role === "therapist",
   });
 
   // Demo data for charts (in real implementation, this would come from API)
   const sessionTrendsData = [
-    { date: '2025-01-01', sessions: 12, completed: 11, cancelled: 1 },
-    { date: '2025-01-02', sessions: 15, completed: 14, cancelled: 1 },
-    { date: '2025-01-03', sessions: 18, completed: 16, cancelled: 2 },
-    { date: '2025-01-04', sessions: 14, completed: 13, cancelled: 1 },
-    { date: '2025-01-05', sessions: 20, completed: 18, cancelled: 2 },
-    { date: '2025-01-06', sessions: 16, completed: 15, cancelled: 1 },
-    { date: '2025-01-07', sessions: 22, completed: 20, cancelled: 2 },
+    { date: "2025-01-01", sessions: 12, completed: 11, cancelled: 1 },
+    { date: "2025-01-02", sessions: 15, completed: 14, cancelled: 1 },
+    { date: "2025-01-03", sessions: 18, completed: 16, cancelled: 2 },
+    { date: "2025-01-04", sessions: 14, completed: 13, cancelled: 1 },
+    { date: "2025-01-05", sessions: 20, completed: 18, cancelled: 2 },
+    { date: "2025-01-06", sessions: 16, completed: 15, cancelled: 1 },
+    { date: "2025-01-07", sessions: 22, completed: 20, cancelled: 2 },
   ];
 
   const clientEngagementData = [
-    { name: 'High', value: 65, color: '#10B981' },
-    { name: 'Moderate', value: 28, color: '#F59E0B' },
-    { name: 'Low', value: 7, color: '#EF4444' },
+    { name: "High", value: 65, color: "#10B981" },
+    { name: "Moderate", value: 28, color: "#F59E0B" },
+    { name: "Low", value: 7, color: "#EF4444" },
   ];
 
   const therapistPerformanceData = [
-    { name: 'Dr. Johnson', sessions: 45, rating: 9.2, attendance: 95 },
-    { name: 'Dr. Chen', sessions: 38, rating: 8.9, attendance: 92 },
-    { name: 'Dr. Rodriguez', sessions: 42, rating: 9.4, attendance: 97 },
-    { name: 'Dr. Williams', sessions: 35, rating: 8.7, attendance: 89 },
-    { name: 'Dr. Brown', sessions: 40, rating: 9.1, attendance: 94 },
+    { name: "Dr. Johnson", sessions: 45, rating: 9.2, attendance: 95 },
+    { name: "Dr. Chen", sessions: 38, rating: 8.9, attendance: 92 },
+    { name: "Dr. Rodriguez", sessions: 42, rating: 9.4, attendance: 97 },
+    { name: "Dr. Williams", sessions: 35, rating: 8.7, attendance: 89 },
+    { name: "Dr. Brown", sessions: 40, rating: 9.1, attendance: 94 },
   ];
 
   const progressRatingData = [
-    { week: 'Week 1', rating: 4.2 },
-    { week: 'Week 2', rating: 5.1 },
-    { week: 'Week 3', rating: 5.8 },
-    { week: 'Week 4', rating: 6.4 },
-    { week: 'Week 5', rating: 7.1 },
-    { week: 'Week 6', rating: 7.6 },
-    { week: 'Week 7', rating: 8.2 },
-    { week: 'Week 8', rating: 8.7 },
+    { week: "Week 1", rating: 4.2 },
+    { week: "Week 2", rating: 5.1 },
+    { week: "Week 3", rating: 5.8 },
+    { week: "Week 4", rating: 6.4 },
+    { week: "Week 5", rating: 7.1 },
+    { week: "Week 6", rating: 7.6 },
+    { week: "Week 7", rating: 8.2 },
+    { week: "Week 8", rating: 8.7 },
   ];
 
   const MetricCard = ({ title, value, change, icon: Icon, trend }: any) => (
@@ -113,8 +124,10 @@ export default function ReportingEngine({ user }: ReportingEngineProps) {
       <CardContent>
         <div className="text-2xl font-bold text-gray-900">{value}</div>
         {change && (
-          <div className={`text-xs flex items-center mt-1 ${trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
-            {trend === 'up' ? (
+          <div
+            className={`text-xs flex items-center mt-1 ${trend === "up" ? "text-green-600" : "text-red-600"}`}
+          >
+            {trend === "up" ? (
               <TrendingUp className="w-3 h-3 mr-1" />
             ) : (
               <TrendingDown className="w-3 h-3 mr-1" />
@@ -141,57 +154,59 @@ export default function ReportingEngine({ user }: ReportingEngineProps) {
         clientEngagement: clientEngagementData,
         therapistPerformance: therapistPerformanceData,
         progressRatings: progressRatingData,
-      }
+      },
     };
-    
+
     // Create CSV header with proper escaping
     const csvHeader = "Hive Wellness Therapy Platform Report\n";
-    const csvMeta = `Generated,${new Date().toLocaleDateString()}\n` +
-                   `Report Type,${reportType.replace(/,/g, ';')}\n` +
-                   `Date Range,${dateRange} days\n\n`;
-    
+    const csvMeta =
+      `Generated,${new Date().toLocaleDateString()}\n` +
+      `Report Type,${reportType.replace(/,/g, ";")}\n` +
+      `Date Range,${dateRange} days\n\n`;
+
     // Create CSV data with proper formatting
-    const csvData = `Metric,Value\n` +
-                   `Total Sessions,${reportData.metrics.totalSessions}\n` +
-                   `Completed Sessions,${reportData.metrics.completedSessions}\n` +
-                   `Cancelled Sessions,${reportData.metrics.cancelledSessions}\n` +
-                   `Average Rating,${reportData.metrics.averageRating}/10\n\n` +
-                   `Therapist Performance\n` +
-                   `Name,Sessions,Rating\n` +
-                   therapistPerformanceData.map(t => 
-                     `"${t.name.replace(/"/g, '""')}",${t.sessions},${t.rating}/10`
-                   ).join('\n');
-    
+    const csvData =
+      `Metric,Value\n` +
+      `Total Sessions,${reportData.metrics.totalSessions}\n` +
+      `Completed Sessions,${reportData.metrics.completedSessions}\n` +
+      `Cancelled Sessions,${reportData.metrics.cancelledSessions}\n` +
+      `Average Rating,${reportData.metrics.averageRating}/10\n\n` +
+      `Therapist Performance\n` +
+      `Name,Sessions,Rating\n` +
+      therapistPerformanceData
+        .map((t) => `"${t.name.replace(/"/g, '""')}",${t.sessions},${t.rating}/10`)
+        .join("\n");
+
     const csvContent = csvHeader + csvMeta + csvData;
-    
+
     // Create blob with explicit CSV MIME type and charset
-    const blob = new Blob([csvContent], { 
-      type: 'text/csv;charset=utf-8;' 
+    const blob = new Blob([csvContent], {
+      type: "text/csv;charset=utf-8;",
     });
-    
+
     // Generate filename with timestamp for uniqueness
-    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').split('T')[0];
+    const timestamp = new Date().toISOString().replace(/[:.]/g, "-").split("T")[0];
     const filename = `hive-wellness-report-${timestamp}.csv`;
-    
+
     // Create download link with security attributes
     const url = window.URL.createObjectURL(blob);
-    const downloadLink = document.createElement('a');
+    const downloadLink = document.createElement("a");
     downloadLink.href = url;
     downloadLink.download = filename;
-    downloadLink.style.display = 'none';
-    downloadLink.setAttribute('rel', 'noopener');
-    downloadLink.setAttribute('target', '_self');
-    
+    downloadLink.style.display = "none";
+    downloadLink.setAttribute("rel", "noopener");
+    downloadLink.setAttribute("target", "_self");
+
     // Perform download
     document.body.appendChild(downloadLink);
     downloadLink.click();
-    
+
     // Clean up immediately
     setTimeout(() => {
       document.body.removeChild(downloadLink);
       window.URL.revokeObjectURL(url);
     }, 100);
-    
+
     toast({
       title: "Report Generated Successfully",
       description: `Report "${filename}" has been downloaded safely.`,
@@ -203,14 +218,12 @@ export default function ReportingEngine({ user }: ReportingEngineProps) {
       {/* Header */}
       <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
         <div>
-          <h1 className="text-2xl font-display font-bold text-gray-900">
-            Reporting & Analytics
-          </h1>
+          <h1 className="text-2xl font-display font-bold text-gray-900">Reporting & Analytics</h1>
           <p className="text-gray-600 mt-1">
             Comprehensive insights into therapy practice performance and client outcomes
           </p>
         </div>
-        
+
         <div className="flex space-x-2">
           <Button variant="outline" onClick={generateReport}>
             <Download className="w-4 h-4 mr-2" />
@@ -235,8 +248,8 @@ export default function ReportingEngine({ user }: ReportingEngineProps) {
             </SelectContent>
           </Select>
         </div>
-        
-        {user.role === 'admin' && (
+
+        {user.role === "admin" && (
           <div className="flex items-center space-x-2">
             <Label htmlFor="therapist">Therapist:</Label>
             <Select value={selectedTherapist} onValueChange={setSelectedTherapist}>
@@ -252,7 +265,7 @@ export default function ReportingEngine({ user }: ReportingEngineProps) {
             </Select>
           </div>
         )}
-        
+
         <div className="flex items-center space-x-2">
           <Label htmlFor="reportType">Report Type:</Label>
           <Select value={reportType} onValueChange={setReportType}>
@@ -373,8 +386,13 @@ export default function ReportingEngine({ user }: ReportingEngineProps) {
                 <div className="flex justify-center mt-4 space-x-4">
                   {clientEngagementData.map((entry, index) => (
                     <div key={index} className="flex items-center space-x-2">
-                      <div className="w-3 h-3 rounded-full" style={{ backgroundColor: entry.color }}></div>
-                      <span className="text-sm text-gray-600">{entry.name}: {entry.value}%</span>
+                      <div
+                        className="w-3 h-3 rounded-full"
+                        style={{ backgroundColor: entry.color }}
+                      ></div>
+                      <span className="text-sm text-gray-600">
+                        {entry.name}: {entry.value}%
+                      </span>
                     </div>
                   ))}
                 </div>
@@ -425,13 +443,7 @@ export default function ReportingEngine({ user }: ReportingEngineProps) {
               trend="up"
               icon={AlertTriangle}
             />
-            <MetricCard
-              title="Session Notes"
-              value="156"
-              change="8"
-              trend="up"
-              icon={FileText}
-            />
+            <MetricCard title="Session Notes" value="156" change="8" trend="up" icon={FileText} />
           </div>
 
           {/* Progress Rating Trends */}
@@ -452,7 +464,7 @@ export default function ReportingEngine({ user }: ReportingEngineProps) {
                     dataKey="rating"
                     stroke="#10B981"
                     strokeWidth={3}
-                    dot={{ fill: '#10B981', strokeWidth: 2, r: 4 }}
+                    dot={{ fill: "#10B981", strokeWidth: 2, r: 4 }}
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -468,13 +480,26 @@ export default function ReportingEngine({ user }: ReportingEngineProps) {
             <CardContent>
               <div className="space-y-4">
                 {[
-                  { intervention: "Cognitive Behavioural Therapy", sessions: 45, success: 89, improvement: 7.2 },
-                  { intervention: "Mindfulness-Based Therapy", sessions: 32, success: 85, improvement: 6.8 },
+                  {
+                    intervention: "Cognitive Behavioural Therapy",
+                    sessions: 45,
+                    success: 89,
+                    improvement: 7.2,
+                  },
+                  {
+                    intervention: "Mindfulness-Based Therapy",
+                    sessions: 32,
+                    success: 85,
+                    improvement: 6.8,
+                  },
                   { intervention: "Exposure Therapy", sessions: 28, success: 82, improvement: 6.5 },
                   { intervention: "Family Therapy", sessions: 24, success: 79, improvement: 6.1 },
                   { intervention: "EMDR", sessions: 18, success: 91, improvement: 7.8 },
                 ].map((item, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                  >
                     <div className="flex-1">
                       <div className="font-medium text-gray-900">{item.intervention}</div>
                       <div className="text-sm text-gray-600">{item.sessions} sessions</div>
@@ -485,7 +510,9 @@ export default function ReportingEngine({ user }: ReportingEngineProps) {
                         <div className="text-xs text-gray-600">Success Rate</div>
                       </div>
                       <div>
-                        <div className="text-sm font-medium text-gray-900">{item.improvement}/10</div>
+                        <div className="text-sm font-medium text-gray-900">
+                          {item.improvement}/10
+                        </div>
                         <div className="text-xs text-gray-600">Avg Improvement</div>
                       </div>
                     </div>
@@ -520,13 +547,7 @@ export default function ReportingEngine({ user }: ReportingEngineProps) {
               trend="down"
               icon={Calendar}
             />
-            <MetricCard
-              title="Client Retention"
-              value="92%"
-              change="1.8"
-              trend="up"
-              icon={Users}
-            />
+            <MetricCard title="Client Retention" value="92%" change="1.8" trend="up" icon={Users} />
           </div>
 
           {/* Revenue and Booking Trends */}
@@ -538,17 +559,19 @@ export default function ReportingEngine({ user }: ReportingEngineProps) {
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={250}>
-                  <AreaChart data={[
-                    { month: 'Jan', revenue: 8500 },
-                    { month: 'Feb', revenue: 9200 },
-                    { month: 'Mar', revenue: 10800 },
-                    { month: 'Apr', revenue: 11200 },
-                    { month: 'May', revenue: 12450 },
-                  ]}>
+                  <AreaChart
+                    data={[
+                      { month: "Jan", revenue: 8500 },
+                      { month: "Feb", revenue: 9200 },
+                      { month: "Mar", revenue: 10800 },
+                      { month: "Apr", revenue: 11200 },
+                      { month: "May", revenue: 12450 },
+                    ]}
+                  >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="month" />
                     <YAxis />
-                    <Tooltip formatter={(value) => [`£${value}`, 'Revenue']} />
+                    <Tooltip formatter={(value) => [`£${value}`, "Revenue"]} />
                     <Area
                       type="monotone"
                       dataKey="revenue"
@@ -568,15 +591,17 @@ export default function ReportingEngine({ user }: ReportingEngineProps) {
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={250}>
-                  <BarChart data={[
-                    { day: 'Mon', sessions: 18 },
-                    { day: 'Tue', sessions: 22 },
-                    { day: 'Wed', sessions: 25 },
-                    { day: 'Thu', sessions: 24 },
-                    { day: 'Fri', sessions: 20 },
-                    { day: 'Sat', sessions: 8 },
-                    { day: 'Sun', sessions: 3 },
-                  ]}>
+                  <BarChart
+                    data={[
+                      { day: "Mon", sessions: 18 },
+                      { day: "Tue", sessions: 22 },
+                      { day: "Wed", sessions: 25 },
+                      { day: "Thu", sessions: 24 },
+                      { day: "Fri", sessions: 20 },
+                      { day: "Sat", sessions: 8 },
+                      { day: "Sun", sessions: 3 },
+                    ]}
+                  >
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="day" />
                     <YAxis />
@@ -613,7 +638,7 @@ export default function ReportingEngine({ user }: ReportingEngineProps) {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="space-y-3">
                   <h4 className="font-medium text-gray-900">Payment Methods</h4>
                   <div className="space-y-2">
@@ -631,7 +656,7 @@ export default function ReportingEngine({ user }: ReportingEngineProps) {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="space-y-3">
                   <h4 className="font-medium text-gray-900">Outstanding</h4>
                   <div className="space-y-2">
@@ -671,13 +696,7 @@ export default function ReportingEngine({ user }: ReportingEngineProps) {
               trend="up"
               icon={FileText}
             />
-            <MetricCard
-              title="Access Audits"
-              value="245"
-              change="12"
-              trend="up"
-              icon={Activity}
-            />
+            <MetricCard title="Access Audits" value="245" change="12" trend="up" icon={Activity} />
             <MetricCard
               title="Security Incidents"
               value="0"
@@ -691,19 +710,54 @@ export default function ReportingEngine({ user }: ReportingEngineProps) {
           <Card>
             <CardHeader>
               <CardTitle>Compliance Status Overview</CardTitle>
-              <CardDescription>Current status of regulatory compliance requirements</CardDescription>
+              <CardDescription>
+                Current status of regulatory compliance requirements
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {[
-                  { requirement: "HIPAA Privacy Rule", status: "Compliant", lastAudit: "2025-01-01", nextAudit: "2025-07-01" },
-                  { requirement: "Data Protection Act", status: "Compliant", lastAudit: "2024-12-15", nextAudit: "2025-06-15" },
-                  { requirement: "Professional Licensing", status: "Compliant", lastAudit: "2024-11-30", nextAudit: "2025-11-30" },
-                  { requirement: "Insurance Coverage", status: "Compliant", lastAudit: "2025-01-15", nextAudit: "2026-01-15" },
-                  { requirement: "Document Retention", status: "Compliant", lastAudit: "2025-01-10", nextAudit: "2025-04-10" },
-                  { requirement: "Access Controls", status: "Review Required", lastAudit: "2024-10-01", nextAudit: "2025-01-01" },
+                  {
+                    requirement: "HIPAA Privacy Rule",
+                    status: "Compliant",
+                    lastAudit: "2025-01-01",
+                    nextAudit: "2025-07-01",
+                  },
+                  {
+                    requirement: "Data Protection Act",
+                    status: "Compliant",
+                    lastAudit: "2024-12-15",
+                    nextAudit: "2025-06-15",
+                  },
+                  {
+                    requirement: "Professional Licensing",
+                    status: "Compliant",
+                    lastAudit: "2024-11-30",
+                    nextAudit: "2025-11-30",
+                  },
+                  {
+                    requirement: "Insurance Coverage",
+                    status: "Compliant",
+                    lastAudit: "2025-01-15",
+                    nextAudit: "2026-01-15",
+                  },
+                  {
+                    requirement: "Document Retention",
+                    status: "Compliant",
+                    lastAudit: "2025-01-10",
+                    nextAudit: "2025-04-10",
+                  },
+                  {
+                    requirement: "Access Controls",
+                    status: "Review Required",
+                    lastAudit: "2024-10-01",
+                    nextAudit: "2025-01-01",
+                  },
                 ].map((item, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                  >
                     <div className="flex-1">
                       <div className="font-medium text-gray-900">{item.requirement}</div>
                       <div className="text-sm text-gray-600">
@@ -711,15 +765,17 @@ export default function ReportingEngine({ user }: ReportingEngineProps) {
                       </div>
                     </div>
                     <div className="flex items-center space-x-4">
-                      <Badge 
-                        variant={item.status === 'Compliant' ? 'default' : 'destructive'}
-                        className={item.status === 'Compliant' ? 'bg-green-100 text-green-800' : ''}
+                      <Badge
+                        variant={item.status === "Compliant" ? "default" : "destructive"}
+                        className={item.status === "Compliant" ? "bg-green-100 text-green-800" : ""}
                       >
                         {item.status}
                       </Badge>
                       <div className="text-right">
                         <div className="text-sm font-medium text-gray-900">Next Audit</div>
-                        <div className="text-xs text-gray-600">{new Date(item.nextAudit).toLocaleDateString()}</div>
+                        <div className="text-xs text-gray-600">
+                          {new Date(item.nextAudit).toLocaleDateString()}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -737,13 +793,46 @@ export default function ReportingEngine({ user }: ReportingEngineProps) {
             <CardContent>
               <div className="space-y-3">
                 {[
-                  { time: "2025-01-05 14:30", user: "Dr. Johnson", action: "Document accessed", resource: "Client #1234 session notes", ip: "192.168.1.100" },
-                  { time: "2025-01-05 14:15", user: "Admin", action: "User permissions modified", resource: "Therapist user group", ip: "192.168.1.10" },
-                  { time: "2025-01-05 13:45", user: "Dr. Chen", action: "Session notes created", resource: "Appointment #5678", ip: "192.168.1.101" },
-                  { time: "2025-01-05 13:30", user: "System", action: "Automated backup", resource: "Full database backup", ip: "Internal" },
-                  { time: "2025-01-05 12:00", user: "Dr. Rodriguez", action: "Client data exported", resource: "Progress report #9012", ip: "192.168.1.102" },
+                  {
+                    time: "2025-01-05 14:30",
+                    user: "Dr. Johnson",
+                    action: "Document accessed",
+                    resource: "Client #1234 session notes",
+                    ip: "192.168.1.100",
+                  },
+                  {
+                    time: "2025-01-05 14:15",
+                    user: "Admin",
+                    action: "User permissions modified",
+                    resource: "Therapist user group",
+                    ip: "192.168.1.10",
+                  },
+                  {
+                    time: "2025-01-05 13:45",
+                    user: "Dr. Chen",
+                    action: "Session notes created",
+                    resource: "Appointment #5678",
+                    ip: "192.168.1.101",
+                  },
+                  {
+                    time: "2025-01-05 13:30",
+                    user: "System",
+                    action: "Automated backup",
+                    resource: "Full database backup",
+                    ip: "Internal",
+                  },
+                  {
+                    time: "2025-01-05 12:00",
+                    user: "Dr. Rodriguez",
+                    action: "Client data exported",
+                    resource: "Progress report #9012",
+                    ip: "192.168.1.102",
+                  },
                 ].map((log, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 border-l-4 border-blue-200 bg-blue-50 rounded-r-lg">
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-3 border-l-4 border-blue-200 bg-blue-50 rounded-r-lg"
+                  >
                     <div className="flex-1">
                       <div className="font-medium text-blue-900">{log.action}</div>
                       <div className="text-sm text-blue-700">

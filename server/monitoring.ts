@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { Request, Response } from "express";
 
 // Performance monitoring
 interface PerformanceMetrics {
@@ -33,7 +33,7 @@ class MonitoringService {
 
   recordRequest(responseTime: number, statusCode: number) {
     this.metrics.requestCount++;
-    
+
     if (statusCode >= 400) {
       this.metrics.errorCount++;
     }
@@ -53,7 +53,7 @@ class MonitoringService {
 
   private calculateAverageResponseTime() {
     if (this.requestTimes.length === 0) return;
-    
+
     const sum = this.requestTimes.reduce((a, b) => a + b, 0);
     this.metrics.averageResponseTime = Math.round(sum / this.requestTimes.length);
   }
@@ -69,7 +69,8 @@ class MonitoringService {
 
   getHealthStatus() {
     const metrics = this.getMetrics();
-    const errorRate = metrics.requestCount > 0 ? (metrics.errorCount / metrics.requestCount) * 100 : 0;
+    const errorRate =
+      metrics.requestCount > 0 ? (metrics.errorCount / metrics.requestCount) * 100 : 0;
     const memoryUsageMB = Math.round(metrics.memoryUsage.heapUsed / 1024 / 1024);
 
     return {
@@ -79,36 +80,42 @@ class MonitoringService {
       errorRate: Math.round(errorRate * 100) / 100,
       averageResponseTime: metrics.averageResponseTime,
       memoryUsage: `${memoryUsageMB}MB`,
-      slowRequestsPercentage: metrics.requestCount > 0 ? 
-        Math.round((metrics.slowRequests / metrics.requestCount) * 100 * 100) / 100 : 0,
+      slowRequestsPercentage:
+        metrics.requestCount > 0
+          ? Math.round((metrics.slowRequests / metrics.requestCount) * 100 * 100) / 100
+          : 0,
       timestamp: new Date().toISOString(),
     };
   }
 
-  private determineHealthStatus(errorRate: number, avgResponseTime: number, memoryMB: number): string {
+  private determineHealthStatus(
+    errorRate: number,
+    avgResponseTime: number,
+    memoryMB: number
+  ): string {
     if (errorRate > 5 || avgResponseTime > 2000 || memoryMB > 512) {
-      return 'warning';
+      return "warning";
     }
     if (errorRate > 10 || avgResponseTime > 5000 || memoryMB > 1024) {
-      return 'critical';
+      return "critical";
     }
-    return 'healthy';
+    return "healthy";
   }
 
   // Alert system for critical issues
   checkAlerts() {
     const health = this.getHealthStatus();
-    
-    if (health.status === 'critical') {
-      console.error('CRITICAL ALERT:', {
+
+    if (health.status === "critical") {
+      console.error("CRITICAL ALERT:", {
         status: health.status,
         errorRate: health.errorRate,
         responseTime: health.averageResponseTime,
         memory: health.memoryUsage,
         timestamp: health.timestamp,
       });
-    } else if (health.status === 'warning') {
-      console.warn('WARNING ALERT:', {
+    } else if (health.status === "warning") {
+      console.warn("WARNING ALERT:", {
         status: health.status,
         errorRate: health.errorRate,
         responseTime: health.averageResponseTime,
@@ -125,12 +132,13 @@ export const monitoring = new MonitoringService();
 export const monitoringMiddleware = (req: Request, res: Response, next: Function) => {
   const start = Date.now();
 
-  res.on('finish', () => {
+  res.on("finish", () => {
     const responseTime = Date.now() - start;
     monitoring.recordRequest(responseTime, res.statusCode);
-    
+
     // Check for alerts on every request (but alerts are rate-limited internally)
-    if (Math.random() < 0.01) { // Check alerts on 1% of requests to avoid spam
+    if (Math.random() < 0.01) {
+      // Check alerts on 1% of requests to avoid spam
       monitoring.checkAlerts();
     }
   });
@@ -158,13 +166,13 @@ export const metricsEndpoint = (req: Request, res: Response) => {
       memoryUsage: health.memoryUsage,
       nodeVersion: process.version,
       platform: process.platform,
-      environment: process.env.NODE_ENV || 'development',
+      environment: process.env.NODE_ENV || "development",
     },
     services: {
-      database: 'operational', // Could add actual DB health check
-      authentication: 'operational',
-      payments: process.env.STRIPE_SECRET_KEY ? 'operational' : 'not_configured',
-      email: process.env.SENDGRID_API_KEY ? 'operational' : 'not_configured',
+      database: "operational", // Could add actual DB health check
+      authentication: "operational",
+      payments: process.env.STRIPE_SECRET_KEY ? "operational" : "not_configured",
+      email: process.env.SENDGRID_API_KEY ? "operational" : "not_configured",
     },
     timestamp: new Date().toISOString(),
   });

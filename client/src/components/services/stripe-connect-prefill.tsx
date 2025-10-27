@@ -1,23 +1,43 @@
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '@/hooks/useAuth';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Progress } from '@/components/ui/progress';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { CreditCard, Settings, CheckCircle, XCircle } from 'lucide-react';
-import { apiRequest } from '@/lib/queryClient';
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Progress } from "@/components/ui/progress";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { CreditCard, Settings, CheckCircle, XCircle } from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
 
 const stripeConnectAutomationSchema = z.object({
   ruleName: z.string().min(1, "Rule name is required"),
@@ -43,11 +63,15 @@ const stripeConnectAutomationSchema = z.object({
       }),
     }),
   }),
-  conditions: z.array(z.object({
-    field: z.string(),
-    operator: z.enum(["equals", "not_equals", "contains", "not_contains"]),
-    value: z.string(),
-  })).optional(),
+  conditions: z
+    .array(
+      z.object({
+        field: z.string(),
+        operator: z.enum(["equals", "not_equals", "contains", "not_contains"]),
+        value: z.string(),
+      })
+    )
+    .optional(),
   isActive: z.boolean().default(true),
   notificationSettings: z.object({
     sendEmail: z.boolean().default(true),
@@ -175,12 +199,14 @@ export default function StripeConnectPrefill() {
   const [activeTab, setActiveTab] = useState("automations");
   const [showNewAutomation, setShowNewAutomation] = useState(false);
   const [showNewOnboarding, setShowNewOnboarding] = useState(false);
-  const [selectedAutomation, setSelectedAutomation] = useState<StripeConnectAutomation | null>(null);
+  const [selectedAutomation, setSelectedAutomation] = useState<StripeConnectAutomation | null>(
+    null
+  );
   const [selectedOnboarding, setSelectedOnboarding] = useState<TherapistOnboarding | null>(null);
 
   // Admin-only access control
-  const isAdmin = user?.role === 'admin';
-  
+  const isAdmin = user?.role === "admin";
+
   if (!isAdmin) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -267,27 +293,27 @@ export default function StripeConnectPrefill() {
 
   // Queries
   const { data: automations = [], isLoading: automationsLoading } = useQuery({
-    queryKey: ['/api/stripe-connect/automations'],
+    queryKey: ["/api/stripe-connect/automations"],
     retry: false,
   });
 
   const { data: onboardings = [], isLoading: onboardingsLoading } = useQuery({
-    queryKey: ['/api/stripe-connect/onboardings'],
+    queryKey: ["/api/stripe-connect/onboardings"],
     retry: false,
   });
 
   const { data: analytics, isLoading: analyticsLoading } = useQuery({
-    queryKey: ['/api/stripe-connect/analytics'],
+    queryKey: ["/api/stripe-connect/analytics"],
     retry: false,
   });
 
   // Mutations
   const createAutomationMutation = useMutation({
     mutationFn: async (data: z.infer<typeof stripeConnectAutomationSchema>) => {
-      return apiRequest('POST', '/api/stripe-connect/automations', data);
+      return apiRequest("POST", "/api/stripe-connect/automations", data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/stripe-connect/automations'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/stripe-connect/automations"] });
       setShowNewAutomation(false);
       automationForm.reset();
       toast({
@@ -306,10 +332,10 @@ export default function StripeConnectPrefill() {
 
   const createOnboardingMutation = useMutation({
     mutationFn: async (data: z.infer<typeof therapistOnboardingSchema>) => {
-      return apiRequest('POST', '/api/stripe-connect/onboardings', data);
+      return apiRequest("POST", "/api/stripe-connect/onboardings", data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/stripe-connect/onboardings'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/stripe-connect/onboardings"] });
       setShowNewOnboarding(false);
       onboardingForm.reset();
       toast({
@@ -328,10 +354,10 @@ export default function StripeConnectPrefill() {
 
   const toggleAutomationMutation = useMutation({
     mutationFn: async ({ id, isActive }: { id: string; isActive: boolean }) => {
-      return apiRequest('PATCH', `/api/stripe-connect/automations/${id}`, { isActive });
+      return apiRequest("PATCH", `/api/stripe-connect/automations/${id}`, { isActive });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/stripe-connect/automations'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/stripe-connect/automations"] });
       toast({
         title: "Automation Updated",
         description: "Automation rule status has been updated.",
@@ -342,151 +368,154 @@ export default function StripeConnectPrefill() {
   // Demo data
   const demoAutomations: StripeConnectAutomation[] = [
     {
-      id: '1',
-      ruleName: 'Auto-Setup New Therapists',
-      trigger: 'therapist_application',
+      id: "1",
+      ruleName: "Auto-Setup New Therapists",
+      trigger: "therapist_application",
       prefillData: {
-        businessType: 'individual',
-        country: 'GB',
-        currency: 'GBP',
-        accountType: 'express',
-        capabilities: ['card_payments', 'transfers'],
+        businessType: "individual",
+        country: "GB",
+        currency: "GBP",
+        accountType: "express",
+        capabilities: ["card_payments", "transfers"],
         settings: {
           payouts: {
             schedule: {
-              interval: 'weekly',
+              interval: "weekly",
             },
             debitNegativeBalances: true,
           },
           cardPayments: {
-            requestThreeDSecure: 'automatic',
+            requestThreeDSecure: "automatic",
           },
         },
       },
       conditions: [
-        { field: 'qualification', operator: 'contains', value: 'licensed' },
-        { field: 'experience', operator: 'not_equals', value: '0' },
+        { field: "qualification", operator: "contains", value: "licensed" },
+        { field: "experience", operator: "not_equals", value: "0" },
       ],
       isActive: true,
       notificationSettings: {
         sendEmail: true,
-        emailTemplate: 'welcome-stripe-setup',
+        emailTemplate: "welcome-stripe-setup",
       },
       executionStats: {
         totalExecutions: 23,
         successfulExecutions: 21,
         failedExecutions: 2,
-        lastExecuted: '2025-07-09T10:30:00Z',
+        lastExecuted: "2025-07-09T10:30:00Z",
       },
-      createdAt: '2025-06-01T10:00:00Z',
-      updatedAt: '2025-07-09T10:30:00Z',
+      createdAt: "2025-06-01T10:00:00Z",
+      updatedAt: "2025-07-09T10:30:00Z",
     },
     {
-      id: '2',
-      ruleName: 'Profile Completion Follow-up',
-      trigger: 'profile_completion',
+      id: "2",
+      ruleName: "Profile Completion Follow-up",
+      trigger: "profile_completion",
       prefillData: {
-        businessType: 'individual',
-        country: 'GB',
-        currency: 'GBP',
-        accountType: 'express',
-        capabilities: ['card_payments', 'transfers'],
+        businessType: "individual",
+        country: "GB",
+        currency: "GBP",
+        accountType: "express",
+        capabilities: ["card_payments", "transfers"],
         settings: {
           payouts: {
             schedule: {
-              interval: 'monthly',
+              interval: "monthly",
               monthlyAnchor: 1,
             },
             debitNegativeBalances: true,
           },
           cardPayments: {
-            requestThreeDSecure: 'automatic',
-            statementDescriptorPrefix: 'HIVE',
+            requestThreeDSecure: "automatic",
+            statementDescriptorPrefix: "HIVE",
           },
         },
       },
       conditions: [
-        { field: 'stripe_account_id', operator: 'equals', value: '' },
-        { field: 'profile_completion', operator: 'equals', value: '100' },
+        { field: "stripe_account_id", operator: "equals", value: "" },
+        { field: "profile_completion", operator: "equals", value: "100" },
       ],
       isActive: true,
       notificationSettings: {
         sendEmail: true,
-        emailTemplate: 'stripe-setup-reminder',
+        emailTemplate: "stripe-setup-reminder",
       },
       executionStats: {
         totalExecutions: 15,
         successfulExecutions: 14,
         failedExecutions: 1,
-        lastExecuted: '2025-07-08T14:15:00Z',
+        lastExecuted: "2025-07-08T14:15:00Z",
       },
-      createdAt: '2025-05-15T14:00:00Z',
-      updatedAt: '2025-07-08T14:15:00Z',
+      createdAt: "2025-05-15T14:00:00Z",
+      updatedAt: "2025-07-08T14:15:00Z",
     },
   ];
 
   const demoOnboardings: TherapistOnboarding[] = [
     {
-      id: '1',
-      therapistId: 'therapist-001',
-      therapistName: 'Dr. Sarah Johnson',
-      status: 'completed',
-      stripeAccountId: 'acct_1234567890',
+      id: "1",
+      therapistId: "therapist-001",
+      therapistName: "Dr. Sarah Johnson",
+      status: "completed",
+      stripeAccountId: "acct_1234567890",
       prefillData: {
-        email: 'sarah.johnson@example.com',
-        firstName: 'Sarah',
-        lastName: 'Johnson',
+        email: "sarah.johnson@example.com",
+        firstName: "Sarah",
+        lastName: "Johnson",
         businessProfile: {
-          name: 'Dr. Sarah Johnson Therapy',
-          productDescription: 'Professional therapy services specialising in anxiety and depression',
-          supportEmail: 'sarah.johnson@example.com',
-          url: 'https://sarahjohnsontherapy.com',
+          name: "Dr. Sarah Johnson Therapy",
+          productDescription:
+            "Professional therapy services specialising in anxiety and depression",
+          supportEmail: "sarah.johnson@example.com",
+          url: "https://sarahjohnsontherapy.com",
         },
         address: {
-          line1: '123 Harley Street',
-          city: 'London',
-          state: 'England',
-          postalCode: 'W1G 6AB',
-          country: 'GB',
+          line1: "123 Harley Street",
+          city: "London",
+          state: "England",
+          postalCode: "W1G 6AB",
+          country: "GB",
         },
       },
-      onboardingUrl: 'https://connect.stripe.com/oauth/authorize?response_type=code&client_id=ca_123&state=st_123',
+      onboardingUrl:
+        "https://connect.stripe.com/oauth/authorize?response_type=code&client_id=ca_123&state=st_123",
       autoSubmit: false,
       followUpDays: 7,
       followUpSent: true,
       completionPercentage: 100,
-      createdAt: '2025-07-01T09:00:00Z',
-      updatedAt: '2025-07-05T14:30:00Z',
+      createdAt: "2025-07-01T09:00:00Z",
+      updatedAt: "2025-07-05T14:30:00Z",
     },
     {
-      id: '2',
-      therapistId: 'therapist-002',
-      therapistName: 'Dr. Michael Chen',
-      status: 'in_progress',
+      id: "2",
+      therapistId: "therapist-002",
+      therapistName: "Dr. Michael Chen",
+      status: "in_progress",
       prefillData: {
-        email: 'michael.chen@example.com',
-        firstName: 'Michael',
-        lastName: 'Chen',
+        email: "michael.chen@example.com",
+        firstName: "Michael",
+        lastName: "Chen",
         businessProfile: {
-          name: 'Dr. Michael Chen Counselling',
-          productDescription: 'Professional counselling services for individuals and couples',
-          supportEmail: 'michael.chen@example.com',
+          name: "Dr. Michael Chen Counselling",
+          productDescription: "Professional counselling services for individuals and couples",
+          supportEmail: "michael.chen@example.com",
         },
         address: {
-          line1: '456 Baker Street',
-          city: 'London',
-          state: 'England',
-          postalCode: 'NW1 6XE',
-          country: 'GB',
+          line1: "456 Baker Street",
+          city: "London",
+          state: "England",
+          postalCode: "NW1 6XE",
+          country: "GB",
         },
       },
-      onboardingUrl: 'https://connect.stripe.com/oauth/authorize?response_type=code&client_id=ca_456&state=st_456',
+      onboardingUrl:
+        "https://connect.stripe.com/oauth/authorize?response_type=code&client_id=ca_456&state=st_456",
       autoSubmit: false,
       followUpDays: 7,
       followUpSent: false,
       completionPercentage: 65,
-      createdAt: '2025-07-07T11:00:00Z',
-      updatedAt: '2025-07-09T09:15:00Z',
+      createdAt: "2025-07-07T11:00:00Z",
+      updatedAt: "2025-07-09T09:15:00Z",
     },
   ];
 
@@ -502,7 +531,10 @@ export default function StripeConnectPrefill() {
           <p className="text-gray-600">Automated therapist onboarding and payment account setup</p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={() => setShowNewAutomation(true)} className="bg-purple-600 hover:bg-purple-700">
+          <Button
+            onClick={() => setShowNewAutomation(true)}
+            className="bg-purple-600 hover:bg-purple-700"
+          >
             <Plus className="w-4 h-4 mr-2" />
             New Automation
           </Button>
@@ -520,7 +552,9 @@ export default function StripeConnectPrefill() {
             <CardTitle className="text-sm font-medium text-gray-600">Active Automations</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-gray-900">{displayAutomations.filter(a => a.isActive).length}</div>
+            <div className="text-2xl font-bold text-gray-900">
+              {displayAutomations.filter((a) => a.isActive).length}
+            </div>
             <p className="text-xs text-green-600 flex items-center">
               <TrendingUp className="w-3 h-3 mr-1" />
               100% operational
@@ -534,8 +568,7 @@ export default function StripeConnectPrefill() {
           <CardContent>
             <div className="text-2xl font-bold text-gray-900">{displayOnboardings.length}</div>
             <p className="text-xs text-green-600 flex items-center">
-              <TrendingUp className="w-3 h-3 mr-1" />
-              2 this week
+              <TrendingUp className="w-3 h-3 mr-1" />2 this week
             </p>
           </CardContent>
         </Card>
@@ -592,22 +625,38 @@ export default function StripeConnectPrefill() {
                         <span>Executions: {automation.executionStats.totalExecutions}</span>
                         <span>Success: {automation.executionStats.successfulExecutions}</span>
                         <span>Failed: {automation.executionStats.failedExecutions}</span>
-                        <span>Last: {automation.executionStats.lastExecuted ? new Date(automation.executionStats.lastExecuted).toLocaleDateString() : 'Never'}</span>
+                        <span>
+                          Last:{" "}
+                          {automation.executionStats.lastExecuted
+                            ? new Date(automation.executionStats.lastExecuted).toLocaleDateString()
+                            : "Never"}
+                        </span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Progress 
-                          value={(automation.executionStats.successfulExecutions / automation.executionStats.totalExecutions) * 100} 
+                        <Progress
+                          value={
+                            (automation.executionStats.successfulExecutions /
+                              automation.executionStats.totalExecutions) *
+                            100
+                          }
                           className="w-24 h-2"
                         />
                         <span className="text-sm text-gray-500">
-                          {Math.round((automation.executionStats.successfulExecutions / automation.executionStats.totalExecutions) * 100)}% success rate
+                          {Math.round(
+                            (automation.executionStats.successfulExecutions /
+                              automation.executionStats.totalExecutions) *
+                              100
+                          )}
+                          % success rate
                         </span>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Switch 
-                        checked={automation.isActive} 
-                        onCheckedChange={(checked) => toggleAutomationMutation.mutate({ id: automation.id, isActive: checked })}
+                      <Switch
+                        checked={automation.isActive}
+                        onCheckedChange={(checked) =>
+                          toggleAutomationMutation.mutate({ id: automation.id, isActive: checked })
+                        }
                       />
                       <Button size="sm" variant="outline">
                         <Eye className="w-4 h-4" />
@@ -633,9 +682,14 @@ export default function StripeConnectPrefill() {
                       <div className="flex items-center gap-3 mb-2">
                         <Users className="w-5 h-5 text-purple-600" />
                         <h3 className="font-semibold text-gray-900">{onboarding.therapistName}</h3>
-                        <Badge 
-                          variant={onboarding.status === 'completed' ? "default" : 
-                                  onboarding.status === 'in_progress' ? "secondary" : "destructive"}
+                        <Badge
+                          variant={
+                            onboarding.status === "completed"
+                              ? "default"
+                              : onboarding.status === "in_progress"
+                                ? "secondary"
+                                : "destructive"
+                          }
                         >
                           {onboarding.status}
                         </Badge>
@@ -662,7 +716,7 @@ export default function StripeConnectPrefill() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      {onboarding.status === 'in_progress' && (
+                      {onboarding.status === "in_progress" && (
                         <Button size="sm" variant="outline" className="text-blue-600">
                           <Play className="w-4 h-4 mr-1" />
                           Resume
@@ -754,7 +808,12 @@ export default function StripeConnectPrefill() {
             </DialogDescription>
           </DialogHeader>
           <Form {...automationForm}>
-            <form onSubmit={automationForm.handleSubmit((data) => createAutomationMutation.mutate(data))} className="space-y-4">
+            <form
+              onSubmit={automationForm.handleSubmit((data) =>
+                createAutomationMutation.mutate(data)
+              )}
+              className="space-y-4"
+            >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={automationForm.control}
@@ -781,7 +840,9 @@ export default function StripeConnectPrefill() {
                             <SelectValue placeholder="Select trigger" />
                           </SelectTrigger>
                           <SelectContent>
-                            <SelectItem value="therapist_application">Therapist Application</SelectItem>
+                            <SelectItem value="therapist_application">
+                              Therapist Application
+                            </SelectItem>
                             <SelectItem value="profile_completion">Profile Completion</SelectItem>
                             <SelectItem value="manual_trigger">Manual Trigger</SelectItem>
                           </SelectContent>
@@ -901,7 +962,12 @@ export default function StripeConnectPrefill() {
             </DialogDescription>
           </DialogHeader>
           <Form {...onboardingForm}>
-            <form onSubmit={onboardingForm.handleSubmit((data) => createOnboardingMutation.mutate(data))} className="space-y-4">
+            <form
+              onSubmit={onboardingForm.handleSubmit((data) =>
+                createOnboardingMutation.mutate(data)
+              )}
+              className="space-y-4"
+            >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={onboardingForm.control}
@@ -923,7 +989,12 @@ export default function StripeConnectPrefill() {
                     <FormItem>
                       <FormLabel>Follow-up Days</FormLabel>
                       <FormControl>
-                        <Input type="number" placeholder="7" {...field} onChange={(e) => field.onChange(parseInt(e.target.value))} />
+                        <Input
+                          type="number"
+                          placeholder="7"
+                          {...field}
+                          onChange={(e) => field.onChange(parseInt(e.target.value))}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

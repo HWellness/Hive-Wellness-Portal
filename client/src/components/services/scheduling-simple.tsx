@@ -22,23 +22,45 @@ export default function SchedulingService({ user }: SchedulingProps) {
       time: "2:00 PM",
       duration: "50 minutes",
       type: "Therapy Session",
-      status: "confirmed"
+      status: "confirmed",
     },
     {
-      id: "2", 
+      id: "2",
       therapistName: "Dr. Sarah Johnson",
       date: "2025-07-14",
-      time: "2:00 PM", 
+      time: "2:00 PM",
       duration: "50 minutes",
       type: "Therapy Session",
-      status: "pending"
-    }
+      status: "pending",
+    },
   ];
 
   const availableSlots = [
-    "8:00 AM", "8:30 AM", "9:00 AM", "9:30 AM", "10:00 AM", "10:30 AM", "11:00 AM", "11:30 AM",
-    "12:00 PM", "12:30 PM", "1:00 PM", "1:30 PM", "2:00 PM", "2:30 PM", "3:00 PM", "3:30 PM",
-    "4:00 PM", "4:30 PM", "5:00 PM", "5:30 PM", "6:00 PM", "6:30 PM", "7:00 PM", "7:30 PM", "8:00 PM"
+    "8:00 AM",
+    "8:30 AM",
+    "9:00 AM",
+    "9:30 AM",
+    "10:00 AM",
+    "10:30 AM",
+    "11:00 AM",
+    "11:30 AM",
+    "12:00 PM",
+    "12:30 PM",
+    "1:00 PM",
+    "1:30 PM",
+    "2:00 PM",
+    "2:30 PM",
+    "3:00 PM",
+    "3:30 PM",
+    "4:00 PM",
+    "4:30 PM",
+    "5:00 PM",
+    "5:30 PM",
+    "6:00 PM",
+    "6:30 PM",
+    "7:00 PM",
+    "7:30 PM",
+    "8:00 PM",
   ];
 
   const scheduleAppointment = () => {
@@ -84,19 +106,19 @@ export default function SchedulingService({ user }: SchedulingProps) {
   };
 
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-GB', {
-      weekday: 'long',
-      year: 'numeric', 
-      month: 'long',
-      day: 'numeric'
+    return date.toLocaleDateString("en-GB", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 
   const formatDateShort = (date: Date) => {
-    return date.toLocaleDateString('en-GB', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
+    return date.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
     });
   };
 
@@ -107,21 +129,21 @@ export default function SchedulingService({ user }: SchedulingProps) {
     const lastDay = new Date(year, month + 1, 0);
     const startDate = new Date(firstDay);
     const endDate = new Date(lastDay);
-    
+
     // Adjust start date to beginning of week (Sunday = 0)
     startDate.setDate(startDate.getDate() - startDate.getDay());
-    
+
     // Adjust end date to end of week
     endDate.setDate(endDate.getDate() + (6 - endDate.getDay()));
-    
+
     const days = [];
     const currentDate = new Date(startDate);
-    
+
     while (currentDate <= endDate) {
       days.push(new Date(currentDate));
       currentDate.setDate(currentDate.getDate() + 1);
     }
-    
+
     return days;
   };
 
@@ -133,10 +155,7 @@ export default function SchedulingService({ user }: SchedulingProps) {
           <h1 className="text-3xl font-display font-bold text-gray-900">Scheduling</h1>
           <p className="text-gray-600 font-body mt-2">Book and manage your therapy appointments</p>
         </div>
-        <Button 
-          className="button-primary"
-          onClick={() => setSelectedTime("2:00 PM")}
-        >
+        <Button className="button-primary" onClick={() => setSelectedTime("2:00 PM")}>
           <Plus className="w-4 h-4 mr-2" />
           Schedule Appointment
         </Button>
@@ -153,10 +172,12 @@ export default function SchedulingService({ user }: SchedulingProps) {
               {/* Date Selector */}
               <div>
                 <h4 className="font-semibold text-gray-900 mb-3">Select Date</h4>
-                <p className="text-sm text-gray-600 mb-4">Appointments available Monday - Friday only</p>
+                <p className="text-sm text-gray-600 mb-4">
+                  Appointments available Monday - Friday only
+                </p>
                 <div className="flex items-center justify-between mb-4">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
                     onClick={() => {
                       const newDate = new Date(selectedDate);
@@ -166,11 +187,9 @@ export default function SchedulingService({ user }: SchedulingProps) {
                   >
                     <ChevronLeft className="w-4 h-4" />
                   </Button>
-                  <h3 className="font-display font-semibold text-lg">
-                    {formatDate(selectedDate)}
-                  </h3>
-                  <Button 
-                    variant="outline" 
+                  <h3 className="font-display font-semibold text-lg">{formatDate(selectedDate)}</h3>
+                  <Button
+                    variant="outline"
                     size="sm"
                     onClick={() => {
                       const newDate = new Date(selectedDate);
@@ -182,21 +201,24 @@ export default function SchedulingService({ user }: SchedulingProps) {
                   </Button>
                 </div>
                 <div className="grid grid-cols-7 gap-2 text-center text-sm">
-                  {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                    <div key={day} className="font-medium text-gray-500 py-2">{day}</div>
+                  {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+                    <div key={day} className="font-medium text-gray-500 py-2">
+                      {day}
+                    </div>
                   ))}
                   {generateCalendarDays(selectedDate).map((day, i) => {
                     const isCurrentMonth = day.getMonth() === selectedDate.getMonth();
-                    const isSelected = day.getDate() === selectedDate.getDate() && 
-                                     day.getMonth() === selectedDate.getMonth() && 
-                                     day.getFullYear() === selectedDate.getFullYear();
+                    const isSelected =
+                      day.getDate() === selectedDate.getDate() &&
+                      day.getMonth() === selectedDate.getMonth() &&
+                      day.getFullYear() === selectedDate.getFullYear();
                     const isToday = day.toDateString() === new Date().toDateString();
                     const isWeekend = day.getDay() === 0 || day.getDay() === 6; // Sunday = 0, Saturday = 6
                     const today = new Date();
                     today.setHours(0, 0, 0, 0);
                     const isPast = day.getTime() < today.getTime();
                     const isDisabled = isWeekend || isPast || !isCurrentMonth;
-                    
+
                     return (
                       <button
                         key={i}
@@ -204,14 +226,14 @@ export default function SchedulingService({ user }: SchedulingProps) {
                         disabled={isDisabled}
                         className={`py-2 px-1 rounded-lg text-sm transition-colors ${
                           isSelected && !isDisabled
-                            ? 'bg-blue-600 text-white' 
+                            ? "bg-blue-600 text-white"
                             : isToday && !isDisabled
-                              ? 'bg-blue-100 text-blue-600 font-semibold'
+                              ? "bg-blue-100 text-blue-600 font-semibold"
                               : isDisabled
-                                ? 'text-gray-300 cursor-not-allowed' 
-                                : isCurrentMonth 
-                                  ? 'hover:bg-blue-50 text-gray-900 cursor-pointer' 
-                                  : 'text-gray-300'
+                                ? "text-gray-300 cursor-not-allowed"
+                                : isCurrentMonth
+                                  ? "hover:bg-blue-50 text-gray-900 cursor-pointer"
+                                  : "text-gray-300"
                         }`}
                       >
                         {day.getDate()}
@@ -245,10 +267,7 @@ export default function SchedulingService({ user }: SchedulingProps) {
                   <p className="text-blue-800 text-sm mb-3">
                     {formatDate(selectedDate)} at {selectedTime}
                   </p>
-                  <Button 
-                    className="button-primary w-full"
-                    onClick={scheduleAppointment}
-                  >
+                  <Button className="button-primary w-full" onClick={scheduleAppointment}>
                     Confirm Appointment
                   </Button>
                 </div>
@@ -287,25 +306,25 @@ export default function SchedulingService({ user }: SchedulingProps) {
                       </div>
                     </div>
                     <div className="flex flex-col items-end gap-2">
-                      <Badge 
+                      <Badge
                         className={
-                          appointment.status === 'confirmed' 
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-yellow-100 text-yellow-800'
+                          appointment.status === "confirmed"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-yellow-100 text-yellow-800"
                         }
                       >
                         {appointment.status}
                       </Badge>
                       <div className="flex gap-2">
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           size="sm"
                           onClick={() => rescheduleAppointment(appointment.id)}
                         >
                           Reschedule
                         </Button>
-                        <Button 
-                          variant="outline" 
+                        <Button
+                          variant="outline"
                           size="sm"
                           onClick={() => cancelAppointment(appointment.id)}
                         >
@@ -322,12 +341,13 @@ export default function SchedulingService({ user }: SchedulingProps) {
           {/* Quick Stats */}
           <div className="grid grid-cols-2 gap-4">
             <Card className="card-modern hover:shadow-lg transition-all duration-200 cursor-pointer group">
-              <CardContent 
+              <CardContent
                 className="p-6 text-center"
                 onClick={() => {
                   toast({
                     title: "Next Session Details",
-                    description: "July 7, 2:00 PM - Dr. Sarah Johnson. Click 'View Session Details' to manage.",
+                    description:
+                      "July 7, 2:00 PM - Dr. Sarah Johnson. Click 'View Session Details' to manage.",
                   });
                   // In a real app, this would navigate to session details
                 }}
@@ -344,12 +364,13 @@ export default function SchedulingService({ user }: SchedulingProps) {
             </Card>
 
             <Card className="card-modern hover:shadow-lg transition-all duration-200 cursor-pointer group">
-              <CardContent 
+              <CardContent
                 className="p-6 text-center"
                 onClick={() => {
                   toast({
                     title: "Session History",
-                    description: "12 sessions completed. View your therapy progress and session notes.",
+                    description:
+                      "12 sessions completed. View your therapy progress and session notes.",
                   });
                   // In a real app, this would navigate to session history page
                 }}
@@ -380,7 +401,7 @@ export default function SchedulingService({ user }: SchedulingProps) {
                 </label>
                 <input
                   type="date"
-                  min={new Date().toISOString().split('T')[0]}
+                  min={new Date().toISOString().split("T")[0]}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>

@@ -1,42 +1,42 @@
-import { Router } from 'express';
-import { adminCalendarManager } from '../admin-calendar-management';
-import { isAuthenticated } from '../replitAuth';
-import { calendarService } from '../services/calendar-service';
-import { therapistCalendarOnboardingService } from '../services/therapist-calendar-onboarding';
-import { storage } from '../storage';
-import { db } from '../db';
-import { therapistCalendars, appointments, users, therapistProfiles } from '../../shared/schema';
-import { eq, and, gte, lte, desc, sql, count, isNotNull, inArray } from 'drizzle-orm';
-import { z } from 'zod';
+import { Router } from "express";
+import { adminCalendarManager } from "../admin-calendar-management";
+import { isAuthenticated } from "../replitAuth";
+import { calendarService } from "../services/calendar-service";
+import { therapistCalendarOnboardingService } from "../services/therapist-calendar-onboarding";
+import { storage } from "../storage";
+import { db } from "../db";
+import { therapistCalendars, appointments, users, therapistProfiles } from "../../shared/schema";
+import { eq, and, gte, lte, desc, sql, count, isNotNull, inArray } from "drizzle-orm";
+import { z } from "zod";
 
 const router = Router();
 
 // Validation schemas
 const therapistCalendarStatusSchema = z.object({
   therapistIds: z.array(z.string()).optional(),
-  status: z.enum(['active', 'pending', 'error']).optional(),
+  status: z.enum(["active", "pending", "error"]).optional(),
   limit: z.coerce.number().min(1).max(100).default(50),
   offset: z.coerce.number().min(0).default(0),
-  search: z.string().optional()
+  search: z.string().optional(),
 });
 
 const bulkOperationSchema = z.object({
   therapistIds: z.array(z.string()).min(1).max(50),
-  operation: z.enum(['sync', 'health-check', 'reset', 'permissions-reset'])
+  operation: z.enum(["sync", "health-check", "reset", "permissions-reset"]),
 });
 
 const reportTypeSchema = z.object({
-  type: z.enum(['weekly', 'monthly', 'yearly', 'calendar-health', 'usage-analytics']),
+  type: z.enum(["weekly", "monthly", "yearly", "calendar-health", "usage-analytics"]),
   startDate: z.string().datetime().optional(),
   endDate: z.string().datetime().optional(),
-  therapistId: z.string().optional()
+  therapistId: z.string().optional(),
 });
 
 // Get available time slots for a specific date
-router.get('/available-slots/:date', async (req, res) => {
+router.get("/available-slots/:date", async (req, res) => {
   try {
     const date = new Date(req.params.date);
-    
+
     // Check if it's a weekend - TEMPORARILY DISABLED FOR TESTING
     const dayOfWeek = date.getDay();
     /* 
@@ -44,12 +44,12 @@ router.get('/available-slots/:date', async (req, res) => {
       return res.json({ availableSlots: [], message: 'Weekends not available' });
     }
     */
-    
+
     const availableSlots = await adminCalendarManager.getAvailableTimeSlotsForDate(date);
     res.json({ availableSlots });
   } catch (error: any) {
-    console.error('Error getting available slots:', error);
-    res.status(500).json({ error: 'Failed to get available slots' });
+    console.error("Error getting available slots:", error);
+    res.status(500).json({ error: "Failed to get available slots" });
   }
 });
 
@@ -60,8 +60,8 @@ router.get('/available-slots/:date', async (req, res) => {
 // Admin routes - require admin authentication
 router.use(isAuthenticated);
 router.use((req, res, next) => {
-  if ((req.user as any)?.role !== 'admin') {
-    return res.status(403).json({ error: 'Admin access required' });
+  if ((req.user as any)?.role !== "admin") {
+    return res.status(403).json({ error: "Admin access required" });
   }
   next();
 });
@@ -74,7 +74,7 @@ router.use((req, res, next) => {
  * GET /api/admin/calendar/overview
  * Returns comprehensive dashboard stats, recent activity, and health status
  */
-router.get('/overview', async (req, res) => {
+router.get("/overview", async (req, res) => {
   try {
     const [
       totalTherapists,
@@ -85,66 +85,91 @@ router.get('/overview', async (req, res) => {
       todayAppointments,
       weekAppointments,
       monthAppointments,
-      recentActivity
+      recentActivity,
     ] = await Promise.all([
       // Total therapists count
-      db.select({ count: count() }).from(users).where(eq(users.role, 'therapist')),
-      
+      db.select({ count: count() }).from(users).where(eq(users.role, "therapist")),
+
       // Total calendars count
       db.select({ count: count() }).from(therapistCalendars),
-      
+
       // Active calendars count
-      db.select({ count: count() }).from(therapistCalendars)
-        .where(eq(therapistCalendars.integrationStatus, 'active')),
-      
+      db
+        .select({ count: count() })
+        .from(therapistCalendars)
+        .where(eq(therapistCalendars.integrationStatus, "active")),
+
       // Pending calendars count
-      db.select({ count: count() }).from(therapistCalendars)
-        .where(eq(therapistCalendars.integrationStatus, 'pending')),
-      
+      db
+        .select({ count: count() })
+        .from(therapistCalendars)
+        .where(eq(therapistCalendars.integrationStatus, "pending")),
+
       // Error calendars count
-      db.select({ count: count() }).from(therapistCalendars)
-        .where(eq(therapistCalendars.integrationStatus, 'error')),
-      
+      db
+        .select({ count: count() })
+        .from(therapistCalendars)
+        .where(eq(therapistCalendars.integrationStatus, "error")),
+
       // Today's appointments
-      db.select({ count: count() }).from(appointments)
+      db
+        .select({ count: count() })
+        .from(appointments)
         .where(
           and(
             gte(appointments.scheduledAt, new Date(new Date().setHours(0, 0, 0, 0))),
             lte(appointments.scheduledAt, new Date(new Date().setHours(23, 59, 59, 999)))
           )
         ),
-      
+
       // This week's appointments
-      db.select({ count: count() }).from(appointments)
+      db
+        .select({ count: count() })
+        .from(appointments)
         .where(
           and(
-            gte(appointments.scheduledAt, new Date(new Date().setDate(new Date().getDate() - new Date().getDay()))),
-            lte(appointments.scheduledAt, new Date(new Date().setDate(new Date().getDate() - new Date().getDay() + 6)))
+            gte(
+              appointments.scheduledAt,
+              new Date(new Date().setDate(new Date().getDate() - new Date().getDay()))
+            ),
+            lte(
+              appointments.scheduledAt,
+              new Date(new Date().setDate(new Date().getDate() - new Date().getDay() + 6))
+            )
           )
         ),
-      
+
       // This month's appointments
-      db.select({ count: count() }).from(appointments)
+      db
+        .select({ count: count() })
+        .from(appointments)
         .where(
           and(
-            gte(appointments.scheduledAt, new Date(new Date().getFullYear(), new Date().getMonth(), 1)),
-            lte(appointments.scheduledAt, new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0))
+            gte(
+              appointments.scheduledAt,
+              new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+            ),
+            lte(
+              appointments.scheduledAt,
+              new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0)
+            )
           )
         ),
-      
+
       // Recent calendar activity (last 10 calendar updates)
-      db.select({
-        id: therapistCalendars.id,
-        therapistId: therapistCalendars.therapistId,
-        integrationStatus: therapistCalendars.integrationStatus,
-        updatedAt: therapistCalendars.updatedAt,
-        therapistName: sql<string>`${users.firstName} || ' ' || ${users.lastName}`,
-        therapistEmail: users.email
-      })
-      .from(therapistCalendars)
-      .leftJoin(users, eq(therapistCalendars.therapistId, users.id))
-      .orderBy(desc(therapistCalendars.updatedAt))
-      .limit(10)
+      db
+        .select({
+          id: therapistCalendars.id,
+          therapistId: therapistCalendars.therapistId,
+          integrationStatus: therapistCalendars.integrationStatus,
+          updatedAt: therapistCalendars.updatedAt,
+          therapistName: sql<string>`${users.firstName} || ' ' || ${users.lastName}`,
+          therapistEmail: users.email,
+        })
+        .from(therapistCalendars)
+        .leftJoin(users, eq(therapistCalendars.therapistId, users.id))
+        .orderBy(desc(therapistCalendars.updatedAt))
+        .limit(10),
     ]);
 
     const totalTherapistCount = totalTherapists[0]?.count || 0;
@@ -153,13 +178,16 @@ router.get('/overview', async (req, res) => {
     const pendingCalendarCount = pendingCalendars[0]?.count || 0;
     const errorCalendarCount = errorCalendars[0]?.count || 0;
 
-    const setupCompletionRate = totalTherapistCount > 0 
-      ? Math.round((activeCalendarCount / totalTherapistCount) * 100)
-      : 0;
+    const setupCompletionRate =
+      totalTherapistCount > 0 ? Math.round((activeCalendarCount / totalTherapistCount) * 100) : 0;
 
     // Calculate health status
-    const healthStatus = errorCalendarCount === 0 ? 'healthy' : 
-                        errorCalendarCount < activeCalendarCount * 0.1 ? 'warning' : 'critical';
+    const healthStatus =
+      errorCalendarCount === 0
+        ? "healthy"
+        : errorCalendarCount < activeCalendarCount * 0.1
+          ? "warning"
+          : "critical";
 
     res.json({
       success: true,
@@ -170,23 +198,22 @@ router.get('/overview', async (req, res) => {
         calendarStatus: {
           active: activeCalendarCount,
           pending: pendingCalendarCount,
-          error: errorCalendarCount
+          error: errorCalendarCount,
         },
         healthStatus,
         appointments: {
           today: todayAppointments[0]?.count || 0,
           thisWeek: weekAppointments[0]?.count || 0,
-          thisMonth: monthAppointments[0]?.count || 0
+          thisMonth: monthAppointments[0]?.count || 0,
         },
-        recentActivity: recentActivity || []
-      }
+        recentActivity: recentActivity || [],
+      },
     });
-
   } catch (error: any) {
-    console.error('❌ Error fetching calendar overview:', error);
+    console.error("❌ Error fetching calendar overview:", error);
     res.status(500).json({
-      error: 'Failed to fetch calendar overview',
-      details: error.message
+      error: "Failed to fetch calendar overview",
+      details: error.message,
     });
   }
 });
@@ -195,13 +222,13 @@ router.get('/overview', async (req, res) => {
  * GET /api/admin/calendar/therapists
  * Returns paginated list of all therapist calendars with status
  */
-router.get('/therapists', async (req, res) => {
+router.get("/therapists", async (req, res) => {
   try {
     const validation = therapistCalendarStatusSchema.safeParse(req.query);
     if (!validation.success) {
       return res.status(400).json({
-        error: 'Invalid query parameters',
-        details: validation.error.errors
+        error: "Invalid query parameters",
+        details: validation.error.errors,
       });
     }
 
@@ -230,7 +257,7 @@ router.get('/therapists', async (req, res) => {
         therapistName: sql<string>`${users.firstName} || ' ' || ${users.lastName}`,
         therapistEmail: users.email,
         therapistActive: users.isActive,
-        permissionsConfigured: sql<boolean>`CASE WHEN ${therapistCalendars.channelId} IS NOT NULL THEN true ELSE false END`
+        permissionsConfigured: sql<boolean>`CASE WHEN ${therapistCalendars.channelId} IS NOT NULL THEN true ELSE false END`,
       })
       .from(therapistCalendars)
       .leftJoin(users, eq(therapistCalendars.therapistId, users.id))
@@ -251,27 +278,31 @@ router.get('/therapists', async (req, res) => {
             and(
               eq(appointments.therapistCalendarId, calendar.id),
               gte(appointments.scheduledAt, new Date()),
-              eq(appointments.status, 'scheduled')
+              eq(appointments.status, "scheduled")
             )
           );
         return {
           therapistId: calendar.therapistId,
-          upcomingAppointments: Number(count[0]?.count || 0)
+          upcomingAppointments: Number(count[0]?.count || 0),
         };
       })
     );
 
     // Combine data
     const enrichedCalendars = calendars.map((calendar: any) => {
-      const appointmentData = appointmentCounts.find(ac => ac.therapistId === calendar.therapistId);
-      
+      const appointmentData = appointmentCounts.find(
+        (ac) => ac.therapistId === calendar.therapistId
+      );
+
       return {
         ...calendar,
         upcomingAppointments: appointmentData?.upcomingAppointments || 0,
         lastSyncTime: calendar.updatedAt,
-        channelStatus: calendar.channelExpiresAt 
-          ? (new Date(calendar.channelExpiresAt) > new Date() ? 'active' : 'expired')
-          : 'inactive'
+        channelStatus: calendar.channelExpiresAt
+          ? new Date(calendar.channelExpiresAt) > new Date()
+            ? "active"
+            : "expired"
+          : "inactive",
       };
     });
 
@@ -291,15 +322,14 @@ router.get('/therapists', async (req, res) => {
         total: totalCount,
         limit,
         offset,
-        hasMore: offset + limit < totalCount
-      }
+        hasMore: offset + limit < totalCount,
+      },
     });
-
   } catch (error: any) {
-    console.error('❌ Error fetching therapist calendars:', error);
+    console.error("❌ Error fetching therapist calendars:", error);
     res.status(500).json({
-      error: 'Failed to fetch therapist calendars',
-      details: error.message
+      error: "Failed to fetch therapist calendars",
+      details: error.message,
     });
   }
 });
@@ -312,7 +342,7 @@ router.get('/therapists', async (req, res) => {
  * GET /api/admin/calendar/therapist/:id
  * Returns detailed calendar info and configuration for a specific therapist
  */
-router.get('/therapist/:id', async (req, res) => {
+router.get("/therapist/:id", async (req, res) => {
   try {
     const { id: therapistId } = req.params;
 
@@ -335,7 +365,7 @@ router.get('/therapist/:id', async (req, res) => {
         updatedAt: therapistCalendars.updatedAt,
         therapistName: sql<string>`${users.firstName} || ' ' || ${users.lastName}`,
         therapistEmail: users.email,
-        therapistActive: users.isActive
+        therapistActive: users.isActive,
       })
       .from(therapistCalendars)
       .leftJoin(users, eq(therapistCalendars.therapistId, users.id))
@@ -344,55 +374,58 @@ router.get('/therapist/:id', async (req, res) => {
 
     if (!calendarData.length) {
       return res.status(404).json({
-        error: 'Calendar not found for this therapist'
+        error: "Calendar not found for this therapist",
       });
     }
 
     const calendar = calendarData[0];
 
     // Get calendar statistics
-    const [
-      totalAppointments,
-      upcomingAppointments,
-      completedAppointments,
-      recentAppointments
-    ] = await Promise.all([
-      // Total appointments
-      db.select({ count: count() }).from(appointments)
-        .where(eq(appointments.therapistCalendarId, calendar.id)),
-      
-      // Upcoming appointments
-      db.select({ count: count() }).from(appointments)
-        .where(
-          and(
-            eq(appointments.therapistCalendarId, calendar.id),
-            gte(appointments.scheduledAt, new Date()),
-            eq(appointments.status, 'scheduled')
-          )
-        ),
-      
-      // Completed appointments
-      db.select({ count: count() }).from(appointments)
-        .where(
-          and(
-            eq(appointments.therapistCalendarId, calendar.id),
-            eq(appointments.status, 'completed')
-          )
-        ),
-      
-      // Recent appointments
-      db.select({
-        id: appointments.id,
-        scheduledAt: appointments.scheduledAt,
-        status: appointments.status,
-        sessionType: appointments.sessionType,
-        googleEventId: appointments.googleEventId
-      })
-      .from(appointments)
-      .where(eq(appointments.therapistCalendarId, calendar.id))
-      .orderBy(desc(appointments.scheduledAt))
-      .limit(10)
-    ]);
+    const [totalAppointments, upcomingAppointments, completedAppointments, recentAppointments] =
+      await Promise.all([
+        // Total appointments
+        db
+          .select({ count: count() })
+          .from(appointments)
+          .where(eq(appointments.therapistCalendarId, calendar.id)),
+
+        // Upcoming appointments
+        db
+          .select({ count: count() })
+          .from(appointments)
+          .where(
+            and(
+              eq(appointments.therapistCalendarId, calendar.id),
+              gte(appointments.scheduledAt, new Date()),
+              eq(appointments.status, "scheduled")
+            )
+          ),
+
+        // Completed appointments
+        db
+          .select({ count: count() })
+          .from(appointments)
+          .where(
+            and(
+              eq(appointments.therapistCalendarId, calendar.id),
+              eq(appointments.status, "completed")
+            )
+          ),
+
+        // Recent appointments
+        db
+          .select({
+            id: appointments.id,
+            scheduledAt: appointments.scheduledAt,
+            status: appointments.status,
+            sessionType: appointments.sessionType,
+            googleEventId: appointments.googleEventId,
+          })
+          .from(appointments)
+          .where(eq(appointments.therapistCalendarId, calendar.id))
+          .orderBy(desc(appointments.scheduledAt))
+          .limit(10),
+      ]);
 
     // Check calendar permissions and health
     let healthCheck = null;
@@ -401,16 +434,19 @@ router.get('/therapist/:id', async (req, res) => {
         // This would be a call to calendarService to check health
         healthCheck = {
           calendarAccessible: true,
-          permissionsValid: calendar.aclRole === 'writer',
-          webhookActive: calendar.channelId && calendar.channelExpiresAt && new Date(calendar.channelExpiresAt) > new Date(),
+          permissionsValid: calendar.aclRole === "writer",
+          webhookActive:
+            calendar.channelId &&
+            calendar.channelExpiresAt &&
+            new Date(calendar.channelExpiresAt) > new Date(),
           lastSyncSuccessful: true,
-          apiQuotaOk: true
+          apiQuotaOk: true,
         };
       }
     } catch (error) {
       healthCheck = {
         calendarAccessible: false,
-        error: 'Health check failed'
+        error: "Health check failed",
       };
     }
 
@@ -421,18 +457,17 @@ router.get('/therapist/:id', async (req, res) => {
         statistics: {
           totalAppointments: totalAppointments[0]?.count || 0,
           upcomingAppointments: upcomingAppointments[0]?.count || 0,
-          completedAppointments: completedAppointments[0]?.count || 0
+          completedAppointments: completedAppointments[0]?.count || 0,
         },
         recentAppointments: recentAppointments || [],
-        healthCheck
-      }
+        healthCheck,
+      },
     });
-
   } catch (error: any) {
-    console.error('❌ Error fetching therapist calendar details:', error);
+    console.error("❌ Error fetching therapist calendar details:", error);
     res.status(500).json({
-      error: 'Failed to fetch calendar details',
-      details: error.message
+      error: "Failed to fetch calendar details",
+      details: error.message,
     });
   }
 });
@@ -441,7 +476,7 @@ router.get('/therapist/:id', async (req, res) => {
  * POST /api/admin/calendar/therapist/:id/sync
  * Force calendar sync and refresh for a specific therapist
  */
-router.post('/therapist/:id/sync', async (req, res) => {
+router.post("/therapist/:id/sync", async (req, res) => {
   try {
     const { id: therapistId } = req.params;
     const adminId = (req.user as any)?.id;
@@ -450,7 +485,7 @@ router.post('/therapist/:id/sync', async (req, res) => {
     const calendar = await storage.getTherapistCalendar(therapistId);
     if (!calendar) {
       return res.status(404).json({
-        error: 'Calendar not found for this therapist'
+        error: "Calendar not found for this therapist",
       });
     }
 
@@ -463,23 +498,24 @@ router.post('/therapist/:id/sync', async (req, res) => {
     }
 
     // Log the sync operation
-    console.log(`📅 Admin ${adminId} forced sync for therapist ${therapistId} calendar ${calendar.id}`);
+    console.log(
+      `📅 Admin ${adminId} forced sync for therapist ${therapistId} calendar ${calendar.id}`
+    );
 
     res.json({
       success: true,
-      message: 'Calendar sync completed successfully',
+      message: "Calendar sync completed successfully",
       syncResult: {
         eventsProcessed: syncResult.eventsProcessed || 0,
         conflictsFound: syncResult.conflictsFound || 0,
-        lastSyncTime: new Date().toISOString()
-      }
+        lastSyncTime: new Date().toISOString(),
+      },
     });
-
   } catch (error: any) {
-    console.error('❌ Error syncing therapist calendar:', error);
+    console.error("❌ Error syncing therapist calendar:", error);
     res.status(500).json({
-      error: 'Failed to sync calendar',
-      details: error.message
+      error: "Failed to sync calendar",
+      details: error.message,
     });
   }
 });
@@ -488,7 +524,7 @@ router.post('/therapist/:id/sync', async (req, res) => {
  * POST /api/admin/calendar/therapist/:id/reset
  * Reset calendar integration status for a specific therapist
  */
-router.post('/therapist/:id/reset', async (req, res) => {
+router.post("/therapist/:id/reset", async (req, res) => {
   try {
     const { id: therapistId } = req.params;
     const adminId = (req.user as any)?.id;
@@ -497,38 +533,39 @@ router.post('/therapist/:id/reset', async (req, res) => {
     const calendar = await storage.getTherapistCalendar(therapistId);
     if (!calendar) {
       return res.status(404).json({
-        error: 'Calendar not found for this therapist'
+        error: "Calendar not found for this therapist",
       });
     }
 
     // Reset integration status
     const updatedCalendar = await storage.updateTherapistCalendar(calendar.id, {
-      integrationStatus: 'pending',
+      integrationStatus: "pending",
       syncToken: null,
       channelId: null,
       channelResourceId: null,
       channelExpiresAt: null,
-      updatedAt: new Date()
+      updatedAt: new Date(),
     });
 
     // Log the reset operation
-    console.log(`🔄 Admin ${adminId} reset calendar integration for therapist ${therapistId} calendar ${calendar.id}`);
+    console.log(
+      `🔄 Admin ${adminId} reset calendar integration for therapist ${therapistId} calendar ${calendar.id}`
+    );
 
     res.json({
       success: true,
-      message: 'Calendar integration reset successfully',
+      message: "Calendar integration reset successfully",
       calendar: {
         id: updatedCalendar.id,
         integrationStatus: updatedCalendar.integrationStatus,
-        resetAt: new Date().toISOString()
-      }
+        resetAt: new Date().toISOString(),
+      },
     });
-
   } catch (error: any) {
-    console.error('❌ Error resetting therapist calendar:', error);
+    console.error("❌ Error resetting therapist calendar:", error);
     res.status(500).json({
-      error: 'Failed to reset calendar integration',
-      details: error.message
+      error: "Failed to reset calendar integration",
+      details: error.message,
     });
   }
 });
@@ -537,16 +574,16 @@ router.post('/therapist/:id/reset', async (req, res) => {
  * POST /api/admin/calendar/therapist/:id/permissions-reset
  * Regenerate calendar sharing permissions for a specific therapist
  */
-router.post('/therapist/:id/permissions-reset', async (req, res) => {
+router.post("/therapist/:id/permissions-reset", async (req, res) => {
   try {
     const { id: therapistId } = req.params;
     const adminId = (req.user as any)?.id;
 
     // Get therapist details
     const therapist = await storage.getUserById(therapistId);
-    if (!therapist || therapist.role !== 'therapist') {
+    if (!therapist || therapist.role !== "therapist") {
       return res.status(404).json({
-        error: 'Therapist not found'
+        error: "Therapist not found",
       });
     }
 
@@ -554,7 +591,7 @@ router.post('/therapist/:id/permissions-reset', async (req, res) => {
     const calendar = await storage.getTherapistCalendar(therapistId);
     if (!calendar) {
       return res.status(404).json({
-        error: 'Calendar not found for this therapist'
+        error: "Calendar not found for this therapist",
       });
     }
 
@@ -565,23 +602,24 @@ router.post('/therapist/:id/permissions-reset', async (req, res) => {
     );
 
     // Log the permissions reset operation
-    console.log(`🔐 Admin ${adminId} reset permissions for therapist ${therapistId} calendar ${calendar.id}`);
+    console.log(
+      `🔐 Admin ${adminId} reset permissions for therapist ${therapistId} calendar ${calendar.id}`
+    );
 
     res.json({
       success: true,
-      message: 'Calendar permissions reset successfully',
+      message: "Calendar permissions reset successfully",
       permissionsResult: {
         therapistEmail: therapist.email,
         permissionsUpdated: permissionsResult.success,
-        resetAt: new Date().toISOString()
-      }
+        resetAt: new Date().toISOString(),
+      },
     });
-
   } catch (error: any) {
-    console.error('❌ Error resetting calendar permissions:', error);
+    console.error("❌ Error resetting calendar permissions:", error);
     res.status(500).json({
-      error: 'Failed to reset calendar permissions',
-      details: error.message
+      error: "Failed to reset calendar permissions",
+      details: error.message,
     });
   }
 });
@@ -594,13 +632,13 @@ router.post('/therapist/:id/permissions-reset', async (req, res) => {
  * POST /api/admin/calendar/bulk/sync
  * Batch sync selected therapist calendars
  */
-router.post('/bulk/sync', async (req, res) => {
+router.post("/bulk/sync", async (req, res) => {
   try {
     const validation = bulkOperationSchema.safeParse(req.body);
     if (!validation.success) {
       return res.status(400).json({
-        error: 'Invalid request body',
-        details: validation.error.errors
+        error: "Invalid request body",
+        details: validation.error.errors,
       });
     }
 
@@ -615,7 +653,7 @@ router.post('/bulk/sync', async (req, res) => {
         googleCalendarId: therapistCalendars.googleCalendarId,
         integrationStatus: therapistCalendars.integrationStatus,
         therapistName: sql<string>`${users.firstName} || ' ' || ${users.lastName}`,
-        therapistEmail: users.email
+        therapistEmail: users.email,
       })
       .from(therapistCalendars)
       .leftJoin(users, eq(therapistCalendars.therapistId, users.id))
@@ -628,15 +666,15 @@ router.post('/bulk/sync', async (req, res) => {
     // Process each calendar
     for (const calendar of calendars) {
       try {
-        if (calendar.integrationStatus === 'active' && calendar.googleCalendarId) {
+        if (calendar.integrationStatus === "active" && calendar.googleCalendarId) {
           // Mock sync result for now (replace with actual calendarService.forceSync)
           const syncResult = {
             success: true,
             eventsProcessed: Math.floor(Math.random() * 10),
             conflictsFound: 0,
-            syncToken: `sync_${Date.now()}`
+            syncToken: `sync_${Date.now()}`,
           };
-          
+
           // Update sync token if provided
           if (syncResult.syncToken && calendar.id) {
             await storage.updateCalendarSyncToken(calendar.id, syncResult.syncToken);
@@ -647,7 +685,7 @@ router.post('/bulk/sync', async (req, res) => {
             therapistName: calendar.therapistName,
             success: true,
             eventsProcessed: syncResult.eventsProcessed || 0,
-            conflictsFound: syncResult.conflictsFound || 0
+            conflictsFound: syncResult.conflictsFound || 0,
           });
           successCount++;
         } else {
@@ -655,7 +693,7 @@ router.post('/bulk/sync', async (req, res) => {
             therapistId: calendar.therapistId,
             therapistName: calendar.therapistName,
             success: false,
-            error: 'Calendar not active or missing Google Calendar ID'
+            error: "Calendar not active or missing Google Calendar ID",
           });
           failureCount++;
         }
@@ -664,14 +702,16 @@ router.post('/bulk/sync', async (req, res) => {
           therapistId: calendar.therapistId,
           therapistName: calendar.therapistName,
           success: false,
-          error: error.message
+          error: error.message,
         });
         failureCount++;
       }
     }
 
     // Log bulk sync operation
-    console.log(`📅 Admin ${adminId} performed bulk sync on ${therapistIds.length} calendars: ${successCount} successful, ${failureCount} failed`);
+    console.log(
+      `📅 Admin ${adminId} performed bulk sync on ${therapistIds.length} calendars: ${successCount} successful, ${failureCount} failed`
+    );
 
     res.json({
       success: true,
@@ -679,16 +719,15 @@ router.post('/bulk/sync', async (req, res) => {
       summary: {
         totalCalendars: calendars.length,
         successful: successCount,
-        failed: failureCount
+        failed: failureCount,
       },
-      results
+      results,
     });
-
   } catch (error: any) {
-    console.error('❌ Error performing bulk calendar sync:', error);
+    console.error("❌ Error performing bulk calendar sync:", error);
     res.status(500).json({
-      error: 'Failed to perform bulk calendar sync',
-      details: error.message
+      error: "Failed to perform bulk calendar sync",
+      details: error.message,
     });
   }
 });
@@ -697,13 +736,13 @@ router.post('/bulk/sync', async (req, res) => {
  * POST /api/admin/calendar/bulk/health-check
  * Run health checks on multiple calendars
  */
-router.post('/bulk/health-check', async (req, res) => {
+router.post("/bulk/health-check", async (req, res) => {
   try {
     const validation = bulkOperationSchema.safeParse(req.body);
     if (!validation.success) {
       return res.status(400).json({
-        error: 'Invalid request body',
-        details: validation.error.errors
+        error: "Invalid request body",
+        details: validation.error.errors,
       });
     }
 
@@ -720,7 +759,7 @@ router.post('/bulk/health-check', async (req, res) => {
         channelId: therapistCalendars.channelId,
         channelExpiresAt: therapistCalendars.channelExpiresAt,
         therapistName: sql<string>`${users.firstName} || ' ' || ${users.lastName}`,
-        therapistEmail: users.email
+        therapistEmail: users.email,
       })
       .from(therapistCalendars)
       .leftJoin(users, eq(therapistCalendars.therapistId, users.id))
@@ -741,62 +780,66 @@ router.post('/bulk/health-check', async (req, res) => {
           integrationStatus: calendar.integrationStatus,
           tests: {
             calendarExists: calendar.googleCalendarId !== null,
-            calendarAccessible: calendar.integrationStatus === 'active',
-            permissionsValid: calendar.integrationStatus === 'active',
-            webhookActive: calendar.channelId !== null && calendar.channelExpiresAt ? new Date(calendar.channelExpiresAt) > new Date() : false,
-            syncWorking: calendar.integrationStatus === 'active'
+            calendarAccessible: calendar.integrationStatus === "active",
+            permissionsValid: calendar.integrationStatus === "active",
+            webhookActive:
+              calendar.channelId !== null && calendar.channelExpiresAt
+                ? new Date(calendar.channelExpiresAt) > new Date()
+                : false,
+            syncWorking: calendar.integrationStatus === "active",
           },
-          status: 'critical' as 'healthy' | 'warning' | 'critical',
-          issues: [] as string[]
+          status: "critical" as "healthy" | "warning" | "critical",
+          issues: [] as string[],
         };
 
         // Analyze test results
         if (!healthCheck.tests.calendarExists) {
-          healthCheck.issues.push('No Google Calendar ID configured');
+          healthCheck.issues.push("No Google Calendar ID configured");
         }
         if (!healthCheck.tests.calendarAccessible) {
-          healthCheck.issues.push('Calendar not accessible or in error state');
+          healthCheck.issues.push("Calendar not accessible or in error state");
         }
         if (!healthCheck.tests.permissionsValid) {
-          healthCheck.issues.push('Calendar permissions are invalid');
+          healthCheck.issues.push("Calendar permissions are invalid");
         }
         if (!healthCheck.tests.webhookActive) {
-          healthCheck.issues.push('Webhook channel expired or inactive');
+          healthCheck.issues.push("Webhook channel expired or inactive");
         }
         if (!healthCheck.tests.syncWorking) {
-          healthCheck.issues.push('Calendar sync not working properly');
+          healthCheck.issues.push("Calendar sync not working properly");
         }
 
         // Determine overall status
         const passedTests = Object.values(healthCheck.tests).filter(Boolean).length;
         if (passedTests >= 4) {
-          healthCheck.status = 'healthy';
+          healthCheck.status = "healthy";
           healthyCount++;
         } else if (passedTests >= 2) {
-          healthCheck.status = 'warning';
+          healthCheck.status = "warning";
           warningCount++;
         } else {
-          healthCheck.status = 'critical';
+          healthCheck.status = "critical";
           criticalCount++;
         }
 
         results.push(healthCheck);
-
       } catch (error: any) {
         results.push({
           therapistId: calendar.therapistId,
           therapistName: calendar.therapistName,
           calendarId: calendar.id,
-          status: 'critical',
+          status: "critical",
           error: error.message,
-          issues: ['Health check failed to run']
+          issues: ["Health check failed to run"],
         });
         criticalCount++;
       }
     }
 
     // Log bulk health check operation
-    console.log(`🏥 Admin ${adminId} performed bulk health check on ${therapistIds.length} calendars: ${healthyCount} healthy, ${warningCount} warning, ${criticalCount} critical`);
+    console.log(
+      `🏥 Admin ${adminId} performed bulk health check on ${therapistIds.length} calendars: ${healthyCount} healthy, ${warningCount} warning, ${criticalCount} critical`
+    );
 
     res.json({
       success: true,
@@ -805,16 +848,15 @@ router.post('/bulk/health-check', async (req, res) => {
         totalCalendars: calendars.length,
         healthy: healthyCount,
         warning: warningCount,
-        critical: criticalCount
+        critical: criticalCount,
       },
-      results
+      results,
     });
-
   } catch (error: any) {
-    console.error('❌ Error performing bulk health check:', error);
+    console.error("❌ Error performing bulk health check:", error);
     res.status(500).json({
-      error: 'Failed to perform bulk health check',
-      details: error.message
+      error: "Failed to perform bulk health check",
+      details: error.message,
     });
   }
 });
@@ -823,14 +865,14 @@ router.post('/bulk/health-check', async (req, res) => {
  * POST /api/admin/calendar/bulk/setup
  * Batch setup calendars for multiple therapists
  */
-router.post('/bulk/setup', async (req, res) => {
+router.post("/bulk/setup", async (req, res) => {
   try {
     const { therapistIds } = req.body;
     const adminId = (req.user as any)?.id;
 
     if (!Array.isArray(therapistIds) || therapistIds.length === 0) {
       return res.status(400).json({
-        error: 'therapistIds array is required'
+        error: "therapistIds array is required",
       });
     }
 
@@ -838,20 +880,21 @@ router.post('/bulk/setup', async (req, res) => {
     const batchResult = await therapistCalendarOnboardingService.batchSetupCalendars(therapistIds);
 
     // Log bulk setup operation
-    console.log(`🏗️ Admin ${adminId} performed bulk calendar setup for ${therapistIds.length} therapists: ${batchResult.successful}/${batchResult.totalTherapists} successful`);
+    console.log(
+      `🏗️ Admin ${adminId} performed bulk calendar setup for ${therapistIds.length} therapists: ${batchResult.successful}/${batchResult.totalTherapists} successful`
+    );
 
     res.json({
       success: true,
       message: `Batch setup completed: ${batchResult.successful}/${batchResult.totalTherapists} successful`,
       summary: batchResult,
-      results: batchResult.results
+      results: batchResult.results,
     });
-
   } catch (error: any) {
-    console.error('❌ Error performing bulk calendar setup:', error);
+    console.error("❌ Error performing bulk calendar setup:", error);
     res.status(500).json({
-      error: 'Failed to perform bulk calendar setup',
-      details: error.message
+      error: "Failed to perform bulk calendar setup",
+      details: error.message,
     });
   }
 });
@@ -864,25 +907,25 @@ router.post('/bulk/setup', async (req, res) => {
  * GET /api/admin/calendar/analytics
  * Returns usage analytics and performance metrics
  */
-router.get('/analytics', async (req, res) => {
+router.get("/analytics", async (req, res) => {
   try {
-    const { timeframe = '30d', therapistId } = req.query;
+    const { timeframe = "30d", therapistId } = req.query;
 
     // Calculate date range based on timeframe
     const endDate = new Date();
     const startDate = new Date();
-    
+
     switch (timeframe) {
-      case '7d':
+      case "7d":
         startDate.setDate(endDate.getDate() - 7);
         break;
-      case '30d':
+      case "30d":
         startDate.setDate(endDate.getDate() - 30);
         break;
-      case '90d':
+      case "90d":
         startDate.setDate(endDate.getDate() - 90);
         break;
-      case '1y':
+      case "1y":
         startDate.setFullYear(endDate.getFullYear() - 1);
         break;
       default:
@@ -892,7 +935,7 @@ router.get('/analytics', async (req, res) => {
     // Build where conditions for therapist filter
     const appointmentWhereConditions = [
       gte(appointments.scheduledAt, startDate),
-      lte(appointments.scheduledAt, endDate)
+      lte(appointments.scheduledAt, endDate),
     ];
 
     if (therapistId) {
@@ -902,65 +945,70 @@ router.get('/analytics', async (req, res) => {
     const [
       // Booking frequency analysis
       bookingFrequency,
-      
+
       // Calendar utilization by status
       calendarUtilization,
-      
+
       // Peak booking times (hour of day)
       peakBookingTimes,
-      
+
       // Calendar setup success rates
       setupSuccessRates,
-      
+
       // Therapist adoption metrics
-      adoptionMetrics
+      adoptionMetrics,
     ] = await Promise.all([
       // Booking frequency per day
-      db.select({
-        date: sql<string>`DATE(${appointments.scheduledAt})`,
-        bookings: count()
-      })
-      .from(appointments)
-      .where(and(...appointmentWhereConditions))
-      .groupBy(sql`DATE(${appointments.scheduledAt})`)
-      .orderBy(sql`DATE(${appointments.scheduledAt})`),
+      db
+        .select({
+          date: sql<string>`DATE(${appointments.scheduledAt})`,
+          bookings: count(),
+        })
+        .from(appointments)
+        .where(and(...appointmentWhereConditions))
+        .groupBy(sql`DATE(${appointments.scheduledAt})`)
+        .orderBy(sql`DATE(${appointments.scheduledAt})`),
 
       // Calendar utilization by status
-      db.select({
-        status: appointments.status,
-        count: count()
-      })
-      .from(appointments)
-      .where(and(...appointmentWhereConditions))
-      .groupBy(appointments.status),
+      db
+        .select({
+          status: appointments.status,
+          count: count(),
+        })
+        .from(appointments)
+        .where(and(...appointmentWhereConditions))
+        .groupBy(appointments.status),
 
       // Peak booking times (hour of day)
-      db.select({
-        hour: sql<number>`EXTRACT(HOUR FROM ${appointments.scheduledAt})`,
-        bookings: count()
-      })
-      .from(appointments)
-      .where(and(...appointmentWhereConditions))
-      .groupBy(sql`EXTRACT(HOUR FROM ${appointments.scheduledAt})`)
-      .orderBy(sql`EXTRACT(HOUR FROM ${appointments.scheduledAt})`),
+      db
+        .select({
+          hour: sql<number>`EXTRACT(HOUR FROM ${appointments.scheduledAt})`,
+          bookings: count(),
+        })
+        .from(appointments)
+        .where(and(...appointmentWhereConditions))
+        .groupBy(sql`EXTRACT(HOUR FROM ${appointments.scheduledAt})`)
+        .orderBy(sql`EXTRACT(HOUR FROM ${appointments.scheduledAt})`),
 
       // Calendar setup success rates
-      db.select({
-        integrationStatus: therapistCalendars.integrationStatus,
-        count: count()
-      })
-      .from(therapistCalendars)
-      .groupBy(therapistCalendars.integrationStatus),
+      db
+        .select({
+          integrationStatus: therapistCalendars.integrationStatus,
+          count: count(),
+        })
+        .from(therapistCalendars)
+        .groupBy(therapistCalendars.integrationStatus),
 
       // Therapist adoption metrics
-      db.select({
-        totalTherapists: sql<number>`COUNT(DISTINCT ${users.id})`,
-        therapistsWithCalendars: sql<number>`COUNT(DISTINCT ${therapistCalendars.therapistId})`,
-        activeCalendars: sql<number>`COUNT(DISTINCT CASE WHEN ${therapistCalendars.integrationStatus} = 'active' THEN ${therapistCalendars.therapistId} END)`
-      })
-      .from(users)
-      .leftJoin(therapistCalendars, eq(users.id, therapistCalendars.therapistId))
-      .where(eq(users.role, 'therapist'))
+      db
+        .select({
+          totalTherapists: sql<number>`COUNT(DISTINCT ${users.id})`,
+          therapistsWithCalendars: sql<number>`COUNT(DISTINCT ${therapistCalendars.therapistId})`,
+          activeCalendars: sql<number>`COUNT(DISTINCT CASE WHEN ${therapistCalendars.integrationStatus} = 'active' THEN ${therapistCalendars.therapistId} END)`,
+        })
+        .from(users)
+        .leftJoin(therapistCalendars, eq(users.id, therapistCalendars.therapistId))
+        .where(eq(users.role, "therapist")),
     ]);
 
     // Process analytics data
@@ -968,47 +1016,56 @@ router.get('/analytics', async (req, res) => {
       timeframe,
       dateRange: {
         start: startDate.toISOString(),
-        end: endDate.toISOString()
+        end: endDate.toISOString(),
       },
-      bookingFrequency: bookingFrequency.map(row => ({
+      bookingFrequency: bookingFrequency.map((row) => ({
         date: row.date,
-        bookings: Number(row.bookings)
+        bookings: Number(row.bookings),
       })),
-      calendarUtilization: calendarUtilization.map(row => ({
+      calendarUtilization: calendarUtilization.map((row) => ({
         status: row.status,
-        count: Number(row.count)
+        count: Number(row.count),
       })),
-      peakBookingTimes: peakBookingTimes.map(row => ({
+      peakBookingTimes: peakBookingTimes.map((row) => ({
         hour: Number(row.hour),
-        bookings: Number(row.bookings)
+        bookings: Number(row.bookings),
       })),
-      setupSuccessRates: setupSuccessRates.map(row => ({
+      setupSuccessRates: setupSuccessRates.map((row) => ({
         status: row.integrationStatus,
-        count: Number(row.count)
+        count: Number(row.count),
       })),
       adoption: {
         totalTherapists: Number(adoptionMetrics[0]?.totalTherapists || 0),
         therapistsWithCalendars: Number(adoptionMetrics[0]?.therapistsWithCalendars || 0),
         activeCalendars: Number(adoptionMetrics[0]?.activeCalendars || 0),
-        adoptionRate: adoptionMetrics[0]?.totalTherapists > 0 
-          ? Math.round((Number(adoptionMetrics[0].therapistsWithCalendars) / Number(adoptionMetrics[0].totalTherapists)) * 100)
-          : 0,
-        activationRate: adoptionMetrics[0]?.therapistsWithCalendars > 0
-          ? Math.round((Number(adoptionMetrics[0].activeCalendars) / Number(adoptionMetrics[0].therapistsWithCalendars)) * 100)
-          : 0
-      }
+        adoptionRate:
+          adoptionMetrics[0]?.totalTherapists > 0
+            ? Math.round(
+                (Number(adoptionMetrics[0].therapistsWithCalendars) /
+                  Number(adoptionMetrics[0].totalTherapists)) *
+                  100
+              )
+            : 0,
+        activationRate:
+          adoptionMetrics[0]?.therapistsWithCalendars > 0
+            ? Math.round(
+                (Number(adoptionMetrics[0].activeCalendars) /
+                  Number(adoptionMetrics[0].therapistsWithCalendars)) *
+                  100
+              )
+            : 0,
+      },
     };
 
     res.json({
       success: true,
-      analytics
+      analytics,
     });
-
   } catch (error: any) {
-    console.error('❌ Error fetching calendar analytics:', error);
+    console.error("❌ Error fetching calendar analytics:", error);
     res.status(500).json({
-      error: 'Failed to fetch calendar analytics',
-      details: error.message
+      error: "Failed to fetch calendar analytics",
+      details: error.message,
     });
   }
 });
@@ -1017,17 +1074,17 @@ router.get('/analytics', async (req, res) => {
  * GET /api/admin/calendar/reports/:type
  * Returns specified report data (weekly, monthly, etc.)
  */
-router.get('/reports/:type', async (req, res) => {
+router.get("/reports/:type", async (req, res) => {
   try {
     const validation = reportTypeSchema.safeParse({
       type: req.params.type,
-      ...req.query
+      ...req.query,
     });
 
     if (!validation.success) {
       return res.status(400).json({
-        error: 'Invalid report parameters',
-        details: validation.error.errors
+        error: "Invalid report parameters",
+        details: validation.error.errors,
       });
     }
 
@@ -1039,13 +1096,13 @@ router.get('/reports/:type', async (req, res) => {
 
     if (!startDate) {
       switch (type) {
-        case 'weekly':
+        case "weekly":
           reportStartDate.setDate(reportEndDate.getDate() - 7);
           break;
-        case 'monthly':
+        case "monthly":
           reportStartDate.setMonth(reportEndDate.getMonth() - 1);
           break;
-        case 'yearly':
+        case "yearly":
           reportStartDate.setFullYear(reportEndDate.getFullYear() - 1);
           break;
         default:
@@ -1056,7 +1113,7 @@ router.get('/reports/:type', async (req, res) => {
     let reportData = {};
 
     switch (type) {
-      case 'calendar-health':
+      case "calendar-health":
         // Generate calendar health report
         const healthData = await db
           .select({
@@ -1066,44 +1123,46 @@ router.get('/reports/:type', async (req, res) => {
             channelExpiresAt: therapistCalendars.channelExpiresAt,
             updatedAt: therapistCalendars.updatedAt,
             therapistName: sql<string>`${users.firstName} || ' ' || ${users.lastName}`,
-            therapistEmail: users.email
+            therapistEmail: users.email,
           })
           .from(therapistCalendars)
           .leftJoin(users, eq(therapistCalendars.therapistId, users.id));
 
         reportData = {
-          type: 'calendar-health',
+          type: "calendar-health",
           generatedAt: new Date().toISOString(),
           summary: {
             totalCalendars: healthData.length,
-            active: healthData.filter(cal => cal.integrationStatus === 'active').length,
-            pending: healthData.filter(cal => cal.integrationStatus === 'pending').length,
-            error: healthData.filter(cal => cal.integrationStatus === 'error').length,
-            expiredWebhooks: healthData.filter(cal => 
-              cal.channelExpiresAt && new Date(cal.channelExpiresAt) < new Date()
-            ).length
+            active: healthData.filter((cal) => cal.integrationStatus === "active").length,
+            pending: healthData.filter((cal) => cal.integrationStatus === "pending").length,
+            error: healthData.filter((cal) => cal.integrationStatus === "error").length,
+            expiredWebhooks: healthData.filter(
+              (cal) => cal.channelExpiresAt && new Date(cal.channelExpiresAt) < new Date()
+            ).length,
           },
-          calendars: healthData.map(cal => ({
+          calendars: healthData.map((cal) => ({
             therapistId: cal.therapistId,
             therapistName: cal.therapistName,
             therapistEmail: cal.therapistEmail,
             integrationStatus: cal.integrationStatus,
-            webhookStatus: cal.channelExpiresAt 
-              ? (new Date(cal.channelExpiresAt) > new Date() ? 'active' : 'expired')
-              : 'inactive',
-            lastUpdated: cal.updatedAt
-          }))
+            webhookStatus: cal.channelExpiresAt
+              ? new Date(cal.channelExpiresAt) > new Date()
+                ? "active"
+                : "expired"
+              : "inactive",
+            lastUpdated: cal.updatedAt,
+          })),
         };
         break;
 
-      case 'usage-analytics':
+      case "usage-analytics":
         // Generate usage analytics report
         const usageData = await db
           .select({
             therapistId: appointments.primaryTherapistId,
             therapistName: sql<string>`${users.firstName} || ' ' || ${users.lastName}`,
             appointmentCount: count(),
-            lastAppointment: sql<Date>`MAX(${appointments.scheduledAt})`
+            lastAppointment: sql<Date>`MAX(${appointments.scheduledAt})`,
           })
           .from(appointments)
           .leftJoin(users, eq(appointments.primaryTherapistId, users.id))
@@ -1114,77 +1173,81 @@ router.get('/reports/:type', async (req, res) => {
               therapistId ? eq(appointments.primaryTherapistId, therapistId) : undefined
             )
           )
-          .groupBy(appointments.primaryTherapistId, sql`${users.firstName} || ' ' || ${users.lastName}`)
+          .groupBy(
+            appointments.primaryTherapistId,
+            sql`${users.firstName} || ' ' || ${users.lastName}`
+          )
           .orderBy(sql`COUNT(*) DESC`);
 
         reportData = {
-          type: 'usage-analytics',
+          type: "usage-analytics",
           dateRange: {
             start: reportStartDate.toISOString(),
-            end: reportEndDate.toISOString()
+            end: reportEndDate.toISOString(),
           },
           generatedAt: new Date().toISOString(),
-          therapistUsage: usageData.map(usage => ({
+          therapistUsage: usageData.map((usage) => ({
             therapistId: usage.therapistId,
             therapistName: usage.therapistName,
             appointmentCount: Number(usage.appointmentCount),
-            lastAppointment: usage.lastAppointment
-          }))
+            lastAppointment: usage.lastAppointment,
+          })),
         };
         break;
 
       default:
         // Generate generic summary report
         const [calendarStats, appointmentStats] = await Promise.all([
-          db.select({
-            integrationStatus: therapistCalendars.integrationStatus,
-            count: count()
-          })
-          .from(therapistCalendars)
-          .groupBy(therapistCalendars.integrationStatus),
+          db
+            .select({
+              integrationStatus: therapistCalendars.integrationStatus,
+              count: count(),
+            })
+            .from(therapistCalendars)
+            .groupBy(therapistCalendars.integrationStatus),
 
-          db.select({
-            status: appointments.status,
-            count: count()
-          })
-          .from(appointments)
-          .where(
-            and(
-              gte(appointments.scheduledAt, reportStartDate),
-              lte(appointments.scheduledAt, reportEndDate)
+          db
+            .select({
+              status: appointments.status,
+              count: count(),
+            })
+            .from(appointments)
+            .where(
+              and(
+                gte(appointments.scheduledAt, reportStartDate),
+                lte(appointments.scheduledAt, reportEndDate)
+              )
             )
-          )
-          .groupBy(appointments.status)
+            .groupBy(appointments.status),
         ]);
 
         reportData = {
           type: type,
           dateRange: {
             start: reportStartDate.toISOString(),
-            end: reportEndDate.toISOString()
+            end: reportEndDate.toISOString(),
           },
           generatedAt: new Date().toISOString(),
-          calendarStatus: calendarStats.map(stat => ({
+          calendarStatus: calendarStats.map((stat) => ({
             status: stat.integrationStatus,
-            count: Number(stat.count)
+            count: Number(stat.count),
           })),
-          appointmentStatus: appointmentStats.map(stat => ({
+          appointmentStatus: appointmentStats.map((stat) => ({
             status: stat.status,
-            count: Number(stat.count)
-          }))
+            count: Number(stat.count),
+          })),
         };
     }
 
     res.json({
       success: true,
-      report: reportData
+      report: reportData,
     });
-
   } catch (error: any) {
-    console.error('❌ Error generating calendar report:', error);
+    console.error("❌ Error generating calendar report:", error);
     res.status(500).json({
-      error: 'Failed to generate calendar report',
-      details: error.message
+      error: "Failed to generate calendar report",
+      details: error.message,
     });
   }
 });
@@ -1197,13 +1260,13 @@ router.get('/reports/:type', async (req, res) => {
  * POST /api/admin/calendar/diagnostics/test-connection
  * Test calendar connectivity and permissions for a specific therapist
  */
-router.post('/diagnostics/test-connection', async (req, res) => {
+router.post("/diagnostics/test-connection", async (req, res) => {
   try {
     const { therapistId } = req.body;
 
     if (!therapistId) {
       return res.status(400).json({
-        error: 'therapistId is required'
+        error: "therapistId is required",
       });
     }
 
@@ -1211,7 +1274,7 @@ router.post('/diagnostics/test-connection', async (req, res) => {
     const calendar = await storage.getTherapistCalendar(therapistId);
     if (!calendar || !calendar.googleCalendarId) {
       return res.status(404).json({
-        error: 'Calendar not found or not configured for this therapist'
+        error: "Calendar not found or not configured for this therapist",
       });
     }
 
@@ -1221,29 +1284,33 @@ router.post('/diagnostics/test-connection', async (req, res) => {
       calendarId: calendar.id,
       googleCalendarId: calendar.googleCalendarId,
       tests: {
-        apiConnection: { status: 'passed', details: 'Google Calendar API connection successful' },
-        calendarAccess: { status: 'passed', details: `Calendar accessible: ${calendar.googleCalendarId}` },
-        permissions: { status: 'passed', details: `Permissions: writer` },
-        webhookStatus: { 
-          status: calendar.channelId && calendar.channelExpiresAt ? 'passed' : 'warning', 
-          details: calendar.channelId ? `Webhook active, expires: ${calendar.channelExpiresAt}` : 'No webhook channel configured'
+        apiConnection: { status: "passed", details: "Google Calendar API connection successful" },
+        calendarAccess: {
+          status: "passed",
+          details: `Calendar accessible: ${calendar.googleCalendarId}`,
         },
-        eventSync: { status: 'passed', details: 'Event sync test completed' }
+        permissions: { status: "passed", details: `Permissions: writer` },
+        webhookStatus: {
+          status: calendar.channelId && calendar.channelExpiresAt ? "passed" : "warning",
+          details: calendar.channelId
+            ? `Webhook active, expires: ${calendar.channelExpiresAt}`
+            : "No webhook channel configured",
+        },
+        eventSync: { status: "passed", details: "Event sync test completed" },
       },
-      overallStatus: 'healthy',
-      timestamp: new Date().toISOString()
+      overallStatus: "healthy",
+      timestamp: new Date().toISOString(),
     };
 
     res.json({
       success: true,
-      diagnostics
+      diagnostics,
     });
-
   } catch (error: any) {
-    console.error('❌ Error running calendar diagnostics:', error);
+    console.error("❌ Error running calendar diagnostics:", error);
     res.status(500).json({
-      error: 'Failed to run calendar diagnostics',
-      details: error.message
+      error: "Failed to run calendar diagnostics",
+      details: error.message,
     });
   }
 });
@@ -1252,7 +1319,7 @@ router.post('/diagnostics/test-connection', async (req, res) => {
  * GET /api/admin/calendar/monitoring/health
  * Real-time monitoring of integration health across all calendars
  */
-router.get('/monitoring/health', async (req, res) => {
+router.get("/monitoring/health", async (req, res) => {
   try {
     // Get all calendar health data
     const calendars = await db
@@ -1262,7 +1329,7 @@ router.get('/monitoring/health', async (req, res) => {
         integrationStatus: therapistCalendars.integrationStatus,
         channelExpiresAt: therapistCalendars.channelExpiresAt,
         updatedAt: therapistCalendars.updatedAt,
-        therapistName: sql<string>`${users.firstName} || ' ' || ${users.lastName}`
+        therapistName: sql<string>`${users.firstName} || ' ' || ${users.lastName}`,
       })
       .from(therapistCalendars)
       .leftJoin(users, eq(therapistCalendars.therapistId, users.id));
@@ -1274,53 +1341,49 @@ router.get('/monitoring/health', async (req, res) => {
 
     const metrics = {
       total: calendars.length,
-      active: calendars.filter(cal => cal.integrationStatus === 'active').length,
-      pending: calendars.filter(cal => cal.integrationStatus === 'pending').length,
-      error: calendars.filter(cal => cal.integrationStatus === 'error').length,
-      expiredWebhooks: calendars.filter(cal => 
-        cal.channelExpiresAt && new Date(cal.channelExpiresAt) < now
+      active: calendars.filter((cal) => cal.integrationStatus === "active").length,
+      pending: calendars.filter((cal) => cal.integrationStatus === "pending").length,
+      error: calendars.filter((cal) => cal.integrationStatus === "error").length,
+      expiredWebhooks: calendars.filter(
+        (cal) => cal.channelExpiresAt && new Date(cal.channelExpiresAt) < now
       ).length,
-      recentlyUpdated: calendars.filter(cal => 
-        new Date(cal.updatedAt) > oneHourAgo
-      ).length,
-      staleCalendars: calendars.filter(cal => 
-        new Date(cal.updatedAt) < oneDayAgo
-      ).length
+      recentlyUpdated: calendars.filter((cal) => new Date(cal.updatedAt) > oneHourAgo).length,
+      staleCalendars: calendars.filter((cal) => new Date(cal.updatedAt) < oneDayAgo).length,
     };
 
     // Health alerts
     const alerts = [];
-    
+
     if (metrics.error > 0) {
       alerts.push({
-        level: 'critical',
+        level: "critical",
         message: `${metrics.error} calendars in error state`,
-        count: metrics.error
+        count: metrics.error,
       });
     }
-    
+
     if (metrics.expiredWebhooks > 0) {
       alerts.push({
-        level: 'warning',
+        level: "warning",
         message: `${metrics.expiredWebhooks} calendars have expired webhooks`,
-        count: metrics.expiredWebhooks
+        count: metrics.expiredWebhooks,
       });
     }
-    
+
     if (metrics.staleCalendars > 0) {
       alerts.push({
-        level: 'info',
+        level: "info",
         message: `${metrics.staleCalendars} calendars haven't been updated in 24 hours`,
-        count: metrics.staleCalendars
+        count: metrics.staleCalendars,
       });
     }
 
     // Overall health status
-    let overallHealth = 'healthy';
+    let overallHealth = "healthy";
     if (metrics.error > 0 || metrics.expiredWebhooks > metrics.total * 0.1) {
-      overallHealth = 'critical';
+      overallHealth = "critical";
     } else if (metrics.expiredWebhooks > 0 || metrics.pending > metrics.total * 0.2) {
-      overallHealth = 'warning';
+      overallHealth = "warning";
     }
 
     res.json({
@@ -1333,25 +1396,24 @@ router.get('/monitoring/health', async (req, res) => {
         uptime: {
           healthy: metrics.active,
           total: metrics.total,
-          percentage: metrics.total > 0 ? Math.round((metrics.active / metrics.total) * 100) : 0
-        }
-      }
+          percentage: metrics.total > 0 ? Math.round((metrics.active / metrics.total) * 100) : 0,
+        },
+      },
     });
-
   } catch (error: any) {
-    console.error('❌ Error fetching calendar health monitoring:', error);
+    console.error("❌ Error fetching calendar health monitoring:", error);
     res.status(500).json({
-      error: 'Failed to fetch calendar health monitoring',
-      details: error.message
+      error: "Failed to fetch calendar health monitoring",
+      details: error.message,
     });
   }
 });
 
 // Create a calendar block (admin only)
-router.post('/blocks', async (req, res) => {
+router.post("/blocks", async (req, res) => {
   try {
     const { title, description, startTime, endTime, blockType, notes } = req.body;
-    
+
     const blockId = await adminCalendarManager.createCalendarBlock({
       title,
       description,
@@ -1359,96 +1421,99 @@ router.post('/blocks', async (req, res) => {
       endTime: new Date(endTime),
       blockType,
       notes,
-      createdBy: (req.user as any)?.id || 'admin'
+      createdBy: (req.user as any)?.id || "admin",
     });
-    
-    res.json({ blockId, message: 'Calendar block created successfully' });
+
+    res.json({ blockId, message: "Calendar block created successfully" });
   } catch (error: any) {
-    console.error('Error creating calendar block:', error);
-    res.status(500).json({ error: 'Failed to create calendar block' });
+    console.error("Error creating calendar block:", error);
+    res.status(500).json({ error: "Failed to create calendar block" });
   }
 });
 
 // Get calendar blocks for a date range
-router.get('/blocks', async (req, res) => {
+router.get("/blocks", async (req, res) => {
   try {
     const { startDate, endDate } = req.query;
-    
+
     const blocks = await adminCalendarManager.getCalendarBlocks(
       new Date(startDate as string),
       new Date(endDate as string)
     );
-    
+
     res.json({ blocks });
   } catch (error: any) {
-    console.error('Error getting calendar blocks:', error);
-    res.status(500).json({ error: 'Failed to get calendar blocks' });
+    console.error("Error getting calendar blocks:", error);
+    res.status(500).json({ error: "Failed to get calendar blocks" });
   }
 });
 
 // Remove a calendar block
-router.delete('/blocks/:blockId', async (req, res) => {
+router.delete("/blocks/:blockId", async (req, res) => {
   try {
     const { blockId } = req.params;
-    const removed = await adminCalendarManager.removeCalendarBlock(blockId, (req.user as any)?.id || 'admin');
-    
+    const removed = await adminCalendarManager.removeCalendarBlock(
+      blockId,
+      (req.user as any)?.id || "admin"
+    );
+
     if (removed) {
-      res.json({ message: 'Calendar block removed successfully' });
+      res.json({ message: "Calendar block removed successfully" });
     } else {
-      res.status(404).json({ error: 'Calendar block not found' });
+      res.status(404).json({ error: "Calendar block not found" });
     }
   } catch (error: any) {
-    console.error('Error removing calendar block:', error);
-    res.status(500).json({ error: 'Failed to remove calendar block' });
+    console.error("Error removing calendar block:", error);
+    res.status(500).json({ error: "Failed to remove calendar block" });
   }
 });
 
 // Create a manual booking (admin creates appointment for someone)
-router.post('/manual-booking', async (req, res) => {
+router.post("/manual-booking", async (req, res) => {
   try {
     const { name, email, phone, dateTime, notes } = req.body;
-    
+
     const bookingId = await adminCalendarManager.createManualBooking(
       name,
       email,
       phone,
       new Date(dateTime),
       notes,
-      (req.user as any)?.id || 'admin'
+      (req.user as any)?.id || "admin"
     );
-    
-    res.json({ bookingId, message: 'Manual booking created successfully' });
+
+    res.json({ bookingId, message: "Manual booking created successfully" });
   } catch (error: any) {
-    console.error('Error creating manual booking:', error);
-    res.status(400).json({ error: error.message || 'Failed to create manual booking' });
+    console.error("Error creating manual booking:", error);
+    res.status(400).json({ error: error.message || "Failed to create manual booking" });
   }
 });
 
 // Quick block time slot
-router.post('/quick-block', async (req, res) => {
+router.post("/quick-block", async (req, res) => {
   try {
     const { date, timeSlot, reason } = req.body;
-    
-    const [hour, minute] = timeSlot.split(':').map(Number);
+
+    const [hour, minute] = timeSlot.split(":").map(Number);
     const startTime = new Date(date);
     startTime.setHours(hour, minute, 0, 0);
-    
+
     const endTime = new Date(startTime);
     endTime.setMinutes(endTime.getMinutes() + 30);
-    
+
     const blockId = await adminCalendarManager.blockTime(
-      reason || 'Blocked',
+      reason || "Blocked",
       startTime,
       endTime,
-      'blocked',
-      (req.user as any)?.id || 'admin',
-      'Quick block from admin panel'
+      "blocked",
+      (req.user as any)?.id || "admin",
+      "Quick block from admin panel"
     );
-    
-    res.json({ blockId, message: 'Time slot blocked successfully' });
+
+    res.json({ blockId, message: "Time slot blocked successfully" });
   } catch (error: any) {
-    console.error('Error blocking time slot:', error);
-    res.status(500).json({ error: 'Failed to block time slot' });
+    console.error("Error blocking time slot:", error);
+    res.status(500).json({ error: "Failed to block time slot" });
   }
 });
 

@@ -1,4 +1,4 @@
-import { Refund, Payment, Appointment } from '@shared/schema';
+import { Refund, Payment, Appointment } from "@shared/schema";
 
 // Refund policy calculation based on Holly's requirements
 export interface RefundCalculation {
@@ -17,23 +17,23 @@ export interface RefundCalculationInput {
   stripeProcessingFee: number; // Stripe processing fees
   cancellationTime: Date; // When cancellation was requested
   sessionTime: Date; // Original session time
-  cancelledBy: 'client' | 'therapist' | 'admin' | 'system';
+  cancelledBy: "client" | "therapist" | "admin" | "system";
 }
 
 /**
  * Calculate refund based on Holly's refund policy:
  * - More than 48 hours before: Full refund to client (100%), minus Stripe processing fees
- * - Between 24-48 hours before: 50% refund to client, 50% to therapist  
+ * - Between 24-48 hours before: 50% refund to client, 50% to therapist
  * - Less than 24 hours before: No refund; therapist retains full 85% share
  */
 export function calculateRefund(input: RefundCalculationInput): RefundCalculation {
-  const { 
-    originalAmount, 
-    therapistEarnings, 
-    stripeProcessingFee, 
-    cancellationTime, 
-    sessionTime, 
-    cancelledBy 
+  const {
+    originalAmount,
+    therapistEarnings,
+    stripeProcessingFee,
+    cancellationTime,
+    sessionTime,
+    cancelledBy,
   } = input;
 
   // Calculate hours between cancellation and session
@@ -41,7 +41,7 @@ export function calculateRefund(input: RefundCalculationInput): RefundCalculatio
   const hoursBeforeSession = timeDifference / (1000 * 60 * 60); // Convert milliseconds to hours
 
   // Special case: If therapist, admin, or system cancels, always full refund
-  if (cancelledBy !== 'client') {
+  if (cancelledBy !== "client") {
     return {
       refundPercentage: 100,
       refundAmount: originalAmount, // Full refund including Stripe fees
@@ -49,7 +49,7 @@ export function calculateRefund(input: RefundCalculationInput): RefundCalculatio
       stripeProcessingFeeRetained: 0,
       refundReason: `${cancelledBy}_cancelled`,
       refundPolicy: `Full refund - cancelled by ${cancelledBy}`,
-      hoursBeforeSession
+      hoursBeforeSession,
     };
   }
 
@@ -62,23 +62,25 @@ export function calculateRefund(input: RefundCalculationInput): RefundCalculatio
       refundAmount,
       therapistCompensation: 0,
       stripeProcessingFeeRetained: stripeProcessingFee,
-      refundReason: 'client_cancelled_48h+',
-      refundPolicy: 'Full refund (minus Stripe processing fees) - cancelled more than 48 hours before session',
-      hoursBeforeSession
+      refundReason: "client_cancelled_48h+",
+      refundPolicy:
+        "Full refund (minus Stripe processing fees) - cancelled more than 48 hours before session",
+      hoursBeforeSession,
     };
   } else if (hoursBeforeSession >= 24) {
     // Between 24-48 hours: 50% refund to client, 50% to therapist
     const halfAmount = originalAmount / 2;
-    const clientRefund = halfAmount - (stripeProcessingFee / 2); // Split Stripe fees
-    const therapistShare = halfAmount - (stripeProcessingFee / 2);
+    const clientRefund = halfAmount - stripeProcessingFee / 2; // Split Stripe fees
+    const therapistShare = halfAmount - stripeProcessingFee / 2;
     return {
       refundPercentage: 50,
       refundAmount: clientRefund,
       therapistCompensation: therapistShare,
       stripeProcessingFeeRetained: stripeProcessingFee,
-      refundReason: 'client_cancelled_24-48h',
-      refundPolicy: '50% refund to client, 50% credited to therapist - cancelled between 24-48 hours before session',
-      hoursBeforeSession
+      refundReason: "client_cancelled_24-48h",
+      refundPolicy:
+        "50% refund to client, 50% credited to therapist - cancelled between 24-48 hours before session",
+      hoursBeforeSession,
     };
   } else {
     // Less than 24 hours: No refund, therapist keeps 85%
@@ -87,9 +89,10 @@ export function calculateRefund(input: RefundCalculationInput): RefundCalculatio
       refundAmount: 0,
       therapistCompensation: therapistEarnings, // Therapist keeps their 85%
       stripeProcessingFeeRetained: stripeProcessingFee,
-      refundReason: 'client_cancelled_24h-',
-      refundPolicy: 'No refund - cancelled less than 24 hours before session. Therapist retains 85% share.',
-      hoursBeforeSession
+      refundReason: "client_cancelled_24h-",
+      refundPolicy:
+        "No refund - cancelled less than 24 hours before session. Therapist retains 85% share.",
+      hoursBeforeSession,
     };
   }
 }
@@ -133,10 +136,10 @@ export function getRefundPolicySummary(): { title: string; items: string[] } {
     title: "Cancellation Policy",
     items: [
       "48+ hours: Full refund (minus processing fees)",
-      "24-48 hours: 50% refund, 50% to therapist", 
+      "24-48 hours: 50% refund, 50% to therapist",
       "Under 24 hours: No refund, therapist keeps 85%",
-      "Therapist cancellations: Always full refund"
-    ]
+      "Therapist cancellations: Always full refund",
+    ],
   };
 }
 
@@ -162,7 +165,7 @@ export function validateRefundInputs(input: RefundCalculationInput): string[] {
     errors.push("Cancellation time must be before session time");
   }
 
-  if (!['client', 'therapist', 'admin', 'system'].includes(input.cancelledBy)) {
+  if (!["client", "therapist", "admin", "system"].includes(input.cancelledBy)) {
     errors.push("Invalid cancellation source");
   }
 

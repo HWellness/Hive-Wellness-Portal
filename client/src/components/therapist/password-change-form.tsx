@@ -109,7 +109,8 @@ export default function PasswordChangeForm() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <Alert className="bg-blue-50 border-blue-200">
             <AlertDescription className="text-sm text-gray-700">
-              Choose a strong password with at least 8 characters, including a mix of letters, numbers, and symbols.
+              Choose a strong password with at least 8 characters, including a mix of letters,
+              numbers, and symbols.
             </AlertDescription>
           </Alert>
 

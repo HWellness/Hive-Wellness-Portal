@@ -2,12 +2,9 @@
 // Following brand guidelines: Purple headings (#9306B1), rounded content boxes, clean typography
 
 // Brand-compliant email template structure
-function createBrandedEmailTemplate(params: {
-  headingText: string;
-  bodyContent: string;
-}) {
+function createBrandedEmailTemplate(params: { headingText: string; bodyContent: string }) {
   const { headingText, bodyContent } = params;
-  
+
   return `
     <!DOCTYPE html>
     <html lang="en">
@@ -108,9 +105,9 @@ export const hiveWellnessEmailTemplates = {
 
       return createBrandedEmailTemplate({
         headingText: `Welcome to Your Therapy Journey, ${firstName}!`,
-        bodyContent
+        bodyContent,
       });
-    }
+    },
   },
 
   therapistOnboardingNext: {
@@ -153,9 +150,9 @@ export const hiveWellnessEmailTemplates = {
 
       return createBrandedEmailTemplate({
         headingText: `Welcome to Our Professional Network, ${therapistName}!`,
-        bodyContent
+        bodyContent,
       });
-    }
+    },
   },
 
   therapistWelcomeNext: {
@@ -196,14 +193,19 @@ export const hiveWellnessEmailTemplates = {
 
       return createBrandedEmailTemplate({
         headingText: `Welcome to Our Professional Network, ${firstName}!`,
-        bodyContent
+        bodyContent,
       });
-    }
+    },
   },
 
   appointmentReminder: {
     subject: "Session Reminder - Tomorrow",
-    template: (clientName: string, therapistName: string, sessionTime: string, sessionLink: string) => {
+    template: (
+      clientName: string,
+      therapistName: string,
+      sessionTime: string,
+      sessionLink: string
+    ) => {
       const bodyContent = `
         <!-- Rounded Content Box -->
         <div style="background: #f8f9fa; padding: 25px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #e9ecef;">
@@ -237,10 +239,10 @@ export const hiveWellnessEmailTemplates = {
       `;
 
       return createBrandedEmailTemplate({
-        headingText: 'Session Reminder',
-        bodyContent
+        headingText: "Session Reminder",
+        bodyContent,
       });
-    }
+    },
   },
 
   therapistPostCallCredentials: {
@@ -300,9 +302,9 @@ export const hiveWellnessEmailTemplates = {
 
       return createBrandedEmailTemplate({
         headingText: `Welcome to Hive Wellness, ${therapistName}!`,
-        bodyContent
+        bodyContent,
       });
-    }
+    },
   },
 
   therapist_workspace_welcome: (variables: {
@@ -393,7 +395,7 @@ export const hiveWellnessEmailTemplates = {
 
     return createBrandedEmailTemplate({
       headingText: `Welcome to Your Professional Workspace, Dr. ${variables.firstName} ${variables.lastName}!`,
-      bodyContent
+      bodyContent,
     });
-  }
+  },
 };

@@ -6,19 +6,32 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { 
-  Users, 
-  UserPlus, 
-  UserCheck, 
-  UserX, 
-  Edit, 
-  Trash2, 
-  Search, 
+import {
+  Users,
+  UserPlus,
+  UserCheck,
+  UserX,
+  Edit,
+  Trash2,
+  Search,
   Filter,
   Shield,
   Lock,
@@ -30,7 +43,7 @@ import {
   Activity,
   Settings,
   Download,
-  Upload
+  Upload,
 } from "lucide-react";
 import type { User } from "@shared/schema";
 
@@ -43,8 +56,8 @@ interface UserAccount {
   email: string;
   firstName: string;
   lastName: string;
-  role: 'client' | 'therapist' | 'admin' | 'institution';
-  status: 'active' | 'suspended' | 'pending' | 'inactive';
+  role: "client" | "therapist" | "admin" | "institution";
+  status: "active" | "suspended" | "pending" | "inactive";
   phone?: string;
   profileImageUrl?: string;
   createdAt: string;
@@ -78,15 +91,17 @@ export default function UserManagement({ user }: UserManagementProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showBookingDialog, setShowBookingDialog] = useState(false);
-  const [selectedClientForBooking, setSelectedClientForBooking] = useState<UserAccount | null>(null);
+  const [selectedClientForBooking, setSelectedClientForBooking] = useState<UserAccount | null>(
+    null
+  );
   const [showAddUserDialog, setShowAddUserDialog] = useState(false);
   const [newUserData, setNewUserData] = useState({
-    email: '',
-    firstName: '',
-    lastName: '',
-    role: 'client' as 'client' | 'therapist' | 'admin' | 'institution',
-    password: '',
-    phone: ''
+    email: "",
+    firstName: "",
+    lastName: "",
+    role: "client" as "client" | "therapist" | "admin" | "institution",
+    password: "",
+    phone: "",
   });
 
   const { toast } = useToast();
@@ -94,11 +109,11 @@ export default function UserManagement({ user }: UserManagementProps) {
 
   // Fetch users - FIXED: Connect to correct admin endpoint
   const { data: usersResponse, isLoading: usersLoading } = useQuery({
-    queryKey: ['/api/admin/users', filterRole, filterStatus],
+    queryKey: ["/api/admin/users", filterRole, filterStatus],
     queryFn: async () => {
-      const response = await apiRequest('GET', '/api/admin/users');
+      const response = await apiRequest("GET", "/api/admin/users");
       return response.json();
-    }
+    },
   });
 
   // Extract users from response safely
@@ -109,22 +124,22 @@ export default function UserManagement({ user }: UserManagementProps) {
     clients: 0,
     therapists: 0,
     admins: 0,
-    suspended: 0
+    suspended: 0,
   };
 
   // Fetch user sessions from database
   const { data: sessions = [], isLoading: sessionsLoading } = useQuery({
-    queryKey: ['/api/admin/sessions'],
+    queryKey: ["/api/admin/sessions"],
     queryFn: async () => {
-      const response = await apiRequest('GET', '/api/admin/sessions');
+      const response = await apiRequest("GET", "/api/admin/sessions");
       return response.json();
-    }
+    },
   });
 
   // Update user mutation
   const updateUserMutation = useMutation({
     mutationFn: async (userData: Partial<UserAccount>) => {
-      return await apiRequest('PUT', `/api/users/${userData.id}`, userData);
+      return await apiRequest("PUT", `/api/users/${userData.id}`, userData);
     },
     onSuccess: () => {
       toast({
@@ -133,7 +148,7 @@ export default function UserManagement({ user }: UserManagementProps) {
       });
       setShowEditDialog(false);
       setSelectedUser(null);
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
     },
     onError: (error) => {
       toast({
@@ -147,7 +162,7 @@ export default function UserManagement({ user }: UserManagementProps) {
   // Create new user mutation
   const createUserMutation = useMutation({
     mutationFn: async (userData: typeof newUserData) => {
-      return await apiRequest('POST', '/api/admin/create-user', userData);
+      return await apiRequest("POST", "/api/admin/create-user", userData);
     },
     onSuccess: () => {
       toast({
@@ -156,14 +171,14 @@ export default function UserManagement({ user }: UserManagementProps) {
       });
       setShowAddUserDialog(false);
       setNewUserData({
-        email: '',
-        firstName: '',
-        lastName: '',
-        role: 'client',
-        password: '',
-        phone: ''
+        email: "",
+        firstName: "",
+        lastName: "",
+        role: "client",
+        password: "",
+        phone: "",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
     },
     onError: (error: any) => {
       toast({
@@ -176,15 +191,15 @@ export default function UserManagement({ user }: UserManagementProps) {
 
   // Suspend/Activate user mutation
   const toggleUserStatusMutation = useMutation({
-    mutationFn: async ({ userId, action }: { userId: string; action: 'suspend' | 'activate' }) => {
-      return await apiRequest('POST', `/api/users/${userId}/${action}`);
+    mutationFn: async ({ userId, action }: { userId: string; action: "suspend" | "activate" }) => {
+      return await apiRequest("POST", `/api/users/${userId}/${action}`);
     },
     onSuccess: (_, { action }) => {
       toast({
-        title: action === 'suspend' ? "User Suspended" : "User Activated",
+        title: action === "suspend" ? "User Suspended" : "User Activated",
         description: `User has been ${action}d successfully.`,
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
     },
     onError: (error) => {
       toast({
@@ -198,141 +213,162 @@ export default function UserManagement({ user }: UserManagementProps) {
   // Demo data for development
   const demoUsers: UserAccount[] = [
     {
-      id: 'user-1',
-      email: 'client1@example.com',
-      firstName: 'Sarah',
-      lastName: 'Johnson',
-      role: 'client',
-      status: 'active',
-      phone: '+44123456789',
-      createdAt: '2025-01-01T10:00:00Z',
-      lastLogin: '2025-01-06T14:30:00Z',
+      id: "user-1",
+      email: "client1@example.com",
+      firstName: "Sarah",
+      lastName: "Johnson",
+      role: "client",
+      status: "active",
+      phone: "+44123456789",
+      createdAt: "2025-01-01T10:00:00Z",
+      lastLogin: "2025-01-06T14:30:00Z",
       loginCount: 45,
       isVerified: true,
-      location: 'London, UK',
-      notes: 'Preferred communication via email'
+      location: "London, UK",
+      notes: "Preferred communication via email",
     },
     {
-      id: 'user-2',
-      email: 'therapist1@example.com',
-      firstName: 'Dr. Michael',
-      lastName: 'Chen',
-      role: 'therapist',
-      status: 'active',
-      phone: '+44987654321',
-      createdAt: '2024-12-15T09:00:00Z',
-      lastLogin: '2025-01-06T16:20:00Z',
+      id: "user-2",
+      email: "therapist1@example.com",
+      firstName: "Dr. Michael",
+      lastName: "Chen",
+      role: "therapist",
+      status: "active",
+      phone: "+44987654321",
+      createdAt: "2024-12-15T09:00:00Z",
+      lastLogin: "2025-01-06T16:20:00Z",
       loginCount: 128,
       isVerified: true,
-      specialisations: ['CBT', 'Anxiety Disorders', 'Depression'],
-      location: 'Manchester, UK',
-      subscription: 'Professional Plan'
+      specialisations: ["CBT", "Anxiety Disorders", "Depression"],
+      location: "Manchester, UK",
+      subscription: "Professional Plan",
     },
     {
-      id: 'user-3',
-      email: 'client2@example.com',
-      firstName: 'James',
-      lastName: 'Wilson',
-      role: 'client',
-      status: 'pending',
-      phone: '+44555123456',
-      createdAt: '2025-01-05T15:30:00Z',
+      id: "user-3",
+      email: "client2@example.com",
+      firstName: "James",
+      lastName: "Wilson",
+      role: "client",
+      status: "pending",
+      phone: "+44555123456",
+      createdAt: "2025-01-05T15:30:00Z",
       loginCount: 2,
       isVerified: false,
-      location: 'Birmingham, UK',
-      notes: 'New user - awaiting verification'
+      location: "Birmingham, UK",
+      notes: "New user - awaiting verification",
     },
     {
-      id: 'user-4',
-      email: 'admin2@example.com',
-      firstName: 'Emma',
-      lastName: 'Davis',
-      role: 'admin',
-      status: 'active',
-      createdAt: '2024-11-20T12:00:00Z',
-      lastLogin: '2025-01-06T18:45:00Z',
+      id: "user-4",
+      email: "admin2@example.com",
+      firstName: "Emma",
+      lastName: "Davis",
+      role: "admin",
+      status: "active",
+      createdAt: "2024-11-20T12:00:00Z",
+      lastLogin: "2025-01-06T18:45:00Z",
       loginCount: 89,
       isVerified: true,
-      location: 'Edinburgh, UK'
-    }
+      location: "Edinburgh, UK",
+    },
   ];
 
   const demoSessions: UserSession[] = [
     {
-      id: 'session-1',
-      userId: 'user-1',
-      userEmail: 'client1@example.com',
-      ipAddress: '192.168.1.100',
-      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-      location: 'London, UK',
-      loginTime: '2025-01-06T14:30:00Z',
-      lastActivity: '2025-01-06T15:45:00Z',
-      isActive: true
+      id: "session-1",
+      userId: "user-1",
+      userEmail: "client1@example.com",
+      ipAddress: "192.168.1.100",
+      userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+      location: "London, UK",
+      loginTime: "2025-01-06T14:30:00Z",
+      lastActivity: "2025-01-06T15:45:00Z",
+      isActive: true,
     },
     {
-      id: 'session-2',
-      userId: 'user-2',
-      userEmail: 'therapist1@example.com',
-      ipAddress: '203.0.113.45',
-      userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
-      location: 'Manchester, UK',
-      loginTime: '2025-01-06T16:20:00Z',
-      lastActivity: '2025-01-06T18:30:00Z',
-      isActive: true
-    }
+      id: "session-2",
+      userId: "user-2",
+      userEmail: "therapist1@example.com",
+      ipAddress: "203.0.113.45",
+      userAgent: "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+      location: "Manchester, UK",
+      loginTime: "2025-01-06T16:20:00Z",
+      lastActivity: "2025-01-06T18:30:00Z",
+      isActive: true,
+    },
   ];
 
   // PRODUCTION FIX: Use real data, not demo data - safely handle empty users array
-  const displayUsers = (users && users.length > 0) ? users.map(user => ({
-    ...user,
-    loginCount: user.loginCount || 0,
-    isVerified: user.isVerified !== undefined ? user.isVerified : true,
-    location: user.location || 'UK',
-    firstName: user.firstName || 'Unknown',
-    lastName: user.lastName || 'User',
-    status: user.status || 'active',
-    role: user.role || 'client'
-  })) : demoUsers;
-  
-  const displaySessions = (sessions && sessions.length > 0) ? sessions : demoSessions;
+  const displayUsers =
+    users && users.length > 0
+      ? users.map((user) => ({
+          ...user,
+          loginCount: user.loginCount || 0,
+          isVerified: user.isVerified !== undefined ? user.isVerified : true,
+          location: user.location || "UK",
+          firstName: user.firstName || "Unknown",
+          lastName: user.lastName || "User",
+          status: user.status || "active",
+          role: user.role || "client",
+        }))
+      : demoUsers;
 
-  const filteredUsers = displayUsers.filter(userAccount => {
-    const matchesRole = filterRole === 'all' || userAccount.role === filterRole;
-    const matchesStatus = filterStatus === 'all' || userAccount.status === filterStatus;
-    const matchesSearch = searchQuery === '' || 
+  const displaySessions = sessions && sessions.length > 0 ? sessions : demoSessions;
+
+  const filteredUsers = displayUsers.filter((userAccount) => {
+    const matchesRole = filterRole === "all" || userAccount.role === filterRole;
+    const matchesStatus = filterStatus === "all" || userAccount.status === filterStatus;
+    const matchesSearch =
+      searchQuery === "" ||
       (userAccount.email && userAccount.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
-      (`${userAccount.firstName || ''} ${userAccount.lastName || ''}`.toLowerCase().includes(searchQuery.toLowerCase()));
-    
+      `${userAccount.firstName || ""} ${userAccount.lastName || ""}`
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
+
     return matchesRole && matchesStatus && matchesSearch;
   });
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'bg-green-100 text-green-800';
-      case 'suspended': return 'bg-red-100 text-red-800';
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'inactive': return 'bg-gray-100 text-gray-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "active":
+        return "bg-green-100 text-green-800";
+      case "suspended":
+        return "bg-red-100 text-red-800";
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "inactive":
+        return "bg-gray-100 text-gray-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getRoleColor = (role: string) => {
     switch (role) {
-      case 'admin': return 'bg-purple-100 text-purple-800';
-      case 'therapist': return 'bg-blue-100 text-blue-800';
-      case 'client': return 'bg-green-100 text-green-800';
-      case 'institution': return 'bg-orange-100 text-orange-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "admin":
+        return "bg-purple-100 text-purple-800";
+      case "therapist":
+        return "bg-blue-100 text-blue-800";
+      case "client":
+        return "bg-green-100 text-green-800";
+      case "institution":
+        return "bg-orange-100 text-orange-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getRoleIcon = (role: string) => {
     switch (role) {
-      case 'admin': return <Shield className="w-4 h-4" />;
-      case 'therapist': return <UserCheck className="w-4 h-4" />;
-      case 'client': return <Users className="w-4 h-4" />;
-      case 'institution': return <Settings className="w-4 h-4" />;
-      default: return <Users className="w-4 h-4" />;
+      case "admin":
+        return <Shield className="w-4 h-4" />;
+      case "therapist":
+        return <UserCheck className="w-4 h-4" />;
+      case "client":
+        return <Users className="w-4 h-4" />;
+      case "institution":
+        return <Settings className="w-4 h-4" />;
+      default:
+        return <Users className="w-4 h-4" />;
     }
   };
 
@@ -343,7 +379,7 @@ export default function UserManagement({ user }: UserManagementProps) {
   };
 
   const handleToggleStatus = (userId: string, currentStatus: string) => {
-    const action = currentStatus === 'active' ? 'suspend' : 'activate';
+    const action = currentStatus === "active" ? "suspend" : "activate";
     toggleUserStatusMutation.mutate({ userId, action });
   };
 
@@ -352,9 +388,7 @@ export default function UserManagement({ user }: UserManagementProps) {
       {/* Header */}
       <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
         <div>
-          <h1 className="text-2xl font-display font-bold text-gray-900">
-            User Management
-          </h1>
+          <h1 className="text-2xl font-display font-bold text-gray-900">User Management</h1>
           <p className="text-gray-600 mt-1">
             Manage user accounts, permissions, and access controls
           </p>
@@ -380,7 +414,7 @@ export default function UserManagement({ user }: UserManagementProps) {
                   <Input
                     id="firstName"
                     value={newUserData.firstName}
-                    onChange={(e) => setNewUserData({...newUserData, firstName: e.target.value})}
+                    onChange={(e) => setNewUserData({ ...newUserData, firstName: e.target.value })}
                     placeholder="Enter first name"
                   />
                 </div>
@@ -389,7 +423,7 @@ export default function UserManagement({ user }: UserManagementProps) {
                   <Input
                     id="lastName"
                     value={newUserData.lastName}
-                    onChange={(e) => setNewUserData({...newUserData, lastName: e.target.value})}
+                    onChange={(e) => setNewUserData({ ...newUserData, lastName: e.target.value })}
                     placeholder="Enter last name"
                   />
                 </div>
@@ -400,7 +434,7 @@ export default function UserManagement({ user }: UserManagementProps) {
                   id="email"
                   type="email"
                   value={newUserData.email}
-                  onChange={(e) => setNewUserData({...newUserData, email: e.target.value})}
+                  onChange={(e) => setNewUserData({ ...newUserData, email: e.target.value })}
                   placeholder="Enter email address"
                 />
               </div>
@@ -410,7 +444,7 @@ export default function UserManagement({ user }: UserManagementProps) {
                   id="password"
                   type="password"
                   value={newUserData.password}
-                  onChange={(e) => setNewUserData({...newUserData, password: e.target.value})}
+                  onChange={(e) => setNewUserData({ ...newUserData, password: e.target.value })}
                   placeholder="Enter password"
                 />
               </div>
@@ -419,13 +453,16 @@ export default function UserManagement({ user }: UserManagementProps) {
                 <Input
                   id="phone"
                   value={newUserData.phone}
-                  onChange={(e) => setNewUserData({...newUserData, phone: e.target.value})}
+                  onChange={(e) => setNewUserData({ ...newUserData, phone: e.target.value })}
                   placeholder="Enter phone number"
                 />
               </div>
               <div>
                 <Label htmlFor="role">Role</Label>
-                <Select value={newUserData.role} onValueChange={(value: any) => setNewUserData({...newUserData, role: value})}>
+                <Select
+                  value={newUserData.role}
+                  onValueChange={(value: any) => setNewUserData({ ...newUserData, role: value })}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select role" />
                   </SelectTrigger>
@@ -438,15 +475,21 @@ export default function UserManagement({ user }: UserManagementProps) {
                 </Select>
               </div>
               <div className="flex gap-2">
-                <Button 
+                <Button
                   onClick={() => createUserMutation.mutate(newUserData)}
-                  disabled={createUserMutation.isPending || !newUserData.email || !newUserData.firstName || !newUserData.lastName || !newUserData.password}
+                  disabled={
+                    createUserMutation.isPending ||
+                    !newUserData.email ||
+                    !newUserData.firstName ||
+                    !newUserData.lastName ||
+                    !newUserData.password
+                  }
                   className="flex-1"
                 >
-                  {createUserMutation.isPending ? 'Creating...' : 'Create User'}
+                  {createUserMutation.isPending ? "Creating..." : "Create User"}
                 </Button>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   onClick={() => setShowAddUserDialog(false)}
                   className="flex-1"
                 >
@@ -547,11 +590,15 @@ export default function UserManagement({ user }: UserManagementProps) {
                   </div>
                 ) : (
                   filteredUsers.map((userAccount) => (
-                    <div key={userAccount.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                    <div
+                      key={userAccount.id}
+                      className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                    >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4">
                           <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold">
-                            {userAccount.firstName[0]}{userAccount.lastName[0]}
+                            {userAccount.firstName[0]}
+                            {userAccount.lastName[0]}
                           </div>
                           <div>
                             <div className="flex items-center space-x-2 mb-1">
@@ -627,13 +674,13 @@ export default function UserManagement({ user }: UserManagementProps) {
                             onClick={() => handleToggleStatus(userAccount.id, userAccount.status)}
                             disabled={toggleUserStatusMutation.isPending}
                           >
-                            {userAccount.status === 'active' ? (
+                            {userAccount.status === "active" ? (
                               <Lock className="w-4 h-4" />
                             ) : (
                               <Unlock className="w-4 h-4" />
                             )}
                           </Button>
-                          {userAccount.role === 'client' && (
+                          {userAccount.role === "client" && (
                             <Button
                               variant="outline"
                               size="sm"
@@ -664,7 +711,9 @@ export default function UserManagement({ user }: UserManagementProps) {
                 <Calendar className="w-5 h-5" />
                 Admin Booking System
               </CardTitle>
-              <p className="text-gray-600">Book appointments for clients with available therapists</p>
+              <p className="text-gray-600">
+                Book appointments for clients with available therapists
+              </p>
             </CardHeader>
             <CardContent>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -672,29 +721,36 @@ export default function UserManagement({ user }: UserManagementProps) {
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">Select Client</h3>
                   <div className="space-y-2 max-h-96 overflow-y-auto">
-                    {displayUsers.filter(u => u.role === 'client').map((client) => (
-                      <Card key={client.id} className={`cursor-pointer transition-colors ${
-                        selectedClientForBooking?.id === client.id 
-                          ? 'border-hive-purple bg-hive-light-purple/10' 
-                          : 'hover:bg-gray-50'
-                      }`}
-                      onClick={() => setSelectedClientForBooking(client)}>
-                        <CardContent className="p-4">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <h4 className="font-medium">{client.firstName} {client.lastName}</h4>
-                              <p className="text-sm text-gray-600">{client.email}</p>
-                              <Badge className={`${getStatusColor(client.status)} mt-1`}>
-                                {client.status}
-                              </Badge>
+                    {displayUsers
+                      .filter((u) => u.role === "client")
+                      .map((client) => (
+                        <Card
+                          key={client.id}
+                          className={`cursor-pointer transition-colors ${
+                            selectedClientForBooking?.id === client.id
+                              ? "border-hive-purple bg-hive-light-purple/10"
+                              : "hover:bg-gray-50"
+                          }`}
+                          onClick={() => setSelectedClientForBooking(client)}
+                        >
+                          <CardContent className="p-4">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <h4 className="font-medium">
+                                  {client.firstName} {client.lastName}
+                                </h4>
+                                <p className="text-sm text-gray-600">{client.email}</p>
+                                <Badge className={`${getStatusColor(client.status)} mt-1`}>
+                                  {client.status}
+                                </Badge>
+                              </div>
+                              {selectedClientForBooking?.id === client.id && (
+                                <div className="w-4 h-4 bg-hive-purple rounded-full"></div>
+                              )}
                             </div>
-                            {selectedClientForBooking?.id === client.id && (
-                              <div className="w-4 h-4 bg-hive-purple rounded-full"></div>
-                            )}
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
+                          </CardContent>
+                        </Card>
+                      ))}
                   </div>
                 </div>
 
@@ -705,7 +761,8 @@ export default function UserManagement({ user }: UserManagementProps) {
                     <Card>
                       <CardHeader>
                         <CardTitle className="text-base">
-                          Booking for: {selectedClientForBooking.firstName} {selectedClientForBooking.lastName}
+                          Booking for: {selectedClientForBooking.firstName}{" "}
+                          {selectedClientForBooking.lastName}
                         </CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-4">
@@ -716,20 +773,22 @@ export default function UserManagement({ user }: UserManagementProps) {
                               <SelectValue placeholder="Choose a therapist..." />
                             </SelectTrigger>
                             <SelectContent>
-                              {displayUsers.filter(u => u.role === 'therapist').map((therapist) => (
-                                <SelectItem key={therapist.id} value={therapist.id}>
-                                  {therapist.firstName} {therapist.lastName}
-                                  {therapist.specialisations && (
-                                    <span className="text-gray-500 ml-2">
-                                      ({therapist.specialisations.join(', ')})
-                                    </span>
-                                  )}
-                                </SelectItem>
-                              ))}
+                              {displayUsers
+                                .filter((u) => u.role === "therapist")
+                                .map((therapist) => (
+                                  <SelectItem key={therapist.id} value={therapist.id}>
+                                    {therapist.firstName} {therapist.lastName}
+                                    {therapist.specialisations && (
+                                      <span className="text-gray-500 ml-2">
+                                        ({therapist.specialisations.join(", ")})
+                                      </span>
+                                    )}
+                                  </SelectItem>
+                                ))}
                             </SelectContent>
                           </Select>
                         </div>
-                        
+
                         <div>
                           <Label htmlFor="session-type">Session Type</Label>
                           <Select>
@@ -738,7 +797,9 @@ export default function UserManagement({ user }: UserManagementProps) {
                             </SelectTrigger>
                             <SelectContent>
                               <SelectItem value="therapy">Therapy Session (£120)</SelectItem>
-                              <SelectItem value="consultation">Initial Consultation (£90)</SelectItem>
+                              <SelectItem value="consultation">
+                                Initial Consultation (£90)
+                              </SelectItem>
                               <SelectItem value="follow-up">Follow-up Session (£100)</SelectItem>
                               <SelectItem value="assessment">Assessment Session (£150)</SelectItem>
                             </SelectContent>
@@ -747,10 +808,10 @@ export default function UserManagement({ user }: UserManagementProps) {
 
                         <div>
                           <Label htmlFor="appointment-date">Appointment Date</Label>
-                          <Input 
-                            type="date" 
+                          <Input
+                            type="date"
                             id="appointment-date"
-                            min={new Date().toISOString().split('T')[0]}
+                            min={new Date().toISOString().split("T")[0]}
                           />
                         </div>
 
@@ -776,7 +837,7 @@ export default function UserManagement({ user }: UserManagementProps) {
 
                         <div>
                           <Label htmlFor="session-notes">Session Notes (Optional)</Label>
-                          <Textarea 
+                          <Textarea
                             id="session-notes"
                             placeholder="Add any notes about this appointment..."
                             rows={3}
@@ -788,8 +849,8 @@ export default function UserManagement({ user }: UserManagementProps) {
                             <Calendar className="w-4 h-4 mr-2" />
                             Book Appointment
                           </Button>
-                          <Button 
-                            variant="outline" 
+                          <Button
+                            variant="outline"
                             onClick={() => setSelectedClientForBooking(null)}
                           >
                             Cancel
@@ -815,49 +876,58 @@ export default function UserManagement({ user }: UserManagementProps) {
         <TabsContent value="sessions" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Active User Sessions ({displaySessions.filter(s => s.isActive).length})</CardTitle>
+              <CardTitle>
+                Active User Sessions ({displaySessions.filter((s) => s.isActive).length})
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {sessionsLoading ? (
                   <div className="text-center py-4">Loading sessions...</div>
-                ) : displaySessions.filter(s => s.isActive).length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    No active sessions found.
-                  </div>
+                ) : displaySessions.filter((s) => s.isActive).length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">No active sessions found.</div>
                 ) : (
-                  displaySessions.filter(s => s.isActive).map((session) => (
-                    <div key={session.id} className="border rounded-lg p-4">
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="flex items-center space-x-2 mb-2">
-                            <h3 className="font-medium text-gray-900">{session.userEmail}</h3>
-                            <Badge className="bg-green-100 text-green-800">Active</Badge>
+                  displaySessions
+                    .filter((s) => s.isActive)
+                    .map((session) => (
+                      <div key={session.id} className="border rounded-lg p-4">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <div className="flex items-center space-x-2 mb-2">
+                              <h3 className="font-medium text-gray-900">{session.userEmail}</h3>
+                              <Badge className="bg-green-100 text-green-800">Active</Badge>
+                            </div>
+                            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600">
+                              <div>
+                                <span className="font-medium">IP Address:</span> {session.ipAddress}
+                              </div>
+                              <div>
+                                <span className="font-medium">Location:</span> {session.location}
+                              </div>
+                              <div>
+                                <span className="font-medium">Login Time:</span>{" "}
+                                {new Date(session.loginTime).toLocaleString()}
+                              </div>
+                              <div>
+                                <span className="font-medium">Last Activity:</span>{" "}
+                                {new Date(session.lastActivity).toLocaleString()}
+                              </div>
+                            </div>
+                            <div className="mt-2 text-xs text-gray-500">
+                              <span className="font-medium">User Agent:</span>{" "}
+                              {session.userAgent.substring(0, 80)}...
+                            </div>
                           </div>
-                          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600">
-                            <div>
-                              <span className="font-medium">IP Address:</span> {session.ipAddress}
-                            </div>
-                            <div>
-                              <span className="font-medium">Location:</span> {session.location}
-                            </div>
-                            <div>
-                              <span className="font-medium">Login Time:</span> {new Date(session.loginTime).toLocaleString()}
-                            </div>
-                            <div>
-                              <span className="font-medium">Last Activity:</span> {new Date(session.lastActivity).toLocaleString()}
-                            </div>
-                          </div>
-                          <div className="mt-2 text-xs text-gray-500">
-                            <span className="font-medium">User Agent:</span> {session.userAgent.substring(0, 80)}...
-                          </div>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            Terminate Session
+                          </Button>
                         </div>
-                        <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
-                          Terminate Session
-                        </Button>
                       </div>
-                    </div>
-                  ))
+                    ))
                 )}
               </div>
             </CardContent>
@@ -878,19 +948,16 @@ export default function UserManagement({ user }: UserManagementProps) {
                     <Label>Search User</Label>
                     <div className="relative">
                       <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
-                      <Input
-                        placeholder="Search by email or name..."
-                        className="pl-9"
-                      />
+                      <Input placeholder="Search by email or name..." className="pl-9" />
                     </div>
                   </div>
-                  
+
                   <div className="space-y-2 max-h-64 overflow-y-auto">
                     {filteredUsers.slice(0, 8).map((userAccount) => (
                       <div
                         key={userAccount.id}
                         className={`p-3 border rounded-lg cursor-pointer transition-colors hover:bg-gray-50 ${
-                          selectedUser?.id === userAccount.id ? 'border-blue-500 bg-blue-50' : ''
+                          selectedUser?.id === userAccount.id ? "border-blue-500 bg-blue-50" : ""
                         }`}
                         onClick={() => setSelectedUser(userAccount)}
                       >
@@ -919,7 +986,9 @@ export default function UserManagement({ user }: UserManagementProps) {
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <div>
-                        <CardTitle>Edit Permissions: {selectedUser.firstName} {selectedUser.lastName}</CardTitle>
+                        <CardTitle>
+                          Edit Permissions: {selectedUser.firstName} {selectedUser.lastName}
+                        </CardTitle>
                         <p className="text-gray-600">{selectedUser.email}</p>
                       </div>
                       <div className="flex items-center space-x-2">
@@ -947,33 +1016,43 @@ export default function UserManagement({ user }: UserManagementProps) {
                         <TabsTrigger value="features">Feature Access</TabsTrigger>
                         <TabsTrigger value="admin">Admin Rights</TabsTrigger>
                       </TabsList>
-                      
+
                       <TabsContent value="core" className="space-y-4 mt-4">
                         <div className="space-y-3">
                           <div className="flex items-center justify-between p-3 border rounded-lg">
                             <div>
                               <p className="font-medium">Account Access</p>
-                              <p className="text-sm text-gray-600">Basic login and profile access</p>
+                              <p className="text-sm text-gray-600">
+                                Basic login and profile access
+                              </p>
                             </div>
                             <input type="checkbox" defaultChecked className="w-4 h-4" />
                           </div>
-                          
+
                           <div className="flex items-center justify-between p-3 border rounded-lg">
                             <div>
                               <p className="font-medium">Book Appointments</p>
                               <p className="text-sm text-gray-600">Schedule therapy sessions</p>
                             </div>
-                            <input type="checkbox" defaultChecked={selectedUser.role !== 'institution'} className="w-4 h-4" />
+                            <input
+                              type="checkbox"
+                              defaultChecked={selectedUser.role !== "institution"}
+                              className="w-4 h-4"
+                            />
                           </div>
-                          
+
                           <div className="flex items-center justify-between p-3 border rounded-lg">
                             <div>
                               <p className="font-medium">Video Sessions</p>
                               <p className="text-sm text-gray-600">Join video therapy calls</p>
                             </div>
-                            <input type="checkbox" defaultChecked={['client', 'therapist'].includes(selectedUser.role)} className="w-4 h-4" />
+                            <input
+                              type="checkbox"
+                              defaultChecked={["client", "therapist"].includes(selectedUser.role)}
+                              className="w-4 h-4"
+                            />
                           </div>
-                          
+
                           <div className="flex items-center justify-between p-3 border rounded-lg">
                             <div>
                               <p className="font-medium">Messaging</p>
@@ -983,7 +1062,7 @@ export default function UserManagement({ user }: UserManagementProps) {
                           </div>
                         </div>
                       </TabsContent>
-                      
+
                       <TabsContent value="features" className="space-y-4 mt-4">
                         <div className="space-y-3">
                           <div className="flex items-center justify-between p-3 border rounded-lg">
@@ -991,76 +1070,120 @@ export default function UserManagement({ user }: UserManagementProps) {
                               <p className="font-medium">Payment Processing</p>
                               <p className="text-sm text-gray-600">Handle payments and billing</p>
                             </div>
-                            <input type="checkbox" defaultChecked={['therapist', 'admin'].includes(selectedUser.role)} className="w-4 h-4" />
+                            <input
+                              type="checkbox"
+                              defaultChecked={["therapist", "admin"].includes(selectedUser.role)}
+                              className="w-4 h-4"
+                            />
                           </div>
-                          
+
                           <div className="flex items-center justify-between p-3 border rounded-lg">
                             <div>
                               <p className="font-medium">Chat Assistant</p>
                               <p className="text-sm text-gray-600">Access Chat-powered tools</p>
                             </div>
-                            <input type="checkbox" defaultChecked={['therapist', 'admin'].includes(selectedUser.role)} className="w-4 h-4" />
+                            <input
+                              type="checkbox"
+                              defaultChecked={["therapist", "admin"].includes(selectedUser.role)}
+                              className="w-4 h-4"
+                            />
                           </div>
-                          
+
                           <div className="flex items-center justify-between p-3 border rounded-lg">
                             <div>
                               <p className="font-medium">Session Notes</p>
-                              <p className="text-sm text-gray-600">Create and manage session documentation</p>
+                              <p className="text-sm text-gray-600">
+                                Create and manage session documentation
+                              </p>
                             </div>
-                            <input type="checkbox" defaultChecked={selectedUser.role === 'therapist'} className="w-4 h-4" />
+                            <input
+                              type="checkbox"
+                              defaultChecked={selectedUser.role === "therapist"}
+                              className="w-4 h-4"
+                            />
                           </div>
-                          
+
                           <div className="flex items-center justify-between p-3 border rounded-lg">
                             <div>
                               <p className="font-medium">Analytics Dashboard</p>
-                              <p className="text-sm text-gray-600">View usage and performance metrics</p>
+                              <p className="text-sm text-gray-600">
+                                View usage and performance metrics
+                              </p>
                             </div>
-                            <input type="checkbox" defaultChecked={['therapist', 'admin', 'institution'].includes(selectedUser.role)} className="w-4 h-4" />
+                            <input
+                              type="checkbox"
+                              defaultChecked={["therapist", "admin", "institution"].includes(
+                                selectedUser.role
+                              )}
+                              className="w-4 h-4"
+                            />
                           </div>
                         </div>
                       </TabsContent>
-                      
+
                       <TabsContent value="admin" className="space-y-4 mt-4">
                         <div className="space-y-3">
                           <div className="flex items-center justify-between p-3 border rounded-lg">
                             <div>
                               <p className="font-medium">User Management</p>
-                              <p className="text-sm text-gray-600">Create, edit, and delete user accounts</p>
+                              <p className="text-sm text-gray-600">
+                                Create, edit, and delete user accounts
+                              </p>
                             </div>
-                            <input type="checkbox" defaultChecked={selectedUser.role === 'admin'} className="w-4 h-4" />
+                            <input
+                              type="checkbox"
+                              defaultChecked={selectedUser.role === "admin"}
+                              className="w-4 h-4"
+                            />
                           </div>
-                          
+
                           <div className="flex items-center justify-between p-3 border rounded-lg">
                             <div>
                               <p className="font-medium">System Configuration</p>
-                              <p className="text-sm text-gray-600">Modify platform settings and configurations</p>
+                              <p className="text-sm text-gray-600">
+                                Modify platform settings and configurations
+                              </p>
                             </div>
-                            <input type="checkbox" defaultChecked={selectedUser.role === 'admin'} className="w-4 h-4" />
+                            <input
+                              type="checkbox"
+                              defaultChecked={selectedUser.role === "admin"}
+                              className="w-4 h-4"
+                            />
                           </div>
-                          
+
                           <div className="flex items-center justify-between p-3 border rounded-lg">
                             <div>
                               <p className="font-medium">Email Management</p>
-                              <p className="text-sm text-gray-600">Send emails and manage communications</p>
+                              <p className="text-sm text-gray-600">
+                                Send emails and manage communications
+                              </p>
                             </div>
-                            <input type="checkbox" defaultChecked={selectedUser.role === 'admin'} className="w-4 h-4" />
+                            <input
+                              type="checkbox"
+                              defaultChecked={selectedUser.role === "admin"}
+                              className="w-4 h-4"
+                            />
                           </div>
-                          
+
                           <div className="flex items-center justify-between p-3 border rounded-lg">
                             <div>
                               <p className="font-medium">Security Oversight</p>
-                              <p className="text-sm text-gray-600">Monitor security events and access logs</p>
+                              <p className="text-sm text-gray-600">
+                                Monitor security events and access logs
+                              </p>
                             </div>
-                            <input type="checkbox" defaultChecked={selectedUser.role === 'admin'} className="w-4 h-4" />
+                            <input
+                              type="checkbox"
+                              defaultChecked={selectedUser.role === "admin"}
+                              className="w-4 h-4"
+                            />
                           </div>
                         </div>
                       </TabsContent>
                     </Tabs>
-                    
+
                     <div className="flex justify-end space-x-2 mt-6 pt-4 border-t">
-                      <Button variant="outline">
-                        Cancel
-                      </Button>
+                      <Button variant="outline">Cancel</Button>
                       <Button>
                         <Shield className="w-4 h-4 mr-2" />
                         Save Permissions
@@ -1095,7 +1218,7 @@ export default function UserManagement({ user }: UserManagementProps) {
                 <p className="text-xs text-muted-foreground">+18% from last month</p>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Active Users</CardTitle>
@@ -1106,7 +1229,7 @@ export default function UserManagement({ user }: UserManagementProps) {
                 <p className="text-xs text-muted-foreground">+12% from last month</p>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">New Registrations</CardTitle>
@@ -1117,7 +1240,7 @@ export default function UserManagement({ user }: UserManagementProps) {
                 <p className="text-xs text-muted-foreground">+24% from last month</p>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Retention Rate</CardTitle>
@@ -1137,9 +1260,7 @@ export default function UserManagement({ user }: UserManagementProps) {
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle>Edit User</DialogTitle>
-            <DialogDescription>
-              Update user information and settings.
-            </DialogDescription>
+            <DialogDescription>Update user information and settings.</DialogDescription>
           </DialogHeader>
           {selectedUser && (
             <div className="space-y-4">
@@ -1149,7 +1270,11 @@ export default function UserManagement({ user }: UserManagementProps) {
                   <Input
                     id="firstName"
                     value={selectedUser.firstName}
-                    onChange={(e) => setSelectedUser(prev => prev ? { ...prev, firstName: e.target.value } : null)}
+                    onChange={(e) =>
+                      setSelectedUser((prev) =>
+                        prev ? { ...prev, firstName: e.target.value } : null
+                      )
+                    }
                   />
                 </div>
                 <div>
@@ -1157,7 +1282,11 @@ export default function UserManagement({ user }: UserManagementProps) {
                   <Input
                     id="lastName"
                     value={selectedUser.lastName}
-                    onChange={(e) => setSelectedUser(prev => prev ? { ...prev, lastName: e.target.value } : null)}
+                    onChange={(e) =>
+                      setSelectedUser((prev) =>
+                        prev ? { ...prev, lastName: e.target.value } : null
+                      )
+                    }
                   />
                 </div>
               </div>
@@ -1167,23 +1296,27 @@ export default function UserManagement({ user }: UserManagementProps) {
                   id="email"
                   type="email"
                   value={selectedUser.email}
-                  onChange={(e) => setSelectedUser(prev => prev ? { ...prev, email: e.target.value } : null)}
+                  onChange={(e) =>
+                    setSelectedUser((prev) => (prev ? { ...prev, email: e.target.value } : null))
+                  }
                 />
               </div>
               <div>
                 <Label htmlFor="phone">Phone</Label>
                 <Input
                   id="phone"
-                  value={selectedUser.phone || ''}
-                  onChange={(e) => setSelectedUser(prev => prev ? { ...prev, phone: e.target.value } : null)}
+                  value={selectedUser.phone || ""}
+                  onChange={(e) =>
+                    setSelectedUser((prev) => (prev ? { ...prev, phone: e.target.value } : null))
+                  }
                 />
               </div>
               <div>
                 <Label htmlFor="role">Role</Label>
                 <Select
                   value={selectedUser.role}
-                  onValueChange={(value: 'client' | 'therapist' | 'admin' | 'institution') =>
-                    setSelectedUser(prev => prev ? { ...prev, role: value } : null)
+                  onValueChange={(value: "client" | "therapist" | "admin" | "institution") =>
+                    setSelectedUser((prev) => (prev ? { ...prev, role: value } : null))
                   }
                 >
                   <SelectTrigger>
@@ -1203,7 +1336,11 @@ export default function UserManagement({ user }: UserManagementProps) {
                   id="newPassword"
                   type="password"
                   placeholder="Enter new password to reset"
-                  onChange={(e) => setSelectedUser(prev => prev ? { ...prev, newPassword: e.target.value } : null)}
+                  onChange={(e) =>
+                    setSelectedUser((prev) =>
+                      prev ? { ...prev, newPassword: e.target.value } : null
+                    )
+                  }
                 />
                 <p className="text-xs text-gray-500 mt-1">Leave blank to keep current password</p>
               </div>
@@ -1215,7 +1352,7 @@ export default function UserManagement({ user }: UserManagementProps) {
                   onClick={() => handleUpdateUser(selectedUser)}
                   disabled={updateUserMutation.isPending}
                 >
-                  {updateUserMutation.isPending ? 'Updating...' : 'Update User'}
+                  {updateUserMutation.isPending ? "Updating..." : "Update User"}
                 </Button>
               </div>
             </div>

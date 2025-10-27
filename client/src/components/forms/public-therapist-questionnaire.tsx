@@ -6,10 +6,23 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { Progress } from "@/components/ui/progress";
@@ -22,49 +35,100 @@ const publicTherapistQuestionnaireSchema = z.object({
   firstName: z.string().min(2, "First name is required"),
   lastName: z.string().min(2, "Last name is required"),
   email: z.string().email("Please enter a valid email address"),
-  
+
   // Step 2: Location (UK only)
   city: z.string().min(1, "City is required"),
   country: z.string().min(1, "Country is required"),
-  
+
   // Step 3: Religion (optional)
   religion: z.string().optional(),
-  
+
   // Step 4: Limited company
   hasLimitedCompany: z.enum(["yes", "no"]),
   supportSettingUp: z.enum(["yes", "no"]).optional(),
   hasAccountant: z.enum(["yes", "no"]).optional(),
   wantsTaxStatsReferral: z.enum(["yes", "no"]).optional(),
-  
+
   // Step 5: Qualification level
   qualificationLevel: z.string().min(1, "Please specify your qualification level"),
-  
+
   // Step 6: Professional body
   professionalBody: z.string().min(1, "Please specify your professional body"),
-  
+
   // Step 7: Therapeutic approaches
   counsellingApproaches: z.array(z.string()).optional(),
   psychologicalTherapies: z.array(z.string()).optional(),
   specialistTherapies: z.array(z.string()).optional(),
-  
+
   // Step 8: Areas of specialisation
-  specialisationAreas: z.array(z.string()).min(1, "Please select at least one area of specialisation"),
-  
+  specialisationAreas: z
+    .array(z.string())
+    .min(1, "Please select at least one area of specialisation"),
+
   // Step 9: Personality traits (max 2)
-  personalityTraits: z.array(z.string()).min(1, "Please select at least one trait").max(2, "Please select up to two traits"),
+  personalityTraits: z
+    .array(z.string())
+    .min(1, "Please select at least one trait")
+    .max(2, "Please select up to two traits"),
 });
 
 type QuestionnaireData = z.infer<typeof publicTherapistQuestionnaireSchema>;
 
 // UK Cities list for geographic restriction
 const ukCities = [
-  "London", "Birmingham", "Manchester", "Liverpool", "Leeds", "Sheffield", "Bristol", "Newcastle", 
-  "Cardiff", "Edinburgh", "Glasgow", "Aberdeen", "Dundee", "Stirling", "Inverness", "Perth",
-  "Belfast", "Derry", "Lisburn", "Newry", "Bangor", "Armagh", "Coleraine", "Ballymena",
-  "Swansea", "Newport", "Bangor", "Wrexham", "Rhyl", "Llandudno", "Aberystwyth", "Carmarthen",
-  "Nottingham", "Leicester", "Coventry", "Hull", "Plymouth", "Stoke-on-Trent", "Wolverhampton",
-  "Derby", "Southampton", "Portsmouth", "Brighton", "Bournemouth", "Swindon", "Reading",
-  "Northampton", "Luton", "Warrington", "Southend-on-Sea", "Preston", "Blackpool", "Oldham"
+  "London",
+  "Birmingham",
+  "Manchester",
+  "Liverpool",
+  "Leeds",
+  "Sheffield",
+  "Bristol",
+  "Newcastle",
+  "Cardiff",
+  "Edinburgh",
+  "Glasgow",
+  "Aberdeen",
+  "Dundee",
+  "Stirling",
+  "Inverness",
+  "Perth",
+  "Belfast",
+  "Derry",
+  "Lisburn",
+  "Newry",
+  "Bangor",
+  "Armagh",
+  "Coleraine",
+  "Ballymena",
+  "Swansea",
+  "Newport",
+  "Bangor",
+  "Wrexham",
+  "Rhyl",
+  "Llandudno",
+  "Aberystwyth",
+  "Carmarthen",
+  "Nottingham",
+  "Leicester",
+  "Coventry",
+  "Hull",
+  "Plymouth",
+  "Stoke-on-Trent",
+  "Wolverhampton",
+  "Derby",
+  "Southampton",
+  "Portsmouth",
+  "Brighton",
+  "Bournemouth",
+  "Swindon",
+  "Reading",
+  "Northampton",
+  "Luton",
+  "Warrington",
+  "Southend-on-Sea",
+  "Preston",
+  "Blackpool",
+  "Oldham",
 ];
 
 // Counselling Approaches from Step 7
@@ -72,7 +136,7 @@ const counsellingApproaches = [
   "Counselling",
   "Emotion-Focused Therapy (EFT)",
   "Motivational Interviewing",
-  "Solution-Focused Therapy"
+  "Solution-Focused Therapy",
 ];
 
 // Psychological Therapies from Step 7
@@ -83,7 +147,7 @@ const psychologicalTherapies = [
   "Compassion-Focused Therapy (CFT)",
   "Dialectical Behaviour Therapy (DBT)",
   "Mindfulness-Based Cognitive Therapy (MBCT)",
-  "Psychodynamic Therapy"
+  "Psychodynamic Therapy",
 ];
 
 // Specialist Therapies from Step 7
@@ -91,31 +155,109 @@ const specialistTherapies = [
   "Cognitive Analytic Therapy (CAT)",
   "Dialectical Behaviour Therapy (DBT)",
   "Eye Movement Desensitisation and Reprocessing (EMDR)",
-  "Psychosexual Therapy"
+  "Psychosexual Therapy",
 ];
 
 // Complete areas of specialisation from Step 8
 const specialisationAreas = [
-  "ADHD", "ASD", "Addiction", "Adoption", "Ageing", "Anger", "Anxiety", "Attachment Disorder",
-  "Body Image", "Bullying", "Cancer", "Cultural Problems", "Demanding Job", "Depression",
-  "Discrimination", "Domestic Violence", "Eating Disorder", "Family", "Bereavement", "Gambling",
-  "Gaslighting", "Gender Identity", "Health Anxiety", "Infertility", "Leadership", "Loneliness",
-  "Love Life", "Medical Trauma", "Menopause", "Money", "Mood Swings", "Negative Thoughts",
-  "OCD", "PMS/PMDD", "Panic Attacks", "Paranoia", "Past Life Events", "Personal Development",
-  "Pet Loss", "Phobias", "Physical Disability", "PTSD", "Racism", "Relationship With Food",
-  "Relationships", "Religion/Spirituality", "Self-Esteem/Confidence", "Self-Harm",
-  "Divorce/Separation", "Sleeping Difficulties", "Smoking", "Stress/Burnout", "Sexuality",
-  "Trauma", "Traumatic Childbirth", "Work", "World Events", "Other"
+  "ADHD",
+  "ASD",
+  "Addiction",
+  "Adoption",
+  "Ageing",
+  "Anger",
+  "Anxiety",
+  "Attachment Disorder",
+  "Body Image",
+  "Bullying",
+  "Cancer",
+  "Cultural Problems",
+  "Demanding Job",
+  "Depression",
+  "Discrimination",
+  "Domestic Violence",
+  "Eating Disorder",
+  "Family",
+  "Bereavement",
+  "Gambling",
+  "Gaslighting",
+  "Gender Identity",
+  "Health Anxiety",
+  "Infertility",
+  "Leadership",
+  "Loneliness",
+  "Love Life",
+  "Medical Trauma",
+  "Menopause",
+  "Money",
+  "Mood Swings",
+  "Negative Thoughts",
+  "OCD",
+  "PMS/PMDD",
+  "Panic Attacks",
+  "Paranoia",
+  "Past Life Events",
+  "Personal Development",
+  "Pet Loss",
+  "Phobias",
+  "Physical Disability",
+  "PTSD",
+  "Racism",
+  "Relationship With Food",
+  "Relationships",
+  "Religion/Spirituality",
+  "Self-Esteem/Confidence",
+  "Self-Harm",
+  "Divorce/Separation",
+  "Sleeping Difficulties",
+  "Smoking",
+  "Stress/Burnout",
+  "Sexuality",
+  "Trauma",
+  "Traumatic Childbirth",
+  "Work",
+  "World Events",
+  "Other",
 ];
 
 // Personality traits from Step 9
 const personalityTraits = [
-  "Warm", "Approachable", "Friendly", "Sociable", "Calm", "Grounding", "Reflective",
-  "Thoughtful", "Optimistic", "Encouraging", "Practical", "Solution-focused", "Compassionate",
-  "Empathetic", "Creative", "Open-minded", "Organised", "Structured", "Flexible", "Adaptable",
-  "Confident", "Direct", "Gentle", "Reassuring", "Relaxed", "Informal", "Energetic", "Dynamic",
-  "Motivational", "Empowering", "Challenging", "Supportive", "Quiet", "Observant",
-  "Professional", "Boundaried"
+  "Warm",
+  "Approachable",
+  "Friendly",
+  "Sociable",
+  "Calm",
+  "Grounding",
+  "Reflective",
+  "Thoughtful",
+  "Optimistic",
+  "Encouraging",
+  "Practical",
+  "Solution-focused",
+  "Compassionate",
+  "Empathetic",
+  "Creative",
+  "Open-minded",
+  "Organised",
+  "Structured",
+  "Flexible",
+  "Adaptable",
+  "Confident",
+  "Direct",
+  "Gentle",
+  "Reassuring",
+  "Relaxed",
+  "Informal",
+  "Energetic",
+  "Dynamic",
+  "Motivational",
+  "Empowering",
+  "Challenging",
+  "Supportive",
+  "Quiet",
+  "Observant",
+  "Professional",
+  "Boundaried",
 ];
 
 export default function PublicTherapistQuestionnaire() {
@@ -154,19 +296,21 @@ export default function PublicTherapistQuestionnaire() {
   const onSubmit = async (data: QuestionnaireData) => {
     try {
       setIsSubmitting(true);
-      
+
       await apiRequest("POST", "/api/public-therapist-questionnaire", data);
-      
+
       toast({
         title: "Questionnaire Submitted Successfully",
-        description: "Thank you for your interest in joining Hive Wellness. We'll be in touch soon.",
+        description:
+          "Thank you for your interest in joining Hive Wellness. We'll be in touch soon.",
       });
-      
+
       setIsSubmitted(true);
     } catch (error: any) {
       toast({
         title: "Submission Failed",
-        description: error.message || "There was an error submitting your questionnaire. Please try again.",
+        description:
+          error.message || "There was an error submitting your questionnaire. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -177,28 +321,38 @@ export default function PublicTherapistQuestionnaire() {
   const nextStep = async () => {
     const fieldsToValidate = getFieldsForStep(currentStep);
     const isValid = await trigger(fieldsToValidate);
-    
+
     if (isValid) {
-      setCurrentStep(prev => Math.min(prev + 1, totalSteps));
+      setCurrentStep((prev) => Math.min(prev + 1, totalSteps));
     }
   };
 
   const prevStep = () => {
-    setCurrentStep(prev => Math.max(prev - 1, 1));
+    setCurrentStep((prev) => Math.max(prev - 1, 1));
   };
 
   const getFieldsForStep = (step: number): (keyof QuestionnaireData)[] => {
     switch (step) {
-      case 1: return ["firstName", "lastName", "email"];
-      case 2: return ["city", "country"];
-      case 3: return []; // Religion is optional
-      case 4: return ["hasLimitedCompany"];
-      case 5: return ["qualificationLevel"];
-      case 6: return ["professionalBody"];
-      case 7: return []; // At least one approach will be validated separately
-      case 8: return ["specialisationAreas"];
-      case 9: return ["personalityTraits"];
-      default: return [];
+      case 1:
+        return ["firstName", "lastName", "email"];
+      case 2:
+        return ["city", "country"];
+      case 3:
+        return []; // Religion is optional
+      case 4:
+        return ["hasLimitedCompany"];
+      case 5:
+        return ["qualificationLevel"];
+      case 6:
+        return ["professionalBody"];
+      case 7:
+        return []; // At least one approach will be validated separately
+      case 8:
+        return ["specialisationAreas"];
+      case 9:
+        return ["personalityTraits"];
+      default:
+        return [];
     }
   };
 
@@ -214,15 +368,15 @@ export default function PublicTherapistQuestionnaire() {
               Thank you for completing the questionnaire!
             </h2>
             <p className="text-gray-600 mb-8 leading-relaxed">
-              We appreciate you taking the time to share your details. Please schedule a 
-              call with a member of our team to discuss the next steps and explore whether 
-              Hive Wellness is the right fit for you.
+              We appreciate you taking the time to share your details. Please schedule a call with a
+              member of our team to discuss the next steps and explore whether Hive Wellness is the
+              right fit for you.
             </p>
-            <Button 
+            <Button
               onClick={() => {
-                const email = encodeURIComponent(watchedValues.email || '');
-                const firstName = encodeURIComponent(watchedValues.firstName || '');
-                const lastName = encodeURIComponent(watchedValues.lastName || '');
+                const email = encodeURIComponent(watchedValues.email || "");
+                const firstName = encodeURIComponent(watchedValues.firstName || "");
+                const lastName = encodeURIComponent(watchedValues.lastName || "");
                 window.location.href = `/book-admin-call-therapist?email=${email}&firstName=${firstName}&lastName=${lastName}`;
               }}
               className="bg-hive-purple hover:bg-hive-purple/90 text-white px-8 py-3 text-lg font-semibold rounded-lg mb-4"
@@ -247,17 +401,11 @@ export default function PublicTherapistQuestionnaire() {
       <div className="container mx-auto px-4 py-8 max-w-2xl">
         {/* Header */}
         <div className="text-center mb-8">
-          <img 
-            src={hiveWellnessLogo} 
-            alt="Hive Wellness" 
-            className="h-16 mx-auto mb-4"
-          />
+          <img src={hiveWellnessLogo} alt="Hive Wellness" className="h-16 mx-auto mb-4" />
           <h1 className="text-3xl font-bold text-hive-purple mb-2">
             Therapist Application Questionnaire
           </h1>
-          <p className="text-gray-600">
-            Join our network of qualified therapists across the UK
-          </p>
+          <p className="text-gray-600">Join our network of qualified therapists across the UK</p>
         </div>
 
         {/* Progress Bar */}
@@ -266,9 +414,7 @@ export default function PublicTherapistQuestionnaire() {
             <span className="text-sm font-medium text-hive-purple">
               Step {currentStep} of {totalSteps}
             </span>
-            <span className="text-sm text-gray-500">
-              {Math.round(progress)}% Complete
-            </span>
+            <span className="text-sm text-gray-500">{Math.round(progress)}% Complete</span>
           </div>
           <Progress value={progress} className="h-2" />
         </div>
@@ -297,8 +443,8 @@ export default function PublicTherapistQuestionnaire() {
                                 First Name*
                               </FormLabel>
                               <FormControl>
-                                <Input 
-                                  placeholder="First Name" 
+                                <Input
+                                  placeholder="First Name"
                                   {...field}
                                   className="border-hive-purple/20 focus:border-hive-purple"
                                 />
@@ -307,7 +453,7 @@ export default function PublicTherapistQuestionnaire() {
                             </FormItem>
                           )}
                         />
-                        
+
                         <FormField
                           control={form.control}
                           name="lastName"
@@ -317,8 +463,8 @@ export default function PublicTherapistQuestionnaire() {
                                 Last Name*
                               </FormLabel>
                               <FormControl>
-                                <Input 
-                                  placeholder="Last Name" 
+                                <Input
+                                  placeholder="Last Name"
                                   {...field}
                                   className="border-hive-purple/20 focus:border-hive-purple"
                                 />
@@ -336,13 +482,11 @@ export default function PublicTherapistQuestionnaire() {
                         name="email"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-hive-purple font-medium">
-                              Email*
-                            </FormLabel>
+                            <FormLabel className="text-hive-purple font-medium">Email*</FormLabel>
                             <FormControl>
-                              <Input 
+                              <Input
                                 type="email"
-                                placeholder="Enter your email address" 
+                                placeholder="Enter your email address"
                                 {...field}
                                 className="border-hive-purple/20 focus:border-hive-purple"
                               />
@@ -371,9 +515,7 @@ export default function PublicTherapistQuestionnaire() {
                         name="city"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-hive-purple font-medium">
-                              City*
-                            </FormLabel>
+                            <FormLabel className="text-hive-purple font-medium">City*</FormLabel>
                             <Select onValueChange={field.onChange} value={field.value}>
                               <FormControl>
                                 <SelectTrigger className="border-hive-purple/20 focus:border-hive-purple">
@@ -398,11 +540,9 @@ export default function PublicTherapistQuestionnaire() {
                         name="country"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-hive-purple font-medium">
-                              Country*
-                            </FormLabel>
+                            <FormLabel className="text-hive-purple font-medium">Country*</FormLabel>
                             <FormControl>
-                              <Input 
+                              <Input
                                 {...field}
                                 value="United Kingdom"
                                 disabled
@@ -433,12 +573,10 @@ export default function PublicTherapistQuestionnaire() {
                         name="religion"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel className="text-hive-purple font-medium">
-                              Religion
-                            </FormLabel>
+                            <FormLabel className="text-hive-purple font-medium">Religion</FormLabel>
                             <FormControl>
-                              <Input 
-                                placeholder="Enter your religion (optional)" 
+                              <Input
+                                placeholder="Enter your religion (optional)"
                                 {...field}
                                 className="border-hive-purple/20 focus:border-hive-purple"
                               />
@@ -557,10 +695,15 @@ export default function PublicTherapistQuestionnaire() {
                               <span className="text-white text-sm font-bold">!</span>
                             </div>
                             <div className="flex-1">
-                              <h4 className="text-blue-800 font-medium mb-2">TaxStats Accountancy Partnership</h4>
+                              <h4 className="text-blue-800 font-medium mb-2">
+                                TaxStats Accountancy Partnership
+                              </h4>
                               <p className="text-blue-700 text-sm mb-3">
-                                We can connect you with TaxStats, a specialist accountancy firm that works exclusively with therapists and healthcare professionals. 
-                                They understand the unique tax requirements of therapy practices and can help with company setup, tax returns, and ongoing financial management.
+                                We can connect you with TaxStats, a specialist accountancy firm that
+                                works exclusively with therapists and healthcare professionals. They
+                                understand the unique tax requirements of therapy practices and can
+                                help with company setup, tax returns, and ongoing financial
+                                management.
                               </p>
                               <FormField
                                 control={form.control}
@@ -578,11 +721,15 @@ export default function PublicTherapistQuestionnaire() {
                                       >
                                         <div className="flex items-center space-x-2">
                                           <RadioGroupItem value="yes" id="taxstats-yes" />
-                                          <Label htmlFor="taxstats-yes" className="text-blue-700">Yes, please connect me with TaxStats</Label>
+                                          <Label htmlFor="taxstats-yes" className="text-blue-700">
+                                            Yes, please connect me with TaxStats
+                                          </Label>
                                         </div>
                                         <div className="flex items-center space-x-2">
                                           <RadioGroupItem value="no" id="taxstats-no" />
-                                          <Label htmlFor="taxstats-no" className="text-blue-700">No, thank you</Label>
+                                          <Label htmlFor="taxstats-no" className="text-blue-700">
+                                            No, thank you
+                                          </Label>
                                         </div>
                                       </RadioGroup>
                                     </FormControl>
@@ -617,8 +764,8 @@ export default function PublicTherapistQuestionnaire() {
                               Qualification Level*
                             </FormLabel>
                             <FormControl>
-                              <Input 
-                                placeholder="e.g. Masters, Doctorate, etc." 
+                              <Input
+                                placeholder="e.g. Masters, Doctorate, etc."
                                 {...field}
                                 className="border-hive-purple/20 focus:border-hive-purple"
                               />
@@ -651,8 +798,8 @@ export default function PublicTherapistQuestionnaire() {
                               Professional Body*
                             </FormLabel>
                             <FormControl>
-                              <Input 
-                                placeholder="e.g. UKCP, BACP, HCPC" 
+                              <Input
+                                placeholder="e.g. UKCP, BACP, HCPC"
                                 {...field}
                                 className="border-hive-purple/20 focus:border-hive-purple"
                               />
@@ -672,13 +819,17 @@ export default function PublicTherapistQuestionnaire() {
                       <h2 className="text-2xl font-semibold text-hive-purple mb-2">
                         Therapeutic Approach & Specialisms
                       </h2>
-                      <p className="text-gray-600">Which types of therapy do you provide? (Tick all that apply)</p>
+                      <p className="text-gray-600">
+                        Which types of therapy do you provide? (Tick all that apply)
+                      </p>
                     </div>
 
                     <div className="space-y-6">
                       {/* Counselling Approaches */}
                       <div className="bg-hive-light-purple/10 p-6 rounded-lg">
-                        <h3 className="text-hive-purple font-medium mb-4">Counselling Approaches</h3>
+                        <h3 className="text-hive-purple font-medium mb-4">
+                          Counselling Approaches
+                        </h3>
                         <div className="space-y-3">
                           {counsellingApproaches.map((approach) => (
                             <FormField
@@ -692,16 +843,14 @@ export default function PublicTherapistQuestionnaire() {
                                       checked={field.value?.includes(approach)}
                                       onCheckedChange={(checked) => {
                                         return checked
-                                          ? field.onChange([...field.value || [], approach])
+                                          ? field.onChange([...(field.value || []), approach])
                                           : field.onChange(
                                               field.value?.filter((value) => value !== approach)
-                                            )
+                                            );
                                       }}
                                     />
                                   </FormControl>
-                                  <FormLabel className="text-sm font-normal">
-                                    {approach}
-                                  </FormLabel>
+                                  <FormLabel className="text-sm font-normal">{approach}</FormLabel>
                                 </FormItem>
                               )}
                             />
@@ -711,7 +860,9 @@ export default function PublicTherapistQuestionnaire() {
 
                       {/* Psychological Therapies */}
                       <div className="bg-hive-light-purple/10 p-6 rounded-lg">
-                        <h3 className="text-hive-purple font-medium mb-4">Psychological Therapies</h3>
+                        <h3 className="text-hive-purple font-medium mb-4">
+                          Psychological Therapies
+                        </h3>
                         <div className="space-y-3">
                           {psychologicalTherapies.map((therapy) => (
                             <FormField
@@ -725,16 +876,14 @@ export default function PublicTherapistQuestionnaire() {
                                       checked={field.value?.includes(therapy)}
                                       onCheckedChange={(checked) => {
                                         return checked
-                                          ? field.onChange([...field.value || [], therapy])
+                                          ? field.onChange([...(field.value || []), therapy])
                                           : field.onChange(
                                               field.value?.filter((value) => value !== therapy)
-                                            )
+                                            );
                                       }}
                                     />
                                   </FormControl>
-                                  <FormLabel className="text-sm font-normal">
-                                    {therapy}
-                                  </FormLabel>
+                                  <FormLabel className="text-sm font-normal">{therapy}</FormLabel>
                                 </FormItem>
                               )}
                             />
@@ -758,16 +907,14 @@ export default function PublicTherapistQuestionnaire() {
                                       checked={field.value?.includes(therapy)}
                                       onCheckedChange={(checked) => {
                                         return checked
-                                          ? field.onChange([...field.value || [], therapy])
+                                          ? field.onChange([...(field.value || []), therapy])
                                           : field.onChange(
                                               field.value?.filter((value) => value !== therapy)
-                                            )
+                                            );
                                       }}
                                     />
                                   </FormControl>
-                                  <FormLabel className="text-sm font-normal">
-                                    {therapy}
-                                  </FormLabel>
+                                  <FormLabel className="text-sm font-normal">{therapy}</FormLabel>
                                 </FormItem>
                               )}
                             />
@@ -789,7 +936,9 @@ export default function PublicTherapistQuestionnaire() {
                     </div>
 
                     <div className="bg-hive-light-purple/10 p-6 rounded-lg">
-                      <h3 className="text-hive-purple font-medium mb-4">Therapist Specialisation*</h3>
+                      <h3 className="text-hive-purple font-medium mb-4">
+                        Therapist Specialisation*
+                      </h3>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-96 overflow-y-auto">
                         {specialisationAreas.map((area) => (
                           <FormField
@@ -803,16 +952,14 @@ export default function PublicTherapistQuestionnaire() {
                                     checked={field.value?.includes(area)}
                                     onCheckedChange={(checked) => {
                                       return checked
-                                        ? field.onChange([...field.value || [], area])
+                                        ? field.onChange([...(field.value || []), area])
                                         : field.onChange(
                                             field.value?.filter((value) => value !== area)
-                                          )
+                                          );
                                     }}
                                   />
                                 </FormControl>
-                                <FormLabel className="text-sm font-normal">
-                                  {area}
-                                </FormLabel>
+                                <FormLabel className="text-sm font-normal">{area}</FormLabel>
                               </FormItem>
                             )}
                           />
@@ -834,9 +981,7 @@ export default function PublicTherapistQuestionnaire() {
                     </div>
 
                     <div className="bg-hive-light-purple/10 p-6 rounded-lg">
-                      <p className="text-sm text-gray-600 mb-4">
-                        Select between 1 and 2 choices.
-                      </p>
+                      <p className="text-sm text-gray-600 mb-4">Select between 1 and 2 choices.</p>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-80 overflow-y-auto">
                         {personalityTraits.map((trait) => (
                           <FormField
@@ -851,7 +996,7 @@ export default function PublicTherapistQuestionnaire() {
                                     onCheckedChange={(checked) => {
                                       if (checked) {
                                         if ((field.value || []).length < 2) {
-                                          field.onChange([...field.value || [], trait]);
+                                          field.onChange([...(field.value || []), trait]);
                                         }
                                       } else {
                                         field.onChange(
@@ -861,9 +1006,7 @@ export default function PublicTherapistQuestionnaire() {
                                     }}
                                   />
                                 </FormControl>
-                                <FormLabel className="text-sm font-normal">
-                                  {trait}
-                                </FormLabel>
+                                <FormLabel className="text-sm font-normal">{trait}</FormLabel>
                               </FormItem>
                             )}
                           />

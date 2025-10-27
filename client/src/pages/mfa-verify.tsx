@@ -1,70 +1,70 @@
-import { useState, useEffect } from 'react';
-import { useLocation } from 'wouter';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Shield, AlertCircle, Loader2 } from 'lucide-react';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { apiRequest, queryClient } from '@/lib/queryClient';
-import { useToast } from '@/hooks/use-toast';
+import { useState, useEffect } from "react";
+import { useLocation } from "wouter";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Shield, AlertCircle, Loader2 } from "lucide-react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 export default function MFAVerify() {
   const [, setLocation] = useLocation();
-  const [verificationCode, setVerificationCode] = useState('');
-  const [error, setError] = useState('');
+  const [verificationCode, setVerificationCode] = useState("");
+  const [error, setError] = useState("");
   const { toast } = useToast();
 
   // Check MFA status
   const { data: mfaStatus, isLoading: statusLoading } = useQuery({
-    queryKey: ['/api/mfa/status'],
+    queryKey: ["/api/mfa/status"],
     retry: false,
   });
 
   // Redirect if MFA not required
   useEffect(() => {
     if (mfaStatus && !mfaStatus.required) {
-      setLocation('/');
+      setLocation("/");
     }
   }, [mfaStatus, setLocation]);
 
   // Verify MFA code
   const verifyMutation = useMutation({
     mutationFn: async (data: { token: string; method?: string }) => {
-      const response = await apiRequest('POST', '/api/mfa/verify-login', data);
+      const response = await apiRequest("POST", "/api/mfa/verify-login", data);
       return response.json();
     },
     onSuccess: async (data) => {
       // Update the query cache with the authenticated user
       if (data.user) {
-        await queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
-        queryClient.setQueryData(['/api/auth/user'], data.user);
+        await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+        queryClient.setQueryData(["/api/auth/user"], data.user);
       }
-      
+
       toast({
         title: "Verification Successful",
         description: "You have been authenticated successfully.",
       });
-      setLocation('/');
+      setLocation("/");
     },
     onError: (err: any) => {
-      setError(err.message || 'Invalid verification code');
+      setError(err.message || "Invalid verification code");
     },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    
+    setError("");
+
     if (!verificationCode.trim()) {
-      setError('Please enter your verification code');
+      setError("Please enter your verification code");
       return;
     }
 
     verifyMutation.mutate({
       token: verificationCode.trim(),
-      method: mfaStatus?.preferredMethod || 'totp'
+      method: mfaStatus?.preferredMethod || "totp",
     });
   };
 
@@ -87,9 +87,7 @@ export default function MFAVerify() {
             <Shield className="h-12 w-12 text-hive-purple" />
           </div>
           <CardTitle>Multi-Factor Authentication</CardTitle>
-          <CardDescription>
-            Please enter your verification code to continue
-          </CardDescription>
+          <CardDescription>Please enter your verification code to continue</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -114,8 +112,8 @@ export default function MFAVerify() {
               />
               <p className="text-sm text-muted-foreground">
                 Enter the code from your authenticator app
-                {mfaStatus?.availableMethods?.includes('sms') && ', SMS'}
-                {mfaStatus?.availableMethods?.includes('email') && ', or email'}
+                {mfaStatus?.availableMethods?.includes("sms") && ", SMS"}
+                {mfaStatus?.availableMethods?.includes("email") && ", or email"}
               </p>
             </div>
 
@@ -131,7 +129,7 @@ export default function MFAVerify() {
                   Verifying...
                 </>
               ) : (
-                'Verify'
+                "Verify"
               )}
             </Button>
 
@@ -140,7 +138,7 @@ export default function MFAVerify() {
                 type="button"
                 variant="ghost"
                 size="sm"
-                onClick={() => setLocation('/api/logout')}
+                onClick={() => setLocation("/api/logout")}
                 data-testid="button-cancel-mfa"
               >
                 Cancel & Logout

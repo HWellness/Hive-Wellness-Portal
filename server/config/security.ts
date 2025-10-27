@@ -1,6 +1,6 @@
 /**
  * Centralized Security Configuration
- * 
+ *
  * Defines trusted domains for iframe embedding and CSP policies
  * to prevent clickjacking while allowing legitimate WordPress integration
  */
@@ -8,10 +8,10 @@
 export interface SecurityConfig {
   // Trusted domains allowed to embed Hive Wellness in iframes
   allowedFrameAncestors: string[];
-  
+
   // Trusted domains for CORS
   allowedOrigins: string[];
-  
+
   // External services that need CSP whitelisting
   externalServices: {
     stripe: string[];
@@ -27,25 +27,20 @@ export interface SecurityConfig {
  * Get security configuration based on environment
  */
 export function getSecurityConfig(): SecurityConfig {
-  const isDevelopment = process.env.NODE_ENV !== 'production';
-  
+  const isDevelopment = process.env.NODE_ENV !== "production";
+
   // Parse custom allowed origins from environment
-  const customOrigins = process.env.ALLOWED_FRAME_ANCESTORS 
-    ? process.env.ALLOWED_FRAME_ANCESTORS.split(',').map(o => o.trim())
+  const customOrigins = process.env.ALLOWED_FRAME_ANCESTORS
+    ? process.env.ALLOWED_FRAME_ANCESTORS.split(",").map((o) => o.trim())
     : [];
 
   // Core trusted domains for iframe embedding
-  const productionDomains = [
-    'https://hive-wellness.co.uk',
-    'https://www.hive-wellness.co.uk',
-  ];
+  const productionDomains = ["https://hive-wellness.co.uk", "https://www.hive-wellness.co.uk"];
 
   // Development domains
-  const developmentDomains = isDevelopment ? [
-    'http://localhost:5000',
-    'http://localhost:3000',
-    'http://127.0.0.1:5000',
-  ] : [];
+  const developmentDomains = isDevelopment
+    ? ["http://localhost:5000", "http://localhost:3000", "http://127.0.0.1:5000"]
+    : [];
 
   // Replit domains (get actual domain from environment)
   const replitDomains = [];
@@ -66,38 +61,27 @@ export function getSecurityConfig(): SecurityConfig {
 
   return {
     allowedFrameAncestors,
-    allowedOrigins: allowedFrameAncestors.filter(o => o !== "'self'"),
-    
+    allowedOrigins: allowedFrameAncestors.filter((o) => o !== "'self'"),
+
     externalServices: {
       stripe: [
-        'https://js.stripe.com',
-        'https://api.stripe.com',
-        'https://checkout.stripe.com',
-        'https://connect.stripe.com',
+        "https://js.stripe.com",
+        "https://api.stripe.com",
+        "https://checkout.stripe.com",
+        "https://connect.stripe.com",
       ],
       google: [
-        'https://accounts.google.com',
-        'https://www.googleapis.com',
-        'https://meet.google.com',
-        'https://calendar.google.com',
-        'https://fonts.googleapis.com',
-        'https://fonts.gstatic.com',
+        "https://accounts.google.com",
+        "https://www.googleapis.com",
+        "https://meet.google.com",
+        "https://calendar.google.com",
+        "https://fonts.googleapis.com",
+        "https://fonts.gstatic.com",
       ],
-      dailyVideo: [
-        'https://*.daily.co',
-        'https://daily.co',
-      ],
-      openai: [
-        'https://api.openai.com',
-      ],
-      replit: [
-        'https://*.replit.dev',
-        'https://*.replit.app',
-      ],
-      vite: isDevelopment ? [
-        'ws://localhost:*',
-        'ws://127.0.0.1:*',
-      ] : [],
+      dailyVideo: ["https://*.daily.co", "https://daily.co"],
+      openai: ["https://api.openai.com"],
+      replit: ["https://*.replit.dev", "https://*.replit.app"],
+      vite: isDevelopment ? ["ws://localhost:*", "ws://127.0.0.1:*"] : [],
     },
   };
 }
@@ -107,22 +91,22 @@ export function getSecurityConfig(): SecurityConfig {
  */
 export function getAllowedScriptSources(): string[] {
   const config = getSecurityConfig();
-  const isDevelopment = process.env.NODE_ENV !== 'production';
-  
+  const isDevelopment = process.env.NODE_ENV !== "production";
+
   const sources = [
     "'self'",
     ...config.externalServices.stripe,
     ...config.externalServices.google,
     ...config.externalServices.dailyVideo,
   ];
-  
+
   // Only allow unsafe-inline and unsafe-eval in development
   // In production, use nonce-based CSP (to be implemented)
   if (isDevelopment) {
     sources.push("'unsafe-inline'"); // Required for React/Vite HMR
     sources.push("'unsafe-eval'"); // Required for Vite development
   }
-  
+
   return sources;
 }
 
@@ -131,7 +115,7 @@ export function getAllowedScriptSources(): string[] {
  */
 export function getAllowedStyleSources(): string[] {
   const config = getSecurityConfig();
-  
+
   return [
     "'self'",
     "'unsafe-inline'", // Required for Tailwind and styled components
@@ -145,8 +129,8 @@ export function getAllowedStyleSources(): string[] {
  */
 export function getAllowedConnectSources(): string[] {
   const config = getSecurityConfig();
-  const isDevelopment = process.env.NODE_ENV !== 'production';
-  
+  const isDevelopment = process.env.NODE_ENV !== "production";
+
   return [
     "'self'",
     ...config.externalServices.stripe,
@@ -163,7 +147,7 @@ export function getAllowedConnectSources(): string[] {
  */
 export function getAllowedFrameSources(): string[] {
   const config = getSecurityConfig();
-  
+
   return [
     "'self'",
     ...config.externalServices.stripe, // Stripe checkout iframes
@@ -177,12 +161,12 @@ export function getAllowedFrameSources(): string[] {
  */
 export function getAllowedImageSources(): string[] {
   const config = getSecurityConfig();
-  
+
   return [
     "'self'",
-    'data:', // For inline images
-    'blob:', // For generated images
-    'https:', // Allow all HTTPS images (can be tightened if needed)
+    "data:", // For inline images
+    "blob:", // For generated images
+    "https:", // Allow all HTTPS images (can be tightened if needed)
     ...config.externalServices.stripe,
     ...config.externalServices.google,
   ];

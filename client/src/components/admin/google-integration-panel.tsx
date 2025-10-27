@@ -1,5 +1,5 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { CheckCircle, Calendar } from 'lucide-react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { CheckCircle, Calendar } from "lucide-react";
 
 export function GoogleIntegrationPanel() {
   return (
@@ -19,7 +19,8 @@ export function GoogleIntegrationPanel() {
             Calendar Sync Status
           </CardTitle>
           <CardDescription>
-            All bookings are automatically added to your Google Calendar at support@hive-wellness.co.uk
+            All bookings are automatically added to your Google Calendar at
+            support@hive-wellness.co.uk
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -28,11 +29,13 @@ export function GoogleIntegrationPanel() {
             <span className="text-sm text-green-600">Active - Auto-creating calendar events</span>
           </div>
           <p className="text-sm text-gray-600 mt-2">
-            New bookings automatically create calendar events with Google Meet links in your support@hive-wellness.co.uk calendar.
+            New bookings automatically create calendar events with Google Meet links in your
+            support@hive-wellness.co.uk calendar.
           </p>
           <div className="mt-3 p-3 bg-blue-50 rounded-lg">
             <p className="text-xs text-blue-700">
-              <strong>How it works:</strong> When someone books through your website, the system automatically:
+              <strong>How it works:</strong> When someone books through your website, the system
+              automatically:
             </p>
             <ul className="text-xs text-blue-700 mt-1 ml-4 list-disc">
               <li>Creates a calendar event in your Google Calendar</li>

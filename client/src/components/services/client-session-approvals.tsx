@@ -1,13 +1,13 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { apiRequest, queryClient } from '@/lib/queryClient';
-import { useToast } from '@/hooks/use-toast';
-import { Clock, Calendar, CheckCircle, XCircle } from 'lucide-react';
-import { User as UserType } from '@shared/schema';
+import React, { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { Clock, Calendar, CheckCircle, XCircle } from "lucide-react";
+import { User as UserType } from "@shared/schema";
 
 interface SessionApprovalRequest {
   id: string;
@@ -16,10 +16,10 @@ interface SessionApprovalRequest {
   date: string;
   time: string;
   duration: number;
-  sessionType: 'individual' | 'consultation';
+  sessionType: "individual" | "consultation";
   sessionRate: number;
   notes?: string;
-  status: 'pending_payment_approval' | 'approved' | 'rejected' | 'expired';
+  status: "pending_payment_approval" | "approved" | "rejected" | "expired";
   createdAt: string;
   expiresAt: string;
   requiresPaymentApproval: boolean;
@@ -35,14 +35,14 @@ export default function ClientSessionApprovals({ user }: ClientSessionApprovalsP
 
   // Fetch pending session approvals
   const { data: pendingApprovals = [], isLoading } = useQuery<SessionApprovalRequest[]>({
-    queryKey: ['/api/client/session-approvals', user.id],
+    queryKey: ["/api/client/session-approvals", user.id],
     retry: false,
   });
 
   // Approve session and proceed to payment
   const approveSessionMutation = useMutation({
     mutationFn: async (approvalId: string) => {
-      const response = await apiRequest('POST', `/api/client/approve-session/${approvalId}`);
+      const response = await apiRequest("POST", `/api/client/approve-session/${approvalId}`);
       return response.json();
     },
     onSuccess: (data) => {
@@ -51,7 +51,7 @@ export default function ClientSessionApprovals({ user }: ClientSessionApprovalsP
         description: "Redirecting to payment...",
       });
       // In a real app, would redirect to Stripe payment flow
-      queryClient.invalidateQueries({ queryKey: ['/api/client/session-approvals'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/client/session-approvals"] });
     },
     onError: (error) => {
       toast({
@@ -65,7 +65,7 @@ export default function ClientSessionApprovals({ user }: ClientSessionApprovalsP
   // Reject session
   const rejectSessionMutation = useMutation({
     mutationFn: async (approvalId: string) => {
-      const response = await apiRequest('POST', `/api/client/reject-session/${approvalId}`);
+      const response = await apiRequest("POST", `/api/client/reject-session/${approvalId}`);
       return response.json();
     },
     onSuccess: () => {
@@ -73,7 +73,7 @@ export default function ClientSessionApprovals({ user }: ClientSessionApprovalsP
         title: "Session Rejected",
         description: "The session request has been declined.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/client/session-approvals'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/client/session-approvals"] });
     },
     onError: (error) => {
       toast({
@@ -86,28 +86,28 @@ export default function ClientSessionApprovals({ user }: ClientSessionApprovalsP
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending_payment_approval':
-        return 'bg-hive-light-blue text-hive-purple';
-      case 'approved':
-        return 'bg-purple-100 text-purple-800';
-      case 'rejected':
-        return 'bg-red-100 text-red-800';
-      case 'expired':
-        return 'bg-gray-100 text-gray-800';
+      case "pending_payment_approval":
+        return "bg-hive-light-blue text-hive-purple";
+      case "approved":
+        return "bg-purple-100 text-purple-800";
+      case "rejected":
+        return "bg-red-100 text-red-800";
+      case "expired":
+        return "bg-gray-100 text-gray-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'pending_payment_approval':
+      case "pending_payment_approval":
         return <AlertCircle className="w-4 h-4" />;
-      case 'approved':
+      case "approved":
         return <CheckCircle className="w-4 h-4" />;
-      case 'rejected':
+      case "rejected":
         return <XCircle className="w-4 h-4" />;
-      case 'expired':
+      case "expired":
         return <Clock className="w-4 h-4" />;
       default:
         return <AlertCircle className="w-4 h-4" />;
@@ -115,18 +115,18 @@ export default function ClientSessionApprovals({ user }: ClientSessionApprovalsP
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-GB', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
+    return new Date(dateString).toLocaleDateString("en-GB", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 
   const formatTime = (timeString: string) => {
-    return new Date(`2000-01-01T${timeString}`).toLocaleTimeString('en-GB', {
-      hour: '2-digit',
-      minute: '2-digit',
+    return new Date(`2000-01-01T${timeString}`).toLocaleTimeString("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -161,9 +161,7 @@ export default function ClientSessionApprovals({ user }: ClientSessionApprovalsP
         <AlertCircle className="w-5 h-5 text-hive-purple" />
         <h2 className="text-xl font-semibold text-hive-black">Session Approvals</h2>
         {pendingApprovals.length > 0 && (
-          <Badge className="bg-yellow-100 text-yellow-800">
-            {pendingApprovals.length} pending
-          </Badge>
+          <Badge className="bg-yellow-100 text-yellow-800">{pendingApprovals.length} pending</Badge>
         )}
       </div>
 
@@ -193,7 +191,7 @@ export default function ClientSessionApprovals({ user }: ClientSessionApprovalsP
                         <Badge className={getStatusColor(approval.status)}>
                           {getStatusIcon(approval.status)}
                           <span className="ml-1 capitalize">
-                            {approval.status.replace('_', ' ')}
+                            {approval.status.replace("_", " ")}
                           </span>
                         </Badge>
                         <Badge variant="outline" className="text-hive-purple">
@@ -206,9 +204,7 @@ export default function ClientSessionApprovals({ user }: ClientSessionApprovalsP
                     <div className="text-2xl font-bold text-hive-purple">
                       £{approval.sessionRate}
                     </div>
-                    <div className="text-sm text-gray-600">
-                      {approval.duration} minutes
-                    </div>
+                    <div className="text-sm text-gray-600">{approval.duration} minutes</div>
                   </div>
                 </div>
               </CardHeader>
@@ -218,15 +214,11 @@ export default function ClientSessionApprovals({ user }: ClientSessionApprovalsP
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-gray-500" />
-                    <span className="text-sm text-gray-700">
-                      {formatDate(approval.date)}
-                    </span>
+                    <span className="text-sm text-gray-700">{formatDate(approval.date)}</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4 text-gray-500" />
-                    <span className="text-sm text-gray-700">
-                      {formatTime(approval.time)}
-                    </span>
+                    <span className="text-sm text-gray-700">{formatTime(approval.time)}</span>
                   </div>
                 </div>
 
@@ -246,7 +238,8 @@ export default function ClientSessionApprovals({ user }: ClientSessionApprovalsP
                   <Alert className="border-yellow-200 bg-yellow-50">
                     <AlertCircle className="h-4 w-4 text-yellow-600" />
                     <AlertDescription className="text-yellow-800">
-                      This session request expires in less than 24 hours. Please approve or decline soon.
+                      This session request expires in less than 24 hours. Please approve or decline
+                      soon.
                     </AlertDescription>
                   </Alert>
                 )}
@@ -261,36 +254,38 @@ export default function ClientSessionApprovals({ user }: ClientSessionApprovalsP
                 )}
 
                 {/* Payment Information */}
-                {approval.status === 'pending_payment_approval' && !isExpired(approval.expiresAt) && (
-                  <div className="bg-blue-50 p-4 rounded-lg">
-                    <div className="flex items-center gap-2 mb-2">
-                      <CreditCard className="w-4 h-4 text-blue-600" />
-                      <h4 className="font-medium text-blue-900">Payment Required</h4>
+                {approval.status === "pending_payment_approval" &&
+                  !isExpired(approval.expiresAt) && (
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                      <div className="flex items-center gap-2 mb-2">
+                        <CreditCard className="w-4 h-4 text-blue-600" />
+                        <h4 className="font-medium text-blue-900">Payment Required</h4>
+                      </div>
+                      <p className="text-sm text-blue-800 mb-3">
+                        Your therapist has requested to schedule this session. You will need to pay
+                        £{approval.sessionRate} to confirm your booking.
+                      </p>
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={() => approveSessionMutation.mutate(approval.id)}
+                          disabled={approveSessionMutation.isPending}
+                          className="bg-green-600 hover:bg-green-700"
+                        >
+                          <CheckCircle className="w-4 h-4 mr-2" />
+                          Approve & Pay
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => rejectSessionMutation.mutate(approval.id)}
+                          disabled={rejectSessionMutation.isPending}
+                          className="border-red-200 text-red-700 hover:bg-red-50"
+                        >
+                          <XCircle className="w-4 h-4 mr-2" />
+                          Decline
+                        </Button>
+                      </div>
                     </div>
-                    <p className="text-sm text-blue-800 mb-3">
-                      Your therapist has requested to schedule this session. You will need to pay £{approval.sessionRate} to confirm your booking.
-                    </p>
-                    <div className="flex gap-2">
-                      <Button
-                        onClick={() => approveSessionMutation.mutate(approval.id)}
-                        disabled={approveSessionMutation.isPending}
-                        className="bg-green-600 hover:bg-green-700"
-                      >
-                        <CheckCircle className="w-4 h-4 mr-2" />
-                        Approve & Pay
-                      </Button>
-                      <Button
-                        variant="outline"
-                        onClick={() => rejectSessionMutation.mutate(approval.id)}
-                        disabled={rejectSessionMutation.isPending}
-                        className="border-red-200 text-red-700 hover:bg-red-50"
-                      >
-                        <XCircle className="w-4 h-4 mr-2" />
-                        Decline
-                      </Button>
-                    </div>
-                  </div>
-                )}
+                  )}
               </CardContent>
             </Card>
           ))}

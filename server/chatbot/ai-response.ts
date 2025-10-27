@@ -1,19 +1,23 @@
-import OpenAI from 'openai';
-import { faqData, searchFAQ } from './faq-data';
-import { filterPrivacyData, getPrivacyWarningMessage, containsHealthInformation } from './privacy-filter';
-import { PRICING_INFO } from '../../shared/constants';
-import { logger } from '../lib/logger';
-import { openaiTracking } from '../openai-tracking-service';
-import { piiDetectionService } from '../pii-detection-service';
+import OpenAI from "openai";
+import { faqData, searchFAQ } from "./faq-data";
+import {
+  filterPrivacyData,
+  getPrivacyWarningMessage,
+  containsHealthInformation,
+} from "./privacy-filter";
+import { PRICING_INFO } from "../../shared/constants";
+import { logger } from "../lib/logger";
+import { openaiTracking } from "../openai-tracking-service";
+import { piiDetectionService } from "../pii-detection-service";
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 export interface ChatResponse {
   response: string;
   wasRedacted: boolean;
-  source: 'faq' | 'ai' | 'privacy_warning';
+  source: "faq" | "ai" | "privacy_warning";
   confidence: number;
   piiDetected?: boolean;
   piiTypes?: string[];
@@ -24,47 +28,47 @@ export async function generateChatResponse(userMessage: string): Promise<ChatRes
   // Step 1: Apply PII detection and masking
   const piiResult = await piiDetectionService.detectAndMask(userMessage, {
     useAIDetection: true,
-    preserveContext: true
+    preserveContext: true,
   });
 
   // Log PII detection for monitoring
   if (piiResult.hasPII) {
-    logger.warn('PII detected in chatbot message', {
+    logger.warn("PII detected in chatbot message", {
       types: piiResult.detectedTypes,
       confidence: piiResult.confidence,
-      messageLength: userMessage.length
+      messageLength: userMessage.length,
     });
   }
 
   // Step 2: Apply legacy privacy filtering
   const privacyResult = filterPrivacyData(userMessage);
-  
+
   // If privacy violations detected, return warning
   if (privacyResult.wasRedacted) {
     return {
       response: getPrivacyWarningMessage(privacyResult.redactedItems),
       wasRedacted: true,
-      source: 'privacy_warning',
+      source: "privacy_warning",
       confidence: 1.0,
       piiDetected: piiResult.hasPII,
       piiTypes: piiResult.detectedTypes,
-      maskedMessage: piiResult.maskedText
+      maskedMessage: piiResult.maskedText,
     };
   }
 
   // Search FAQ first (using masked text for safety)
   const faqMatches = searchFAQ(piiResult.maskedText);
-  
+
   if (faqMatches.length > 0) {
     const bestMatch = faqMatches[0];
     return {
       response: bestMatch.answer,
       wasRedacted: false,
-      source: 'faq',
+      source: "faq",
       confidence: 0.9,
       piiDetected: piiResult.hasPII,
       piiTypes: piiResult.detectedTypes,
-      maskedMessage: piiResult.maskedText
+      maskedMessage: piiResult.maskedText,
     };
   }
 
@@ -106,7 +110,10 @@ RESPONSE STYLE:
 - When users need help or have concerns, provide the support email: support@hive-wellness.co.uk
 
 CONTEXT FROM FAQ:
-${faqData.slice(0, 5).map(faq => `Q: ${faq.question}\nA: ${faq.answer}`).join('\n\n')}
+${faqData
+  .slice(0, 5)
+  .map((faq) => `Q: ${faq.question}\nA: ${faq.answer}`)
+  .join("\n\n")}
 
 Examples of good responses:
 "Our sessions cost £65, £80, or £120 depending on your therapist's experience. After you complete our questionnaire, our team will match you with the right therapist, then you'll have a free 15-20 minute introduction call!"
@@ -121,54 +128,55 @@ Examples of good responses:
         model: "gpt-4o", // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
         messages: [
           { role: "system", content: systemPrompt },
-          { role: "user", content: piiResult.maskedText }
+          { role: "user", content: piiResult.maskedText },
         ],
         max_tokens: 150,
         temperature: 0.8,
       },
       {
-        featureType: 'chatbot',
-        metadata: { 
+        featureType: "chatbot",
+        metadata: {
           messageLength: userMessage.length,
           piiDetected: piiResult.hasPII,
-          piiTypes: piiResult.detectedTypes.join(',')
-        }
+          piiTypes: piiResult.detectedTypes.join(","),
+        },
       }
     );
 
-    const aiResponse = completion.choices[0]?.message?.content || 
+    const aiResponse =
+      completion.choices[0]?.message?.content ||
       "I'm sorry, I'm having trouble processing your request right now. Please try again or email support@hive-wellness.co.uk for assistance.";
 
     return {
       response: aiResponse,
       wasRedacted: false,
-      source: 'ai',
+      source: "ai",
       confidence: 0.8,
       piiDetected: piiResult.hasPII,
       piiTypes: piiResult.detectedTypes,
-      maskedMessage: piiResult.maskedText
+      maskedMessage: piiResult.maskedText,
     };
-
   } catch (error) {
     // PII automatically sanitized by logger
-    logger.error('OpenAI API error in chatbot', error);
-    
+    logger.error("OpenAI API error in chatbot", error);
+
     // Fallback response
     return {
-      response: "I'm sorry, I'm having trouble processing your request right now. Please try again or email support@hive-wellness.co.uk for assistance. You can also browse our FAQ section for common questions about our therapy services.",
+      response:
+        "I'm sorry, I'm having trouble processing your request right now. Please try again or email support@hive-wellness.co.uk for assistance. You can also browse our FAQ section for common questions about our therapy services.",
       wasRedacted: false,
-      source: 'ai',
+      source: "ai",
       confidence: 0.5,
-      maskedMessage: piiResult.maskedText
+      maskedMessage: piiResult.maskedText,
     };
   }
 }
 
 export async function logChatInteraction(
-  userId: string | null, 
-  message: string, 
-  response: string, 
-  source: string, 
+  userId: string | null,
+  message: string,
+  response: string,
+  source: string,
   confidence?: number,
   wasRedacted?: boolean,
   redactedItems?: string[],
@@ -179,39 +187,40 @@ export async function logChatInteraction(
 ) {
   // Log sanitized chat interaction using PII detection service
   const sanitizedMessage = await piiDetectionService.sanitizeForLogging(message);
-  
+
   // Sanitized log for debugging (message already protected by PII detection)
-  logger.info('Chat interaction logged', {
-    userId: userId || 'anonymous',
+  logger.info("Chat interaction logged", {
+    userId: userId || "anonymous",
     message: sanitizedMessage,
     responseSource: source,
     messageLength: message.length,
-    responseLength: response.length
+    responseLength: response.length,
   });
 
   // Save to database for admin monitoring
   try {
-    const { storage } = await import('../storage');
-    const { nanoid } = await import('nanoid');
-    
+    const { storage } = await import("../storage");
+    const { nanoid } = await import("nanoid");
+
     await storage.createChatbotConversation({
       id: nanoid(),
       userId: userId,
       sessionId: sessionId || `session_${Date.now()}`,
       userMessage: sanitizedMessage,
       botResponse: response,
-      responseSource: source as 'faq' | 'ai' | 'privacy_warning' | 'error',
-      confidence: confidence?.toString() || '0.8',
+      responseSource: source as "faq" | "ai" | "privacy_warning" | "error",
+      confidence: confidence?.toString() || "0.8",
       wasRedacted: wasRedacted || false,
       redactedItems: redactedItems ? JSON.stringify(redactedItems) : null,
       messageLength: message.length,
       responseLength: response.length,
       ipAddress: ipAddress,
       userAgent: userAgent,
-      source: chatSource as 'landing-page' | 'portal' | 'wordpress' | 'external' || 'landing-page'
+      source:
+        (chatSource as "landing-page" | "portal" | "wordpress" | "external") || "landing-page",
     });
   } catch (error) {
-    logger.error('Error saving chatbot conversation to database', error);
+    logger.error("Error saving chatbot conversation to database", error);
     // Don't fail the chatbot response if database save fails
   }
 }

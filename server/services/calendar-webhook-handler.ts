@@ -3,17 +3,17 @@
  * Processes Google Calendar push notifications for real-time sync
  */
 
-import { storage } from '../storage';
-import { calendarService } from './calendar-service';
-import { db } from '../db';
-import { therapistCalendars, appointments } from '../../shared/schema';
-import { eq, and } from 'drizzle-orm';
-import { nanoid } from 'nanoid';
+import { storage } from "../storage";
+import { calendarService } from "./calendar-service";
+import { db } from "../db";
+import { therapistCalendars, appointments } from "../../shared/schema";
+import { eq, and } from "drizzle-orm";
+import { nanoid } from "nanoid";
 
 export interface WebhookEvent {
   channelId: string;
   resourceId: string;
-  resourceState: 'not_exists' | 'exists' | 'sync';
+  resourceState: "not_exists" | "exists" | "sync";
   resourceUri: string;
   channelExpiration?: string;
   channelToken?: string;
@@ -41,15 +41,15 @@ export class CalendarWebhookHandler {
     try {
       // Find calendar associated with this channel
       const calendars = await storage.listTherapistCalendars();
-      const calendar = calendars.find(cal => cal.channelId === event.channelId);
+      const calendar = calendars.find((cal) => cal.channelId === event.channelId);
 
       if (!calendar) {
         console.warn(`⚠️ No calendar found for channel ${event.channelId}`);
         return {
-          calendarId: '',
+          calendarId: "",
           eventsProcessed: 0,
           conflicts: 0,
-          errors: [`No calendar found for channel ${event.channelId}`]
+          errors: [`No calendar found for channel ${event.channelId}`],
         };
       }
 
@@ -60,7 +60,7 @@ export class CalendarWebhookHandler {
           calendarId: calendar.googleCalendarId!,
           eventsProcessed: 0,
           conflicts: 0,
-          errors: ['Already processing']
+          errors: ["Already processing"],
         };
       }
 
@@ -74,14 +74,13 @@ export class CalendarWebhookHandler {
       } finally {
         this.processingLock.delete(calendar.googleCalendarId!);
       }
-
     } catch (error: any) {
       console.error(`❌ Webhook processing failed:`, error);
       return {
-        calendarId: '',
+        calendarId: "",
         eventsProcessed: 0,
         conflicts: 0,
-        errors: [error.message]
+        errors: [error.message],
       };
     }
   }
@@ -91,14 +90,14 @@ export class CalendarWebhookHandler {
    */
   private async syncCalendarEvents(calendar: any): Promise<SyncResult> {
     if (!calendar.googleCalendarId) {
-      throw new Error('Calendar missing Google Calendar ID');
+      throw new Error("Calendar missing Google Calendar ID");
     }
 
     const result: SyncResult = {
       calendarId: calendar.googleCalendarId,
       eventsProcessed: 0,
       conflicts: 0,
-      errors: []
+      errors: [],
     };
 
     try {
@@ -111,7 +110,9 @@ export class CalendarWebhookHandler {
         return result;
       }
 
-      console.log(`📅 Processing ${events.length} events for calendar ${calendar.googleCalendarId}`);
+      console.log(
+        `📅 Processing ${events.length} events for calendar ${calendar.googleCalendarId}`
+      );
 
       // Process each event
       for (const event of events) {
@@ -128,7 +129,9 @@ export class CalendarWebhookHandler {
       result.conflicts = conflicts.length;
 
       if (conflicts.length > 0) {
-        console.warn(`⚠️ Detected ${conflicts.length} conflicts for calendar ${calendar.googleCalendarId}`);
+        console.warn(
+          `⚠️ Detected ${conflicts.length} conflicts for calendar ${calendar.googleCalendarId}`
+        );
         await this.handleConflicts(calendar, conflicts);
       }
 
@@ -136,7 +139,6 @@ export class CalendarWebhookHandler {
       await this.updateSyncToken(calendar);
 
       return result;
-
     } catch (error: any) {
       console.error(`❌ Calendar sync failed for ${calendar.googleCalendarId}:`, error);
       result.errors.push(error.message);
@@ -149,13 +151,13 @@ export class CalendarWebhookHandler {
    */
   private async getCalendarEventsSinceLastSync(calendar: any): Promise<any[]> {
     try {
-      const { google } = await import('googleapis');
-      const calendarApi = google.calendar({ version: 'v3' });
+      const { google } = await import("googleapis");
+      const calendarApi = google.calendar({ version: "v3" });
 
       const params: any = {
         calendarId: calendar.googleCalendarId,
         singleEvents: true,
-        orderBy: 'startTime'
+        orderBy: "startTime",
       };
 
       // Use sync token for incremental sync if available
@@ -167,28 +169,31 @@ export class CalendarWebhookHandler {
         const thirtyDaysAgo = new Date();
         thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
         params.timeMin = thirtyDaysAgo.toISOString();
-        console.log(`🔄 First sync for calendar ${calendar.googleCalendarId} - fetching last 30 days`);
+        console.log(
+          `🔄 First sync for calendar ${calendar.googleCalendarId} - fetching last 30 days`
+        );
       }
 
       const response = await calendarApi.events.list(params);
-      
+
       // Store new sync token
       if (response.data.nextSyncToken) {
         this.syncTokenCache.set(calendar.googleCalendarId, response.data.nextSyncToken);
       }
 
       return response.data.items || [];
-
     } catch (error: any) {
       // Handle sync token invalidation
       if (error.code === 410 && calendar.syncToken) {
-        console.log(`🔄 Sync token invalidated for ${calendar.googleCalendarId}, falling back to full sync`);
-        
+        console.log(
+          `🔄 Sync token invalidated for ${calendar.googleCalendarId}, falling back to full sync`
+        );
+
         // Clear sync token and retry with full sync
-        await storage.updateCalendarSyncToken(calendar.id, '');
+        await storage.updateCalendarSyncToken(calendar.id, "");
         return this.getCalendarEventsSinceLastSync({ ...calendar, syncToken: null });
       }
-      
+
       throw error;
     }
   }
@@ -200,7 +205,7 @@ export class CalendarWebhookHandler {
     try {
       // Check if this is an appointment-related event
       const appointmentId = event.extendedProperties?.private?.appointmentId;
-      
+
       if (!appointmentId) {
         console.log(`📅 Non-appointment event: ${event.summary || event.id}`);
         return;
@@ -214,9 +219,9 @@ export class CalendarWebhookHandler {
       }
 
       // Check if event was deleted
-      if (event.status === 'cancelled') {
+      if (event.status === "cancelled") {
         console.log(`🗑️ Event cancelled: ${event.id}, updating appointment status`);
-        await storage.updateAppointmentStatus(appointmentId, 'cancelled');
+        await storage.updateAppointmentStatus(appointmentId, "cancelled");
         return;
       }
 
@@ -224,20 +229,20 @@ export class CalendarWebhookHandler {
       if (event.start?.dateTime && event.end?.dateTime) {
         const newStartTime = new Date(event.start.dateTime);
         const newEndTime = new Date(event.end.dateTime);
-        
-        if (newStartTime.getTime() !== appointment.scheduledAt.getTime() || 
-            newEndTime.getTime() !== appointment.endTime.getTime()) {
-          
+
+        if (
+          newStartTime.getTime() !== appointment.scheduledAt.getTime() ||
+          newEndTime.getTime() !== appointment.endTime.getTime()
+        ) {
           console.log(`⏰ Event time changed: ${event.id}, updating appointment`);
           await storage.updateAppointment(appointmentId, {
             scheduledAt: newStartTime,
-            endTime: newEndTime
+            endTime: newEndTime,
           });
         }
       }
 
       console.log(`✅ Processed event: ${event.id} for appointment ${appointmentId}`);
-
     } catch (error: any) {
       console.error(`❌ Error processing calendar event ${event.id}:`, error);
       throw error;
@@ -262,10 +267,9 @@ export class CalendarWebhookHandler {
 
       // Get appointments for this therapist in the same period
       const appointments = await storage.getAppointmentsByTherapist(calendar.therapistId);
-      const upcomingAppointments = appointments.filter(apt => 
-        apt.scheduledAt >= startTime && 
-        apt.scheduledAt <= endTime &&
-        apt.status !== 'cancelled'
+      const upcomingAppointments = appointments.filter(
+        (apt) =>
+          apt.scheduledAt >= startTime && apt.scheduledAt <= endTime && apt.status !== "cancelled"
       );
 
       const conflicts: any[] = [];
@@ -275,10 +279,10 @@ export class CalendarWebhookHandler {
         const aptStart = appointment.scheduledAt;
         const aptEnd = appointment.endTime;
 
-        const conflictingBusyTime = busyTimes.find(busyTime => {
+        const conflictingBusyTime = busyTimes.find((busyTime) => {
           const busyStart = new Date(busyTime.start);
           const busyEnd = new Date(busyTime.end);
-          
+
           // Check for overlap
           return aptStart < busyEnd && aptEnd > busyStart;
         });
@@ -287,15 +291,17 @@ export class CalendarWebhookHandler {
           conflicts.push({
             appointment,
             busyTime: conflictingBusyTime,
-            calendarId: calendar.googleCalendarId
+            calendarId: calendar.googleCalendarId,
           });
         }
       }
 
       return conflicts;
-
     } catch (error: any) {
-      console.error(`❌ Error detecting conflicts for calendar ${calendar.googleCalendarId}:`, error);
+      console.error(
+        `❌ Error detecting conflicts for calendar ${calendar.googleCalendarId}:`,
+        error
+      );
       return [];
     }
   }
@@ -304,7 +310,9 @@ export class CalendarWebhookHandler {
    * Handle detected conflicts
    */
   private async handleConflicts(calendar: any, conflicts: any[]): Promise<void> {
-    console.log(`🚨 Handling ${conflicts.length} conflicts for calendar ${calendar.googleCalendarId}`);
+    console.log(
+      `🚨 Handling ${conflicts.length} conflicts for calendar ${calendar.googleCalendarId}`
+    );
 
     for (const conflict of conflicts) {
       try {
@@ -313,20 +321,22 @@ export class CalendarWebhookHandler {
           appointmentId: conflict.appointment.id,
           appointmentTime: conflict.appointment.scheduledAt,
           busyTime: conflict.busyTime,
-          calendarId: conflict.calendarId
+          calendarId: conflict.calendarId,
         });
 
         // Update appointment status to show conflict
         await storage.updateAppointment(conflict.appointment.id, {
-          status: 'rescheduled', // Mark for rescheduling
-          notes: `Calendar conflict detected: ${conflict.busyTime.summary || 'Busy time'}`
+          status: "rescheduled", // Mark for rescheduling
+          notes: `Calendar conflict detected: ${conflict.busyTime.summary || "Busy time"}`,
         });
 
         // Could also send notifications here
         // await notificationService.sendConflictAlert(conflict);
-
       } catch (error: any) {
-        console.error(`❌ Error handling conflict for appointment ${conflict.appointment.id}:`, error);
+        console.error(
+          `❌ Error handling conflict for appointment ${conflict.appointment.id}:`,
+          error
+        );
       }
     }
   }
@@ -336,7 +346,7 @@ export class CalendarWebhookHandler {
    */
   private async updateSyncToken(calendar: any): Promise<void> {
     const newSyncToken = this.syncTokenCache.get(calendar.googleCalendarId);
-    
+
     if (newSyncToken && newSyncToken !== calendar.syncToken) {
       try {
         await storage.updateCalendarSyncToken(calendar.id, newSyncToken);
@@ -350,28 +360,28 @@ export class CalendarWebhookHandler {
   /**
    * Health check for webhook processing
    */
-  async healthCheck(): Promise<{ status: 'healthy' | 'unhealthy'; details: any }> {
+  async healthCheck(): Promise<{ status: "healthy" | "unhealthy"; details: any }> {
     try {
       const calendars = await storage.listTherapistCalendars();
-      const activeChannels = calendars.filter(cal => 
-        cal.channelId && cal.channelExpiresAt && cal.channelExpiresAt > new Date()
+      const activeChannels = calendars.filter(
+        (cal) => cal.channelId && cal.channelExpiresAt && cal.channelExpiresAt > new Date()
       );
 
       return {
-        status: 'healthy',
+        status: "healthy",
         details: {
           totalCalendars: calendars.length,
           activeChannels: activeChannels.length,
           processingLocks: this.processingLock.size,
-          syncTokenCache: this.syncTokenCache.size
-        }
+          syncTokenCache: this.syncTokenCache.size,
+        },
       };
     } catch (error: any) {
       return {
-        status: 'unhealthy',
+        status: "unhealthy",
         details: {
-          error: error.message
-        }
+          error: error.message,
+        },
       };
     }
   }
@@ -385,7 +395,7 @@ export class CalendarWebhookHandler {
       expiryBuffer.setHours(expiryBuffer.getHours() + 24); // Renew 24 hours before expiry
 
       const calendarsToRenew = await storage.getCalendarsNeedingChannelRenewal(expiryBuffer);
-      
+
       console.log(`🔄 Found ${calendarsToRenew.length} channels needing renewal`);
 
       for (const calendar of calendarsToRenew) {
@@ -396,10 +406,12 @@ export class CalendarWebhookHandler {
           await calendarService.renewChannel(calendar.channelId);
           console.log(`✅ Successfully renewed channel for calendar ${calendar.googleCalendarId}`);
         } catch (error: any) {
-          console.error(`❌ Failed to renew channel for calendar ${calendar.googleCalendarId}:`, error);
+          console.error(
+            `❌ Failed to renew channel for calendar ${calendar.googleCalendarId}:`,
+            error
+          );
         }
       }
-
     } catch (error: any) {
       console.error(`❌ Error processing expired channels:`, error);
     }
@@ -410,7 +422,7 @@ export class CalendarWebhookHandler {
    */
   clearProcessingLocks(): void {
     this.processingLock.clear();
-    console.log('🗑️ Cleared all processing locks');
+    console.log("🗑️ Cleared all processing locks");
   }
 
   /**
@@ -419,7 +431,7 @@ export class CalendarWebhookHandler {
   getProcessingStatus(): { lockedCalendars: string[]; syncTokens: number } {
     return {
       lockedCalendars: Array.from(this.processingLock),
-      syncTokens: this.syncTokenCache.size
+      syncTokens: this.syncTokenCache.size,
     };
   }
 }

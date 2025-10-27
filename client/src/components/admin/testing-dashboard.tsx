@@ -1,32 +1,39 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { useToast } from '@/hooks/use-toast';
-import { 
-  TestTube, 
-  CheckCircle, 
-  XCircle, 
-  Clock, 
-  Users, 
-  Calendar, 
-  Mail, 
+import React, { useState } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useToast } from "@/hooks/use-toast";
+import {
+  TestTube,
+  CheckCircle,
+  XCircle,
+  Clock,
+  Users,
+  Calendar,
+  Mail,
   CreditCard,
   Video,
   Sheet,
   Play,
-  RefreshCw
-} from 'lucide-react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+  RefreshCw,
+} from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface TestResult {
   id: string;
   testName: string;
-  category: 'booking' | 'admin' | 'video' | 'integration';
-  status: 'pending' | 'running' | 'passed' | 'failed';
+  category: "booking" | "admin" | "video" | "integration";
+  status: "pending" | "running" | "passed" | "failed";
   details: string;
   timestamp: string;
   duration?: number;
@@ -37,7 +44,7 @@ interface TestCase {
   id: string;
   name: string;
   description: string;
-  category: 'booking' | 'admin' | 'video' | 'integration';
+  category: "booking" | "admin" | "video" | "integration";
   endpoint?: string;
   expectedResult: string;
   automated: boolean;
@@ -46,195 +53,212 @@ interface TestCase {
 export function TestingDashboard() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [runningTests, setRunningTests] = useState<Set<string>>(new Set());
 
   // Get test results
   const { data: testResults = [], isLoading: resultsLoading } = useQuery<TestResult[]>({
-    queryKey: ['/api/admin/testing/results'],
-    refetchInterval: 5000 // Refresh every 5 seconds during testing
+    queryKey: ["/api/admin/testing/results"],
+    refetchInterval: 5000, // Refresh every 5 seconds during testing
   });
 
   // Predefined test cases
   const testCases: TestCase[] = [
     {
-      id: 'unpaid-booking',
-      name: 'Unpaid Introduction Call Booking',
-      description: 'Test free introduction call booking flow with email and calendar integration',
-      category: 'booking',
-      endpoint: '/book-introduction',
-      expectedResult: 'Booking created, emails sent, calendar event created, Google Sheets logged',
-      automated: true
+      id: "unpaid-booking",
+      name: "Unpaid Introduction Call Booking",
+      description: "Test free introduction call booking flow with email and calendar integration",
+      category: "booking",
+      endpoint: "/book-introduction",
+      expectedResult: "Booking created, emails sent, calendar event created, Google Sheets logged",
+      automated: true,
     },
     {
-      id: 'paid-booking',
-      name: 'Paid Therapy Session Booking',
-      description: 'Test paid session booking with Stripe payment processing',
-      category: 'booking',
-      expectedResult: 'Payment processed, session created, 85% therapist payment calculated',
-      automated: true
+      id: "paid-booking",
+      name: "Paid Therapy Session Booking",
+      description: "Test paid session booking with Stripe payment processing",
+      category: "booking",
+      expectedResult: "Payment processed, session created, 85% therapist payment calculated",
+      automated: true,
     },
     {
-      id: 'google-sheets-integration',
-      name: 'Google Sheets Form Logging',
-      description: 'Verify form responses are logged to Google Sheets with proper status tracking',
-      category: 'admin',
-      expectedResult: 'Form data logged, status updatable, spreadsheet accessible',
-      automated: true
+      id: "google-sheets-integration",
+      name: "Google Sheets Form Logging",
+      description: "Verify form responses are logged to Google Sheets with proper status tracking",
+      category: "admin",
+      expectedResult: "Form data logged, status updatable, spreadsheet accessible",
+      automated: true,
     },
     {
-      id: 'gmail-template-system',
-      name: 'Gmail Template Management',
-      description: 'Test custom email template creation and sending with Hive branding',
-      category: 'admin',
-      expectedResult: 'Templates created, variables replaced, branding applied, emails sent',
-      automated: true
+      id: "gmail-template-system",
+      name: "Gmail Template Management",
+      description: "Test custom email template creation and sending with Hive branding",
+      category: "admin",
+      expectedResult: "Templates created, variables replaced, branding applied, emails sent",
+      automated: true,
     },
     {
-      id: 'client-video-access',
-      name: 'Client Video Session Access',
-      description: 'Verify clients can access Google Meet sessions from dashboard',
-      category: 'video',
-      expectedResult: 'Google Meet links accessible, no authentication issues',
-      automated: false
+      id: "client-video-access",
+      name: "Client Video Session Access",
+      description: "Verify clients can access Google Meet sessions from dashboard",
+      category: "video",
+      expectedResult: "Google Meet links accessible, no authentication issues",
+      automated: false,
     },
     {
-      id: 'therapist-video-access',
-      name: 'Therapist Video Session Access',
-      description: 'Test therapist access to scheduled sessions and Google Meet integration',
-      category: 'video',
-      expectedResult: 'Sessions accessible, Google Meet works, session notes available',
-      automated: false
+      id: "therapist-video-access",
+      name: "Therapist Video Session Access",
+      description: "Test therapist access to scheduled sessions and Google Meet integration",
+      category: "video",
+      expectedResult: "Sessions accessible, Google Meet works, session notes available",
+      automated: false,
     },
     {
-      id: 'calendar-sync',
-      name: 'Google Calendar Synchronization',
-      description: 'Verify all bookings create proper calendar events with Google Meet links',
-      category: 'integration',
-      expectedResult: 'Calendar events created, Google Meet links included, participants added',
-      automated: true
+      id: "calendar-sync",
+      name: "Google Calendar Synchronization",
+      description: "Verify all bookings create proper calendar events with Google Meet links",
+      category: "integration",
+      expectedResult: "Calendar events created, Google Meet links included, participants added",
+      automated: true,
     },
     {
-      id: 'email-delivery',
-      name: 'Email Delivery System',
-      description: 'Test Gmail API email delivery for confirmations and notifications',
-      category: 'integration',
-      expectedResult: 'All notification emails delivered successfully within 30 seconds',
-      automated: true
-    }
+      id: "email-delivery",
+      name: "Email Delivery System",
+      description: "Test Gmail API email delivery for confirmations and notifications",
+      category: "integration",
+      expectedResult: "All notification emails delivered successfully within 30 seconds",
+      automated: true,
+    },
   ];
 
   // Run automated test mutation
   const runTestMutation = useMutation({
     mutationFn: async (testId: string) => {
-      const response = await fetch('/api/admin/testing/run-test', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ testId })
+      const response = await fetch("/api/admin/testing/run-test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ testId }),
       });
-      
-      if (!response.ok) throw new Error('Failed to run test');
+
+      if (!response.ok) throw new Error("Failed to run test");
       return response.json();
     },
     onSuccess: (data, testId) => {
-      setRunningTests(prev => {
+      setRunningTests((prev) => {
         const newSet = new Set(prev);
         newSet.delete(testId);
         return newSet;
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/testing/results'] });
-      toast({ 
-        title: 'Test completed', 
-        description: `Test ${testId} finished with status: ${data.status}` 
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/testing/results"] });
+      toast({
+        title: "Test completed",
+        description: `Test ${testId} finished with status: ${data.status}`,
       });
     },
     onError: (error, testId) => {
-      setRunningTests(prev => {
+      setRunningTests((prev) => {
         const newSet = new Set(prev);
         newSet.delete(testId);
         return newSet;
       });
-      toast({ 
-        title: 'Test failed', 
+      toast({
+        title: "Test failed",
         description: `Failed to run test ${testId}`,
-        variant: 'destructive' 
+        variant: "destructive",
       });
-    }
+    },
   });
 
   // Clear test results mutation
   const clearResultsMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch('/api/admin/testing/clear-results', {
-        method: 'DELETE'
+      const response = await fetch("/api/admin/testing/clear-results", {
+        method: "DELETE",
       });
-      
-      if (!response.ok) throw new Error('Failed to clear results');
+
+      if (!response.ok) throw new Error("Failed to clear results");
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/testing/results'] });
-      toast({ title: 'Test results cleared' });
-    }
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/testing/results"] });
+      toast({ title: "Test results cleared" });
+    },
   });
 
   const handleRunTest = (testId: string) => {
-    setRunningTests(prev => new Set(prev).add(testId));
+    setRunningTests((prev) => new Set(prev).add(testId));
     runTestMutation.mutate(testId);
   };
 
   const handleRunAllTests = () => {
-    const automatedTests = testCases.filter(test => test.automated);
-    automatedTests.forEach(test => {
-      setRunningTests(prev => new Set(prev).add(test.id));
+    const automatedTests = testCases.filter((test) => test.automated);
+    automatedTests.forEach((test) => {
+      setRunningTests((prev) => new Set(prev).add(test.id));
       runTestMutation.mutate(test.id);
     });
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'passed': return <CheckCircle className="h-4 w-4 text-green-500" />;
-      case 'failed': return <XCircle className="h-4 w-4 text-red-500" />;
-      case 'running': return <RefreshCw className="h-4 w-4 text-blue-500 animate-spin" />;
-      default: return <Clock className="h-4 w-4 text-gray-500" />;
+      case "passed":
+        return <CheckCircle className="h-4 w-4 text-green-500" />;
+      case "failed":
+        return <XCircle className="h-4 w-4 text-red-500" />;
+      case "running":
+        return <RefreshCw className="h-4 w-4 text-blue-500 animate-spin" />;
+      default:
+        return <Clock className="h-4 w-4 text-gray-500" />;
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'passed': return 'default';
-      case 'failed': return 'destructive';
-      case 'running': return 'secondary';
-      default: return 'outline';
+      case "passed":
+        return "default";
+      case "failed":
+        return "destructive";
+      case "running":
+        return "secondary";
+      default:
+        return "outline";
     }
   };
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
-      case 'booking': return <Calendar className="h-4 w-4" />;
-      case 'admin': return <Users className="h-4 w-4" />;
-      case 'video': return <Video className="h-4 w-4" />;
-      case 'integration': return <Sheet className="h-4 w-4" />;
-      default: return <TestTube className="h-4 w-4" />;
+      case "booking":
+        return <Calendar className="h-4 w-4" />;
+      case "admin":
+        return <Users className="h-4 w-4" />;
+      case "video":
+        return <Video className="h-4 w-4" />;
+      case "integration":
+        return <Sheet className="h-4 w-4" />;
+      default:
+        return <TestTube className="h-4 w-4" />;
     }
   };
 
-  const filteredTests = selectedCategory === 'all' 
-    ? testCases 
-    : testCases.filter(test => test.category === selectedCategory);
+  const filteredTests =
+    selectedCategory === "all"
+      ? testCases
+      : testCases.filter((test) => test.category === selectedCategory);
 
-  const testResultsByCategory = testResults.reduce((acc, result) => {
-    if (!acc[result.category]) acc[result.category] = [];
-    acc[result.category].push(result);
-    return acc;
-  }, {} as Record<string, TestResult[]>);
+  const testResultsByCategory = testResults.reduce(
+    (acc, result) => {
+      if (!acc[result.category]) acc[result.category] = [];
+      acc[result.category].push(result);
+      return acc;
+    },
+    {} as Record<string, TestResult[]>
+  );
 
   const overallStats = {
     total: testResults.length,
-    passed: testResults.filter(r => r.status === 'passed').length,
-    failed: testResults.filter(r => r.status === 'failed').length,
-    running: testResults.filter(r => r.status === 'running').length
+    passed: testResults.filter((r) => r.status === "passed").length,
+    failed: testResults.filter((r) => r.status === "failed").length,
+    running: testResults.filter((r) => r.status === "running").length,
   };
 
   return (
@@ -254,8 +278,8 @@ export function TestingDashboard() {
             <Play className="h-4 w-4 mr-2" />
             Run All Automated Tests
           </Button>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => clearResultsMutation.mutate()}
             disabled={clearResultsMutation.isPending}
           >
@@ -306,7 +330,7 @@ export function TestingDashboard() {
           <TabsTrigger value="results">Test Results</TabsTrigger>
           <TabsTrigger value="manual-guide">Manual Testing Guide</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="test-cases" className="space-y-6">
           <Card>
             <CardHeader>
@@ -319,37 +343,37 @@ export function TestingDashboard() {
                 </div>
                 <div className="flex gap-2">
                   <Button
-                    variant={selectedCategory === 'all' ? 'default' : 'outline'}
+                    variant={selectedCategory === "all" ? "default" : "outline"}
                     size="sm"
-                    onClick={() => setSelectedCategory('all')}
+                    onClick={() => setSelectedCategory("all")}
                   >
                     All
                   </Button>
                   <Button
-                    variant={selectedCategory === 'booking' ? 'default' : 'outline'}
+                    variant={selectedCategory === "booking" ? "default" : "outline"}
                     size="sm"
-                    onClick={() => setSelectedCategory('booking')}
+                    onClick={() => setSelectedCategory("booking")}
                   >
                     Booking
                   </Button>
                   <Button
-                    variant={selectedCategory === 'admin' ? 'default' : 'outline'}
+                    variant={selectedCategory === "admin" ? "default" : "outline"}
                     size="sm"
-                    onClick={() => setSelectedCategory('admin')}
+                    onClick={() => setSelectedCategory("admin")}
                   >
                     Admin
                   </Button>
                   <Button
-                    variant={selectedCategory === 'video' ? 'default' : 'outline'}
+                    variant={selectedCategory === "video" ? "default" : "outline"}
                     size="sm"
-                    onClick={() => setSelectedCategory('video')}
+                    onClick={() => setSelectedCategory("video")}
                   >
                     Video
                   </Button>
                   <Button
-                    variant={selectedCategory === 'integration' ? 'default' : 'outline'}
+                    variant={selectedCategory === "integration" ? "default" : "outline"}
                     size="sm"
-                    onClick={() => setSelectedCategory('integration')}
+                    onClick={() => setSelectedCategory("integration")}
                   >
                     Integration
                   </Button>
@@ -365,13 +389,11 @@ export function TestingDashboard() {
                         <div className="flex items-center gap-2 mb-2">
                           {getCategoryIcon(test.category)}
                           <h4 className="font-medium">{test.name}</h4>
-                          <Badge variant={test.automated ? 'default' : 'secondary'}>
-                            {test.automated ? 'Automated' : 'Manual'}
+                          <Badge variant={test.automated ? "default" : "secondary"}>
+                            {test.automated ? "Automated" : "Manual"}
                           </Badge>
                         </div>
-                        <p className="text-sm text-muted-foreground mb-2">
-                          {test.description}
-                        </p>
+                        <p className="text-sm text-muted-foreground mb-2">{test.description}</p>
                         <p className="text-xs text-muted-foreground">
                           <strong>Expected Result:</strong> {test.expectedResult}
                         </p>
@@ -400,14 +422,12 @@ export function TestingDashboard() {
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="results" className="space-y-6">
           <Card>
             <CardHeader>
               <CardTitle>Test Results</CardTitle>
-              <CardDescription>
-                Results from recent test runs
-              </CardDescription>
+              <CardDescription>Results from recent test runs</CardDescription>
             </CardHeader>
             <CardContent>
               {resultsLoading ? (
@@ -440,17 +460,16 @@ export function TestingDashboard() {
                             </div>
                           </TableCell>
                           <TableCell>
-                            <Badge variant={getStatusColor(result.status)} className="flex items-center gap-1 w-fit">
+                            <Badge
+                              variant={getStatusColor(result.status)}
+                              className="flex items-center gap-1 w-fit"
+                            >
                               {getStatusIcon(result.status)}
                               {result.status}
                             </Badge>
                           </TableCell>
-                          <TableCell>
-                            {result.duration ? `${result.duration}ms` : '-'}
-                          </TableCell>
-                          <TableCell>
-                            {new Date(result.timestamp).toLocaleString()}
-                          </TableCell>
+                          <TableCell>{result.duration ? `${result.duration}ms` : "-"}</TableCell>
+                          <TableCell>{new Date(result.timestamp).toLocaleString()}</TableCell>
                           <TableCell className="max-w-xs truncate">
                             {result.errorMessage || result.details}
                           </TableCell>
@@ -463,7 +482,7 @@ export function TestingDashboard() {
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="manual-guide" className="space-y-6">
           <Card>
             <CardHeader>
@@ -476,10 +495,11 @@ export function TestingDashboard() {
               <Alert>
                 <TestTube className="h-4 w-4" />
                 <AlertDescription>
-                  Use the demo accounts for testing: demo@hive (client), therapist@demo.hive (therapist), admin@demo.hive (admin)
+                  Use the demo accounts for testing: demo@hive (client), therapist@demo.hive
+                  (therapist), admin@demo.hive (admin)
                 </AlertDescription>
               </Alert>
-              
+
               <div className="space-y-4">
                 <div className="border rounded-lg p-4">
                   <h4 className="font-semibold mb-2 flex items-center gap-2">
@@ -495,7 +515,7 @@ export function TestingDashboard() {
                     <li>Confirm no authentication issues</li>
                   </ol>
                 </div>
-                
+
                 <div className="border rounded-lg p-4">
                   <h4 className="font-semibold mb-2 flex items-center gap-2">
                     <Users className="h-4 w-4" />
@@ -510,7 +530,7 @@ export function TestingDashboard() {
                     <li>Verify client information accessibility</li>
                   </ol>
                 </div>
-                
+
                 <div className="border rounded-lg p-4">
                   <h4 className="font-semibold mb-2 flex items-center gap-2">
                     <CreditCard className="h-4 w-4" />

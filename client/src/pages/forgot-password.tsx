@@ -5,7 +5,14 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Mail, CheckCircle } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
@@ -101,12 +108,15 @@ export default function ForgotPasswordPage() {
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-blue-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="mb-6">
-          <Link href="/login" className="inline-flex items-center text-hive-purple hover:text-hive-purple/80 font-medium">
+          <Link
+            href="/login"
+            className="inline-flex items-center text-hive-purple hover:text-hive-purple/80 font-medium"
+          >
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Login
           </Link>
         </div>
-        
+
         <Card className="border border-hive-purple/20 shadow-lg">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-bold text-hive-purple">Reset Password</CardTitle>
@@ -152,7 +162,10 @@ export default function ForgotPasswordPage() {
             <div className="mt-6 text-center">
               <p className="text-sm text-hive-black/70">
                 Remember your password?{" "}
-                <Link href="/login" className="text-hive-purple hover:text-hive-purple/80 font-medium">
+                <Link
+                  href="/login"
+                  className="text-hive-purple hover:text-hive-purple/80 font-medium"
+                >
                   Sign in here
                 </Link>
               </p>

@@ -1,14 +1,23 @@
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Calendar } from '@/components/ui/calendar';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
-import { format } from 'date-fns';
-import { Calendar as CalendarIcon, Clock, CheckCircle, Loader2, User, Mail, Phone, MessageSquare } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Calendar } from "@/components/ui/calendar";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import { format } from "date-fns";
+import {
+  Calendar as CalendarIcon,
+  Clock,
+  CheckCircle,
+  Loader2,
+  User,
+  Mail,
+  Phone,
+  MessageSquare,
+} from "lucide-react";
 
 interface BookingData {
   name: string;
@@ -35,14 +44,14 @@ interface AvailabilitySummary {
 export function StreamlinedBookingWidget() {
   const { toast } = useToast();
   const [bookingData, setBookingData] = useState<BookingData>({
-    name: '',
-    email: '',
-    phone: '',
-    message: '',
+    name: "",
+    email: "",
+    phone: "",
+    message: "",
     preferredDate: undefined,
-    preferredTime: ''
+    preferredTime: "",
   });
-  
+
   const [availableSlots, setAvailableSlots] = useState<AvailabilitySlot[]>([]);
   const [availabilitySummary, setAvailabilitySummary] = useState<AvailabilitySummary | null>(null);
   const [isLoadingAvailability, setIsLoadingAvailability] = useState(false);
@@ -50,10 +59,10 @@ export function StreamlinedBookingWidget() {
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const handleInputChange = (field: keyof BookingData, value: string | Date | undefined) => {
-    setBookingData(prev => ({ ...prev, [field]: value }));
-    
+    setBookingData((prev) => ({ ...prev, [field]: value }));
+
     // Auto-load availability when date changes
-    if (field === 'preferredDate' && value instanceof Date) {
+    if (field === "preferredDate" && value instanceof Date) {
       loadAvailability(value);
     }
   };
@@ -61,7 +70,9 @@ export function StreamlinedBookingWidget() {
   const loadAvailability = async (date: Date) => {
     setIsLoadingAvailability(true);
     try {
-      const response = await fetch(`/api/admin/calendar/availability?date=${format(date, 'yyyy-MM-dd')}`);
+      const response = await fetch(
+        `/api/admin/calendar/availability?date=${format(date, "yyyy-MM-dd")}`
+      );
       if (response.ok) {
         const data = await response.json();
         setAvailableSlots(data.slots || []);
@@ -78,7 +89,7 @@ export function StreamlinedBookingWidget() {
     } catch (error) {
       setAvailableSlots([]);
       setAvailabilitySummary(null);
-      console.error('Availability error:', error);
+      console.error("Availability error:", error);
     } finally {
       setIsLoadingAvailability(false);
     }
@@ -86,8 +97,13 @@ export function StreamlinedBookingWidget() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!bookingData.name || !bookingData.email || !bookingData.preferredDate || !bookingData.preferredTime) {
+
+    if (
+      !bookingData.name ||
+      !bookingData.email ||
+      !bookingData.preferredDate ||
+      !bookingData.preferredTime
+    ) {
       toast({
         variant: "destructive",
         title: "Missing Information",
@@ -98,18 +114,18 @@ export function StreamlinedBookingWidget() {
 
     setIsSubmitting(true);
     try {
-      const response = await fetch('/api/introduction-calls/book-widget', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const response = await fetch("/api/introduction-calls/book-widget", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: bookingData.name,
           email: bookingData.email,
           phone: bookingData.phone,
           message: bookingData.message,
-          preferredDate: format(bookingData.preferredDate, 'yyyy-MM-dd'),
+          preferredDate: format(bookingData.preferredDate, "yyyy-MM-dd"),
           preferredTime: bookingData.preferredTime,
-          userType: 'client',
-          source: 'streamlined_booking_widget'
+          userType: "client",
+          source: "streamlined_booking_widget",
         }),
       });
 
@@ -146,7 +162,9 @@ export function StreamlinedBookingWidget() {
             <CheckCircle className="h-16 w-16 text-green-500 mx-auto mb-4" />
             <h3 className="text-xl font-semibold text-gray-900 mb-2">Booking Confirmed!</h3>
             <p className="text-gray-600 mb-4">
-              Your consultation is scheduled for {bookingData.preferredDate && format(bookingData.preferredDate, 'MMMM d, yyyy')} at {bookingData.preferredTime}.
+              Your consultation is scheduled for{" "}
+              {bookingData.preferredDate && format(bookingData.preferredDate, "MMMM d, yyyy")} at{" "}
+              {bookingData.preferredTime}.
             </p>
             <div className="bg-green-50 border border-green-200 rounded-lg p-3">
               <p className="text-sm text-green-800">
@@ -170,7 +188,7 @@ export function StreamlinedBookingWidget() {
           Direct integration with admin calendar • Real-time availability • No double bookings
         </CardDescription>
       </CardHeader>
-      
+
       <CardContent className="p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Personal Information */}
@@ -183,7 +201,7 @@ export function StreamlinedBookingWidget() {
               <Input
                 id="name"
                 value={bookingData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
+                onChange={(e) => handleInputChange("name", e.target.value)}
                 placeholder="Enter your full name"
                 required
               />
@@ -197,7 +215,7 @@ export function StreamlinedBookingWidget() {
                 id="email"
                 type="email"
                 value={bookingData.email}
-                onChange={(e) => handleInputChange('email', e.target.value)}
+                onChange={(e) => handleInputChange("email", e.target.value)}
                 placeholder="Enter your email"
                 required
               />
@@ -211,7 +229,7 @@ export function StreamlinedBookingWidget() {
                 id="phone"
                 type="tel"
                 value={bookingData.phone}
-                onChange={(e) => handleInputChange('phone', e.target.value)}
+                onChange={(e) => handleInputChange("phone", e.target.value)}
                 placeholder="Enter your phone number"
               />
             </div>
@@ -223,7 +241,7 @@ export function StreamlinedBookingWidget() {
               <Textarea
                 id="message"
                 value={bookingData.message}
-                onChange={(e) => handleInputChange('message', e.target.value)}
+                onChange={(e) => handleInputChange("message", e.target.value)}
                 placeholder="Tell us briefly about your needs..."
                 className="min-h-[80px]"
               />
@@ -239,7 +257,7 @@ export function StreamlinedBookingWidget() {
                 <Calendar
                   mode="single"
                   selected={bookingData.preferredDate}
-                  onSelect={(date) => handleInputChange('preferredDate', date)}
+                  onSelect={(date) => handleInputChange("preferredDate", date)}
                   disabled={(date) => {
                     const today = new Date();
                     today.setHours(0, 0, 0, 0);
@@ -251,9 +269,11 @@ export function StreamlinedBookingWidget() {
               {availabilitySummary && bookingData.preferredDate && (
                 <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-md text-center">
                   <div className="text-sm text-blue-800">
-                    <strong>{availabilitySummary.availableSlots}</strong> available slots • 
+                    <strong>{availabilitySummary.availableSlots}</strong> available slots •
                     <span className="ml-1">{availabilitySummary.bookedSlots} booked • </span>
-                    <span className="text-blue-600">{format(bookingData.preferredDate, 'EEEE, MMM d')}</span>
+                    <span className="text-blue-600">
+                      {format(bookingData.preferredDate, "EEEE, MMM d")}
+                    </span>
                   </div>
                 </div>
               )}
@@ -263,9 +283,11 @@ export function StreamlinedBookingWidget() {
             <div className="space-y-3">
               <Label className="text-base font-semibold flex items-center gap-2">
                 Available Time Slots *
-                <Badge variant="outline" className="text-xs">Live</Badge>
+                <Badge variant="outline" className="text-xs">
+                  Live
+                </Badge>
               </Label>
-              
+
               {!bookingData.preferredDate ? (
                 <div className="border-2 border-dashed border-gray-200 rounded-lg p-8 text-center">
                   <Clock className="h-8 w-8 mx-auto mb-2 text-gray-400" />
@@ -294,17 +316,17 @@ export function StreamlinedBookingWidget() {
                         variant={bookingData.preferredTime === slot.time ? "default" : "outline"}
                         size="sm"
                         disabled={!slot.isAvailable}
-                        onClick={() => handleInputChange('preferredTime', slot.time)}
+                        onClick={() => handleInputChange("preferredTime", slot.time)}
                         className={`
-                          ${!slot.isAvailable ? 'opacity-40' : 'hover:scale-105 transition-transform'}
-                          ${bookingData.preferredTime === slot.time ? 'bg-purple-600 text-white' : ''}
-                          ${slot.isAvailable && bookingData.preferredTime !== slot.time ? 'border-green-300' : ''}
+                          ${!slot.isAvailable ? "opacity-40" : "hover:scale-105 transition-transform"}
+                          ${bookingData.preferredTime === slot.time ? "bg-purple-600 text-white" : ""}
+                          ${slot.isAvailable && bookingData.preferredTime !== slot.time ? "border-green-300" : ""}
                         `}
                       >
                         <div className="text-center">
                           <div className="font-medium">{slot.time}</div>
                           <div className="text-xs">
-                            {!slot.isAvailable ? 'Booked' : 'Available'}
+                            {!slot.isAvailable ? "Booked" : "Available"}
                           </div>
                         </div>
                       </Button>
@@ -329,7 +351,13 @@ export function StreamlinedBookingWidget() {
           {/* Submit Button */}
           <Button
             type="submit"
-            disabled={isSubmitting || !bookingData.name || !bookingData.email || !bookingData.preferredDate || !bookingData.preferredTime}
+            disabled={
+              isSubmitting ||
+              !bookingData.name ||
+              !bookingData.email ||
+              !bookingData.preferredDate ||
+              !bookingData.preferredTime
+            }
             className="w-full bg-purple-600 hover:bg-purple-700 text-white py-3"
           >
             {isSubmitting ? (

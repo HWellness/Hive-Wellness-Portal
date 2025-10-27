@@ -2,7 +2,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { 
+import {
   Users,
   UserCheck,
   UserPlus,
@@ -19,7 +19,7 @@ import {
   Clock,
   Send,
   CheckCircle,
-  Cloud
+  Cloud,
 } from "lucide-react";
 import AdminUserManagement from "@/components/admin/admin-user-management";
 import { Link } from "wouter";
@@ -29,12 +29,12 @@ import { useState } from "react";
 
 function AdminStatsOverview() {
   const { data: statsData, isLoading } = useQuery({
-    queryKey: ['/api/admin/stats'],
+    queryKey: ["/api/admin/stats"],
     staleTime: 0,
   });
 
   const { data: appointmentsData } = useQuery({
-    queryKey: ['/api/admin/appointments'],
+    queryKey: ["/api/admin/appointments"],
     staleTime: 0,
   });
 
@@ -45,7 +45,7 @@ function AdminStatsOverview() {
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        {[1, 2, 3, 4].map(i => (
+        {[1, 2, 3, 4].map((i) => (
           <Card key={i} className="bg-white/80 backdrop-blur-sm border-0 shadow-lg">
             <CardContent className="p-6">
               <div className="animate-pulse">
@@ -90,7 +90,9 @@ function AdminStatsOverview() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-secondary text-hive-black/70">Scheduled Sessions</p>
-              <p className="text-2xl font-primary text-hive-light-blue">{stats.scheduledAppointments || 0}</p>
+              <p className="text-2xl font-primary text-hive-light-blue">
+                {stats.scheduledAppointments || 0}
+              </p>
             </div>
             <Clock className="w-8 h-8 text-hive-light-blue/60" />
           </div>
@@ -128,16 +130,16 @@ function EmailTestingSection() {
       toast({
         title: "Email Test Complete",
         description: `${successCount} successful, ${failCount} failed. Check results below.`,
-        variant: successCount > 0 ? "default" : "destructive"
+        variant: successCount > 0 ? "default" : "destructive",
       });
     },
     onError: (error: any) => {
       toast({
         title: "Email Test Failed",
         description: error.message || "Failed to run email tests",
-        variant: "destructive"
+        variant: "destructive",
       });
-    }
+    },
   });
 
   return (
@@ -156,7 +158,7 @@ function EmailTestingSection() {
               Test client welcome, therapist welcome, and session booking emails
             </p>
           </div>
-          <Button 
+          <Button
             onClick={() => emailTestMutation.mutate()}
             disabled={emailTestMutation.isPending}
             className="bg-hive-purple hover:bg-hive-purple/90"
@@ -183,14 +185,17 @@ function EmailTestingSection() {
             </h4>
             <div className="space-y-2">
               {testResults.results?.map((result, index) => (
-                <div key={index} className="flex items-center justify-between p-2 bg-white rounded border">
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-2 bg-white rounded border"
+                >
                   <span className="text-sm font-medium">{result.type}</span>
-                  <span className={`text-xs px-2 py-1 rounded ${
-                    result.success 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-red-100 text-red-800'
-                  }`}>
-                    {result.success ? 'Success' : 'Failed'}
+                  <span
+                    className={`text-xs px-2 py-1 rounded ${
+                      result.success ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                    }`}
+                  >
+                    {result.success ? "Success" : "Failed"}
                   </span>
                 </div>
               ))}
@@ -214,30 +219,30 @@ export default function AdminDashboard() {
     try {
       const response = await apiRequest("POST", "/api/auth/logout");
       const data = await response.json();
-      
+
       // Clear all authentication data
       queryClient.clear();
       toast({
         title: "Logged Out",
         description: "You have been successfully logged out.",
       });
-      
+
       // Use the redirect path from backend based on user role
       if (data.success && data.redirect) {
         window.location.href = data.redirect;
       } else {
         // Fallback for admin role
-        window.location.href = '/login';
+        window.location.href = "/login";
       }
     } catch (error) {
       console.error("Logout error:", error);
       // Force logout even if API fails
       queryClient.clear();
-      window.location.href = '/login';
+      window.location.href = "/login";
     }
   };
 
-  if (!user || (user as any).role !== 'admin') {
+  if (!user || (user as any).role !== "admin") {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -256,79 +261,83 @@ export default function AdminDashboard() {
       title: "Therapist Management",
       description: "Review applications, manage status, and create accounts",
       icon: UserCheck,
-      action: () => window.location.href = '/admin-services/therapist-status',
-      color: "bg-hive-purple"
+      action: () => (window.location.href = "/admin-services/therapist-status"),
+      color: "bg-hive-purple",
     },
     {
       title: "Client Questionnaires",
       description: "View and manage client intake questionnaires",
       icon: FileText,
-      action: () => window.location.href = '/admin-dashboard?tab=client-questionnaires',
-      color: "bg-hive-blue"
+      action: () => (window.location.href = "/admin-dashboard?tab=client-questionnaires"),
+      color: "bg-hive-blue",
     },
     {
       title: "Email Templates",
       description: "Manage all automated email content and templates",
       icon: Mail,
-      action: () => window.location.href = '/admin-email-templates',
-      color: "bg-hive-purple"
+      action: () => (window.location.href = "/admin-email-templates"),
+      color: "bg-hive-purple",
     },
     {
       title: "Messaging Automation",
       description: "SMS, WhatsApp messaging and HubSpot CRM integration",
       icon: MessageSquare,
-      action: () => window.location.href = '/admin-dashboard?service=messaging-automation',
-      color: "bg-hive-blue"
+      action: () => (window.location.href = "/admin-dashboard?service=messaging-automation"),
+      color: "bg-hive-blue",
     },
     {
-      title: "User Management", 
+      title: "User Management",
       description: "Manage clients, therapists, and accounts",
       icon: Users,
-      action: () => window.location.href = '/admin-dashboard?service=user-management',
-      color: "bg-hive-purple"
+      action: () => (window.location.href = "/admin-dashboard?service=user-management"),
+      color: "bg-hive-purple",
     },
     {
       title: "Appointment Management",
-      description: "Monitor and manage all therapy appointments", 
+      description: "Monitor and manage all therapy appointments",
       icon: Calendar,
-      action: () => window.location.href = '/admin-dashboard?service=appointment-management',
-      color: "bg-hive-blue"
+      action: () => (window.location.href = "/admin-dashboard?service=appointment-management"),
+      color: "bg-hive-blue",
     },
     {
       title: "Platform Analytics",
       description: "View platform usage and performance metrics",
       icon: BarChart3,
-      action: () => toast({ title: "Coming Soon", description: "Analytics dashboard will be available soon" }),
-      color: "bg-hive-light-blue"
+      action: () =>
+        toast({ title: "Coming Soon", description: "Analytics dashboard will be available soon" }),
+      color: "bg-hive-light-blue",
     },
     {
       title: "System Monitoring",
       description: "Monitor system health and security",
       icon: Activity,
-      action: () => toast({ title: "Coming Soon", description: "System monitoring will be available soon" }),
-      color: "bg-green-600"
+      action: () =>
+        toast({ title: "Coming Soon", description: "System monitoring will be available soon" }),
+      color: "bg-green-600",
     },
     {
       title: "Payment Management",
       description: "Oversee payment processing and disputes",
       icon: CreditCard,
-      action: () => toast({ title: "Coming Soon", description: "Payment management will be available soon" }),
-      color: "bg-orange-600"
+      action: () =>
+        toast({ title: "Coming Soon", description: "Payment management will be available soon" }),
+      color: "bg-orange-600",
     },
     {
       title: "Security Center",
       description: "Manage security settings and access controls",
       icon: Shield,
-      action: () => toast({ title: "Coming Soon", description: "Security center will be available soon" }),
-      color: "bg-red-600"
+      action: () =>
+        toast({ title: "Coming Soon", description: "Security center will be available soon" }),
+      color: "bg-red-600",
     },
     {
       title: "Admin User Management",
       description: "Create and manage administrator accounts for staff",
       icon: UserPlus,
       action: () => setShowAdminUserManagement(true),
-      color: "bg-hive-purple"
-    }
+      color: "bg-hive-purple",
+    },
   ];
 
   // Show admin user management interface if state is true
@@ -339,9 +348,7 @@ export default function AdminDashboard() {
           {/* Header with back button */}
           <div className="flex justify-between items-center mb-8">
             <div>
-              <h1 className="text-3xl font-primary text-hive-purple mb-2">
-                Admin User Management
-              </h1>
+              <h1 className="text-3xl font-primary text-hive-purple mb-2">Admin User Management</h1>
               <p className="text-hive-black/70 font-secondary">
                 Manage administrator accounts for Hive staff members
               </p>
@@ -375,18 +382,16 @@ export default function AdminDashboard() {
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-3xl font-primary text-hive-purple mb-2">
-              Admin Dashboard
-            </h1>
+            <h1 className="text-3xl font-primary text-hive-purple mb-2">Admin Dashboard</h1>
             <p className="text-hive-black/70 font-secondary">
-              Welcome back, {(user as any).firstName || 'Admin'} - Platform Administration
+              Welcome back, {(user as any).firstName || "Admin"} - Platform Administration
             </p>
           </div>
           <div className="flex items-center gap-4">
             <Button
               variant="outline"
               className="bg-white/90 hover:bg-white text-hive-purple hover:text-hive-purple border-hive-purple/20 font-secondary"
-              onClick={() => window.open('https://hive-wellness.co.uk', '_blank')}
+              onClick={() => window.open("https://hive-wellness.co.uk", "_blank")}
               data-testid="button-return-website"
             >
               Return to Website
@@ -413,8 +418,8 @@ export default function AdminDashboard() {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {adminSections.map((section, index) => (
-                <Card 
-                  key={index} 
+                <Card
+                  key={index}
                   className="bg-gradient-to-br from-white to-gray-50 border-0 shadow-md hover:shadow-lg transition-all duration-200 cursor-pointer"
                   onClick={section.action}
                 >
@@ -453,21 +458,27 @@ export default function AdminDashboard() {
                 <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-lg">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                   <div className="flex-1">
-                    <p className="font-secondary text-hive-black font-medium">Demo client account created</p>
+                    <p className="font-secondary text-hive-black font-medium">
+                      Demo client account created
+                    </p>
                     <p className="text-sm font-secondary text-hive-black/70">Just now</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-hive-purple/10 to-hive-purple/20 rounded-lg">
                   <div className="w-2 h-2 bg-hive-purple rounded-full"></div>
                   <div className="flex-1">
-                    <p className="font-secondary text-hive-black font-medium">Demo therapist account active</p>
+                    <p className="font-secondary text-hive-black font-medium">
+                      Demo therapist account active
+                    </p>
                     <p className="text-sm font-secondary text-hive-black/70">Just now</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-4 p-4 bg-gradient-to-r from-purple-50 to-purple-100 rounded-lg">
                   <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
                   <div className="flex-1">
-                    <p className="font-secondary text-hive-black font-medium">Admin dashboard accessed</p>
+                    <p className="font-secondary text-hive-black font-medium">
+                      Admin dashboard accessed
+                    </p>
                     <p className="text-sm font-secondary text-hive-black/70">Just now</p>
                   </div>
                 </div>

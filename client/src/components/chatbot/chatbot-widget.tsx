@@ -1,6 +1,6 @@
-import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import EmbeddableChatbot from './embeddable-chatbot';
+import React from "react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import EmbeddableChatbot from "./embeddable-chatbot";
 
 // Create a separate query client for the widget to avoid conflicts
 const widgetQueryClient = new QueryClient({
@@ -15,7 +15,7 @@ const widgetQueryClient = new QueryClient({
 interface ChatbotWidgetProps {
   // WordPress customisation options
   primaryColor?: string;
-  position?: 'bottom-right' | 'bottom-left' | 'top-right' | 'top-left';
+  position?: "bottom-right" | "bottom-left" | "top-right" | "top-left";
   initialMessage?: string;
   compactMode?: boolean;
   showBranding?: boolean;

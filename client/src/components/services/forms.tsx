@@ -18,7 +18,8 @@ export default function Forms({ user }: FormsProps) {
     {
       id: "lead-capture",
       title: "Lead Capture (Welcome Pack)",
-      description: "The lead capture form displayed on bottom of homepage for 'Joining the Hive Network'.",
+      description:
+        "The lead capture form displayed on bottom of homepage for 'Joining the Hive Network'.",
       icon: <Mail className="w-5 h-5" />,
       type: "lead-capture" as const,
       status: "active",
@@ -45,29 +46,21 @@ export default function Forms({ user }: FormsProps) {
   };
 
   if (selectedForm) {
-    const form = gravityForms.find(f => f.id === selectedForm);
+    const form = gravityForms.find((f) => f.id === selectedForm);
     if (form) {
       return (
         <div className="p-6 max-w-4xl mx-auto">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-3">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setSelectedForm(null)}
-              >
+              <Button variant="outline" size="sm" onClick={() => setSelectedForm(null)}>
                 ← Back to Forms
               </Button>
               <div>
-                <h1 className="text-2xl font-bold text-gray-900">
-                  {form.title}
-                </h1>
+                <h1 className="text-2xl font-bold text-gray-900">{form.title}</h1>
                 <p className="text-gray-600">{form.description}</p>
               </div>
             </div>
-            <Badge className="bg-green-100 text-green-800">
-              {form.status}
-            </Badge>
+            <Badge className="bg-green-100 text-green-800">{form.status}</Badge>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
@@ -140,7 +133,7 @@ export default function Forms({ user }: FormsProps) {
             <p className="text-2xl font-bold text-gray-900">{formStats.totalForms}</p>
           </CardContent>
         </Card>
-        
+
         <Card className="card-modern">
           <CardContent className="p-6">
             <div className="flex items-center gap-2 mb-2">
@@ -150,7 +143,7 @@ export default function Forms({ user }: FormsProps) {
             <p className="text-2xl font-bold text-gray-900">{formStats.totalSubmissions}</p>
           </CardContent>
         </Card>
-        
+
         <Card className="card-modern">
           <CardContent className="p-6">
             <div className="flex items-center gap-2 mb-2">
@@ -160,7 +153,7 @@ export default function Forms({ user }: FormsProps) {
             <p className="text-2xl font-bold text-gray-900">{formStats.avgConversionRate}</p>
           </CardContent>
         </Card>
-        
+
         <Card className="card-modern">
           <CardContent className="p-6">
             <div className="flex items-center gap-2 mb-2">
@@ -195,9 +188,7 @@ export default function Forms({ user }: FormsProps) {
                         <p className="text-sm text-gray-600 mt-1">{form.description}</p>
                       </div>
                     </div>
-                    <Badge className="bg-green-100 text-green-800">
-                      {form.status}
-                    </Badge>
+                    <Badge className="bg-green-100 text-green-800">{form.status}</Badge>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -221,11 +212,7 @@ export default function Forms({ user }: FormsProps) {
                       <Eye className="w-4 h-4 mr-2" />
                       Preview
                     </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1"
-                    >
+                    <Button variant="outline" size="sm" className="flex-1">
                       <Settings className="w-4 h-4 mr-2" />
                       Settings
                     </Button>
@@ -254,9 +241,7 @@ export default function Forms({ user }: FormsProps) {
           <div className="text-center py-12">
             <FileText className="w-16 h-16 text-gray-300 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">No Archived Forms</h3>
-            <p className="text-gray-600">
-              You don't have any archived forms.
-            </p>
+            <p className="text-gray-600">You don't have any archived forms.</p>
           </div>
         </TabsContent>
       </Tabs>

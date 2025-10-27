@@ -1,8 +1,18 @@
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { CheckCircle, XCircle, Clock, AlertCircle, MessageSquare, Mail, Smartphone, Settings, ExternalLink } from 'lucide-react';
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  CheckCircle,
+  XCircle,
+  Clock,
+  AlertCircle,
+  MessageSquare,
+  Mail,
+  Smartphone,
+  Settings,
+  ExternalLink,
+} from "lucide-react";
 
 interface MessagingStatusDashboardProps {
   user: any;
@@ -10,7 +20,7 @@ interface MessagingStatusDashboardProps {
 
 export default function MessagingStatusDashboard({ user }: MessagingStatusDashboardProps) {
   // Check if user is admin
-  const isAdmin = user?.role === 'admin';
+  const isAdmin = user?.role === "admin";
 
   if (!isAdmin) {
     return (
@@ -32,38 +42,38 @@ export default function MessagingStatusDashboard({ user }: MessagingStatusDashbo
   // Status data (in production, this would come from API)
   const messagingStatus = {
     email: {
-      status: 'active',
-      provider: 'SendGrid',
+      status: "active",
+      provider: "SendGrid",
       configured: true,
-      lastMessage: '2 hours ago',
+      lastMessage: "2 hours ago",
       messagesLastDay: 24,
-      errorRate: 0.5
+      errorRate: 0.5,
     },
     sms: {
-      status: 'setup_required',
-      provider: 'Twilio',
+      status: "setup_required",
+      provider: "Twilio",
       configured: false,
       lastMessage: null,
       messagesLastDay: 0,
-      errorRate: 0
+      errorRate: 0,
     },
     whatsapp: {
-      status: 'setup_required',
-      provider: 'Twilio',
+      status: "setup_required",
+      provider: "Twilio",
       configured: false,
       lastMessage: null,
       messagesLastDay: 0,
-      errorRate: 0
-    }
+      errorRate: 0,
+    },
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'active':
+      case "active":
         return <CheckCircle className="w-5 h-5 text-green-600" />;
-      case 'setup_required':
+      case "setup_required":
         return <AlertCircle className="w-5 h-5 text-orange-600" />;
-      case 'error':
+      case "error":
         return <XCircle className="w-5 h-5 text-red-600" />;
       default:
         return <Clock className="w-5 h-5 text-gray-600" />;
@@ -72,11 +82,11 @@ export default function MessagingStatusDashboard({ user }: MessagingStatusDashbo
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case 'active':
+      case "active":
         return <Badge className="bg-green-100 text-green-800">Active</Badge>;
-      case 'setup_required':
+      case "setup_required":
         return <Badge className="bg-orange-100 text-orange-800">Setup Required</Badge>;
-      case 'error':
+      case "error":
         return <Badge className="bg-red-100 text-red-800">Error</Badge>;
       default:
         return <Badge className="bg-gray-100 text-gray-800">Unknown</Badge>;
@@ -213,7 +223,9 @@ export default function MessagingStatusDashboard({ user }: MessagingStatusDashbo
                 <CheckCircle className="w-5 h-5 text-green-600" />
                 <div>
                   <p className="font-medium">Database Schema</p>
-                  <p className="text-sm text-gray-600">All messaging tables created and configured</p>
+                  <p className="text-sm text-gray-600">
+                    All messaging tables created and configured
+                  </p>
                 </div>
               </div>
               <Badge className="bg-green-100 text-green-800">Complete</Badge>
@@ -257,7 +269,9 @@ export default function MessagingStatusDashboard({ user }: MessagingStatusDashbo
                 <CheckCircle className="w-5 h-5 text-green-600" />
                 <div>
                   <p className="font-medium">User Preferences</p>
-                  <p className="text-sm text-gray-600">Communication preferences system operational</p>
+                  <p className="text-sm text-gray-600">
+                    Communication preferences system operational
+                  </p>
                 </div>
               </div>
               <Badge className="bg-green-100 text-green-800">Complete</Badge>
@@ -274,40 +288,50 @@ export default function MessagingStatusDashboard({ user }: MessagingStatusDashbo
         <CardContent>
           <div className="space-y-4">
             <div className="p-4 bg-blue-50 rounded-lg">
-              <h3 className="font-medium text-blue-900 mb-2">Next Steps for Full Messaging Setup</h3>
+              <h3 className="font-medium text-blue-900 mb-2">
+                Next Steps for Full Messaging Setup
+              </h3>
               <div className="space-y-2 text-sm text-blue-800">
                 <div className="flex items-center space-x-2">
-                  <span className="w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center text-xs font-medium">1</span>
+                  <span className="w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center text-xs font-medium">
+                    1
+                  </span>
                   <span>Create a Twilio account at twilio.com</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <span className="w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center text-xs font-medium">2</span>
+                  <span className="w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center text-xs font-medium">
+                    2
+                  </span>
                   <span>Configure WhatsApp Business API (if needed)</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <span className="w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center text-xs font-medium">3</span>
+                  <span className="w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center text-xs font-medium">
+                    3
+                  </span>
                   <span>Add Twilio credentials to environment variables</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <span className="w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center text-xs font-medium">4</span>
+                  <span className="w-6 h-6 bg-blue-200 rounded-full flex items-center justify-center text-xs font-medium">
+                    4
+                  </span>
                   <span>Test SMS and WhatsApp functionality</span>
                 </div>
               </div>
             </div>
 
             <div className="flex space-x-3">
-              <Button 
+              <Button
                 variant="outline"
                 className="flex items-center space-x-2"
-                onClick={() => window.open('https://console.twilio.com/', '_blank')}
+                onClick={() => window.open("https://console.twilio.com/", "_blank")}
               >
                 <ExternalLink className="w-4 h-4" />
                 <span>Open Twilio Console</span>
               </Button>
-              <Button 
+              <Button
                 variant="outline"
                 className="flex items-center space-x-2"
-                onClick={() => window.open('https://www.twilio.com/docs/whatsapp', '_blank')}
+                onClick={() => window.open("https://www.twilio.com/docs/whatsapp", "_blank")}
               >
                 <ExternalLink className="w-4 h-4" />
                 <span>WhatsApp Documentation</span>

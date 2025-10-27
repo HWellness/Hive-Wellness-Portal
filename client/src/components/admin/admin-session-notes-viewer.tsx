@@ -1,19 +1,31 @@
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { 
-  FileText, 
-  Search, 
-  Calendar, 
-  User, 
-  Mail, 
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import {
+  FileText,
+  Search,
+  Calendar,
+  User,
+  Mail,
   AlertCircle,
   CheckCircle,
   Clock,
@@ -23,8 +35,8 @@ import {
   TrendingUp,
   Shield,
   Filter,
-  X
-} from 'lucide-react';
+  X,
+} from "lucide-react";
 
 interface SessionNote {
   id: string;
@@ -69,51 +81,63 @@ interface SessionNote {
 }
 
 export default function AdminSessionNotesViewer() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [clientFilter, setClientFilter] = useState('');
-  const [therapistFilter, setTherapistFilter] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [clientFilter, setClientFilter] = useState("");
+  const [therapistFilter, setTherapistFilter] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [selectedNote, setSelectedNote] = useState<SessionNote | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
 
   // Fetch all clients
   const { data: clientsData } = useQuery({
-    queryKey: ['/api/admin/clients'],
+    queryKey: ["/api/admin/clients"],
     queryFn: async () => {
-      const response = await fetch('/api/admin/clients');
+      const response = await fetch("/api/admin/clients");
       if (!response.ok) return [];
       const data = await response.json();
       return data.clients || [];
-    }
+    },
   });
 
   // Fetch all therapists
   const { data: therapistsData } = useQuery({
-    queryKey: ['/api/admin/therapists'],
+    queryKey: ["/api/admin/therapists"],
     queryFn: async () => {
-      const response = await fetch('/api/admin/therapists');
+      const response = await fetch("/api/admin/therapists");
       if (!response.ok) return [];
       const data = await response.json();
       return data.therapists || [];
-    }
+    },
   });
 
   // Fetch all session notes with filters
-  const { data: notesData, isLoading, refetch } = useQuery({
-    queryKey: ['/api/admin/session-notes', searchTerm, clientFilter, therapistFilter, startDate, endDate],
+  const {
+    data: notesData,
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: [
+      "/api/admin/session-notes",
+      searchTerm,
+      clientFilter,
+      therapistFilter,
+      startDate,
+      endDate,
+    ],
     queryFn: async () => {
       const params = new URLSearchParams();
-      if (searchTerm) params.append('search', searchTerm);
-      if (clientFilter && clientFilter !== 'all') params.append('clientId', clientFilter);
-      if (therapistFilter && therapistFilter !== 'all') params.append('therapistId', therapistFilter);
-      if (startDate) params.append('startDate', startDate);
-      if (endDate) params.append('endDate', endDate);
-      
+      if (searchTerm) params.append("search", searchTerm);
+      if (clientFilter && clientFilter !== "all") params.append("clientId", clientFilter);
+      if (therapistFilter && therapistFilter !== "all")
+        params.append("therapistId", therapistFilter);
+      if (startDate) params.append("startDate", startDate);
+      if (endDate) params.append("endDate", endDate);
+
       const response = await fetch(`/api/admin/session-notes?${params}`);
-      if (!response.ok) throw new Error('Failed to fetch session notes');
+      if (!response.ok) throw new Error("Failed to fetch session notes");
       return response.json();
-    }
+    },
   });
 
   const notes: SessionNote[] = notesData?.notes || [];
@@ -121,11 +145,11 @@ export default function AdminSessionNotesViewer() {
   const therapists = therapistsData || [];
 
   const clearFilters = () => {
-    setSearchTerm('');
-    setClientFilter('');
-    setTherapistFilter('');
-    setStartDate('');
-    setEndDate('');
+    setSearchTerm("");
+    setClientFilter("");
+    setTherapistFilter("");
+    setStartDate("");
+    setEndDate("");
   };
 
   const handleViewNote = (note: SessionNote) => {
@@ -135,22 +159,27 @@ export default function AdminSessionNotesViewer() {
 
   const getRiskBadgeColor = (riskLevel?: string) => {
     switch (riskLevel) {
-      case 'low': return 'bg-green-500';
-      case 'moderate': return 'bg-yellow-500';
-      case 'high': return 'bg-orange-500';
-      case 'critical': return 'bg-red-500';
-      default: return 'bg-gray-500';
+      case "low":
+        return "bg-green-500";
+      case "moderate":
+        return "bg-yellow-500";
+      case "high":
+        return "bg-orange-500";
+      case "critical":
+        return "bg-red-500";
+      default:
+        return "bg-gray-500";
     }
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString('en-GB', {
-      timeZone: 'Europe/London',
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Date(dateString).toLocaleString("en-GB", {
+      timeZone: "Europe/London",
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
@@ -159,9 +188,7 @@ export default function AdminSessionNotesViewer() {
       <div className="container mx-auto max-w-7xl">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-3xl font-primary text-hive-purple mb-2">
-            Session Notes Viewer
-          </h1>
+          <h1 className="text-3xl font-primary text-hive-purple mb-2">Session Notes Viewer</h1>
           <p className="text-hive-black/70 font-secondary">
             View all therapist session notes for backup and oversight • Confidential Information
           </p>
@@ -268,7 +295,7 @@ export default function AdminSessionNotesViewer() {
 
               {/* Action Buttons */}
               <div className="flex items-end gap-2">
-                <Button 
+                <Button
                   onClick={() => refetch()}
                   className="bg-hive-purple hover:bg-hive-purple/90 flex-1"
                   data-testid="button-apply-filters"
@@ -276,7 +303,7 @@ export default function AdminSessionNotesViewer() {
                   <Search className="w-4 h-4 mr-2" />
                   Apply Filters
                 </Button>
-                <Button 
+                <Button
                   onClick={clearFilters}
                   variant="outline"
                   className="border-gray-300"
@@ -291,24 +318,26 @@ export default function AdminSessionNotesViewer() {
             {(clientFilter || therapistFilter || startDate || endDate || searchTerm) && (
               <div className="flex flex-wrap gap-2 pt-2 border-t">
                 <span className="text-sm text-gray-600">Active filters:</span>
-                {clientFilter && clientFilter !== 'all' && (
+                {clientFilter && clientFilter !== "all" && (
                   <Badge variant="secondary" className="text-xs">
-                    Client: {clients.find((c: any) => c.id === clientFilter)?.firstName} {clients.find((c: any) => c.id === clientFilter)?.lastName}
+                    Client: {clients.find((c: any) => c.id === clientFilter)?.firstName}{" "}
+                    {clients.find((c: any) => c.id === clientFilter)?.lastName}
                   </Badge>
                 )}
-                {therapistFilter && therapistFilter !== 'all' && (
+                {therapistFilter && therapistFilter !== "all" && (
                   <Badge variant="secondary" className="text-xs">
-                    Therapist: {therapists.find((t: any) => t.id === therapistFilter)?.firstName} {therapists.find((t: any) => t.id === therapistFilter)?.lastName}
+                    Therapist: {therapists.find((t: any) => t.id === therapistFilter)?.firstName}{" "}
+                    {therapists.find((t: any) => t.id === therapistFilter)?.lastName}
                   </Badge>
                 )}
                 {startDate && (
                   <Badge variant="secondary" className="text-xs">
-                    From: {new Date(startDate).toLocaleDateString('en-GB')}
+                    From: {new Date(startDate).toLocaleDateString("en-GB")}
                   </Badge>
                 )}
                 {endDate && (
                   <Badge variant="secondary" className="text-xs">
-                    To: {new Date(endDate).toLocaleDateString('en-GB')}
+                    To: {new Date(endDate).toLocaleDateString("en-GB")}
                   </Badge>
                 )}
                 {searchTerm && (
@@ -319,9 +348,7 @@ export default function AdminSessionNotesViewer() {
               </div>
             )}
 
-            <p className="text-sm text-gray-500">
-              Total notes: {notes.length}
-            </p>
+            <p className="text-sm text-gray-500">Total notes: {notes.length}</p>
           </CardContent>
         </Card>
 
@@ -346,10 +373,15 @@ export default function AdminSessionNotesViewer() {
         ) : (
           <div className="grid gap-4">
             {notes.map((note) => (
-              <Card 
-                key={note.id} 
+              <Card
+                key={note.id}
                 className="hover:shadow-lg transition-shadow cursor-pointer border-l-4"
-                style={{ borderLeftColor: note.riskLevel === 'high' || note.riskLevel === 'critical' ? '#dc3545' : '#9306B1' }}
+                style={{
+                  borderLeftColor:
+                    note.riskLevel === "high" || note.riskLevel === "critical"
+                      ? "#dc3545"
+                      : "#9306B1",
+                }}
                 onClick={() => handleViewNote(note)}
                 data-testid={`card-note-${note.id}`}
               >
@@ -378,17 +410,24 @@ export default function AdminSessionNotesViewer() {
                         <div>
                           <p className="text-gray-600 flex items-center gap-1">
                             <User className="w-4 h-4" />
-                            <strong>Client:</strong> {note.client ? `${note.client.firstName} ${note.client.lastName}` : 'Unknown'}
+                            <strong>Client:</strong>{" "}
+                            {note.client
+                              ? `${note.client.firstName} ${note.client.lastName}`
+                              : "Unknown"}
                           </p>
                           <p className="text-gray-600 flex items-center gap-1">
                             <User className="w-4 h-4" />
-                            <strong>Therapist:</strong> {note.therapist ? `${note.therapist.firstName} ${note.therapist.lastName}` : 'Unknown'}
+                            <strong>Therapist:</strong>{" "}
+                            {note.therapist
+                              ? `${note.therapist.firstName} ${note.therapist.lastName}`
+                              : "Unknown"}
                           </p>
                         </div>
                         <div>
                           <p className="text-gray-600 flex items-center gap-1">
                             <Calendar className="w-4 h-4" />
-                            <strong>Session:</strong> {note.appointment ? formatDate(note.appointment.scheduledAt) : 'N/A'}
+                            <strong>Session:</strong>{" "}
+                            {note.appointment ? formatDate(note.appointment.scheduledAt) : "N/A"}
                           </p>
                           <p className="text-gray-600 flex items-center gap-1">
                             <Clock className="w-4 h-4" />
@@ -399,7 +438,9 @@ export default function AdminSessionNotesViewer() {
 
                       {note.sessionFocus && note.sessionFocus.length > 0 && (
                         <div className="mt-3">
-                          <p className="text-sm text-gray-600 mb-1"><strong>Focus Areas:</strong></p>
+                          <p className="text-sm text-gray-600 mb-1">
+                            <strong>Focus Areas:</strong>
+                          </p>
                           <div className="flex flex-wrap gap-2">
                             {note.sessionFocus.map((focus, idx) => (
                               <Badge key={idx} variant="outline" className="text-xs">
@@ -419,8 +460,8 @@ export default function AdminSessionNotesViewer() {
                       )}
                     </div>
 
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="sm"
                       onClick={(e) => {
                         e.stopPropagation();
@@ -471,43 +512,55 @@ export default function AdminSessionNotesViewer() {
                       <div>
                         <p className="font-semibold text-gray-700">Client:</p>
                         <p className="text-gray-600">
-                          {selectedNote.client ? `${selectedNote.client.firstName} ${selectedNote.client.lastName}` : 'Unknown'}
+                          {selectedNote.client
+                            ? `${selectedNote.client.firstName} ${selectedNote.client.lastName}`
+                            : "Unknown"}
                           {selectedNote.client?.email && (
-                            <span className="text-xs block text-gray-500">{selectedNote.client.email}</span>
+                            <span className="text-xs block text-gray-500">
+                              {selectedNote.client.email}
+                            </span>
                           )}
                         </p>
                       </div>
                       <div>
                         <p className="font-semibold text-gray-700">Therapist:</p>
                         <p className="text-gray-600">
-                          {selectedNote.therapist ? `${selectedNote.therapist.firstName} ${selectedNote.therapist.lastName}` : 'Unknown'}
+                          {selectedNote.therapist
+                            ? `${selectedNote.therapist.firstName} ${selectedNote.therapist.lastName}`
+                            : "Unknown"}
                           {selectedNote.therapist?.email && (
-                            <span className="text-xs block text-gray-500">{selectedNote.therapist.email}</span>
+                            <span className="text-xs block text-gray-500">
+                              {selectedNote.therapist.email}
+                            </span>
                           )}
                         </p>
                       </div>
                       <div>
                         <p className="font-semibold text-gray-700">Session Date:</p>
                         <p className="text-gray-600">
-                          {selectedNote.appointment ? formatDate(selectedNote.appointment.scheduledAt) : 'N/A'}
+                          {selectedNote.appointment
+                            ? formatDate(selectedNote.appointment.scheduledAt)
+                            : "N/A"}
                         </p>
                       </div>
                       <div>
                         <p className="font-semibold text-gray-700">Session Type:</p>
                         <p className="text-gray-600">
-                          {selectedNote.appointment?.sessionType || 'N/A'}
+                          {selectedNote.appointment?.sessionType || "N/A"}
                         </p>
                       </div>
                       {selectedNote.appointment?.duration && (
                         <div>
                           <p className="font-semibold text-gray-700">Duration:</p>
-                          <p className="text-gray-600">{selectedNote.appointment.duration} minutes</p>
+                          <p className="text-gray-600">
+                            {selectedNote.appointment.duration} minutes
+                          </p>
                         </div>
                       )}
                       <div>
                         <p className="font-semibold text-gray-700">Risk Level:</p>
                         <Badge className={`${getRiskBadgeColor(selectedNote.riskLevel)}`}>
-                          {selectedNote.riskLevel?.toUpperCase() || 'N/A'}
+                          {selectedNote.riskLevel?.toUpperCase() || "N/A"}
                         </Badge>
                       </div>
                     </div>
@@ -524,7 +577,9 @@ export default function AdminSessionNotesViewer() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="pt-4">
-                      <p className="text-gray-700 whitespace-pre-wrap">{selectedNote.subjectiveFeedback}</p>
+                      <p className="text-gray-700 whitespace-pre-wrap">
+                        {selectedNote.subjectiveFeedback}
+                      </p>
                     </CardContent>
                   </Card>
                 )}
@@ -538,7 +593,9 @@ export default function AdminSessionNotesViewer() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="pt-4">
-                      <p className="text-gray-700 whitespace-pre-wrap">{selectedNote.objectiveObservations}</p>
+                      <p className="text-gray-700 whitespace-pre-wrap">
+                        {selectedNote.objectiveObservations}
+                      </p>
                     </CardContent>
                   </Card>
                 )}
@@ -566,7 +623,9 @@ export default function AdminSessionNotesViewer() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="pt-4">
-                      <p className="text-gray-700 whitespace-pre-wrap">{selectedNote.planAndGoals}</p>
+                      <p className="text-gray-700 whitespace-pre-wrap">
+                        {selectedNote.planAndGoals}
+                      </p>
                     </CardContent>
                   </Card>
                 )}
@@ -580,7 +639,9 @@ export default function AdminSessionNotesViewer() {
                     <CardContent>
                       <div className="flex flex-wrap gap-2">
                         {selectedNote.sessionFocus.map((focus, idx) => (
-                          <Badge key={idx} variant="outline">{focus}</Badge>
+                          <Badge key={idx} variant="outline">
+                            {focus}
+                          </Badge>
                         ))}
                       </div>
                     </CardContent>
@@ -598,7 +659,9 @@ export default function AdminSessionNotesViewer() {
                     <CardContent>
                       <ul className="list-disc list-inside space-y-1">
                         {selectedNote.interventionsUsed.map((intervention, idx) => (
-                          <li key={idx} className="text-gray-700">{intervention}</li>
+                          <li key={idx} className="text-gray-700">
+                            {intervention}
+                          </li>
                         ))}
                       </ul>
                     </CardContent>
@@ -611,7 +674,9 @@ export default function AdminSessionNotesViewer() {
                       <CardTitle className="text-base">Homework Assigned</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-gray-700 whitespace-pre-wrap">{selectedNote.homeworkAssigned}</p>
+                      <p className="text-gray-700 whitespace-pre-wrap">
+                        {selectedNote.homeworkAssigned}
+                      </p>
                     </CardContent>
                   </Card>
                 )}
@@ -625,7 +690,9 @@ export default function AdminSessionNotesViewer() {
                       </CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <p className="text-gray-700 whitespace-pre-wrap">{selectedNote.nextSessionGoals}</p>
+                      <p className="text-gray-700 whitespace-pre-wrap">
+                        {selectedNote.nextSessionGoals}
+                      </p>
                     </CardContent>
                   </Card>
                 )}
@@ -637,12 +704,15 @@ export default function AdminSessionNotesViewer() {
                   </CardHeader>
                   <CardContent>
                     <div className="grid grid-cols-2 gap-4">
-                      {selectedNote.progressScore !== null && selectedNote.progressScore !== undefined && (
-                        <div>
-                          <p className="font-semibold text-gray-700">Progress Score:</p>
-                          <p className="text-2xl font-bold text-hive-purple">{selectedNote.progressScore}/10</p>
-                        </div>
-                      )}
+                      {selectedNote.progressScore !== null &&
+                        selectedNote.progressScore !== undefined && (
+                          <div>
+                            <p className="font-semibold text-gray-700">Progress Score:</p>
+                            <p className="text-2xl font-bold text-hive-purple">
+                              {selectedNote.progressScore}/10
+                            </p>
+                          </div>
+                        )}
                       {selectedNote.clientEngagement && (
                         <div>
                           <p className="font-semibold text-gray-700">Client Engagement:</p>
@@ -668,7 +738,9 @@ export default function AdminSessionNotesViewer() {
                           <p className="font-semibold text-gray-700 mb-2">Risk Factors:</p>
                           <ul className="list-disc list-inside space-y-1">
                             {selectedNote.riskFactors.map((factor, idx) => (
-                              <li key={idx} className="text-gray-700">{factor}</li>
+                              <li key={idx} className="text-gray-700">
+                                {factor}
+                              </li>
                             ))}
                           </ul>
                         </div>
@@ -676,7 +748,9 @@ export default function AdminSessionNotesViewer() {
                       {selectedNote.safetyPlan && (
                         <div>
                           <p className="font-semibold text-gray-700 mb-2">Safety Plan:</p>
-                          <p className="text-gray-700 whitespace-pre-wrap">{selectedNote.safetyPlan}</p>
+                          <p className="text-gray-700 whitespace-pre-wrap">
+                            {selectedNote.safetyPlan}
+                          </p>
                         </div>
                       )}
                     </CardContent>
@@ -699,7 +773,7 @@ export default function AdminSessionNotesViewer() {
               </div>
 
               <div className="mt-6 flex justify-end">
-                <Button 
+                <Button
                   onClick={() => setDialogOpen(false)}
                   className="bg-hive-purple hover:bg-hive-purple/90"
                   data-testid="button-close-dialog"

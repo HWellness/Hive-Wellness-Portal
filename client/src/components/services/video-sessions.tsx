@@ -5,7 +5,19 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { Video, Calendar, Clock, User, Phone, PhoneOff, Mic, MicOff, VideoIcon, VideoOff, Settings } from "lucide-react";
+import {
+  Video,
+  Calendar,
+  Clock,
+  User,
+  Phone,
+  PhoneOff,
+  Mic,
+  MicOff,
+  VideoIcon,
+  VideoOff,
+  Settings,
+} from "lucide-react";
 import type { User as UserType } from "@shared/schema";
 
 interface VideoSessionsProps {
@@ -18,8 +30,8 @@ interface VideoSession {
   therapistName: string;
   scheduledAt: string;
   duration: number;
-  status: 'scheduled' | 'active' | 'completed' | 'cancelled';
-  sessionType: 'therapy' | 'consultation' | 'check-in';
+  status: "scheduled" | "active" | "completed" | "cancelled";
+  sessionType: "therapy" | "consultation" | "check-in";
   roomId?: string;
 }
 
@@ -33,14 +45,14 @@ export default function VideoSessions({ user }: VideoSessionsProps) {
 
   // Fetch upcoming and recent sessions
   const { data: sessions = [], isLoading } = useQuery({
-    queryKey: ['/api/video-sessions', user.id],
+    queryKey: ["/api/video-sessions", user.id],
     enabled: !!user.id,
   });
 
   // Join session mutation
   const joinSessionMutation = useMutation({
     mutationFn: async (sessionId: string) => {
-      return await apiRequest('POST', `/api/video-sessions/${sessionId}/join`);
+      return await apiRequest("POST", `/api/video-sessions/${sessionId}/join`);
     },
     onSuccess: (data: any) => {
       setActiveSession(data?.session || null);
@@ -62,7 +74,7 @@ export default function VideoSessions({ user }: VideoSessionsProps) {
   // Leave session mutation
   const leaveSessionMutation = useMutation({
     mutationFn: async (sessionId: string) => {
-      return await apiRequest('POST', `/api/video-sessions/${sessionId}/leave`);
+      return await apiRequest("POST", `/api/video-sessions/${sessionId}/leave`);
     },
     onSuccess: () => {
       setActiveSession(null);
@@ -71,44 +83,52 @@ export default function VideoSessions({ user }: VideoSessionsProps) {
         title: "Session Ended",
         description: "You have left the session.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/video-sessions'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/video-sessions"] });
     },
   });
 
   // Schedule new session mutation
   const scheduleSessionMutation = useMutation({
-    mutationFn: async (sessionData: { therapistId: string; scheduledAt: string; sessionType: string }) => {
-      return await apiRequest('POST', '/api/video-sessions/schedule', sessionData);
+    mutationFn: async (sessionData: {
+      therapistId: string;
+      scheduledAt: string;
+      sessionType: string;
+    }) => {
+      return await apiRequest("POST", "/api/video-sessions/schedule", sessionData);
     },
     onSuccess: () => {
       toast({
         title: "Session Scheduled",
         description: "Your therapy session has been scheduled successfully.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/video-sessions'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/video-sessions"] });
     },
   });
 
   const formatDateTime = (dateString: string) => {
-    return new Date(dateString).toLocaleString('en-GB', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    return new Date(dateString).toLocaleString("en-GB", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
   // Moved to SessionCard component
 
-  const upcomingSessions = (sessions as VideoSession[] || []).filter((s: VideoSession) => 
-    s.status === 'scheduled' && new Date(s.scheduledAt) > new Date()
+  const upcomingSessions = ((sessions as VideoSession[]) || []).filter(
+    (s: VideoSession) => s.status === "scheduled" && new Date(s.scheduledAt) > new Date()
   );
 
-  const recentSessions = (sessions as VideoSession[] || []).filter((s: VideoSession) => 
-    s.status === 'completed' || (s.status === 'scheduled' && new Date(s.scheduledAt) <= new Date())
-  ).slice(0, 5);
+  const recentSessions = ((sessions as VideoSession[]) || [])
+    .filter(
+      (s: VideoSession) =>
+        s.status === "completed" ||
+        (s.status === "scheduled" && new Date(s.scheduledAt) <= new Date())
+    )
+    .slice(0, 5);
 
   if (isInSession && activeSession) {
     return (
@@ -159,18 +179,26 @@ export default function VideoSessions({ user }: VideoSessionsProps) {
               variant="outline"
               size="lg"
               onClick={() => setIsMuted(!isMuted)}
-              className={`w-14 h-14 rounded-full ${isMuted ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-700 hover:bg-gray-600'} border-0`}
+              className={`w-14 h-14 rounded-full ${isMuted ? "bg-red-600 hover:bg-red-700" : "bg-gray-700 hover:bg-gray-600"} border-0`}
             >
-              {isMuted ? <MicOff className="w-6 h-6 text-white" /> : <Mic className="w-6 h-6 text-white" />}
+              {isMuted ? (
+                <MicOff className="w-6 h-6 text-white" />
+              ) : (
+                <Mic className="w-6 h-6 text-white" />
+              )}
             </Button>
 
             <Button
               variant="outline"
               size="lg"
               onClick={() => setIsVideoOn(!isVideoOn)}
-              className={`w-14 h-14 rounded-full ${!isVideoOn ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-700 hover:bg-gray-600'} border-0`}
+              className={`w-14 h-14 rounded-full ${!isVideoOn ? "bg-red-600 hover:bg-red-700" : "bg-gray-700 hover:bg-gray-600"} border-0`}
             >
-              {isVideoOn ? <VideoIcon className="w-6 h-6 text-white" /> : <VideoOff className="w-6 h-6 text-white" />}
+              {isVideoOn ? (
+                <VideoIcon className="w-6 h-6 text-white" />
+              ) : (
+                <VideoOff className="w-6 h-6 text-white" />
+              )}
             </Button>
 
             <Button
@@ -202,7 +230,7 @@ export default function VideoSessions({ user }: VideoSessionsProps) {
   }
 
   const nextSession = upcomingSessions[0];
-  
+
   return (
     <div className="max-w-5xl mx-auto p-6 space-y-8">
       {/* Page Header */}
@@ -219,7 +247,7 @@ export default function VideoSessions({ user }: VideoSessionsProps) {
             Schedule Session
           </Button>
         </div>
-        
+
         {/* Next Session Highlight */}
         {nextSession && (
           <div className="bg-gradient-to-r from-primary/5 to-accent/5 border border-primary/20 rounded-2xl p-6 space-y-4">
@@ -230,7 +258,9 @@ export default function VideoSessions({ user }: VideoSessionsProps) {
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="text-h4 text-foreground">{nextSession.therapistName}</h3>
-                <p className="text-body text-muted-foreground">{formatDateTime(nextSession.scheduledAt)}</p>
+                <p className="text-body text-muted-foreground">
+                  {formatDateTime(nextSession.scheduledAt)}
+                </p>
                 <p className="text-caption">{nextSession.duration} minutes</p>
               </div>
               <Button size="lg" className="bg-primary hover:bg-primary/90">
@@ -250,10 +280,14 @@ export default function VideoSessions({ user }: VideoSessionsProps) {
               <div className="w-12 h-12 bg-green-500/10 rounded-xl flex items-center justify-center">
                 <Video className="w-6 h-6 text-green-600" />
               </div>
-              <Badge className="bg-green-500/10 text-green-700 border-green-500/20">Available</Badge>
+              <Badge className="bg-green-500/10 text-green-700 border-green-500/20">
+                Available
+              </Badge>
             </div>
             <h3 className="text-h4 text-foreground mb-2">Instant Session</h3>
-            <p className="text-caption mb-4">Start an immediate session if your therapist is available</p>
+            <p className="text-caption mb-4">
+              Start an immediate session if your therapist is available
+            </p>
             <Button variant="outline" className="w-full">
               Check Availability
             </Button>
@@ -266,10 +300,14 @@ export default function VideoSessions({ user }: VideoSessionsProps) {
               <div className="w-12 h-12 bg-accent/10 rounded-xl flex items-center justify-center">
                 <Calendar className="w-6 h-6 text-accent-foreground" />
               </div>
-              <Badge className="bg-accent/10 text-accent-foreground border-accent/20">{upcomingSessions.length}</Badge>
+              <Badge className="bg-accent/10 text-accent-foreground border-accent/20">
+                {upcomingSessions.length}
+              </Badge>
             </div>
             <h3 className="text-h4 text-foreground mb-2">Upcoming</h3>
-            <p className="text-caption mb-4">You have {upcomingSessions.length} upcoming sessions</p>
+            <p className="text-caption mb-4">
+              You have {upcomingSessions.length} upcoming sessions
+            </p>
             <Button variant="outline" className="w-full">
               View Schedule
             </Button>
@@ -302,9 +340,9 @@ export default function VideoSessions({ user }: VideoSessionsProps) {
           <CardContent className="p-0">
             <div className="space-y-0">
               {upcomingSessions.map((session: VideoSession, index: number) => (
-                <SessionCard 
-                  key={session.id} 
-                  session={session} 
+                <SessionCard
+                  key={session.id}
+                  session={session}
                   isNext={index === 0}
                   onJoin={(sessionId) => joinSessionMutation.mutate(sessionId)}
                   isJoining={joinSessionMutation.isPending}
@@ -324,12 +362,7 @@ export default function VideoSessions({ user }: VideoSessionsProps) {
           <CardContent className="p-0">
             <div className="space-y-0">
               {recentSessions.map((session: VideoSession) => (
-                <SessionCard 
-                  key={session.id} 
-                  session={session} 
-                  isNext={false}
-                  isPast={true}
-                />
+                <SessionCard key={session.id} session={session} isNext={false} isPast={true} />
               ))}
             </div>
           </CardContent>
@@ -369,45 +402,56 @@ interface SessionCardProps {
 
 function SessionCard({ session, isNext, isPast, onJoin, isJoining }: SessionCardProps) {
   const formatDateTime = (dateString: string) => {
-    return new Date(dateString).toLocaleString('en-GB', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+    return new Date(dateString).toLocaleString("en-GB", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'bg-green-500/10 text-green-700 border-green-500/20';
-      case 'scheduled': return 'bg-primary/10 text-primary border-primary/20';
-      case 'completed': return 'bg-muted text-muted-foreground border-muted';
-      case 'cancelled': return 'bg-destructive/10 text-destructive border-destructive/20';
-      default: return 'bg-muted text-muted-foreground border-muted';
+      case "active":
+        return "bg-green-500/10 text-green-700 border-green-500/20";
+      case "scheduled":
+        return "bg-primary/10 text-primary border-primary/20";
+      case "completed":
+        return "bg-muted text-muted-foreground border-muted";
+      case "cancelled":
+        return "bg-destructive/10 text-destructive border-destructive/20";
+      default:
+        return "bg-muted text-muted-foreground border-muted";
     }
   };
 
   return (
-    <div className={`
+    <div
+      className={`
       flex items-center justify-between p-card border-b border-border last:border-b-0
       hover:bg-muted/30 transition-colors
-      ${isNext ? 'bg-primary/5 border-l-4 border-l-primary' : ''}
-    `}>
+      ${isNext ? "bg-primary/5 border-l-4 border-l-primary" : ""}
+    `}
+    >
       <div className="flex items-center gap-4">
-        <div className={`
+        <div
+          className={`
           w-12 h-12 rounded-xl flex items-center justify-center
-          ${isPast ? 'bg-muted' : 'bg-accent/10'}
-        `}>
-          <User className={`w-6 h-6 ${isPast ? 'text-muted-foreground' : 'text-accent-foreground'}`} />
+          ${isPast ? "bg-muted" : "bg-accent/10"}
+        `}
+        >
+          <User
+            className={`w-6 h-6 ${isPast ? "text-muted-foreground" : "text-accent-foreground"}`}
+          />
         </div>
         <div className="space-y-1">
           <h4 className="text-h4 text-foreground">{session.therapistName}</h4>
           <p className="text-body text-muted-foreground">{formatDateTime(session.scheduledAt)}</p>
           <div className="flex items-center gap-3">
             <Badge className={getStatusColor(session.status)}>
-              {session.status === 'scheduled' ? 'Upcoming' : session.status}
+              {session.status === "scheduled" ? "Upcoming" : session.status}
             </Badge>
             <span className="text-caption">{session.duration} min</span>
           </div>
@@ -422,7 +466,7 @@ function SessionCard({ session, isNext, isPast, onJoin, isJoining }: SessionCard
             className="bg-primary hover:bg-primary/90 text-primary-foreground"
           >
             <Video className="w-4 h-4 mr-2" />
-            {isNext ? 'Join Now' : 'Join'}
+            {isNext ? "Join Now" : "Join"}
           </Button>
         )}
         {!isPast && (

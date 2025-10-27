@@ -1,10 +1,17 @@
-import { db } from './db';
-import { users, formSubmissions, sessions, appointments, retentionPolicies, retentionAuditLogs } from '@shared/schema';
-import { sql, lt, and, isNull, or, eq } from 'drizzle-orm';
+import { db } from "./db";
+import {
+  users,
+  formSubmissions,
+  sessions,
+  appointments,
+  retentionPolicies,
+  retentionAuditLogs,
+} from "@shared/schema";
+import { sql, lt, and, isNull, or, eq } from "drizzle-orm";
 
 export interface RetentionPolicy {
   name: string;
-  dataType: 'users' | 'sessions' | 'form_submissions' | 'appointments';
+  dataType: "users" | "sessions" | "form_submissions" | "appointments";
   retentionDays: number;
   enabled: boolean;
   softDeleteFirst?: boolean;
@@ -23,43 +30,43 @@ export interface RetentionLog {
   timestamp: Date;
   dataType: string;
   recordId: string;
-  action: 'soft_delete' | 'hard_delete' | 'skip';
+  action: "soft_delete" | "hard_delete" | "skip";
   reason: string;
   dryRun: boolean;
 }
 
 const DEFAULT_RETENTION_POLICIES: RetentionPolicy[] = [
   {
-    name: 'Inactive Unverified Users',
-    dataType: 'users',
+    name: "Inactive Unverified Users",
+    dataType: "users",
     retentionDays: 180, // 6 months
     enabled: true,
     softDeleteFirst: true,
-    gracePeriodDays: 30
+    gracePeriodDays: 30,
   },
   {
-    name: 'Old Sessions',
-    dataType: 'sessions',
+    name: "Old Sessions",
+    dataType: "sessions",
     retentionDays: 90, // 3 months
     enabled: true,
-    softDeleteFirst: false
+    softDeleteFirst: false,
   },
   {
-    name: 'Old Form Submissions',
-    dataType: 'form_submissions',
+    name: "Old Form Submissions",
+    dataType: "form_submissions",
     retentionDays: 365, // 1 year
     enabled: true,
     softDeleteFirst: true,
-    gracePeriodDays: 30
+    gracePeriodDays: 30,
   },
   {
-    name: 'Cancelled Appointments',
-    dataType: 'appointments',
+    name: "Cancelled Appointments",
+    dataType: "appointments",
     retentionDays: 180, // 6 months
     enabled: true,
     softDeleteFirst: true,
-    gracePeriodDays: 30
-  }
+    gracePeriodDays: 30,
+  },
 ];
 
 export class DataRetentionService {
@@ -74,8 +81,8 @@ export class DataRetentionService {
    * Run data retention process for all enabled policies
    */
   async runRetention(dryRun: boolean = false): Promise<RetentionResult[]> {
-    console.log(`🗑️ Starting data retention process (${dryRun ? 'DRY RUN' : 'LIVE'})...`);
-    
+    console.log(`🗑️ Starting data retention process (${dryRun ? "DRY RUN" : "LIVE"})...`);
+
     const results: RetentionResult[] = [];
 
     for (const policy of this.policies) {
@@ -85,7 +92,7 @@ export class DataRetentionService {
       }
 
       console.log(`📋 Processing policy: ${policy.name} (${policy.dataType})`);
-      
+
       try {
         const result = await this.processPolicy(policy, dryRun);
         results.push(result);
@@ -96,7 +103,7 @@ export class DataRetentionService {
           softDeleted: 0,
           hardDeleted: 0,
           skipped: 0,
-          errors: [error instanceof Error ? error.message : String(error)]
+          errors: [error instanceof Error ? error.message : String(error)],
         });
       }
     }
@@ -114,7 +121,7 @@ export class DataRetentionService {
       softDeleted: 0,
       hardDeleted: 0,
       skipped: 0,
-      errors: []
+      errors: [],
     };
 
     const cutoffDate = new Date();
@@ -123,18 +130,18 @@ export class DataRetentionService {
     console.log(`📅 Retention cutoff date for ${policy.name}: ${cutoffDate.toISOString()}`);
 
     switch (policy.dataType) {
-      case 'users':
+      case "users":
         return await this.processUsers(policy, cutoffDate, dryRun);
-      
-      case 'sessions':
+
+      case "sessions":
         return await this.processSessions(policy, cutoffDate, dryRun);
-      
-      case 'form_submissions':
+
+      case "form_submissions":
         return await this.processFormSubmissions(policy, cutoffDate, dryRun);
-      
-      case 'appointments':
+
+      case "appointments":
         return await this.processAppointments(policy, cutoffDate, dryRun);
-      
+
       default:
         throw new Error(`Unknown data type: ${policy.dataType}`);
     }
@@ -143,13 +150,17 @@ export class DataRetentionService {
   /**
    * Process user retention - only delete unverified/inactive users
    */
-  private async processUsers(policy: RetentionPolicy, cutoffDate: Date, dryRun: boolean): Promise<RetentionResult> {
+  private async processUsers(
+    policy: RetentionPolicy,
+    cutoffDate: Date,
+    dryRun: boolean
+  ): Promise<RetentionResult> {
     const result: RetentionResult = {
-      dataType: 'users',
+      dataType: "users",
       softDeleted: 0,
       hardDeleted: 0,
       skipped: 0,
-      errors: []
+      errors: [],
     };
 
     try {
@@ -160,10 +171,7 @@ export class DataRetentionService {
         .where(
           and(
             lt(users.createdAt, cutoffDate),
-            or(
-              sql`${users.isVerified} = false`,
-              sql`${users.isActive} = false`
-            ),
+            or(sql`${users.isVerified} = false`, sql`${users.isActive} = false`),
             isNull(users.deletedAt)
           )
         );
@@ -172,15 +180,15 @@ export class DataRetentionService {
 
       for (const user of eligibleUsers) {
         // Skip admin users and verified active users
-        if (user.role === 'admin' || (user.isVerified && user.isActive)) {
+        if (user.role === "admin" || (user.isVerified && user.isActive)) {
           result.skipped++;
           this.logRetention({
             timestamp: new Date(),
-            dataType: 'users',
+            dataType: "users",
             recordId: user.id,
-            action: 'skip',
-            reason: 'Admin or active verified user',
-            dryRun
+            action: "skip",
+            reason: "Admin or active verified user",
+            dryRun,
           });
           continue;
         }
@@ -194,17 +202,19 @@ export class DataRetentionService {
               .where(sql`${users.id} = ${user.id}`);
           }
           result.softDeleted++;
-          
+
           this.logRetention({
             timestamp: new Date(),
-            dataType: 'users',
+            dataType: "users",
             recordId: user.id,
-            action: 'soft_delete',
+            action: "soft_delete",
             reason: `Unverified/inactive user older than ${policy.retentionDays} days`,
-            dryRun
+            dryRun,
           });
 
-          console.log(`🗑️ ${dryRun ? '[DRY RUN] Would soft delete' : 'Soft deleted'} user: ${user.email}`);
+          console.log(
+            `🗑️ ${dryRun ? "[DRY RUN] Would soft delete" : "Soft deleted"} user: ${user.email}`
+          );
         }
       }
 
@@ -216,36 +226,34 @@ export class DataRetentionService {
         const softDeletedUsers = await db
           .select()
           .from(users)
-          .where(
-            and(
-              lt(users.deletedAt!, hardDeleteCutoff),
-              sql`${users.deletedAt} IS NOT NULL`
-            )
-          );
+          .where(and(lt(users.deletedAt!, hardDeleteCutoff), sql`${users.deletedAt} IS NOT NULL`));
 
-        console.log(`🗑️ Found ${softDeletedUsers.length} users past grace period for hard deletion`);
+        console.log(
+          `🗑️ Found ${softDeletedUsers.length} users past grace period for hard deletion`
+        );
 
         for (const user of softDeletedUsers) {
           if (!dryRun) {
             await db.delete(users).where(sql`${users.id} = ${user.id}`);
           }
           result.hardDeleted++;
-          
+
           this.logRetention({
             timestamp: new Date(),
-            dataType: 'users',
+            dataType: "users",
             recordId: user.id,
-            action: 'hard_delete',
+            action: "hard_delete",
             reason: `Grace period expired (${policy.gracePeriodDays} days)`,
-            dryRun
+            dryRun,
           });
 
-          console.log(`💀 ${dryRun ? '[DRY RUN] Would hard delete' : 'Hard deleted'} user: ${user.email}`);
+          console.log(
+            `💀 ${dryRun ? "[DRY RUN] Would hard delete" : "Hard deleted"} user: ${user.email}`
+          );
         }
       }
-
     } catch (error) {
-      console.error('Error processing users:', error);
+      console.error("Error processing users:", error);
       result.errors.push(error instanceof Error ? error.message : String(error));
     }
 
@@ -255,13 +263,17 @@ export class DataRetentionService {
   /**
    * Process session retention - delete expired sessions
    */
-  private async processSessions(policy: RetentionPolicy, cutoffDate: Date, dryRun: boolean): Promise<RetentionResult> {
+  private async processSessions(
+    policy: RetentionPolicy,
+    cutoffDate: Date,
+    dryRun: boolean
+  ): Promise<RetentionResult> {
     const result: RetentionResult = {
-      dataType: 'sessions',
+      dataType: "sessions",
       softDeleted: 0,
       hardDeleted: 0,
       skipped: 0,
-      errors: []
+      errors: [],
     };
 
     try {
@@ -282,18 +294,19 @@ export class DataRetentionService {
       for (const session of expiredSessions) {
         this.logRetention({
           timestamp: new Date(),
-          dataType: 'sessions',
+          dataType: "sessions",
           recordId: session.sid,
-          action: 'hard_delete',
+          action: "hard_delete",
           reason: `Session expired more than ${policy.retentionDays} days ago`,
-          dryRun
+          dryRun,
         });
       }
 
-      console.log(`🗑️ ${dryRun ? '[DRY RUN] Would delete' : 'Deleted'} ${expiredSessions.length} expired sessions`);
-
+      console.log(
+        `🗑️ ${dryRun ? "[DRY RUN] Would delete" : "Deleted"} ${expiredSessions.length} expired sessions`
+      );
     } catch (error) {
-      console.error('Error processing sessions:', error);
+      console.error("Error processing sessions:", error);
       result.errors.push(error instanceof Error ? error.message : String(error));
     }
 
@@ -303,13 +316,17 @@ export class DataRetentionService {
   /**
    * Process form submission retention
    */
-  private async processFormSubmissions(policy: RetentionPolicy, cutoffDate: Date, dryRun: boolean): Promise<RetentionResult> {
+  private async processFormSubmissions(
+    policy: RetentionPolicy,
+    cutoffDate: Date,
+    dryRun: boolean
+  ): Promise<RetentionResult> {
     const result: RetentionResult = {
-      dataType: 'form_submissions',
+      dataType: "form_submissions",
       softDeleted: 0,
       hardDeleted: 0,
       skipped: 0,
-      errors: []
+      errors: [],
     };
 
     try {
@@ -317,12 +334,7 @@ export class DataRetentionService {
       const oldSubmissions = await db
         .select()
         .from(formSubmissions)
-        .where(
-          and(
-            lt(formSubmissions.createdAt, cutoffDate),
-            isNull(formSubmissions.deletedAt)
-          )
-        );
+        .where(and(lt(formSubmissions.createdAt, cutoffDate), isNull(formSubmissions.deletedAt)));
 
       console.log(`📝 Found ${oldSubmissions.length} old form submissions`);
 
@@ -335,14 +347,14 @@ export class DataRetentionService {
               .where(sql`${formSubmissions.id} = ${submission.id}`);
           }
           result.softDeleted++;
-          
+
           this.logRetention({
             timestamp: new Date(),
-            dataType: 'form_submissions',
+            dataType: "form_submissions",
             recordId: submission.id,
-            action: 'soft_delete',
+            action: "soft_delete",
             reason: `Form submission older than ${policy.retentionDays} days`,
-            dryRun
+            dryRun,
           });
         }
       }
@@ -371,10 +383,11 @@ export class DataRetentionService {
         result.hardDeleted = softDeletedSubmissions.length;
       }
 
-      console.log(`🗑️ ${dryRun ? '[DRY RUN] Would process' : 'Processed'} form submissions: ${result.softDeleted} soft deleted, ${result.hardDeleted} hard deleted`);
-
+      console.log(
+        `🗑️ ${dryRun ? "[DRY RUN] Would process" : "Processed"} form submissions: ${result.softDeleted} soft deleted, ${result.hardDeleted} hard deleted`
+      );
     } catch (error) {
-      console.error('Error processing form submissions:', error);
+      console.error("Error processing form submissions:", error);
       result.errors.push(error instanceof Error ? error.message : String(error));
     }
 
@@ -384,13 +397,17 @@ export class DataRetentionService {
   /**
    * Process appointment retention - only cancelled/completed appointments
    */
-  private async processAppointments(policy: RetentionPolicy, cutoffDate: Date, dryRun: boolean): Promise<RetentionResult> {
+  private async processAppointments(
+    policy: RetentionPolicy,
+    cutoffDate: Date,
+    dryRun: boolean
+  ): Promise<RetentionResult> {
     const result: RetentionResult = {
-      dataType: 'appointments',
+      dataType: "appointments",
       softDeleted: 0,
       hardDeleted: 0,
       skipped: 0,
-      errors: []
+      errors: [],
     };
 
     try {
@@ -402,10 +419,7 @@ export class DataRetentionService {
         .where(
           and(
             lt(appointments.createdAt, cutoffDate),
-            or(
-              sql`${appointments.status} = 'cancelled'`,
-              sql`${appointments.status} = 'no_show'`
-            ),
+            or(sql`${appointments.status} = 'cancelled'`, sql`${appointments.status} = 'no_show'`),
             isNull(appointments.deletedAt)
           )
         );
@@ -414,15 +428,15 @@ export class DataRetentionService {
 
       for (const appointment of oldAppointments) {
         // Skip appointments with payment records (for financial compliance)
-        if (appointment.paymentStatus !== 'pending' && appointment.price && appointment.price > 0) {
+        if (appointment.paymentStatus !== "pending" && appointment.price && appointment.price > 0) {
           result.skipped++;
           this.logRetention({
             timestamp: new Date(),
-            dataType: 'appointments',
+            dataType: "appointments",
             recordId: appointment.id,
-            action: 'skip',
-            reason: 'Has payment record - must be retained for compliance',
-            dryRun
+            action: "skip",
+            reason: "Has payment record - must be retained for compliance",
+            dryRun,
           });
           continue;
         }
@@ -435,22 +449,23 @@ export class DataRetentionService {
               .where(sql`${appointments.id} = ${appointment.id}`);
           }
           result.softDeleted++;
-          
+
           this.logRetention({
             timestamp: new Date(),
-            dataType: 'appointments',
+            dataType: "appointments",
             recordId: appointment.id,
-            action: 'soft_delete',
+            action: "soft_delete",
             reason: `Cancelled appointment older than ${policy.retentionDays} days`,
-            dryRun
+            dryRun,
           });
         }
       }
 
-      console.log(`🗑️ ${dryRun ? '[DRY RUN] Would process' : 'Processed'} appointments: ${result.softDeleted} soft deleted, ${result.skipped} skipped`);
-
+      console.log(
+        `🗑️ ${dryRun ? "[DRY RUN] Would process" : "Processed"} appointments: ${result.softDeleted} soft deleted, ${result.skipped} skipped`
+      );
     } catch (error) {
-      console.error('Error processing appointments:', error);
+      console.error("Error processing appointments:", error);
       result.errors.push(error instanceof Error ? error.message : String(error));
     }
 
@@ -464,7 +479,7 @@ export class DataRetentionService {
     const warningDate = new Date();
     warningDate.setDate(warningDate.getDate() + daysAhead);
 
-    const policy = this.policies.find(p => p.dataType === 'users');
+    const policy = this.policies.find((p) => p.dataType === "users");
     if (!policy || !policy.enabled) {
       return [];
     }
@@ -479,18 +494,17 @@ export class DataRetentionService {
         .where(
           and(
             lt(users.createdAt, cutoffDate),
-            or(
-              eq(users.isVerified, false),
-              eq(users.isActive, false)
-            ),
+            or(eq(users.isVerified, false), eq(users.isActive, false)),
             isNull(users.deletedAt)
           )
         );
 
-      console.log(`⚠️ Found ${usersAtRisk.length} users scheduled for deletion in ${daysAhead} days`);
+      console.log(
+        `⚠️ Found ${usersAtRisk.length} users scheduled for deletion in ${daysAhead} days`
+      );
       return usersAtRisk;
     } catch (error) {
-      console.error('Error finding users scheduled for deletion:', error);
+      console.error("Error finding users scheduled for deletion:", error);
       return [];
     }
   }

@@ -1,17 +1,23 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useToast } from '@/hooks/use-toast';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient';
-import { MessageSquare, Phone, Settings, Send, Users, Clock, Check, X } from 'lucide-react';
+import React, { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { MessageSquare, Phone, Settings, Send, Users, Clock, Check, X } from "lucide-react";
 
 interface CommunicationPreferences {
   userId: string;
@@ -29,8 +35,8 @@ interface CommunicationPreferences {
 interface MessageTemplate {
   id: string;
   name: string;
-  type: 'appointment_reminder' | 'welcome' | 'followup' | 'custom';
-  channel: 'email' | 'sms' | 'whatsapp';
+  type: "appointment_reminder" | "welcome" | "followup" | "custom";
+  channel: "email" | "sms" | "whatsapp";
   subject?: string;
   content: string;
   variables: string[];
@@ -41,11 +47,11 @@ interface MessageTemplate {
 interface NotificationLog {
   id: string;
   userId: string;
-  channel: 'email' | 'sms' | 'whatsapp';
+  channel: "email" | "sms" | "whatsapp";
   type: string;
   recipient: string;
   message: string;
-  status: 'pending' | 'sent' | 'delivered' | 'failed';
+  status: "pending" | "sent" | "delivered" | "failed";
   sentAt?: string;
   deliveredAt?: string;
   failureReason?: string;
@@ -58,56 +64,56 @@ interface WhatsAppMessagingInterfaceProps {
 export default function WhatsAppMessagingInterface({ user }: WhatsAppMessagingInterfaceProps) {
   const [activeTab, setActiveTab] = useState("send");
   const [messageForm, setMessageForm] = useState({
-    recipient: '',
-    channel: 'whatsapp' as 'email' | 'sms' | 'whatsapp',
-    templateId: '',
-    customMessage: '',
-    variables: {} as Record<string, string>
+    recipient: "",
+    channel: "whatsapp" as "email" | "sms" | "whatsapp",
+    templateId: "",
+    customMessage: "",
+    variables: {} as Record<string, string>,
   });
   const [bulkMessageForm, setBulkMessageForm] = useState({
     userIds: [] as string[],
-    channel: 'whatsapp' as 'email' | 'sms' | 'whatsapp',
-    templateId: '',
-    customMessage: '',
-    variables: {} as Record<string, string>
+    channel: "whatsapp" as "email" | "sms" | "whatsapp",
+    templateId: "",
+    customMessage: "",
+    variables: {} as Record<string, string>,
   });
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   // Admin-only access control
-  const isAdmin = user?.role === 'admin';
-  const canSendMessages = isAdmin || user?.role === 'therapist';
+  const isAdmin = user?.role === "admin";
+  const canSendMessages = isAdmin || user?.role === "therapist";
 
   // Fetch communication preferences
   const { data: preferences } = useQuery<CommunicationPreferences>({
-    queryKey: ['/api/messaging/preferences'],
+    queryKey: ["/api/messaging/preferences"],
     enabled: !!user,
   });
 
   // Fetch templates
   const { data: templates = [] } = useQuery<MessageTemplate[]>({
-    queryKey: ['/api/messaging/templates'],
+    queryKey: ["/api/messaging/templates"],
     enabled: isAdmin,
   });
 
   // Fetch notification logs
   const { data: logs = [] } = useQuery<NotificationLog[]>({
-    queryKey: ['/api/messaging/logs'],
+    queryKey: ["/api/messaging/logs"],
     enabled: isAdmin,
   });
 
   // Update preferences mutation
   const updatePreferencesMutation = useMutation({
     mutationFn: async (newPreferences: Partial<CommunicationPreferences>) => {
-      return await apiRequest('PUT', '/api/messaging/preferences', newPreferences);
+      return await apiRequest("PUT", "/api/messaging/preferences", newPreferences);
     },
     onSuccess: () => {
       toast({
         title: "Preferences Updated",
         description: "Your communication preferences have been updated successfully.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/messaging/preferences'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/messaging/preferences"] });
     },
     onError: () => {
       toast({
@@ -121,7 +127,7 @@ export default function WhatsAppMessagingInterface({ user }: WhatsAppMessagingIn
   // Send message mutation
   const sendMessageMutation = useMutation({
     mutationFn: async (messageData: any) => {
-      return await apiRequest('POST', '/api/messaging/send', messageData);
+      return await apiRequest("POST", "/api/messaging/send", messageData);
     },
     onSuccess: () => {
       toast({
@@ -129,13 +135,13 @@ export default function WhatsAppMessagingInterface({ user }: WhatsAppMessagingIn
         description: "Your message has been sent successfully.",
       });
       setMessageForm({
-        recipient: '',
-        channel: 'whatsapp',
-        templateId: '',
-        customMessage: '',
-        variables: {}
+        recipient: "",
+        channel: "whatsapp",
+        templateId: "",
+        customMessage: "",
+        variables: {},
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/messaging/logs'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/messaging/logs"] });
     },
     onError: () => {
       toast({
@@ -149,7 +155,7 @@ export default function WhatsAppMessagingInterface({ user }: WhatsAppMessagingIn
   // Send bulk message mutation
   const sendBulkMessageMutation = useMutation({
     mutationFn: async (messageData: any) => {
-      return await apiRequest('POST', '/api/messaging/send-bulk', messageData);
+      return await apiRequest("POST", "/api/messaging/send-bulk", messageData);
     },
     onSuccess: () => {
       toast({
@@ -158,12 +164,12 @@ export default function WhatsAppMessagingInterface({ user }: WhatsAppMessagingIn
       });
       setBulkMessageForm({
         userIds: [],
-        channel: 'whatsapp',
-        templateId: '',
-        customMessage: '',
-        variables: {}
+        channel: "whatsapp",
+        templateId: "",
+        customMessage: "",
+        variables: {},
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/messaging/logs'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/messaging/logs"] });
     },
     onError: () => {
       toast({
@@ -190,12 +196,15 @@ export default function WhatsAppMessagingInterface({ user }: WhatsAppMessagingIn
       templateId: messageForm.templateId || undefined,
       customMessage: messageForm.customMessage || undefined,
       variables: messageForm.variables,
-      recipient: messageForm.recipient
+      recipient: messageForm.recipient,
     });
   };
 
   const handleSendBulkMessage = () => {
-    if (bulkMessageForm.userIds.length === 0 || (!bulkMessageForm.templateId && !bulkMessageForm.customMessage)) {
+    if (
+      bulkMessageForm.userIds.length === 0 ||
+      (!bulkMessageForm.templateId && !bulkMessageForm.customMessage)
+    ) {
       toast({
         title: "Missing Information",
         description: "Please select recipients and a message template or custom message.",
@@ -209,7 +218,7 @@ export default function WhatsAppMessagingInterface({ user }: WhatsAppMessagingIn
       channel: bulkMessageForm.channel,
       templateId: bulkMessageForm.templateId || undefined,
       customMessage: bulkMessageForm.customMessage || undefined,
-      variables: bulkMessageForm.variables
+      variables: bulkMessageForm.variables,
     });
   };
 
@@ -285,7 +294,12 @@ export default function WhatsAppMessagingInterface({ user }: WhatsAppMessagingIn
                 </div>
                 <div>
                   <Label htmlFor="channel">Channel</Label>
-                  <Select value={messageForm.channel} onValueChange={(value: any) => setMessageForm({ ...messageForm, channel: value })}>
+                  <Select
+                    value={messageForm.channel}
+                    onValueChange={(value: any) =>
+                      setMessageForm({ ...messageForm, channel: value })
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select channel" />
                     </SelectTrigger>
@@ -300,7 +314,10 @@ export default function WhatsAppMessagingInterface({ user }: WhatsAppMessagingIn
 
               <div>
                 <Label htmlFor="template">Message Template (Optional)</Label>
-                <Select value={messageForm.templateId} onValueChange={(value) => setMessageForm({ ...messageForm, templateId: value })}>
+                <Select
+                  value={messageForm.templateId}
+                  onValueChange={(value) => setMessageForm({ ...messageForm, templateId: value })}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select template or use custom message" />
                   </SelectTrigger>
@@ -320,12 +337,14 @@ export default function WhatsAppMessagingInterface({ user }: WhatsAppMessagingIn
                   id="customMessage"
                   placeholder="Enter your custom message here..."
                   value={messageForm.customMessage}
-                  onChange={(e) => setMessageForm({ ...messageForm, customMessage: e.target.value })}
+                  onChange={(e) =>
+                    setMessageForm({ ...messageForm, customMessage: e.target.value })
+                  }
                   rows={4}
                 />
               </div>
 
-              <Button 
+              <Button
                 onClick={handleSendMessage}
                 disabled={sendMessageMutation.isPending}
                 className="w-full bg-hive-purple hover:bg-hive-purple/90"
@@ -358,7 +377,12 @@ export default function WhatsAppMessagingInterface({ user }: WhatsAppMessagingIn
             <CardContent className="space-y-4">
               <div>
                 <Label htmlFor="bulkChannel">Channel</Label>
-                <Select value={bulkMessageForm.channel} onValueChange={(value: any) => setBulkMessageForm({ ...bulkMessageForm, channel: value })}>
+                <Select
+                  value={bulkMessageForm.channel}
+                  onValueChange={(value: any) =>
+                    setBulkMessageForm({ ...bulkMessageForm, channel: value })
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select channel" />
                   </SelectTrigger>
@@ -372,7 +396,12 @@ export default function WhatsAppMessagingInterface({ user }: WhatsAppMessagingIn
 
               <div>
                 <Label htmlFor="bulkTemplate">Message Template (Optional)</Label>
-                <Select value={bulkMessageForm.templateId} onValueChange={(value) => setBulkMessageForm({ ...bulkMessageForm, templateId: value })}>
+                <Select
+                  value={bulkMessageForm.templateId}
+                  onValueChange={(value) =>
+                    setBulkMessageForm({ ...bulkMessageForm, templateId: value })
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select template or use custom message" />
                   </SelectTrigger>
@@ -392,7 +421,9 @@ export default function WhatsAppMessagingInterface({ user }: WhatsAppMessagingIn
                   id="bulkCustomMessage"
                   placeholder="Enter your custom message here..."
                   value={bulkMessageForm.customMessage}
-                  onChange={(e) => setBulkMessageForm({ ...bulkMessageForm, customMessage: e.target.value })}
+                  onChange={(e) =>
+                    setBulkMessageForm({ ...bulkMessageForm, customMessage: e.target.value })
+                  }
                   rows={4}
                 />
               </div>
@@ -402,18 +433,23 @@ export default function WhatsAppMessagingInterface({ user }: WhatsAppMessagingIn
                 <Input
                   id="bulkRecipients"
                   placeholder="Enter user IDs separated by commas"
-                  value={bulkMessageForm.userIds.join(', ')}
-                  onChange={(e) => setBulkMessageForm({ 
-                    ...bulkMessageForm, 
-                    userIds: e.target.value.split(',').map(id => id.trim()).filter(id => id) 
-                  })}
+                  value={bulkMessageForm.userIds.join(", ")}
+                  onChange={(e) =>
+                    setBulkMessageForm({
+                      ...bulkMessageForm,
+                      userIds: e.target.value
+                        .split(",")
+                        .map((id) => id.trim())
+                        .filter((id) => id),
+                    })
+                  }
                 />
                 <p className="text-sm text-gray-500 mt-1">
                   For demo: use demo-client-1, demo-therapist-1, etc.
                 </p>
               </div>
 
-              <Button 
+              <Button
                 onClick={handleSendBulkMessage}
                 disabled={sendBulkMessageMutation.isPending}
                 className="w-full bg-hive-purple hover:bg-hive-purple/90"
@@ -461,7 +497,7 @@ export default function WhatsAppMessagingInterface({ user }: WhatsAppMessagingIn
                       <p className="text-sm text-gray-600 mb-2">{template.content}</p>
                       {template.variables.length > 0 && (
                         <div className="text-xs text-gray-500">
-                          Variables: {template.variables.join(', ')}
+                          Variables: {template.variables.join(", ")}
                         </div>
                       )}
                     </div>
@@ -481,9 +517,7 @@ export default function WhatsAppMessagingInterface({ user }: WhatsAppMessagingIn
             <CardContent>
               <div className="space-y-4">
                 {logs.length === 0 ? (
-                  <p className="text-gray-500 text-center py-8">
-                    No message logs available yet.
-                  </p>
+                  <p className="text-gray-500 text-center py-8">No message logs available yet.</p>
                 ) : (
                   logs.map((log: NotificationLog) => (
                     <div key={log.id} className="border rounded-lg p-4">
@@ -492,20 +526,27 @@ export default function WhatsAppMessagingInterface({ user }: WhatsAppMessagingIn
                           <Badge variant="outline">{log.channel}</Badge>
                           <span className="text-sm text-gray-600">{log.recipient}</span>
                         </div>
-                        <Badge variant={
-                          log.status === 'delivered' ? 'default' :
-                          log.status === 'sent' ? 'secondary' :
-                          log.status === 'failed' ? 'destructive' : 'outline'
-                        }>
-                          {log.status === 'delivered' && <Check className="w-3 h-3 mr-1" />}
-                          {log.status === 'failed' && <X className="w-3 h-3 mr-1" />}
+                        <Badge
+                          variant={
+                            log.status === "delivered"
+                              ? "default"
+                              : log.status === "sent"
+                                ? "secondary"
+                                : log.status === "failed"
+                                  ? "destructive"
+                                  : "outline"
+                          }
+                        >
+                          {log.status === "delivered" && <Check className="w-3 h-3 mr-1" />}
+                          {log.status === "failed" && <X className="w-3 h-3 mr-1" />}
                           {log.status}
                         </Badge>
                       </div>
                       <p className="text-sm text-gray-600 mb-2">{log.message}</p>
                       <div className="text-xs text-gray-500">
                         {log.sentAt && `Sent: ${new Date(log.sentAt).toLocaleString()}`}
-                        {log.deliveredAt && ` | Delivered: ${new Date(log.deliveredAt).toLocaleString()}`}
+                        {log.deliveredAt &&
+                          ` | Delivered: ${new Date(log.deliveredAt).toLocaleString()}`}
                         {log.failureReason && ` | Error: ${log.failureReason}`}
                       </div>
                     </div>
@@ -533,7 +574,7 @@ export default function WhatsAppMessagingInterface({ user }: WhatsAppMessagingIn
                 <Switch
                   id="emailEnabled"
                   checked={preferences.emailEnabled}
-                  onCheckedChange={(checked) => 
+                  onCheckedChange={(checked) =>
                     updatePreferencesMutation.mutate({ emailEnabled: checked })
                   }
                 />
@@ -543,7 +584,7 @@ export default function WhatsAppMessagingInterface({ user }: WhatsAppMessagingIn
                 <Switch
                   id="smsEnabled"
                   checked={preferences.smsEnabled}
-                  onCheckedChange={(checked) => 
+                  onCheckedChange={(checked) =>
                     updatePreferencesMutation.mutate({ smsEnabled: checked })
                   }
                 />
@@ -553,7 +594,7 @@ export default function WhatsAppMessagingInterface({ user }: WhatsAppMessagingIn
                 <Switch
                   id="whatsappEnabled"
                   checked={preferences.whatsappEnabled}
-                  onCheckedChange={(checked) => 
+                  onCheckedChange={(checked) =>
                     updatePreferencesMutation.mutate({ whatsappEnabled: checked })
                   }
                 />
@@ -563,7 +604,7 @@ export default function WhatsAppMessagingInterface({ user }: WhatsAppMessagingIn
                 <Switch
                   id="appointmentReminders"
                   checked={preferences.appointmentReminders}
-                  onCheckedChange={(checked) => 
+                  onCheckedChange={(checked) =>
                     updatePreferencesMutation.mutate({ appointmentReminders: checked })
                   }
                 />

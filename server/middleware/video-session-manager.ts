@@ -1,11 +1,11 @@
-import { WebSocketServer, WebSocket } from 'ws';
-import { Server } from 'http';
-import { nanoid } from 'nanoid';
+import { WebSocketServer, WebSocket } from "ws";
+import { Server } from "http";
+import { nanoid } from "nanoid";
 
 export interface VideoSessionParticipant {
   id: string;
   userId: string;
-  role: 'client' | 'therapist';
+  role: "client" | "therapist";
   name: string;
   ws: WebSocket;
   isConnected: boolean;
@@ -18,7 +18,7 @@ export interface VideoSessionRoom {
   id: string;
   sessionId: string;
   participants: Map<string, VideoSessionParticipant>;
-  status: 'waiting' | 'active' | 'ended';
+  status: "waiting" | "active" | "ended";
   createdAt: number;
   startedAt?: number;
   endedAt?: number;
@@ -26,7 +26,7 @@ export interface VideoSessionRoom {
     therapistId: string;
     clientId: string;
     scheduledDuration: number;
-    sessionType: 'therapy' | 'consultation' | 'check-in';
+    sessionType: "therapy" | "consultation" | "check-in";
   };
 }
 
@@ -44,77 +44,81 @@ export class VideoSessionManager {
   }
 
   initialize(server: Server) {
-    this.wss = new WebSocketServer({ 
-      server, 
-      path: '/ws/video-sessions'
+    this.wss = new WebSocketServer({
+      server,
+      path: "/ws/video-sessions",
     });
 
-    this.wss.on('connection', (ws, req) => {
-      console.log('Video session WebSocket connection established');
-      
-      ws.on('message', (data) => {
+    this.wss.on("connection", (ws, req) => {
+      console.log("Video session WebSocket connection established");
+
+      ws.on("message", (data) => {
         try {
           const message = JSON.parse(data.toString());
           this.handleMessage(ws, message);
         } catch (error) {
-          console.error('Invalid WebSocket message:', error);
-          ws.send(JSON.stringify({
-            type: 'error',
-            error: 'Invalid message format'
-          }));
+          console.error("Invalid WebSocket message:", error);
+          ws.send(
+            JSON.stringify({
+              type: "error",
+              error: "Invalid message format",
+            })
+          );
         }
       });
 
-      ws.on('close', () => {
+      ws.on("close", () => {
         this.handleDisconnection(ws);
       });
 
-      ws.on('error', (error) => {
-        console.error('WebSocket error:', error);
+      ws.on("error", (error) => {
+        console.error("WebSocket error:", error);
       });
     });
 
-    console.log('Video Session WebSocket server initialized on /ws/video-sessions');
+    console.log("Video Session WebSocket server initialized on /ws/video-sessions");
   }
 
   private handleMessage(ws: WebSocket, message: any) {
     switch (message.type) {
-      case 'join-session':
+      case "join-session":
         this.handleJoinSession(ws, message);
         break;
-      case 'leave-session':
+      case "leave-session":
         this.handleLeaveSession(ws, message);
         break;
-      case 'toggle-audio':
+      case "toggle-audio":
         this.handleToggleAudio(ws, message);
         break;
-      case 'toggle-video':
+      case "toggle-video":
         this.handleToggleVideo(ws, message);
         break;
-      case 'send-offer':
-      case 'send-answer':
-      case 'send-ice-candidate':
-      case 'offer':
-      case 'answer':
-      case 'ice-candidate':
+      case "send-offer":
+      case "send-answer":
+      case "send-ice-candidate":
+      case "offer":
+      case "answer":
+      case "ice-candidate":
         this.handleWebRTCSignaling(ws, message);
         break;
-      case 'session-notification':
+      case "session-notification":
         this.handleSessionNotification(ws, message);
         break;
       default:
-        console.log('Unknown message type:', message.type);
+        console.log("Unknown message type:", message.type);
     }
   }
 
   private handleJoinSession(ws: WebSocket, message: any) {
     const { sessionId, userId, userRole, userName } = message;
-    
+
     if (!sessionId || !userId || !userRole || !userName) {
-      ws.send(JSON.stringify({
-        type: 'error',
-        error: 'Missing required fields'
-      }));
+      ws.send(
+        JSON.stringify({
+          type: "error",
+          error: "Missing required fields",
+        })
+      );
       return;
     }
 
@@ -125,22 +129,22 @@ export class VideoSessionManager {
         id: nanoid(),
         sessionId,
         participants: new Map(),
-        status: 'waiting',
+        status: "waiting",
         createdAt: Date.now(),
         metadata: {
-          therapistId: userRole === 'therapist' ? userId : '',
-          clientId: userRole === 'client' ? userId : '',
+          therapistId: userRole === "therapist" ? userId : "",
+          clientId: userRole === "client" ? userId : "",
           scheduledDuration: 50, // default 50 minutes
-          sessionType: 'therapy'
-        }
+          sessionType: "therapy",
+        },
       };
       this.rooms.set(sessionId, room);
     }
 
     // Update metadata if this is the first participant of each role
-    if (userRole === 'therapist' && !room.metadata.therapistId) {
+    if (userRole === "therapist" && !room.metadata.therapistId) {
       room.metadata.therapistId = userId;
-    } else if (userRole === 'client' && !room.metadata.clientId) {
+    } else if (userRole === "client" && !room.metadata.clientId) {
       room.metadata.clientId = userId;
     }
 
@@ -154,7 +158,7 @@ export class VideoSessionManager {
       isConnected: true,
       audioEnabled: true,
       videoEnabled: true,
-      joinedAt: Date.now()
+      joinedAt: Date.now(),
     };
 
     room.participants.set(participant.id, participant);
@@ -162,16 +166,16 @@ export class VideoSessionManager {
 
     console.log(`🎯 Participant ${userName} (${userRole}) joined session ${sessionId}`);
     console.log(`👥 Room now has ${room.participants.size} participants`);
-    
+
     // Log all participants in the room
-    console.log('📋 Current participants in room:');
+    console.log("📋 Current participants in room:");
     room.participants.forEach((p, id) => {
       console.log(`  - ${p.name} (${p.role}) - ID: ${p.userId}`);
     });
 
     // If both participants are present, start the session
-    if (room.participants.size === 2 && room.status === 'waiting') {
-      room.status = 'active';
+    if (room.participants.size === 2 && room.status === "waiting") {
+      room.status = "active";
       room.startedAt = Date.now();
       console.log(`Session ${sessionId} is now active with 2 participants`);
     }
@@ -179,34 +183,36 @@ export class VideoSessionManager {
     // Notify all participants about the new participant
     console.log(`📢 Broadcasting participant-joined to ${room.participants.size} participants`);
     this.broadcastToRoom(sessionId, {
-      type: 'participant-joined',
+      type: "participant-joined",
       participant: {
         id: participant.id,
         userId: participant.userId,
         role: participant.role,
         name: participant.name,
         audioEnabled: participant.audioEnabled,
-        videoEnabled: participant.videoEnabled
+        videoEnabled: participant.videoEnabled,
       },
       roomStatus: room.status,
-      participantCount: room.participants.size
+      participantCount: room.participants.size,
     });
 
     // Send current room state to the new participant
-    ws.send(JSON.stringify({
-      type: 'session-joined',
-      roomId: room.id,
-      sessionId,
-      status: room.status,
-      participants: Array.from(room.participants.values()).map(p => ({
-        id: p.id,
-        userId: p.userId,
-        role: p.role,
-        name: p.name,
-        audioEnabled: p.audioEnabled,
-        videoEnabled: p.videoEnabled
-      }))
-    }));
+    ws.send(
+      JSON.stringify({
+        type: "session-joined",
+        roomId: room.id,
+        sessionId,
+        status: room.status,
+        participants: Array.from(room.participants.values()).map((p) => ({
+          id: p.id,
+          userId: p.userId,
+          role: p.role,
+          name: p.name,
+          audioEnabled: p.audioEnabled,
+          videoEnabled: p.videoEnabled,
+        })),
+      })
+    );
 
     console.log(`User ${userName} (${userRole}) joined session ${sessionId}`);
   }
@@ -214,7 +220,7 @@ export class VideoSessionManager {
   private handleLeaveSession(ws: WebSocket, message: any) {
     const { sessionId, userId } = message;
     const room = this.rooms.get(sessionId);
-    
+
     if (!room) return;
 
     // Find and remove participant
@@ -232,22 +238,22 @@ export class VideoSessionManager {
 
       // Notify remaining participants
       this.broadcastToRoom(sessionId, {
-        type: 'participant-left',
+        type: "participant-left",
         participantId: participantToRemove.id,
         userId,
-        participantCount: room.participants.size
+        participantCount: room.participants.size,
       });
 
       // If room is empty or only one person left, end the session
       if (room.participants.size === 0) {
-        room.status = 'ended';
+        room.status = "ended";
         room.endedAt = Date.now();
         this.rooms.delete(sessionId);
-      } else if (room.participants.size === 1 && room.status === 'active') {
+      } else if (room.participants.size === 1 && room.status === "active") {
         // Notify the remaining participant that the other person left
         this.broadcastToRoom(sessionId, {
-          type: 'session-ended',
-          reason: 'participant-left'
+          type: "session-ended",
+          reason: "participant-left",
         });
       }
 
@@ -265,22 +271,30 @@ export class VideoSessionManager {
     this.updateParticipantMedia(sessionId, userId, { videoEnabled });
   }
 
-  private updateParticipantMedia(sessionId: string, userId: string, updates: Partial<Pick<VideoSessionParticipant, 'audioEnabled' | 'videoEnabled'>>) {
+  private updateParticipantMedia(
+    sessionId: string,
+    userId: string,
+    updates: Partial<Pick<VideoSessionParticipant, "audioEnabled" | "videoEnabled">>
+  ) {
     const room = this.rooms.get(sessionId);
     if (!room) return;
 
     for (const participant of Array.from(room.participants.values())) {
       if (participant.userId === userId) {
         Object.assign(participant, updates);
-        
+
         // Broadcast media state change to other participants
-        this.broadcastToRoom(sessionId, {
-          type: 'participant-media-changed',
-          participantId: participant.id,
-          userId,
-          audioEnabled: participant.audioEnabled,
-          videoEnabled: participant.videoEnabled
-        }, participant.ws);
+        this.broadcastToRoom(
+          sessionId,
+          {
+            type: "participant-media-changed",
+            participantId: participant.id,
+            userId,
+            audioEnabled: participant.audioEnabled,
+            videoEnabled: participant.videoEnabled,
+          },
+          participant.ws
+        );
         break;
       }
     }
@@ -291,9 +305,9 @@ export class VideoSessionManager {
     console.log(`=== WEBRTC SIGNALING ===`);
     console.log(`Type: ${message.type}`);
     console.log(`Session: ${sessionId}`);
-    
+
     const room = this.rooms.get(sessionId);
-    
+
     if (!room) {
       console.log(`❌ No room found for session ${sessionId}`);
       return;
@@ -326,25 +340,28 @@ export class VideoSessionManager {
         break;
       }
     }
-    
+
     if (!targetFound) {
       console.log(`❌ Target participant ${targetUserId} not found in session ${sessionId}`);
-      console.log(`Available participants:`, Array.from(room.participants.values()).map(p => p.userId));
+      console.log(
+        `Available participants:`,
+        Array.from(room.participants.values()).map((p) => p.userId)
+      );
     }
   }
 
   private handleSessionNotification(ws: WebSocket, message: any) {
     const { type: notificationType, sessionId, targetUserId, ...notificationData } = message;
-    
+
     // Handle different types of session notifications
     switch (notificationType) {
-      case 'session-invitation':
+      case "session-invitation":
         this.sendSessionInvitation(sessionId, targetUserId, notificationData);
         break;
-      case 'session-reminder':
+      case "session-reminder":
         this.sendSessionReminder(sessionId, targetUserId, notificationData);
         break;
-      case 'session-started':
+      case "session-started":
         this.sendSessionStartedNotification(sessionId, targetUserId, notificationData);
         break;
     }
@@ -355,18 +372,18 @@ export class VideoSessionManager {
     for (const [userId, connection] of Array.from(this.userConnections.entries())) {
       if (connection === ws) {
         this.userConnections.delete(userId);
-        
+
         // Remove from all rooms
         for (const [sessionId, room] of Array.from(this.rooms.entries())) {
           for (const [participantId, participant] of Array.from(room.participants.entries())) {
             if (participant.userId === userId) {
               room.participants.delete(participantId);
-              
+
               // Notify other participants
               this.broadcastToRoom(sessionId, {
-                type: 'participant-disconnected',
+                type: "participant-disconnected",
                 participantId,
-                userId
+                userId,
               });
               break;
             }
@@ -392,33 +409,39 @@ export class VideoSessionManager {
   sendSessionInvitation(sessionId: string, targetUserId: string, data: any) {
     const ws = this.userConnections.get(targetUserId);
     if (ws && ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify({
-        type: 'session-invitation',
-        sessionId,
-        ...data
-      }));
+      ws.send(
+        JSON.stringify({
+          type: "session-invitation",
+          sessionId,
+          ...data,
+        })
+      );
     }
   }
 
   sendSessionReminder(sessionId: string, targetUserId: string, data: any) {
     const ws = this.userConnections.get(targetUserId);
     if (ws && ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify({
-        type: 'session-reminder',
-        sessionId,
-        ...data
-      }));
+      ws.send(
+        JSON.stringify({
+          type: "session-reminder",
+          sessionId,
+          ...data,
+        })
+      );
     }
   }
 
   sendSessionStartedNotification(sessionId: string, targetUserId: string, data: any) {
     const ws = this.userConnections.get(targetUserId);
     if (ws && ws.readyState === WebSocket.OPEN) {
-      ws.send(JSON.stringify({
-        type: 'session-started',
-        sessionId,
-        ...data
-      }));
+      ws.send(
+        JSON.stringify({
+          type: "session-started",
+          sessionId,
+          ...data,
+        })
+      );
     }
   }
 
@@ -427,18 +450,18 @@ export class VideoSessionManager {
     therapistId: string;
     clientId: string;
     scheduledDuration: number;
-    sessionType: 'therapy' | 'consultation' | 'check-in';
+    sessionType: "therapy" | "consultation" | "check-in";
   }) {
     const sessionId = nanoid();
     const room: VideoSessionRoom = {
       id: nanoid(),
       sessionId,
       participants: new Map(),
-      status: 'waiting',
+      status: "waiting",
       createdAt: Date.now(),
-      metadata: sessionData
+      metadata: sessionData,
     };
-    
+
     this.rooms.set(sessionId, room);
     return sessionId;
   }
@@ -452,19 +475,19 @@ export class VideoSessionManager {
       sessionId: room.sessionId,
       status: room.status,
       participantCount: room.participants.size,
-      participants: Array.from(room.participants.values()).map(p => ({
+      participants: Array.from(room.participants.values()).map((p) => ({
         id: p.id,
         userId: p.userId,
         role: p.role,
         name: p.name,
         isConnected: p.isConnected,
         audioEnabled: p.audioEnabled,
-        videoEnabled: p.videoEnabled
+        videoEnabled: p.videoEnabled,
       })),
       createdAt: room.createdAt,
       startedAt: room.startedAt,
       endedAt: room.endedAt,
-      metadata: room.metadata
+      metadata: room.metadata,
     };
   }
 
@@ -472,13 +495,13 @@ export class VideoSessionManager {
     const room = this.rooms.get(sessionId);
     if (!room) return false;
 
-    room.status = 'ended';
+    room.status = "ended";
     room.endedAt = Date.now();
 
     // Notify all participants
     this.broadcastToRoom(sessionId, {
-      type: 'session-ended',
-      reason: reason || 'session-completed'
+      type: "session-ended",
+      reason: reason || "session-completed",
     });
 
     // Clean up room
@@ -489,7 +512,7 @@ export class VideoSessionManager {
   getAllActiveSessions() {
     const activeSessions = [];
     for (const [sessionId, room] of Array.from(this.rooms.entries())) {
-      if (room.status === 'active' || room.status === 'waiting') {
+      if (room.status === "active" || room.status === "waiting") {
         activeSessions.push(this.getSessionStatus(sessionId));
       }
     }

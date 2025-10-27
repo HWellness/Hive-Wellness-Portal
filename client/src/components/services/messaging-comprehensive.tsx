@@ -1,17 +1,36 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useToast } from '@/hooks/use-toast';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient';
-import { MessageSquare, Phone, Settings, Send, Users, Clock, Check, X, Smartphone, Mail, Bot, AlertCircle } from 'lucide-react';
+import React, { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import {
+  MessageSquare,
+  Phone,
+  Settings,
+  Send,
+  Users,
+  Clock,
+  Check,
+  X,
+  Smartphone,
+  Mail,
+  Bot,
+  AlertCircle,
+} from "lucide-react";
 
 interface MessagingServiceProps {
   user: any;
@@ -33,11 +52,11 @@ interface CommunicationPreferences {
 interface NotificationLog {
   id: string;
   userId: string;
-  channel: 'email' | 'sms' | 'whatsapp';
+  channel: "email" | "sms" | "whatsapp";
   type: string;
   recipient: string;
   message: string;
-  status: 'pending' | 'sent' | 'delivered' | 'failed';
+  status: "pending" | "sent" | "delivered" | "failed";
   sentAt?: string;
   deliveredAt?: string;
   failureReason?: string;
@@ -46,54 +65,54 @@ interface NotificationLog {
 export default function MessagingService({ user }: MessagingServiceProps) {
   const [activeTab, setActiveTab] = useState("overview");
   const [messageForm, setMessageForm] = useState({
-    recipient: '',
-    channel: 'email' as 'email' | 'sms' | 'whatsapp',
-    subject: '',
-    message: '',
-    priority: 'normal' as 'low' | 'normal' | 'high' | 'urgent'
+    recipient: "",
+    channel: "email" as "email" | "sms" | "whatsapp",
+    subject: "",
+    message: "",
+    priority: "normal" as "low" | "normal" | "high" | "urgent",
   });
   const [bulkMessageForm, setBulkMessageForm] = useState({
     userIds: [] as string[],
-    channel: 'email' as 'email' | 'sms' | 'whatsapp',
-    subject: '',
-    message: '',
-    priority: 'normal' as 'low' | 'normal' | 'high' | 'urgent'
+    channel: "email" as "email" | "sms" | "whatsapp",
+    subject: "",
+    message: "",
+    priority: "normal" as "low" | "normal" | "high" | "urgent",
   });
   const [testMessageForm, setTestMessageForm] = useState({
-    channel: 'email' as 'email' | 'sms' | 'whatsapp',
-    recipient: user?.email || ''
+    channel: "email" as "email" | "sms" | "whatsapp",
+    recipient: user?.email || "",
   });
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   // Access control
-  const canSendMessages = user?.role === 'admin' || user?.role === 'therapist';
-  const isAdmin = user?.role === 'admin';
+  const canSendMessages = user?.role === "admin" || user?.role === "therapist";
+  const isAdmin = user?.role === "admin";
 
   // Fetch communication preferences
   const { data: preferences, isLoading: preferencesLoading } = useQuery({
-    queryKey: ['/api/messaging/preferences'],
+    queryKey: ["/api/messaging/preferences"],
     enabled: !!user,
   });
 
   // Fetch notification logs (admin only)
   const { data: logs = [], isLoading: logsLoading } = useQuery({
-    queryKey: ['/api/messaging/logs'],
+    queryKey: ["/api/messaging/logs"],
     enabled: isAdmin,
   });
 
   // Update preferences mutation
   const updatePreferencesMutation = useMutation({
     mutationFn: async (newPreferences: Partial<CommunicationPreferences>) => {
-      return await apiRequest('PUT', '/api/messaging/preferences', newPreferences);
+      return await apiRequest("PUT", "/api/messaging/preferences", newPreferences);
     },
     onSuccess: () => {
       toast({
         title: "Preferences Updated",
         description: "Your communication preferences have been updated successfully.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/messaging/preferences'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/messaging/preferences"] });
     },
     onError: () => {
       toast({
@@ -107,7 +126,7 @@ export default function MessagingService({ user }: MessagingServiceProps) {
   // Send message mutation
   const sendMessageMutation = useMutation({
     mutationFn: async (messageData: any) => {
-      return await apiRequest('POST', '/api/messaging/send', messageData);
+      return await apiRequest("POST", "/api/messaging/send", messageData);
     },
     onSuccess: () => {
       toast({
@@ -115,13 +134,13 @@ export default function MessagingService({ user }: MessagingServiceProps) {
         description: "Your message has been sent successfully.",
       });
       setMessageForm({
-        recipient: '',
-        channel: 'email',
-        subject: '',
-        message: '',
-        priority: 'normal'
+        recipient: "",
+        channel: "email",
+        subject: "",
+        message: "",
+        priority: "normal",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/messaging/logs'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/messaging/logs"] });
     },
     onError: () => {
       toast({
@@ -135,7 +154,7 @@ export default function MessagingService({ user }: MessagingServiceProps) {
   // Send bulk message mutation
   const sendBulkMessageMutation = useMutation({
     mutationFn: async (messageData: any) => {
-      return await apiRequest('POST', '/api/messaging/send-bulk', messageData);
+      return await apiRequest("POST", "/api/messaging/send-bulk", messageData);
     },
     onSuccess: () => {
       toast({
@@ -144,12 +163,12 @@ export default function MessagingService({ user }: MessagingServiceProps) {
       });
       setBulkMessageForm({
         userIds: [],
-        channel: 'email',
-        subject: '',
-        message: '',
-        priority: 'normal'
+        channel: "email",
+        subject: "",
+        message: "",
+        priority: "normal",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/messaging/logs'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/messaging/logs"] });
     },
     onError: () => {
       toast({
@@ -163,7 +182,7 @@ export default function MessagingService({ user }: MessagingServiceProps) {
   // Test message mutation
   const testMessageMutation = useMutation({
     mutationFn: async (testData: any) => {
-      return await apiRequest('POST', '/api/messaging/test', testData);
+      return await apiRequest("POST", "/api/messaging/test", testData);
     },
     onSuccess: () => {
       toast({
@@ -196,7 +215,7 @@ export default function MessagingService({ user }: MessagingServiceProps) {
       subject: messageForm.subject,
       customMessage: messageForm.message,
       priority: messageForm.priority,
-      recipient: messageForm.recipient
+      recipient: messageForm.recipient,
     });
   };
 
@@ -215,24 +234,24 @@ export default function MessagingService({ user }: MessagingServiceProps) {
       channel: bulkMessageForm.channel,
       subject: bulkMessageForm.subject,
       customMessage: bulkMessageForm.message,
-      priority: bulkMessageForm.priority
+      priority: bulkMessageForm.priority,
     });
   };
 
   const handleTestMessage = () => {
     testMessageMutation.mutate({
       channel: testMessageForm.channel,
-      recipient: testMessageForm.recipient
+      recipient: testMessageForm.recipient,
     });
   };
 
   const getChannelIcon = (channel: string) => {
     switch (channel) {
-      case 'whatsapp':
+      case "whatsapp":
         return <MessageSquare className="w-4 h-4" />;
-      case 'sms':
+      case "sms":
         return <Smartphone className="w-4 h-4" />;
-      case 'email':
+      case "email":
         return <Mail className="w-4 h-4" />;
       default:
         return <MessageSquare className="w-4 h-4" />;
@@ -241,14 +260,14 @@ export default function MessagingService({ user }: MessagingServiceProps) {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'delivered':
-        return 'bg-green-100 text-green-800';
-      case 'sent':
-        return 'bg-blue-100 text-blue-800';
-      case 'failed':
-        return 'bg-red-100 text-red-800';
+      case "delivered":
+        return "bg-green-100 text-green-800";
+      case "sent":
+        return "bg-blue-100 text-blue-800";
+      case "failed":
+        return "bg-red-100 text-red-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -279,11 +298,9 @@ export default function MessagingService({ user }: MessagingServiceProps) {
           <div className="flex items-center space-x-2">
             <AlertCircle className="w-5 h-5 text-orange-600" />
             <div>
-              <p className="font-medium text-orange-800">
-                SMS & WhatsApp Setup Required
-              </p>
+              <p className="font-medium text-orange-800">SMS & WhatsApp Setup Required</p>
               <p className="text-sm text-orange-600">
-                To enable SMS and WhatsApp messaging, please configure your Twilio credentials. 
+                To enable SMS and WhatsApp messaging, please configure your Twilio credentials.
                 Email messaging is fully operational.
               </p>
             </div>
@@ -392,7 +409,12 @@ export default function MessagingService({ user }: MessagingServiceProps) {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="testChannel">Test Channel</Label>
-                  <Select value={testMessageForm.channel} onValueChange={(value: any) => setTestMessageForm({ ...testMessageForm, channel: value })}>
+                  <Select
+                    value={testMessageForm.channel}
+                    onValueChange={(value: any) =>
+                      setTestMessageForm({ ...testMessageForm, channel: value })
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select channel" />
                     </SelectTrigger>
@@ -409,11 +431,13 @@ export default function MessagingService({ user }: MessagingServiceProps) {
                     id="testRecipient"
                     placeholder="Email or phone number"
                     value={testMessageForm.recipient}
-                    onChange={(e) => setTestMessageForm({ ...testMessageForm, recipient: e.target.value })}
+                    onChange={(e) =>
+                      setTestMessageForm({ ...testMessageForm, recipient: e.target.value })
+                    }
                   />
                 </div>
               </div>
-              <Button 
+              <Button
                 onClick={handleTestMessage}
                 disabled={testMessageMutation.isPending}
                 className="bg-hive-purple hover:bg-hive-purple/90"
@@ -456,7 +480,7 @@ export default function MessagingService({ user }: MessagingServiceProps) {
               </CardHeader>
               <CardContent className="space-y-4">
                 {/* Example Templates for Therapists */}
-                {user?.role === 'therapist' && (
+                {user?.role === "therapist" && (
                   <div className="p-4 bg-hive-light-blue/30 rounded-lg border border-hive-purple/20">
                     <h4 className="font-semibold text-hive-purple mb-3 flex items-center">
                       <MessageSquare className="w-4 h-4 mr-2" />
@@ -465,52 +489,74 @@ export default function MessagingService({ user }: MessagingServiceProps) {
                     <div className="space-y-2 text-sm">
                       <div className="p-3 bg-white rounded border border-gray-200">
                         <p className="font-medium text-gray-700 mb-1">Appointment Reminder:</p>
-                        <p className="text-gray-600 italic">"Hi [Client Name], this is a friendly reminder about your therapy session tomorrow at [Time]. Looking forward to seeing you. If you need to reschedule, please let me know. Best regards, [Your Name]"</p>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
+                        <p className="text-gray-600 italic">
+                          "Hi [Client Name], this is a friendly reminder about your therapy session
+                          tomorrow at [Time]. Looking forward to seeing you. If you need to
+                          reschedule, please let me know. Best regards, [Your Name]"
+                        </p>
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           className="mt-2 text-hive-purple hover:text-hive-purple hover:bg-hive-purple/10"
-                          onClick={() => setMessageForm({ 
-                            ...messageForm, 
-                            message: "Hi [Client Name], this is a friendly reminder about your therapy session tomorrow at [Time]. Looking forward to seeing you. If you need to reschedule, please let me know. Best regards, [Your Name]" 
-                          })}
+                          onClick={() =>
+                            setMessageForm({
+                              ...messageForm,
+                              message:
+                                "Hi [Client Name], this is a friendly reminder about your therapy session tomorrow at [Time]. Looking forward to seeing you. If you need to reschedule, please let me know. Best regards, [Your Name]",
+                            })
+                          }
                         >
                           Use This Template
                         </Button>
                       </div>
                       <div className="p-3 bg-white rounded border border-gray-200">
                         <p className="font-medium text-gray-700 mb-1">Check-in Message:</p>
-                        <p className="text-gray-600 italic">"Hi [Client Name], I hope you're doing well. I wanted to check in and see how you've been feeling since our last session. Please feel free to reach out if you'd like to discuss anything. Take care, [Your Name]"</p>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
+                        <p className="text-gray-600 italic">
+                          "Hi [Client Name], I hope you're doing well. I wanted to check in and see
+                          how you've been feeling since our last session. Please feel free to reach
+                          out if you'd like to discuss anything. Take care, [Your Name]"
+                        </p>
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           className="mt-2 text-hive-purple hover:text-hive-purple hover:bg-hive-purple/10"
-                          onClick={() => setMessageForm({ 
-                            ...messageForm, 
-                            message: "Hi [Client Name], I hope you're doing well. I wanted to check in and see how you've been feeling since our last session. Please feel free to reach out if you'd like to discuss anything. Take care, [Your Name]" 
-                          })}
+                          onClick={() =>
+                            setMessageForm({
+                              ...messageForm,
+                              message:
+                                "Hi [Client Name], I hope you're doing well. I wanted to check in and see how you've been feeling since our last session. Please feel free to reach out if you'd like to discuss anything. Take care, [Your Name]",
+                            })
+                          }
                         >
                           Use This Template
                         </Button>
                       </div>
                       <div className="p-3 bg-white rounded border border-gray-200">
                         <p className="font-medium text-gray-700 mb-1">Session Follow-up:</p>
-                        <p className="text-gray-600 italic">"Hi [Client Name], thank you for today's session. I wanted to follow up on the techniques we discussed. Remember to practice [specific technique] and note how it goes. See you at our next session. Warm regards, [Your Name]"</p>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
+                        <p className="text-gray-600 italic">
+                          "Hi [Client Name], thank you for today's session. I wanted to follow up on
+                          the techniques we discussed. Remember to practice [specific technique] and
+                          note how it goes. See you at our next session. Warm regards, [Your Name]"
+                        </p>
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           className="mt-2 text-hive-purple hover:text-hive-purple hover:bg-hive-purple/10"
-                          onClick={() => setMessageForm({ 
-                            ...messageForm, 
-                            message: "Hi [Client Name], thank you for today's session. I wanted to follow up on the techniques we discussed. Remember to practice [specific technique] and note how it goes. See you at our next session. Warm regards, [Your Name]" 
-                          })}
+                          onClick={() =>
+                            setMessageForm({
+                              ...messageForm,
+                              message:
+                                "Hi [Client Name], thank you for today's session. I wanted to follow up on the techniques we discussed. Remember to practice [specific technique] and note how it goes. See you at our next session. Warm regards, [Your Name]",
+                            })
+                          }
                         >
                           Use This Template
                         </Button>
                       </div>
                     </div>
                     <p className="text-xs text-gray-500 mt-3">
-                      💡 Tip: Click "Use This Template" to copy the message, then personalise it for your client.
+                      💡 Tip: Click "Use This Template" to copy the message, then personalise it for
+                      your client.
                     </p>
                   </div>
                 )}
@@ -522,12 +568,19 @@ export default function MessagingService({ user }: MessagingServiceProps) {
                       id="recipient"
                       placeholder="Email or phone number"
                       value={messageForm.recipient}
-                      onChange={(e) => setMessageForm({ ...messageForm, recipient: e.target.value })}
+                      onChange={(e) =>
+                        setMessageForm({ ...messageForm, recipient: e.target.value })
+                      }
                     />
                   </div>
                   <div>
                     <Label htmlFor="channel">Channel</Label>
-                    <Select value={messageForm.channel} onValueChange={(value: any) => setMessageForm({ ...messageForm, channel: value })}>
+                    <Select
+                      value={messageForm.channel}
+                      onValueChange={(value: any) =>
+                        setMessageForm({ ...messageForm, channel: value })
+                      }
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Select channel" />
                       </SelectTrigger>
@@ -540,7 +593,7 @@ export default function MessagingService({ user }: MessagingServiceProps) {
                   </div>
                 </div>
 
-                {messageForm.channel === 'email' && (
+                {messageForm.channel === "email" && (
                   <div>
                     <Label htmlFor="subject">Subject</Label>
                     <Input
@@ -565,7 +618,12 @@ export default function MessagingService({ user }: MessagingServiceProps) {
 
                 <div>
                   <Label htmlFor="priority">Priority</Label>
-                  <Select value={messageForm.priority} onValueChange={(value: any) => setMessageForm({ ...messageForm, priority: value })}>
+                  <Select
+                    value={messageForm.priority}
+                    onValueChange={(value: any) =>
+                      setMessageForm({ ...messageForm, priority: value })
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select priority" />
                     </SelectTrigger>
@@ -578,7 +636,7 @@ export default function MessagingService({ user }: MessagingServiceProps) {
                   </Select>
                 </div>
 
-                <Button 
+                <Button
                   onClick={handleSendMessage}
                   disabled={sendMessageMutation.isPending}
                   className="w-full bg-hive-purple hover:bg-hive-purple/90"
@@ -623,7 +681,12 @@ export default function MessagingService({ user }: MessagingServiceProps) {
               <CardContent className="space-y-4">
                 <div>
                   <Label htmlFor="bulkChannel">Channel</Label>
-                  <Select value={bulkMessageForm.channel} onValueChange={(value: any) => setBulkMessageForm({ ...bulkMessageForm, channel: value })}>
+                  <Select
+                    value={bulkMessageForm.channel}
+                    onValueChange={(value: any) =>
+                      setBulkMessageForm({ ...bulkMessageForm, channel: value })
+                    }
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select channel" />
                     </SelectTrigger>
@@ -635,14 +698,16 @@ export default function MessagingService({ user }: MessagingServiceProps) {
                   </Select>
                 </div>
 
-                {bulkMessageForm.channel === 'email' && (
+                {bulkMessageForm.channel === "email" && (
                   <div>
                     <Label htmlFor="bulkSubject">Subject</Label>
                     <Input
                       id="bulkSubject"
                       placeholder="Message subject"
                       value={bulkMessageForm.subject}
-                      onChange={(e) => setBulkMessageForm({ ...bulkMessageForm, subject: e.target.value })}
+                      onChange={(e) =>
+                        setBulkMessageForm({ ...bulkMessageForm, subject: e.target.value })
+                      }
                     />
                   </div>
                 )}
@@ -653,7 +718,9 @@ export default function MessagingService({ user }: MessagingServiceProps) {
                     id="bulkMessage"
                     placeholder="Enter your message here..."
                     value={bulkMessageForm.message}
-                    onChange={(e) => setBulkMessageForm({ ...bulkMessageForm, message: e.target.value })}
+                    onChange={(e) =>
+                      setBulkMessageForm({ ...bulkMessageForm, message: e.target.value })
+                    }
                     rows={4}
                   />
                 </div>
@@ -663,18 +730,23 @@ export default function MessagingService({ user }: MessagingServiceProps) {
                   <Input
                     id="bulkRecipients"
                     placeholder="Enter user IDs separated by commas"
-                    value={bulkMessageForm.userIds.join(', ')}
-                    onChange={(e) => setBulkMessageForm({ 
-                      ...bulkMessageForm, 
-                      userIds: e.target.value.split(',').map(id => id.trim()).filter(id => id) 
-                    })}
+                    value={bulkMessageForm.userIds.join(", ")}
+                    onChange={(e) =>
+                      setBulkMessageForm({
+                        ...bulkMessageForm,
+                        userIds: e.target.value
+                          .split(",")
+                          .map((id) => id.trim())
+                          .filter((id) => id),
+                      })
+                    }
                   />
                   <p className="text-sm text-gray-500 mt-1">
                     For demo: use demo-client-1, demo-therapist-1, etc.
                   </p>
                 </div>
 
-                <Button 
+                <Button
                   onClick={handleSendBulkMessage}
                   disabled={sendBulkMessageMutation.isPending}
                   className="w-full bg-hive-purple hover:bg-hive-purple/90"
@@ -719,7 +791,7 @@ export default function MessagingService({ user }: MessagingServiceProps) {
                     </div>
                     <Switch
                       checked={preferences.emailEnabled}
-                      onCheckedChange={(checked) => 
+                      onCheckedChange={(checked) =>
                         updatePreferencesMutation.mutate({ emailEnabled: checked })
                       }
                     />
@@ -731,7 +803,7 @@ export default function MessagingService({ user }: MessagingServiceProps) {
                     </div>
                     <Switch
                       checked={preferences.smsEnabled}
-                      onCheckedChange={(checked) => 
+                      onCheckedChange={(checked) =>
                         updatePreferencesMutation.mutate({ smsEnabled: checked })
                       }
                     />
@@ -743,7 +815,7 @@ export default function MessagingService({ user }: MessagingServiceProps) {
                     </div>
                     <Switch
                       checked={preferences.whatsappEnabled}
-                      onCheckedChange={(checked) => 
+                      onCheckedChange={(checked) =>
                         updatePreferencesMutation.mutate({ whatsappEnabled: checked })
                       }
                     />
@@ -755,7 +827,7 @@ export default function MessagingService({ user }: MessagingServiceProps) {
                     </div>
                     <Switch
                       checked={preferences.appointmentReminders}
-                      onCheckedChange={(checked) => 
+                      onCheckedChange={(checked) =>
                         updatePreferencesMutation.mutate({ appointmentReminders: checked })
                       }
                     />
@@ -790,9 +862,7 @@ export default function MessagingService({ user }: MessagingServiceProps) {
                   <Clock className="w-6 h-6 animate-spin" />
                 </div>
               ) : logs.length === 0 ? (
-                <p className="text-gray-500 text-center py-8">
-                  No message logs available yet.
-                </p>
+                <p className="text-gray-500 text-center py-8">No message logs available yet.</p>
               ) : (
                 <div className="space-y-4">
                   {logs.map((log: NotificationLog) => (
@@ -804,15 +874,16 @@ export default function MessagingService({ user }: MessagingServiceProps) {
                           <span className="text-sm text-gray-600">{log.recipient}</span>
                         </div>
                         <Badge className={getStatusColor(log.status)}>
-                          {log.status === 'delivered' && <Check className="w-3 h-3 mr-1" />}
-                          {log.status === 'failed' && <X className="w-3 h-3 mr-1" />}
+                          {log.status === "delivered" && <Check className="w-3 h-3 mr-1" />}
+                          {log.status === "failed" && <X className="w-3 h-3 mr-1" />}
                           {log.status}
                         </Badge>
                       </div>
                       <p className="text-sm text-gray-600 mb-2">{log.message}</p>
                       <div className="text-xs text-gray-500">
                         {log.sentAt && `Sent: ${new Date(log.sentAt).toLocaleString()}`}
-                        {log.deliveredAt && ` | Delivered: ${new Date(log.deliveredAt).toLocaleString()}`}
+                        {log.deliveredAt &&
+                          ` | Delivered: ${new Date(log.deliveredAt).toLocaleString()}`}
                         {log.failureReason && ` | Error: ${log.failureReason}`}
                       </div>
                     </div>

@@ -1,18 +1,18 @@
-import React, { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Search, MessageCircle, Settings, BarChart3, Plus, Edit } from 'lucide-react';
-import { apiRequest } from '@/lib/queryClient';
-import { useToast } from '@/hooks/use-toast';
+import React, { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Search, MessageCircle, Settings, BarChart3, Plus, Edit } from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 interface FAQEntry {
   id: string;
@@ -30,35 +30,36 @@ interface ChatbotAdminProps {
 export function ChatbotAdmin({ userRole }: ChatbotAdminProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [chatbotEnabled, setChatbotEnabled] = useState(true);
   const [editingFAQ, setEditingFAQ] = useState<FAQEntry | null>(null);
   const [newFAQ, setNewFAQ] = useState<Partial<FAQEntry>>({
-    question: '',
-    answer: '',
+    question: "",
+    answer: "",
     keywords: [],
-    category: 'general',
-    priority: 1
+    category: "general",
+    priority: 1,
   });
 
   // Only allow admin access
-  if (userRole !== 'admin') {
+  if (userRole !== "admin") {
     return (
       <Alert className="max-w-2xl mx-auto mt-8">
         <AlertDescription>
-          Chatbot administration is restricted to admin users only. This ensures proper oversight of AI responses and FAQ management for therapy platform compliance.
+          Chatbot administration is restricted to admin users only. This ensures proper oversight of
+          AI responses and FAQ management for therapy platform compliance.
         </AlertDescription>
       </Alert>
     );
   }
 
   const { data: faqData, isLoading } = useQuery({
-    queryKey: ['/api/chatbot/faq'],
+    queryKey: ["/api/chatbot/faq"],
     retry: 1,
   });
 
   const { data: searchResults } = useQuery({
-    queryKey: ['/api/chatbot/faq/search', searchQuery],
+    queryKey: ["/api/chatbot/faq/search", searchQuery],
     enabled: !!searchQuery,
     retry: 1,
   });
@@ -66,14 +67,14 @@ export function ChatbotAdmin({ userRole }: ChatbotAdminProps) {
   const saveFAQMutation = useMutation({
     mutationFn: async (faqEntry: FAQEntry) => {
       // This would typically save to database
-      return await apiRequest('POST', '/api/chatbot/faq', faqEntry);
+      return await apiRequest("POST", "/api/chatbot/faq", faqEntry);
     },
     onSuccess: () => {
       toast({
         title: "FAQ Updated",
         description: "FAQ entry has been saved successfully.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/chatbot/faq'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/chatbot/faq"] });
       setEditingFAQ(null);
     },
     onError: () => {
@@ -82,7 +83,7 @@ export function ChatbotAdmin({ userRole }: ChatbotAdminProps) {
         description: "Failed to save FAQ entry. Please try again.",
         variant: "destructive",
       });
-    }
+    },
   });
 
   const categories = faqData ? [...new Set(faqData.map((faq: FAQEntry) => faq.category))] : [];
@@ -112,7 +113,9 @@ export function ChatbotAdmin({ userRole }: ChatbotAdminProps) {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Chatbot Administration</h1>
-          <p className="text-gray-600 mt-1">Manage FAQ entries, monitor chat performance, and configure settings</p>
+          <p className="text-gray-600 mt-1">
+            Manage FAQ entries, monitor chat performance, and configure settings
+          </p>
         </div>
         <div className="flex items-center space-x-4">
           <div className="flex items-center space-x-2">
@@ -153,14 +156,18 @@ export function ChatbotAdmin({ userRole }: ChatbotAdminProps) {
                     className="max-w-sm"
                   />
                 </div>
-                <Button onClick={() => setEditingFAQ({
-                  id: '',
-                  question: '',
-                  answer: '',
-                  keywords: [],
-                  category: 'general',
-                  priority: 1
-                })}>
+                <Button
+                  onClick={() =>
+                    setEditingFAQ({
+                      id: "",
+                      question: "",
+                      answer: "",
+                      keywords: [],
+                      category: "general",
+                      priority: 1,
+                    })
+                  }
+                >
                   <Plus className="w-4 h-4 mr-2" />
                   Add FAQ
                 </Button>
@@ -168,7 +175,7 @@ export function ChatbotAdmin({ userRole }: ChatbotAdminProps) {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {categories.map(category => (
+                {categories.map((category) => (
                   <div key={category} className="space-y-2">
                     <Badge variant="outline" className="mb-2">
                       {category.charAt(0).toUpperCase() + category.slice(1)}
@@ -183,7 +190,7 @@ export function ChatbotAdmin({ userRole }: ChatbotAdminProps) {
                                 <h4 className="font-semibold text-sm">{faq.question}</h4>
                                 <p className="text-gray-600 text-sm mt-1">{faq.answer}</p>
                                 <div className="flex flex-wrap gap-1 mt-2">
-                                  {faq.keywords.map(keyword => (
+                                  {faq.keywords.map((keyword) => (
                                     <Badge key={keyword} variant="secondary" className="text-xs">
                                       {keyword}
                                     </Badge>
@@ -208,8 +215,7 @@ export function ChatbotAdmin({ userRole }: ChatbotAdminProps) {
                               </div>
                             </div>
                           </Card>
-                        ))
-                      }
+                        ))}
                     </div>
                   </div>
                 ))}
@@ -221,12 +227,8 @@ export function ChatbotAdmin({ userRole }: ChatbotAdminProps) {
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center justify-between">
-                  {editingFAQ.id ? 'Edit FAQ Entry' : 'Add New FAQ Entry'}
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => setEditingFAQ(null)}
-                  >
+                  {editingFAQ.id ? "Edit FAQ Entry" : "Add New FAQ Entry"}
+                  <Button variant="ghost" size="sm" onClick={() => setEditingFAQ(null)}>
                     <X className="w-4 h-4" />
                   </Button>
                 </CardTitle>
@@ -237,7 +239,7 @@ export function ChatbotAdmin({ userRole }: ChatbotAdminProps) {
                   <Input
                     id="question"
                     value={editingFAQ.question}
-                    onChange={(e) => setEditingFAQ({...editingFAQ, question: e.target.value})}
+                    onChange={(e) => setEditingFAQ({ ...editingFAQ, question: e.target.value })}
                     placeholder="Enter the FAQ question..."
                   />
                 </div>
@@ -246,7 +248,7 @@ export function ChatbotAdmin({ userRole }: ChatbotAdminProps) {
                   <Textarea
                     id="answer"
                     value={editingFAQ.answer}
-                    onChange={(e) => setEditingFAQ({...editingFAQ, answer: e.target.value})}
+                    onChange={(e) => setEditingFAQ({ ...editingFAQ, answer: e.target.value })}
                     placeholder="Enter the FAQ answer..."
                     rows={4}
                   />
@@ -255,11 +257,16 @@ export function ChatbotAdmin({ userRole }: ChatbotAdminProps) {
                   <Label htmlFor="keywords">Keywords (comma-separated)</Label>
                   <Input
                     id="keywords"
-                    value={editingFAQ.keywords.join(', ')}
-                    onChange={(e) => setEditingFAQ({
-                      ...editingFAQ, 
-                      keywords: e.target.value.split(',').map(k => k.trim()).filter(k => k)
-                    })}
+                    value={editingFAQ.keywords.join(", ")}
+                    onChange={(e) =>
+                      setEditingFAQ({
+                        ...editingFAQ,
+                        keywords: e.target.value
+                          .split(",")
+                          .map((k) => k.trim())
+                          .filter((k) => k),
+                      })
+                    }
                     placeholder="keyword1, keyword2, keyword3"
                   />
                 </div>
@@ -269,7 +276,7 @@ export function ChatbotAdmin({ userRole }: ChatbotAdminProps) {
                     <Input
                       id="category"
                       value={editingFAQ.category}
-                      onChange={(e) => setEditingFAQ({...editingFAQ, category: e.target.value})}
+                      onChange={(e) => setEditingFAQ({ ...editingFAQ, category: e.target.value })}
                       placeholder="Category"
                     />
                   </div>
@@ -281,7 +288,9 @@ export function ChatbotAdmin({ userRole }: ChatbotAdminProps) {
                       min="1"
                       max="10"
                       value={editingFAQ.priority}
-                      onChange={(e) => setEditingFAQ({...editingFAQ, priority: parseInt(e.target.value)})}
+                      onChange={(e) =>
+                        setEditingFAQ({ ...editingFAQ, priority: parseInt(e.target.value) })
+                      }
                       className="w-20"
                     />
                   </div>
@@ -341,17 +350,17 @@ export function ChatbotAdmin({ userRole }: ChatbotAdminProps) {
             <CardContent>
               <div className="space-y-3">
                 {[
-                  { category: 'Booking & Scheduling', count: 312, percentage: 28 },
-                  { category: 'Therapy Information', count: 289, percentage: 25 },
-                  { category: 'Payment & Pricing', count: 234, percentage: 21 },
-                  { category: 'Technical Support', count: 156, percentage: 14 },
-                  { category: 'Privacy & Security', count: 123, percentage: 12 },
+                  { category: "Booking & Scheduling", count: 312, percentage: 28 },
+                  { category: "Therapy Information", count: 289, percentage: 25 },
+                  { category: "Payment & Pricing", count: 234, percentage: 21 },
+                  { category: "Technical Support", count: 156, percentage: 14 },
+                  { category: "Privacy & Security", count: 123, percentage: 12 },
                 ].map((item, index) => (
                   <div key={index} className="flex items-center space-x-3">
                     <div className="w-32 text-sm">{item.category}</div>
                     <div className="flex-1 bg-gray-200 rounded-full h-2">
-                      <div 
-                        className="bg-[#9306B1] h-2 rounded-full" 
+                      <div
+                        className="bg-[#9306B1] h-2 rounded-full"
                         style={{ width: `${item.percentage}%` }}
                       />
                     </div>
@@ -380,7 +389,7 @@ export function ChatbotAdmin({ userRole }: ChatbotAdminProps) {
                   </div>
                   <Switch checked={chatbotEnabled} onCheckedChange={setChatbotEnabled} />
                 </div>
-                
+
                 <div className="flex items-center justify-between">
                   <div>
                     <Label>AI Fallback</Label>
@@ -388,19 +397,23 @@ export function ChatbotAdmin({ userRole }: ChatbotAdminProps) {
                   </div>
                   <Switch defaultChecked />
                 </div>
-                
+
                 <div className="flex items-center justify-between">
                   <div>
                     <Label>Privacy Filtering</Label>
-                    <p className="text-sm text-gray-600">Automatically filter personal information</p>
+                    <p className="text-sm text-gray-600">
+                      Automatically filter personal information
+                    </p>
                   </div>
                   <Switch defaultChecked />
                 </div>
-                
+
                 <div className="flex items-center justify-between">
                   <div>
                     <Label>Conversation Logging</Label>
-                    <p className="text-sm text-gray-600">Log sanitized conversations for improvement</p>
+                    <p className="text-sm text-gray-600">
+                      Log sanitized conversations for improvement
+                    </p>
                   </div>
                   <Switch defaultChecked />
                 </div>

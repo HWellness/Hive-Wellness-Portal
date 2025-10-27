@@ -1,32 +1,48 @@
-import { useState, useEffect } from 'react';
-import { useParams, useLocation } from 'wouter';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Checkbox } from '@/components/ui/checkbox';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { useToast } from '@/hooks/use-toast';
-import { useMutation, useQuery } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient';
-import { CheckCircle, Clock, FileText, User, CreditCard, Shield, Upload } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Progress } from '@/components/ui/progress';
-import hiveWellnessLogo from '@assets/Hive Logo_1752073128164.png';
+import { useState, useEffect } from "react";
+import { useParams, useLocation } from "wouter";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { useToast } from "@/hooks/use-toast";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { CheckCircle, Clock, FileText, User, CreditCard, Shield, Upload } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Progress } from "@/components/ui/progress";
+import hiveWellnessLogo from "@assets/Hive Logo_1752073128164.png";
 
 const personalizedOnboardingSchema = z.object({
   // Enhanced Professional Details (based on enquiry)
   specializedAreas: z.array(z.string()).min(1, "Please select at least one specialised area"),
-  therapeuticApproaches: z.array(z.string()).min(1, "Please select at least one therapeutic approach"),
+  therapeuticApproaches: z
+    .array(z.string())
+    .min(1, "Please select at least one therapeutic approach"),
   clientAgeGroups: z.array(z.string()).min(1, "Please select at least one age group"),
   sessionFormats: z.array(z.string()).min(1, "Please select at least one session format"),
-  
+
   // Availability Preferences
   preferredSchedule: z.object({
     mornings: z.boolean().default(false),
@@ -36,40 +52,40 @@ const personalizedOnboardingSchema = z.object({
   }),
   maxClientsPerWeek: z.number().min(1).max(50),
   preferredSessionLength: z.enum(["50", "60", "90"]),
-  
+
   // Technology & Platform Setup
   techComfortLevel: z.enum(["beginner", "intermediate", "advanced"]),
   platformTrainingNeeded: z.boolean().default(false),
   videoCallExperience: z.enum(["none", "some", "extensive"]),
-  
+
   // Business Preferences
   payoutPreference: z.enum(["daily", "weekly", "monthly"]),
   instantPayoutInterest: z.boolean().default(false),
   marketingConsent: z.boolean().default(false),
   directoryListingConsent: z.boolean().default(true),
-  
+
   // Professional Development
   continuingEducationInterests: z.array(z.string()),
   supervisionNeeds: z.enum(["not_needed", "occasional", "regular"]),
   peerSupportInterest: z.boolean().default(false),
-  
+
   // Client Connecting Preferences
   clientConnectingCriteria: z.object({
     genderPreference: z.enum(["no_preference", "same_gender", "different_gender"]),
     ageRangePreference: z.array(z.string()),
     issueSpecialization: z.array(z.string()),
   }),
-  
+
   // Final Confirmations
   readyToStartDate: z.string().min(1, "Please provide your preferred start date"),
   additionalQuestions: z.string().optional(),
-  finalConsentAgreement: z.boolean().refine(val => val === true, "You must agree to proceed"),
+  finalConsentAgreement: z.boolean().refine((val) => val === true, "You must agree to proceed"),
 });
 
 type PersonalizedOnboardingFormData = z.infer<typeof personalizedOnboardingSchema>;
 
 export default function TherapistOnboardingStep3() {
-  const [token] = useLocation().split('?token=');
+  const [token] = useLocation().split("?token=");
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [therapistData, setTherapistData] = useState<any>(null);
@@ -113,9 +129,9 @@ export default function TherapistOnboardingStep3() {
 
   // Load therapist onboarding data
   const { data: onboardingData, isError } = useQuery({
-    queryKey: ['/api/therapist-onboarding/step3', token],
+    queryKey: ["/api/therapist-onboarding/step3", token],
     queryFn: async () => {
-      const response = await apiRequest('GET', `/api/therapist-onboarding/step3?token=${token}`);
+      const response = await apiRequest("GET", `/api/therapist-onboarding/step3?token=${token}`);
       return response.json();
     },
     enabled: !!token,
@@ -125,7 +141,7 @@ export default function TherapistOnboardingStep3() {
     if (onboardingData) {
       setTherapistData(onboardingData.therapist);
       setIsLoading(false);
-      
+
       // Pre-populate form with existing data if available
       if (onboardingData.existingFormData) {
         form.reset(onboardingData.existingFormData);
@@ -135,7 +151,7 @@ export default function TherapistOnboardingStep3() {
 
   const submitMutation = useMutation({
     mutationFn: async (data: PersonalizedOnboardingFormData) => {
-      const response = await apiRequest('POST', '/api/therapist-onboarding/step3/submit', {
+      const response = await apiRequest("POST", "/api/therapist-onboarding/step3/submit", {
         token,
         formData: data,
       });
@@ -144,12 +160,13 @@ export default function TherapistOnboardingStep3() {
     onSuccess: (result) => {
       toast({
         title: "Onboarding Form Completed! 🎉",
-        description: "Thank you for completing your personalised onboarding. We'll be in touch within 24 hours with your next steps.",
+        description:
+          "Thank you for completing your personalised onboarding. We'll be in touch within 24 hours with your next steps.",
       });
       setProgress(100);
       // Redirect to success page or dashboard
       setTimeout(() => {
-        window.location.href = '/therapist-onboarding/success';
+        window.location.href = "/therapist-onboarding/success";
       }, 2000);
     },
     onError: (error: any) => {
@@ -168,7 +185,9 @@ export default function TherapistOnboardingStep3() {
           <CardContent className="p-6 text-center">
             <Clock className="w-8 h-8 text-purple-600 mx-auto mb-4 animate-spin" />
             <h2 className="text-lg font-semibold mb-2">Loading Your Personalised Form</h2>
-            <p className="text-gray-600">Please wait while we prepare your onboarding experience...</p>
+            <p className="text-gray-600">
+              Please wait while we prepare your onboarding experience...
+            </p>
           </CardContent>
         </Card>
       </div>
@@ -182,7 +201,8 @@ export default function TherapistOnboardingStep3() {
           <CardContent className="p-6 text-center">
             <Alert>
               <AlertDescription>
-                Invalid or expired onboarding link. Please contact support@hive-wellness.co.uk for assistance.
+                Invalid or expired onboarding link. Please contact support@hive-wellness.co.uk for
+                assistance.
               </AlertDescription>
             </Alert>
           </CardContent>
@@ -197,11 +217,7 @@ export default function TherapistOnboardingStep3() {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="mb-6">
-            <img 
-              src={hiveWellnessLogo} 
-              alt="Hive Wellness Logo" 
-              className="h-16 mx-auto mb-4"
-            />
+            <img src={hiveWellnessLogo} alt="Hive Wellness Logo" className="h-16 mx-auto mb-4" />
           </div>
           <h1 className="text-3xl font-bold text-purple-900 mb-2">
             Welcome, {therapistData.firstName}! 🐝
@@ -216,8 +232,10 @@ export default function TherapistOnboardingStep3() {
         </div>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit((data) => submitMutation.mutate(data))} className="space-y-8">
-            
+          <form
+            onSubmit={form.handleSubmit((data) => submitMutation.mutate(data))}
+            className="space-y-8"
+          >
             {/* Professional Specialisation */}
             <Card>
               <CardHeader>
@@ -235,9 +253,18 @@ export default function TherapistOnboardingStep3() {
                       <FormLabel>What areas do you specialise in?</FormLabel>
                       <div className="grid grid-cols-2 gap-2">
                         {[
-                          'Anxiety & Stress', 'Depression', 'Trauma & PTSD', 'Relationships',
-                          'Addiction', 'Eating Disorders', 'Grief & Loss', 'LGBTQ+ Issues',
-                          'Family Therapy', 'Child & Adolescent', 'Career Counselling', 'Life Transitions'
+                          "Anxiety & Stress",
+                          "Depression",
+                          "Trauma & PTSD",
+                          "Relationships",
+                          "Addiction",
+                          "Eating Disorders",
+                          "Grief & Loss",
+                          "LGBTQ+ Issues",
+                          "Family Therapy",
+                          "Child & Adolescent",
+                          "Career Counselling",
+                          "Life Transitions",
                         ].map((area) => (
                           <div key={area} className="flex items-center space-x-2">
                             <Checkbox
@@ -266,8 +293,14 @@ export default function TherapistOnboardingStep3() {
                       <FormLabel>Which therapeutic approaches do you use?</FormLabel>
                       <div className="grid grid-cols-2 gap-2">
                         {[
-                          'CBT', 'DBT', 'Psychodynamic', 'Humanistic',
-                          'Solution-Focused', 'Mindfulness-Based', 'EMDR', 'Systemic'
+                          "CBT",
+                          "DBT",
+                          "Psychodynamic",
+                          "Humanistic",
+                          "Solution-Focused",
+                          "Mindfulness-Based",
+                          "EMDR",
+                          "Systemic",
                         ].map((approach) => (
                           <div key={approach} className="flex items-center space-x-2">
                             <Checkbox
@@ -307,10 +340,10 @@ export default function TherapistOnboardingStep3() {
                       <FormLabel>When do you prefer to work? (Select all that apply)</FormLabel>
                       <div className="grid grid-cols-2 gap-4">
                         {[
-                          { key: 'mornings', label: 'Mornings (9AM-12PM)' },
-                          { key: 'afternoons', label: 'Afternoons (12PM-5PM)' },
-                          { key: 'evenings', label: 'Evenings (5PM-8PM)' },
-                          { key: 'weekends', label: 'Weekends' },
+                          { key: "mornings", label: "Mornings (9AM-12PM)" },
+                          { key: "afternoons", label: "Afternoons (12PM-5PM)" },
+                          { key: "evenings", label: "Evenings (5PM-8PM)" },
+                          { key: "weekends", label: "Weekends" },
                         ].map((time) => (
                           <div key={time.key} className="flex items-center space-x-2">
                             <Checkbox
@@ -379,7 +412,9 @@ export default function TherapistOnboardingStep3() {
                         </FormControl>
                         <SelectContent>
                           <SelectItem value="beginner">Beginner - I need guidance</SelectItem>
-                          <SelectItem value="intermediate">Intermediate - I can learn quickly</SelectItem>
+                          <SelectItem value="intermediate">
+                            Intermediate - I can learn quickly
+                          </SelectItem>
                           <SelectItem value="advanced">Advanced - I'm very comfortable</SelectItem>
                         </SelectContent>
                       </Select>
@@ -402,10 +437,7 @@ export default function TherapistOnboardingStep3() {
                         </FormDescription>
                       </div>
                       <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
+                        <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                       </FormControl>
                     </FormItem>
                   )}
@@ -441,7 +473,8 @@ export default function TherapistOnboardingStep3() {
                         </SelectContent>
                       </Select>
                       <FormDescription>
-                        You receive 85% of each session fee. Hive Wellness covers all Stripe processing fees.
+                        You receive 85% of each session fee. Hive Wellness covers all Stripe
+                        processing fees.
                       </FormDescription>
                       <FormMessage />
                     </FormItem>
@@ -454,18 +487,13 @@ export default function TherapistOnboardingStep3() {
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                       <div className="space-y-0.5">
-                        <FormLabel className="text-base">
-                          Interested in instant payouts?
-                        </FormLabel>
+                        <FormLabel className="text-base">Interested in instant payouts?</FormLabel>
                         <FormDescription>
                           Get paid within minutes after each session (small fee applies)
                         </FormDescription>
                       </div>
                       <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
+                        <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                       </FormControl>
                     </FormItem>
                   )}
@@ -523,17 +551,16 @@ export default function TherapistOnboardingStep3() {
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
                       <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
+                        <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                       </FormControl>
                       <div className="space-y-1 leading-none">
                         <FormLabel>
-                          I confirm that all information provided is accurate and I'm ready to proceed with onboarding
+                          I confirm that all information provided is accurate and I'm ready to
+                          proceed with onboarding
                         </FormLabel>
                         <FormDescription>
-                          By checking this box, you agree to move forward with the next steps in your Hive Wellness journey
+                          By checking this box, you agree to move forward with the next steps in
+                          your Hive Wellness journey
                         </FormDescription>
                       </div>
                     </FormItem>

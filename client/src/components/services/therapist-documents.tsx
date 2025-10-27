@@ -15,101 +15,101 @@ export default function TherapistDocuments({ user }: TherapistDocumentsProps) {
 
   const documents = [
     {
-      id: 'therapist-walkthrough',
-      title: 'Therapist Walkthrough Document',
-      description: 'Your step-by-step setup guide for getting started with Hive Wellness',
+      id: "therapist-walkthrough",
+      title: "Therapist Walkthrough Document",
+      description: "Your step-by-step setup guide for getting started with Hive Wellness",
       icon: BookOpen,
-      filename: 'Therapist-Walkthrough-Document-Hive-Wellness.pdf',
+      filename: "Therapist-Walkthrough-Document-Hive-Wellness.pdf",
       highlights: [
-        'Welcome and onboarding process overview',
-        'Complete your onboarding form step by step',
-        'Access and setup your therapist portal',
-        'Profile settings, payment setup, and availability',
-        'Portal features including dashboard and messaging',
-        'Support contact information and getting help'
-      ]
+        "Welcome and onboarding process overview",
+        "Complete your onboarding form step by step",
+        "Access and setup your therapist portal",
+        "Profile settings, payment setup, and availability",
+        "Portal features including dashboard and messaging",
+        "Support contact information and getting help",
+      ],
     },
     {
-      id: 'therapist-information',
-      title: 'Therapist Information Pack & Pricing',
-      description: 'Complete guide to working with Hive Wellness',
+      id: "therapist-information",
+      title: "Therapist Information Pack & Pricing",
+      description: "Complete guide to working with Hive Wellness",
       icon: Info,
-      filename: 'Hive-Wellness-Therapist-Information-Pack.pdf',
+      filename: "Hive-Wellness-Therapist-Information-Pack.pdf",
       highlights: [
-        'Welcome from our founder and company values',
-        'How Hive Wellness works and therapist expectations',
-        'Session structure and clinical practice guidelines',
-        'Tiered pricing system and earnings breakdown',
-        'Fee structure: therapists receive 85% of session fees',
-        'Payment processing and payout information'
-      ]
+        "Welcome from our founder and company values",
+        "How Hive Wellness works and therapist expectations",
+        "Session structure and clinical practice guidelines",
+        "Tiered pricing system and earnings breakdown",
+        "Fee structure: therapists receive 85% of session fees",
+        "Payment processing and payout information",
+      ],
     },
     {
-      id: 'therapist-safeguarding',
-      title: 'Safeguarding Procedures',
-      description: 'Essential safeguarding policies and procedures',
+      id: "therapist-safeguarding",
+      title: "Safeguarding Procedures",
+      description: "Essential safeguarding policies and procedures",
       icon: Shield,
-      filename: 'Hive-Wellness-Safeguarding-Procedures.pdf',
+      filename: "Hive-Wellness-Safeguarding-Procedures.pdf",
       highlights: [
-        'Legal and policy framework compliance',
-        'Key safeguarding principles and responsibilities',
-        'Recognising and responding to safeguarding concerns',
-        'Emergency procedures and reporting protocols',
-        'Confidentiality and information sharing guidelines',
-        'Professional conduct and ongoing support'
-      ]
+        "Legal and policy framework compliance",
+        "Key safeguarding principles and responsibilities",
+        "Recognising and responding to safeguarding concerns",
+        "Emergency procedures and reporting protocols",
+        "Confidentiality and information sharing guidelines",
+        "Professional conduct and ongoing support",
+      ],
     },
     {
-      id: 'taxstats-financial-guide',
-      title: 'TaxStats Financial Guide for Therapists',
-      description: 'Professional financial and tax guidance for your therapy practice',
+      id: "taxstats-financial-guide",
+      title: "TaxStats Financial Guide for Therapists",
+      description: "Professional financial and tax guidance for your therapy practice",
       icon: Banknote,
-      filename: 'Hive-Wellness-TaxStats-Financial-Guide.pdf',
+      filename: "Hive-Wellness-TaxStats-Financial-Guide.pdf",
       highlights: [
-        'How Stripe payments work and getting paid via the platform',
-        'Choosing your business structure: Sole Trader vs Limited Company',
-        'Tax registration and Self Assessment requirements',
-        'Allowable business expenses for therapists',
-        'Corporation Tax and company compliance obligations',
-        'Important HMRC deadlines and proactive tax planning'
-      ]
-    }
+        "How Stripe payments work and getting paid via the platform",
+        "Choosing your business structure: Sole Trader vs Limited Company",
+        "Tax registration and Self Assessment requirements",
+        "Allowable business expenses for therapists",
+        "Corporation Tax and company compliance obligations",
+        "Important HMRC deadlines and proactive tax planning",
+      ],
+    },
   ];
 
   const handleDownloadDocument = async (documentType: string, filename: string) => {
     try {
       setDownloadingDoc(documentType);
-      
+
       // Map document types to public URLs
       const documentUrls: Record<string, string> = {
-        'therapist-walkthrough': '/documents/Therapist-Walkthrough-Document-Hive-Wellness.pdf',
-        'therapist-information': '/documents/HW-Therapist-Information-Pack-and-Pricing_1753986034497.pdf',
-        'therapist-safeguarding': '/documents/HW-Safeguarding-Procedures_1753986034497.pdf',
-        'taxstats-financial-guide': '/documents/Hive-Wellness-TaxStats-Financial-Guide.pdf'
+        "therapist-walkthrough": "/documents/Therapist-Walkthrough-Document-Hive-Wellness.pdf",
+        "therapist-information":
+          "/documents/HW-Therapist-Information-Pack-and-Pricing_1753986034497.pdf",
+        "therapist-safeguarding": "/documents/HW-Safeguarding-Procedures_1753986034497.pdf",
+        "taxstats-financial-guide": "/documents/Hive-Wellness-TaxStats-Financial-Guide.pdf",
       };
-      
+
       const documentUrl = documentUrls[documentType];
       if (!documentUrl) {
-        throw new Error('Document not found');
+        throw new Error("Document not found");
       }
-      
+
       // Create download link
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = documentUrl;
       link.download = filename;
       document.body.appendChild(link);
       link.click();
-      
+
       // Cleanup
       document.body.removeChild(link);
-      
+
       toast({
         title: "Download Complete",
         description: "Document has been downloaded successfully.",
       });
-      
     } catch (error) {
-      console.error('Download error:', error);
+      console.error("Download error:", error);
       toast({
         title: "Download Failed",
         description: error instanceof Error ? error.message : "Failed to download document",
@@ -124,21 +124,21 @@ export default function TherapistDocuments({ user }: TherapistDocumentsProps) {
     try {
       // Map document types to public URLs
       const documentUrls: Record<string, string> = {
-        'therapist-walkthrough': '/documents/Therapist-Walkthrough-Document-Hive-Wellness.pdf',
-        'therapist-information': '/documents/HW-Therapist-Information-Pack-and-Pricing_1753986034497.pdf',
-        'therapist-safeguarding': '/documents/HW-Safeguarding-Procedures_1753986034497.pdf',
-        'taxstats-financial-guide': '/documents/Hive-Wellness-TaxStats-Financial-Guide.pdf'
+        "therapist-walkthrough": "/documents/Therapist-Walkthrough-Document-Hive-Wellness.pdf",
+        "therapist-information":
+          "/documents/HW-Therapist-Information-Pack-and-Pricing_1753986034497.pdf",
+        "therapist-safeguarding": "/documents/HW-Safeguarding-Procedures_1753986034497.pdf",
+        "taxstats-financial-guide": "/documents/Hive-Wellness-TaxStats-Financial-Guide.pdf",
       };
-      
+
       const documentUrl = documentUrls[documentType];
       if (!documentUrl) {
-        throw new Error('Document not found');
+        throw new Error("Document not found");
       }
-      
-      window.open(documentUrl, '_blank');
-      
+
+      window.open(documentUrl, "_blank");
     } catch (error) {
-      console.error('View error:', error);
+      console.error("View error:", error);
       toast({
         title: "View Failed",
         description: "Failed to open document",
@@ -152,7 +152,8 @@ export default function TherapistDocuments({ user }: TherapistDocumentsProps) {
       <div>
         <h1 className="text-3xl font-bold text-hive-black mb-2">Therapist Information Packs</h1>
         <p className="text-lg text-hive-black/70">
-          Access essential documentation for working with Hive Wellness, including our comprehensive information pack and safeguarding procedures.
+          Access essential documentation for working with Hive Wellness, including our comprehensive
+          information pack and safeguarding procedures.
         </p>
       </div>
 
@@ -160,7 +161,7 @@ export default function TherapistDocuments({ user }: TherapistDocumentsProps) {
         {documents.map((document) => {
           const IconComponent = document.icon;
           const isDownloading = downloadingDoc === document.id;
-          
+
           return (
             <Card key={document.id} className="border-hive-purple/20 shadow-lg">
               <CardHeader className="bg-gradient-to-r from-hive-purple/5 to-hive-purple/10">
@@ -193,21 +194,21 @@ export default function TherapistDocuments({ user }: TherapistDocumentsProps) {
                   </div>
 
                   <div className="flex space-x-4">
-                    <Button 
+                    <Button
                       onClick={() => handleViewDocument(document.id)}
                       className="flex-1 bg-hive-purple hover:bg-hive-purple/90 text-white"
                     >
                       <ExternalLink className="w-4 h-4 mr-2" />
                       View Document
                     </Button>
-                    <Button 
+                    <Button
                       onClick={() => handleDownloadDocument(document.id, document.filename)}
                       disabled={isDownloading}
                       variant="outline"
                       className="flex-1 border-hive-purple text-hive-purple hover:bg-hive-purple/10"
                     >
                       <Download className="w-4 h-4 mr-2" />
-                      {isDownloading ? 'Downloading...' : 'Download PDF'}
+                      {isDownloading ? "Downloading..." : "Download PDF"}
                     </Button>
                   </div>
                 </div>
@@ -226,8 +227,8 @@ export default function TherapistDocuments({ user }: TherapistDocumentsProps) {
             <div>
               <h3 className="font-semibold text-amber-800 mb-1">Important Note</h3>
               <p className="text-sm text-amber-700">
-                Please ensure you've read and understood both documents before beginning work with clients. 
-                If you have any questions, contact Admin at admin@hive-wellness.co.uk
+                Please ensure you've read and understood both documents before beginning work with
+                clients. If you have any questions, contact Admin at admin@hive-wellness.co.uk
               </p>
             </div>
           </div>

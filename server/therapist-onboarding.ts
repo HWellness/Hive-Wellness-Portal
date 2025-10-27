@@ -1,5 +1,5 @@
-import { MailService } from '@sendgrid/mail';
-import type { IStorage } from './storage';
+import { MailService } from "@sendgrid/mail";
+import type { IStorage } from "./storage";
 
 interface TherapistEnquiry {
   id: string;
@@ -11,15 +11,21 @@ interface TherapistEnquiry {
   experience: string;
   motivation: string;
   availability: string;
-  status: 'enquiry' | 'intro_call_scheduled' | 'intro_call_completed' | 'onboarding_sent' | 'onboarding_completed';
+  status:
+    | "enquiry"
+    | "intro_call_scheduled"
+    | "intro_call_completed"
+    | "onboarding_sent"
+    | "onboarding_completed";
   createdAt: string;
   updatedAt: string;
 }
 
-
-
 export class TherapistOnboardingService {
-  constructor(private storage: IStorage, private mailService: MailService) {}
+  constructor(
+    private storage: IStorage,
+    private mailService: MailService
+  ) {}
 
   // Step 1: Handle initial therapist enquiry from website
   async handleTherapistEnquiry(enquiryData: {
@@ -32,11 +38,10 @@ export class TherapistOnboardingService {
     motivation: string;
     availability: string;
   }): Promise<TherapistEnquiry> {
-    
     const enquiry: TherapistEnquiry = {
       id: `therapist_enquiry_${Date.now()}`,
       ...enquiryData,
-      status: 'enquiry',
+      status: "enquiry",
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -48,7 +53,7 @@ export class TherapistOnboardingService {
     try {
       await this.sendIntroCallInvitation(enquiry);
     } catch (error: any) {
-      console.log('Email sending failed (non-blocking):', error.message);
+      console.log("Email sending failed (non-blocking):", error.message);
     }
 
     return enquiry;
@@ -57,20 +62,20 @@ export class TherapistOnboardingService {
   // Step 2: Send email inviting therapist to book intro call with admin team
   async sendIntroCallInvitation(enquiry: TherapistEnquiry): Promise<void> {
     const bookingLink = `https://api.hive-wellness.co.uk/book-admin-call?therapist=${encodeURIComponent(enquiry.email)}`;
-    
+
     const emailTemplate = {
       to: enquiry.email,
       from: {
-        email: 'support@hive-wellness.co.uk',
-        name: 'Hive Wellness Team'
+        email: "support@hive-wellness.co.uk",
+        name: "Hive Wellness Team",
       },
-      replyTo: 'support@hive-wellness.co.uk',
-      subject: 'Welcome to Hive Wellness - Book Your Introduction Call',
-      categories: ['therapist-onboarding', 'introduction-call'],
+      replyTo: "support@hive-wellness.co.uk",
+      subject: "Welcome to Hive Wellness - Book Your Introduction Call",
+      categories: ["therapist-onboarding", "introduction-call"],
       customArgs: {
-        'stage': 'introduction-call',
-        'therapist_id': enquiry.id,
-        'email_type': 'onboarding'
+        stage: "introduction-call",
+        therapist_id: enquiry.id,
+        email_type: "onboarding",
       },
       text: `Welcome to Hive Wellness, ${enquiry.firstName}!
 
@@ -168,7 +173,7 @@ Connecting you with qualified mental health professionals`,
             <p><strong>Date:</strong> ${data.date || "TBD"}</p>
             <p><strong>Time:</strong> ${data.time || "TBD"}</p>
             <p><strong>Duration:</strong> 50 minutes</p>
-            ${notes ? `<p><strong>Notes:</strong> ${data.notes || ""}</p>` : ''}
+            ${notes ? `<p><strong>Notes:</strong> ${data.notes || ""}</p>` : ""}
           </div>
           
           <p style="color: #333; line-height: 1.6;">
@@ -201,13 +206,13 @@ Connecting you with qualified mental health professionals`,
             </p>
           </div>
         </div>
-      `
+      `,
     };
 
     // Email to admin
     const adminEmailMsg = {
-      to: 'support@hive-wellness.co.uk',
-      from: 'support@hive-wellness.co.uk',
+      to: "support@hive-wellness.co.uk",
+      from: "support@hive-wellness.co.uk",
       subject: `New Introduction Call Booked - ${data.therapistName || "team member"}`,
       html: `
         <div style="font-family: 'Open Sans', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
@@ -224,24 +229,26 @@ Connecting you with qualified mental health professionals`,
             <p><strong>Date:</strong> ${data.date || "TBD"}</p>
             <p><strong>Time:</strong> ${data.time || "TBD"}</p>
             <p><strong>Meeting Link:</strong> <a href="${data.meetingLink || "#"}">${data.meetingLink || "#"}</a></p>
-            ${notes ? `<p><strong>Notes:</strong> ${data.notes || ""}</p>` : ''}
+            ${notes ? `<p><strong>Notes:</strong> ${data.notes || ""}</p>` : ""}
           </div>
           
           <p>Please ensure you're available for this introduction call and prepare the standard onboarding materials.</p>
         </div>
-      `
+      `,
     };
 
     try {
       // Send both emails
       await Promise.all([
         this.mailService.send(therapistEmailMsg),
-        this.mailService.send(adminEmailMsg)
+        this.mailService.send(adminEmailMsg),
       ]);
-      
-      console.log(`Introduction call emails sent to ${data.therapistName || "team member"} (${callData.therapistEmail}) and admin`);
+
+      console.log(
+        `Introduction call emails sent to ${data.therapistName || "team member"} (${callData.therapistEmail}) and admin`
+      );
     } catch (error) {
-      console.error('Failed to send introduction call emails:', error);
+      console.error("Failed to send introduction call emails:", error);
       // Don't throw - this is non-blocking
     }
   }

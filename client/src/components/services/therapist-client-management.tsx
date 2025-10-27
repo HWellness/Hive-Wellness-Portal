@@ -1,17 +1,31 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { apiRequest, queryClient } from '@/lib/queryClient';
-import { useToast } from '@/hooks/use-toast';
-import { Users, Calendar, Mail, Phone, MessageCircle, Plus, FileText, Edit, TrendingUp, Upload, Download, Trash2, RefreshCw } from 'lucide-react';
-import { User as UserType } from '@shared/schema';
-import { ObjectUploader } from '@/components/ObjectUploader';
+import React, { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Users,
+  Calendar,
+  Mail,
+  Phone,
+  MessageCircle,
+  Plus,
+  FileText,
+  Edit,
+  TrendingUp,
+  Upload,
+  Download,
+  Trash2,
+  RefreshCw,
+} from "lucide-react";
+import { User as UserType } from "@shared/schema";
+import { ObjectUploader } from "@/components/ObjectUploader";
 
 interface AssignedClient {
   id: string;
@@ -22,21 +36,21 @@ interface AssignedClient {
   sessionCount: number;
   lastSession?: string;
   nextSession?: string;
-  status: 'active' | 'pending' | 'paused' | 'completed';
+  status: "active" | "pending" | "paused" | "completed";
   hasPaymentMethod: boolean;
   totalSessions: number;
   completedSessions: number;
   currentGoals: string[];
   lastNotes?: string;
-  riskLevel: 'low' | 'medium' | 'high';
-  progressStatus: 'excellent' | 'good' | 'fair' | 'needs_attention';
+  riskLevel: "low" | "medium" | "high";
+  progressStatus: "excellent" | "good" | "fair" | "needs_attention";
 }
 
 interface ClientNote {
   id: string;
   clientId: string;
   date: string;
-  sessionType: 'individual' | 'consultation';
+  sessionType: "individual" | "consultation";
   duration?: number;
   content: string;
   mood: number; // 1-10 scale
@@ -55,7 +69,7 @@ interface ClientDocument {
   fileSize: number;
   uploadDate: string;
   uploadedBy: string;
-  documentType: 'note' | 'assessment' | 'treatment_plan' | 'report' | 'other';
+  documentType: "note" | "assessment" | "treatment_plan" | "report" | "other";
   description?: string;
 }
 
@@ -66,11 +80,13 @@ interface TherapistClientManagementProps {
 export default function TherapistClientManagement({ user }: TherapistClientManagementProps) {
   const { toast } = useToast();
   const [selectedClient, setSelectedClient] = useState<AssignedClient | null>(null);
-  const [activeTab, setActiveTab] = useState('overview');
-  const [newNote, setNewNote] = useState('');
-  const [noteType, setNoteType] = useState<'individual' | 'consultation'>('individual');
-  const [documentType, setDocumentType] = useState<'note' | 'assessment' | 'treatment_plan' | 'report' | 'other'>('note');
-  const [documentDescription, setDocumentDescription] = useState('');
+  const [activeTab, setActiveTab] = useState("overview");
+  const [newNote, setNewNote] = useState("");
+  const [noteType, setNoteType] = useState<"individual" | "consultation">("individual");
+  const [documentType, setDocumentType] = useState<
+    "note" | "assessment" | "treatment_plan" | "report" | "other"
+  >("note");
+  const [documentDescription, setDocumentDescription] = useState("");
 
   // Fetch assigned clients
   const { data: assignedClients = [], isLoading } = useQuery<AssignedClient[]>({
@@ -80,21 +96,21 @@ export default function TherapistClientManagement({ user }: TherapistClientManag
 
   // Fetch client notes when a client is selected
   const { data: clientNotes = [] } = useQuery<ClientNote[]>({
-    queryKey: ['/api/therapist/client-notes', selectedClient?.id],
+    queryKey: ["/api/therapist/client-notes", selectedClient?.id],
     enabled: !!selectedClient,
     retry: false,
   });
 
   // Fetch client documents when a client is selected
   const { data: clientDocuments = [] } = useQuery<ClientDocument[]>({
-    queryKey: ['/api/therapist/client-documents', selectedClient?.id],
+    queryKey: ["/api/therapist/client-documents", selectedClient?.id],
     enabled: !!selectedClient,
     retry: false,
   });
 
   // Fetch client questionnaire when a client is selected
   const { data: clientQuestionnaire, isLoading: isQuestionnaireLoading } = useQuery<any>({
-    queryKey: ['/api/therapist/client-questionnaire', selectedClient?.id],
+    queryKey: ["/api/therapist/client-questionnaire", selectedClient?.id],
     enabled: !!selectedClient,
     retry: false,
   });
@@ -102,7 +118,7 @@ export default function TherapistClientManagement({ user }: TherapistClientManag
   // Add client note mutation
   const addNoteMutation = useMutation({
     mutationFn: async (noteData: { clientId: string; content: string; sessionType: string }) => {
-      const response = await apiRequest('POST', '/api/therapist/client-notes', noteData);
+      const response = await apiRequest("POST", "/api/therapist/client-notes", noteData);
       return response.json();
     },
     onSuccess: () => {
@@ -110,8 +126,8 @@ export default function TherapistClientManagement({ user }: TherapistClientManag
         title: "Note Added",
         description: "Client note has been saved successfully.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/therapist/client-notes'] });
-      setNewNote('');
+      queryClient.invalidateQueries({ queryKey: ["/api/therapist/client-notes"] });
+      setNewNote("");
     },
     onError: (error) => {
       toast({
@@ -132,7 +148,7 @@ export default function TherapistClientManagement({ user }: TherapistClientManag
       documentType: string;
       description: string;
     }) => {
-      const response = await apiRequest('POST', '/api/therapist/client-documents', documentData);
+      const response = await apiRequest("POST", "/api/therapist/client-documents", documentData);
       return response.json();
     },
     onSuccess: () => {
@@ -140,8 +156,8 @@ export default function TherapistClientManagement({ user }: TherapistClientManag
         title: "Document Uploaded",
         description: "Client document has been uploaded successfully.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/therapist/client-documents'] });
-      setDocumentDescription('');
+      queryClient.invalidateQueries({ queryKey: ["/api/therapist/client-documents"] });
+      setDocumentDescription("");
     },
     onError: (error) => {
       toast({
@@ -155,7 +171,7 @@ export default function TherapistClientManagement({ user }: TherapistClientManag
   // Delete client document mutation
   const deleteDocumentMutation = useMutation({
     mutationFn: async (documentId: string) => {
-      const response = await apiRequest('DELETE', `/api/therapist/client-documents/${documentId}`);
+      const response = await apiRequest("DELETE", `/api/therapist/client-documents/${documentId}`);
       return response.json();
     },
     onSuccess: () => {
@@ -163,7 +179,7 @@ export default function TherapistClientManagement({ user }: TherapistClientManag
         title: "Document Deleted",
         description: "Document has been removed successfully.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/therapist/client-documents'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/therapist/client-documents"] });
     },
     onError: (error) => {
       toast({
@@ -176,44 +192,44 @@ export default function TherapistClientManagement({ user }: TherapistClientManag
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active':
-        return 'bg-green-100 text-green-800';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'paused':
-        return 'bg-gray-100 text-gray-800';
-      case 'completed':
-        return 'bg-blue-100 text-blue-800';
+      case "active":
+        return "bg-green-100 text-green-800";
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "paused":
+        return "bg-gray-100 text-gray-800";
+      case "completed":
+        return "bg-blue-100 text-blue-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getRiskColor = (risk: string) => {
     switch (risk) {
-      case 'low':
-        return 'bg-green-100 text-green-800';
-      case 'medium':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'high':
-        return 'bg-red-100 text-red-800';
+      case "low":
+        return "bg-green-100 text-green-800";
+      case "medium":
+        return "bg-yellow-100 text-yellow-800";
+      case "high":
+        return "bg-red-100 text-red-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getProgressColor = (progress: string) => {
     switch (progress) {
-      case 'excellent':
-        return 'bg-green-100 text-green-800';
-      case 'good':
-        return 'bg-blue-100 text-blue-800';
-      case 'fair':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'needs_attention':
-        return 'bg-red-100 text-red-800';
+      case "excellent":
+        return "bg-green-100 text-green-800";
+      case "good":
+        return "bg-blue-100 text-blue-800";
+      case "fair":
+        return "bg-yellow-100 text-yellow-800";
+      case "needs_attention":
+        return "bg-red-100 text-red-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -230,7 +246,7 @@ export default function TherapistClientManagement({ user }: TherapistClientManag
     addNoteMutation.mutate({
       clientId: selectedClient.id,
       content: newNote,
-      sessionType: noteType
+      sessionType: noteType,
     });
   };
 
@@ -280,15 +296,15 @@ export default function TherapistClientManagement({ user }: TherapistClientManag
                   <div
                     key={client.id}
                     className={`p-3 rounded-lg border cursor-pointer hover:bg-gray-50 transition-colors ${
-                      selectedClient?.id === client.id ? 'border-hive-purple bg-hive-purple/5' : 'border-gray-200'
+                      selectedClient?.id === client.id
+                        ? "border-hive-purple bg-hive-purple/5"
+                        : "border-gray-200"
                     }`}
                     onClick={() => setSelectedClient(client)}
                   >
                     <div className="flex items-start justify-between mb-2">
                       <h4 className="font-medium text-gray-900">{client.name}</h4>
-                      <Badge className={getStatusColor(client.status)}>
-                        {client.status}
-                      </Badge>
+                      <Badge className={getStatusColor(client.status)}>{client.status}</Badge>
                     </div>
                     <p className="text-sm text-gray-600 mb-2">{client.email}</p>
                     <div className="flex justify-between text-xs text-gray-500">
@@ -344,11 +360,15 @@ export default function TherapistClientManagement({ user }: TherapistClientManag
                   <CardContent>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                       <div className="text-center">
-                        <div className="text-2xl font-bold text-hive-purple">{selectedClient.totalSessions}</div>
+                        <div className="text-2xl font-bold text-hive-purple">
+                          {selectedClient.totalSessions}
+                        </div>
                         <div className="text-sm text-gray-600">Total Sessions</div>
                       </div>
                       <div className="text-center">
-                        <div className="text-2xl font-bold text-green-600">{selectedClient.completedSessions}</div>
+                        <div className="text-2xl font-bold text-green-600">
+                          {selectedClient.completedSessions}
+                        </div>
                         <div className="text-sm text-gray-600">Completed</div>
                       </div>
                       <div className="text-center">
@@ -359,7 +379,7 @@ export default function TherapistClientManagement({ user }: TherapistClientManag
                       </div>
                       <div className="text-center">
                         <Badge className={getProgressColor(selectedClient.progressStatus)}>
-                          {selectedClient.progressStatus.replace('_', ' ')}
+                          {selectedClient.progressStatus.replace("_", " ")}
                         </Badge>
                         <div className="text-sm text-gray-600 mt-1">Progress</div>
                       </div>
@@ -396,10 +416,9 @@ export default function TherapistClientManagement({ user }: TherapistClientManag
                         <div>
                           <span className="font-medium">Last Session:</span>
                           <span className="ml-2 text-gray-600">
-                            {selectedClient.lastSession 
+                            {selectedClient.lastSession
                               ? new Date(selectedClient.lastSession).toLocaleDateString()
-                              : 'No sessions yet'
-                            }
+                              : "No sessions yet"}
                           </span>
                         </div>
                       </div>
@@ -413,8 +432,8 @@ export default function TherapistClientManagement({ user }: TherapistClientManag
                   <CardHeader>
                     <div className="flex items-center justify-between">
                       <CardTitle>Client Intake Questionnaire</CardTitle>
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         size="sm"
                         onClick={() => {
                           toast({
@@ -439,40 +458,53 @@ export default function TherapistClientManagement({ user }: TherapistClientManag
                       <div className="text-center py-8 text-gray-500">
                         <FileText className="w-12 h-12 mx-auto mb-4 opacity-30" />
                         <p>No questionnaire available</p>
-                        <p className="text-sm">This client hasn't completed the intake questionnaire yet.</p>
+                        <p className="text-sm">
+                          This client hasn't completed the intake questionnaire yet.
+                        </p>
                       </div>
                     ) : (
                       <div className="space-y-6">
                         {/* Personal Information */}
                         <div className="border rounded-lg p-4 bg-gray-50">
-                          <h3 className="font-semibold text-lg mb-4 text-hive-purple">Personal Information</h3>
+                          <h3 className="font-semibold text-lg mb-4 text-hive-purple">
+                            Personal Information
+                          </h3>
                           <div className="grid grid-cols-2 gap-4 text-sm">
                             <div>
                               <span className="font-medium">Name:</span>
                               <span className="ml-2 text-gray-700">
-                                {clientQuestionnaire.step2FirstName} {clientQuestionnaire.step2LastName}
+                                {clientQuestionnaire.step2FirstName}{" "}
+                                {clientQuestionnaire.step2LastName}
                               </span>
                             </div>
                             <div>
                               <span className="font-medium">Email:</span>
-                              <span className="ml-2 text-gray-700">{clientQuestionnaire.step2Email}</span>
+                              <span className="ml-2 text-gray-700">
+                                {clientQuestionnaire.step2Email}
+                              </span>
                             </div>
                             {clientQuestionnaire.step3AgeRange && (
                               <div>
                                 <span className="font-medium">Age Range:</span>
-                                <span className="ml-2 text-gray-700">{clientQuestionnaire.step3AgeRange}</span>
+                                <span className="ml-2 text-gray-700">
+                                  {clientQuestionnaire.step3AgeRange}
+                                </span>
                               </div>
                             )}
                             {clientQuestionnaire.step4Gender && (
                               <div>
                                 <span className="font-medium">Gender:</span>
-                                <span className="ml-2 text-gray-700">{clientQuestionnaire.step4Gender}</span>
+                                <span className="ml-2 text-gray-700">
+                                  {clientQuestionnaire.step4Gender}
+                                </span>
                               </div>
                             )}
                             {clientQuestionnaire.step5Pronouns && (
                               <div>
                                 <span className="font-medium">Pronouns:</span>
-                                <span className="ml-2 text-gray-700">{clientQuestionnaire.step5Pronouns}</span>
+                                <span className="ml-2 text-gray-700">
+                                  {clientQuestionnaire.step5Pronouns}
+                                </span>
                               </div>
                             )}
                           </div>
@@ -480,8 +512,10 @@ export default function TherapistClientManagement({ user }: TherapistClientManag
 
                         {/* Wellbeing & Mental Health */}
                         <div className="border rounded-lg p-4 bg-blue-50">
-                          <h3 className="font-semibold text-lg mb-4 text-hive-purple">Wellbeing & Mental Health</h3>
-                          
+                          <h3 className="font-semibold text-lg mb-4 text-hive-purple">
+                            Wellbeing & Mental Health
+                          </h3>
+
                           {clientQuestionnaire.step6WellbeingRating && (
                             <div className="mb-4">
                               <span className="font-medium">Current Wellbeing Rating:</span>
@@ -492,61 +526,83 @@ export default function TherapistClientManagement({ user }: TherapistClientManag
                               </div>
                             </div>
                           )}
-                          
-                          {clientQuestionnaire.step7MentalHealthSymptoms && 
-                           Array.isArray(clientQuestionnaire.step7MentalHealthSymptoms) &&
-                           clientQuestionnaire.step7MentalHealthSymptoms.length > 0 && (
-                            <div className="mb-4">
-                              <span className="font-medium">Mental Health Symptoms:</span>
-                              <div className="flex flex-wrap gap-2 mt-2">
-                                {clientQuestionnaire.step7MentalHealthSymptoms.map((symptom: string, index: number) => (
-                                  <Badge key={index} variant="outline" className="text-gray-700">
-                                    {symptom}
-                                  </Badge>
-                                ))}
-                              </div>
-                            </div>
-                          )}
 
-                          {clientQuestionnaire.step8SupportAreas && 
-                           Array.isArray(clientQuestionnaire.step8SupportAreas) &&
-                           clientQuestionnaire.step8SupportAreas.length > 0 && (
-                            <div>
-                              <span className="font-medium">Areas Seeking Support:</span>
-                              <div className="flex flex-wrap gap-2 mt-2">
-                                {clientQuestionnaire.step8SupportAreas.map((area: string, index: number) => (
-                                  <Badge key={index} variant="outline" className="text-hive-purple border-hive-purple">
-                                    {area}
-                                  </Badge>
-                                ))}
+                          {clientQuestionnaire.step7MentalHealthSymptoms &&
+                            Array.isArray(clientQuestionnaire.step7MentalHealthSymptoms) &&
+                            clientQuestionnaire.step7MentalHealthSymptoms.length > 0 && (
+                              <div className="mb-4">
+                                <span className="font-medium">Mental Health Symptoms:</span>
+                                <div className="flex flex-wrap gap-2 mt-2">
+                                  {clientQuestionnaire.step7MentalHealthSymptoms.map(
+                                    (symptom: string, index: number) => (
+                                      <Badge
+                                        key={index}
+                                        variant="outline"
+                                        className="text-gray-700"
+                                      >
+                                        {symptom}
+                                      </Badge>
+                                    )
+                                  )}
+                                </div>
                               </div>
-                            </div>
-                          )}
+                            )}
+
+                          {clientQuestionnaire.step8SupportAreas &&
+                            Array.isArray(clientQuestionnaire.step8SupportAreas) &&
+                            clientQuestionnaire.step8SupportAreas.length > 0 && (
+                              <div>
+                                <span className="font-medium">Areas Seeking Support:</span>
+                                <div className="flex flex-wrap gap-2 mt-2">
+                                  {clientQuestionnaire.step8SupportAreas.map(
+                                    (area: string, index: number) => (
+                                      <Badge
+                                        key={index}
+                                        variant="outline"
+                                        className="text-hive-purple border-hive-purple"
+                                      >
+                                        {area}
+                                      </Badge>
+                                    )
+                                  )}
+                                </div>
+                              </div>
+                            )}
                         </div>
 
                         {/* Therapy Preferences */}
                         <div className="border rounded-lg p-4 bg-green-50">
-                          <h3 className="font-semibold text-lg mb-4 text-hive-purple">Therapy Preferences</h3>
-                          
-                          {clientQuestionnaire.step9TherapyTypes && 
-                           Array.isArray(clientQuestionnaire.step9TherapyTypes) &&
-                           clientQuestionnaire.step9TherapyTypes.length > 0 && (
-                            <div className="mb-4">
-                              <span className="font-medium">Preferred Therapy Types:</span>
-                              <div className="flex flex-wrap gap-2 mt-2">
-                                {clientQuestionnaire.step9TherapyTypes.map((type: string, index: number) => (
-                                  <Badge key={index} variant="outline" className="text-green-700 border-green-700">
-                                    {type}
-                                  </Badge>
-                                ))}
+                          <h3 className="font-semibold text-lg mb-4 text-hive-purple">
+                            Therapy Preferences
+                          </h3>
+
+                          {clientQuestionnaire.step9TherapyTypes &&
+                            Array.isArray(clientQuestionnaire.step9TherapyTypes) &&
+                            clientQuestionnaire.step9TherapyTypes.length > 0 && (
+                              <div className="mb-4">
+                                <span className="font-medium">Preferred Therapy Types:</span>
+                                <div className="flex flex-wrap gap-2 mt-2">
+                                  {clientQuestionnaire.step9TherapyTypes.map(
+                                    (type: string, index: number) => (
+                                      <Badge
+                                        key={index}
+                                        variant="outline"
+                                        className="text-green-700 border-green-700"
+                                      >
+                                        {type}
+                                      </Badge>
+                                    )
+                                  )}
+                                </div>
                               </div>
-                            </div>
-                          )}
+                            )}
 
                           {clientQuestionnaire.step10PreviousTherapy && (
                             <div className="mb-4">
                               <span className="font-medium">Previous Therapy Experience:</span>
-                              <span className="ml-2 text-gray-700">{clientQuestionnaire.step10PreviousTherapy}</span>
+                              <span className="ml-2 text-gray-700">
+                                {clientQuestionnaire.step10PreviousTherapy}
+                              </span>
                             </div>
                           )}
 
@@ -555,21 +611,26 @@ export default function TherapistClientManagement({ user }: TherapistClientManag
                               <div>
                                 <span className="font-medium">Therapist Gender Preference:</span>
                                 <span className="ml-2 text-gray-700 capitalize">
-                                  {clientQuestionnaire.step12TherapistGenderPreference.replace('_', ' ')}
+                                  {clientQuestionnaire.step12TherapistGenderPreference.replace(
+                                    "_",
+                                    " "
+                                  )}
                                 </span>
                               </div>
                             )}
                             {clientQuestionnaire.step11ReligionPreference && (
                               <div>
                                 <span className="font-medium">Religion:</span>
-                                <span className="ml-2 text-gray-700">{clientQuestionnaire.step11ReligionPreference}</span>
+                                <span className="ml-2 text-gray-700">
+                                  {clientQuestionnaire.step11ReligionPreference}
+                                </span>
                               </div>
                             )}
                             {clientQuestionnaire.step13ReligionMatching && (
                               <div>
                                 <span className="font-medium">Religion Matching Preference:</span>
                                 <span className="ml-2 text-gray-700 capitalize">
-                                  {clientQuestionnaire.step13ReligionMatching.replace('_', ' ')}
+                                  {clientQuestionnaire.step13ReligionMatching.replace("_", " ")}
                                 </span>
                               </div>
                             )}
@@ -579,7 +640,9 @@ export default function TherapistClientManagement({ user }: TherapistClientManag
                         {/* Admin Notes */}
                         {clientQuestionnaire.adminNotes && (
                           <div className="border rounded-lg p-4 bg-yellow-50">
-                            <h3 className="font-semibold text-lg mb-2 text-hive-purple">Admin Notes</h3>
+                            <h3 className="font-semibold text-lg mb-2 text-hive-purple">
+                              Admin Notes
+                            </h3>
                             <p className="text-sm text-gray-700 whitespace-pre-wrap">
                               {clientQuestionnaire.adminNotes}
                             </p>
@@ -591,7 +654,10 @@ export default function TherapistClientManagement({ user }: TherapistClientManag
                           <div className="flex justify-between">
                             <span>Questionnaire ID: {clientQuestionnaire.id}</span>
                             {clientQuestionnaire.completedAt && (
-                              <span>Completed: {new Date(clientQuestionnaire.completedAt).toLocaleDateString()}</span>
+                              <span>
+                                Completed:{" "}
+                                {new Date(clientQuestionnaire.completedAt).toLocaleDateString()}
+                              </span>
                             )}
                           </div>
                         </div>
@@ -632,7 +698,7 @@ export default function TherapistClientManagement({ user }: TherapistClientManag
                             rows={4}
                           />
                         </div>
-                        <Button 
+                        <Button
                           onClick={handleAddNote}
                           disabled={addNoteMutation.isPending || !newNote.trim()}
                           className="bg-hive-purple hover:bg-hive-purple/90"
@@ -656,7 +722,9 @@ export default function TherapistClientManagement({ user }: TherapistClientManag
                           <div key={note.id} className="border rounded-lg p-4">
                             <div className="flex items-start justify-between mb-2">
                               <div className="flex items-center gap-2">
-                                <Badge variant="outline">{note.sessionType.replace('_', ' ')}</Badge>
+                                <Badge variant="outline">
+                                  {note.sessionType.replace("_", " ")}
+                                </Badge>
                                 <span className="text-sm text-gray-600">
                                   {new Date(note.date).toLocaleDateString()}
                                 </span>
@@ -724,32 +792,34 @@ export default function TherapistClientManagement({ user }: TherapistClientManag
                             maxFileSize={10485760} // 10MB
                             onGetUploadParameters={async () => {
                               if (!selectedClient) {
-                                throw new Error('No client selected');
+                                throw new Error("No client selected");
                               }
                               // Get a unique filename for the upload
                               const timestamp = Date.now();
                               const tempFileName = `document-${timestamp}`;
-                              
-                              const response = await apiRequest('GET', 
+
+                              const response = await apiRequest(
+                                "GET",
                                 `/api/therapist/client-documents/upload-params?clientId=${selectedClient.id}&fileName=${encodeURIComponent(tempFileName)}`
                               );
                               const params = await response.json();
-                              console.log('Upload params received:', params);
+                              console.log("Upload params received:", params);
                               return {
                                 method: params.method,
                                 url: params.url,
                                 fields: {
                                   objectPath: params.objectPath,
-                                  fileName: params.fileName
-                                }
+                                  fileName: params.fileName,
+                                },
                               };
                             }}
                             onComplete={(result) => {
-                              console.log('Upload completed:', result);
+                              console.log("Upload completed:", result);
                               const file = result.successful[0];
                               if (file && selectedClient) {
                                 // Extract objectPath from upload result
-                                const objectPath = file.meta?.objectPath || file.response?.body?.objectPath;
+                                const objectPath =
+                                  file.meta?.objectPath || file.response?.body?.objectPath;
                                 if (!objectPath) {
                                   toast({
                                     title: "Upload Error",
@@ -758,7 +828,7 @@ export default function TherapistClientManagement({ user }: TherapistClientManag
                                   });
                                   return;
                                 }
-                                
+
                                 // Use secure backend endpoint with server-generated objectPath
                                 addDocumentMutation.mutate({
                                   clientId: selectedClient.id,
@@ -766,7 +836,7 @@ export default function TherapistClientManagement({ user }: TherapistClientManag
                                   fileName: file.name,
                                   fileSize: file.size || 0,
                                   documentType: documentType,
-                                  description: documentDescription
+                                  description: documentDescription,
                                 });
                               }
                             }}
@@ -788,8 +858,8 @@ export default function TherapistClientManagement({ user }: TherapistClientManag
                           variant="outline"
                           onClick={() => {
                             if (selectedClient) {
-                              queryClient.invalidateQueries({ 
-                                queryKey: ['/api/therapist/client-documents', selectedClient.id] 
+                              queryClient.invalidateQueries({
+                                queryKey: ["/api/therapist/client-documents", selectedClient.id],
                               });
                               toast({
                                 title: "Refreshed",
@@ -822,24 +892,32 @@ export default function TherapistClientManagement({ user }: TherapistClientManag
                                 <div className="flex-1">
                                   <div className="flex items-center gap-2 mb-2">
                                     <FileText className="w-4 h-4 text-hive-purple" />
-                                    <h5 className="font-medium text-gray-900">{document.fileName}</h5>
+                                    <h5 className="font-medium text-gray-900">
+                                      {document.fileName}
+                                    </h5>
                                     <Badge variant="outline" className="text-xs">
-                                      {document.documentType.replace('_', ' ')}
+                                      {document.documentType.replace("_", " ")}
                                     </Badge>
                                   </div>
                                   {document.description && (
-                                    <p className="text-sm text-gray-600 mb-2">{document.description}</p>
+                                    <p className="text-sm text-gray-600 mb-2">
+                                      {document.description}
+                                    </p>
                                   )}
                                   <div className="flex items-center gap-4 text-xs text-gray-500">
-                                    <span>Uploaded: {new Date(document.uploadDate).toLocaleDateString()}</span>
-                                    <span>Size: {(document.fileSize / 1024 / 1024).toFixed(2)} MB</span>
+                                    <span>
+                                      Uploaded: {new Date(document.uploadDate).toLocaleDateString()}
+                                    </span>
+                                    <span>
+                                      Size: {(document.fileSize / 1024 / 1024).toFixed(2)} MB
+                                    </span>
                                   </div>
                                 </div>
                                 <div className="flex gap-2">
                                   <Button
                                     size="sm"
                                     variant="outline"
-                                    onClick={() => window.open(document.fileUrl, '_blank')}
+                                    onClick={() => window.open(document.fileUrl, "_blank")}
                                     data-testid={`button-download-${document.id}`}
                                   >
                                     <Download className="w-4 h-4" />
@@ -848,7 +926,9 @@ export default function TherapistClientManagement({ user }: TherapistClientManag
                                     size="sm"
                                     variant="outline"
                                     onClick={() => {
-                                      if (confirm('Are you sure you want to delete this document?')) {
+                                      if (
+                                        confirm("Are you sure you want to delete this document?")
+                                      ) {
                                         deleteDocumentMutation.mutate(document.id);
                                       }
                                     }}
@@ -904,7 +984,8 @@ export default function TherapistClientManagement({ user }: TherapistClientManag
                 <Users className="w-16 h-16 mx-auto mb-4 text-gray-400" />
                 <h3 className="text-lg font-medium text-gray-900 mb-2">Select a Client</h3>
                 <p className="text-gray-600">
-                  Choose a client from the list to view their details and manage their therapy journey.
+                  Choose a client from the list to view their details and manage their therapy
+                  journey.
                 </p>
               </CardContent>
             </Card>

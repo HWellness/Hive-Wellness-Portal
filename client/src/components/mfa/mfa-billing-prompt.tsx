@@ -95,8 +95,8 @@ Hive Wellness Admin Team`;
         <Alert className="border-orange-200 bg-white">
           <AlertCircle className="h-4 w-4 text-orange-600" />
           <AlertDescription className="text-sm text-gray-700">
-            Multi-Factor Authentication (MFA) requires a paid provider subscription. 
-            This service enhances security for all user accounts on the Hive Wellness platform.
+            Multi-Factor Authentication (MFA) requires a paid provider subscription. This service
+            enhances security for all user accounts on the Hive Wellness platform.
           </AlertDescription>
         </Alert>
 
@@ -125,11 +125,7 @@ Hive Wellness Admin Team`;
               <Mail className="h-4 w-4 mr-2" />
               {requestBillingMutation.isPending ? "Submitting..." : "Submit Request"}
             </Button>
-            <Button
-              variant="outline"
-              onClick={handleCopyTemplate}
-              className="border-gray-300"
-            >
+            <Button variant="outline" onClick={handleCopyTemplate} className="border-gray-300">
               {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
             </Button>
           </div>

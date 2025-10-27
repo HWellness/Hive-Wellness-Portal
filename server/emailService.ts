@@ -1,4 +1,4 @@
-import { MailService } from '@sendgrid/mail';
+import { MailService } from "@sendgrid/mail";
 
 if (!process.env.SENDGRID_API_KEY) {
   throw new Error("SENDGRID_API_KEY environment variable must be set");
@@ -15,31 +15,34 @@ interface FormSubmissionNotificationParams {
   submittedAt: Date;
 }
 
-export async function sendTestEmailToAllAdmins(subject: string, htmlContent: string): Promise<boolean> {
-  const adminEmails = [
-    'support@hive-wellness.co.uk',
-    'support@hivewellness.nl', 
-  ];
-  
+export async function sendTestEmailToAllAdmins(
+  subject: string,
+  htmlContent: string
+): Promise<boolean> {
+  const adminEmails = ["support@hive-wellness.co.uk", "support@hivewellness.nl"];
+
   try {
     for (const adminEmail of adminEmails) {
       await mailService.send({
         to: adminEmail,
-        from: 'support@hive-wellness.co.uk',
+        from: "support@hive-wellness.co.uk",
         subject: `[ADMIN TEST] ${subject}`,
-        html: htmlContent
+        html: htmlContent,
       });
       console.log(`Test email sent successfully to ${adminEmail}`);
     }
     return true;
   } catch (error) {
-    console.error('Failed to send test emails to admin addresses:', error);
+    console.error("Failed to send test emails to admin addresses:", error);
     return false;
   }
 }
 
 // Send welcome email to new clients with admin copy
-export async function sendClientWelcomeEmail(clientEmail: string, clientName: string): Promise<boolean> {
+export async function sendClientWelcomeEmail(
+  clientEmail: string,
+  clientName: string
+): Promise<boolean> {
   try {
     const emailContent = `
       <!DOCTYPE html>
@@ -146,35 +149,38 @@ export async function sendClientWelcomeEmail(clientEmail: string, clientName: st
     // Send to client
     await mailService.send({
       to: clientEmail,
-      from: 'support@hive-wellness.co.uk',
-      subject: 'Welcome to Hive Wellness - Your Journey Begins Here',
-      html: emailContent
+      from: "support@hive-wellness.co.uk",
+      subject: "Welcome to Hive Wellness - Your Journey Begins Here",
+      html: emailContent,
     });
 
     // Send copy to Holly
     await mailService.send({
-      to: 'support@hive-wellness.co.uk',
+      to: "support@hive-wellness.co.uk",
 
-      from: 'support@hive-wellness.co.uk',
+      from: "support@hive-wellness.co.uk",
       subject: `[COPY] Client Welcome Email Sent to ${clientName} (${clientEmail})`,
-      html: emailContent
+      html: emailContent,
     });
 
     console.log(`Welcome email sent to client ${clientEmail} with copy to Holly`);
     return true;
   } catch (error) {
-    console.error('❌ Error sending client welcome email:', {
-      error: error instanceof Error ? error.message : 'Unknown error',
+    console.error("❌ Error sending client welcome email:", {
+      error: error instanceof Error ? error.message : "Unknown error",
       stack: error instanceof Error ? error.stack : undefined,
       clientEmail,
-      clientName
+      clientName,
     });
     return false;
   }
 }
 
 // Send welcome email to new therapists with admin copy
-export async function sendTherapistWelcomeEmail(therapistEmail: string, therapistName: string): Promise<boolean> {
+export async function sendTherapistWelcomeEmail(
+  therapistEmail: string,
+  therapistName: string
+): Promise<boolean> {
   try {
     const emailContent = `
       <!DOCTYPE html>
@@ -290,32 +296,32 @@ export async function sendTherapistWelcomeEmail(therapistEmail: string, therapis
     // Send to therapist
     await mailService.send({
       to: therapistEmail,
-      from: 'support@hive-wellness.co.uk',
-      subject: 'Welcome to Hive Wellness - Start Connecting with Clients',
-      html: emailContent
+      from: "support@hive-wellness.co.uk",
+      subject: "Welcome to Hive Wellness - Start Connecting with Clients",
+      html: emailContent,
     });
 
     // Send copy to Holly
     await mailService.send({
-      to: 'support@hive-wellness.co.uk',
+      to: "support@hive-wellness.co.uk",
 
-      from: 'support@hive-wellness.co.uk',
+      from: "support@hive-wellness.co.uk",
       subject: `[COPY] Therapist Welcome Email Sent to ${therapistName} (${therapistEmail})`,
-      html: emailContent
+      html: emailContent,
     });
 
     console.log(`Welcome email sent to therapist ${therapistEmail} with copy to Holly`);
     return true;
   } catch (error) {
-    console.error('Error sending therapist welcome email:', error);
+    console.error("Error sending therapist welcome email:", error);
     return false;
   }
 }
 
 // Send session booking confirmation with admin copy
 export async function sendSessionBookingConfirmation(
-  clientEmail: string, 
-  therapistEmail: string, 
+  clientEmail: string,
+  therapistEmail: string,
   sessionDetails: {
     clientName: string;
     therapistName: string;
@@ -437,11 +443,15 @@ export async function sendSessionBookingConfirmation(
                       <li>Have any relevant notes or questions ready</li>
                   </ul>
                   
-                  ${sessionDetails.sessionUrl ? `
+                  ${
+                    sessionDetails.sessionUrl
+                      ? `
                   <div style="text-align: center;">
                       <a href="${sessionDetails.sessionUrl}" class="cta-button">Join Video Session</a>
                   </div>
-                  ` : ''}
+                  `
+                      : ""
+                  }
               </div>
               <div class="footer">
                   <p>© 2025 Hive Wellness. All rights reserved.</p>
@@ -456,40 +466,48 @@ export async function sendSessionBookingConfirmation(
     // Send to client
     await mailService.send({
       to: clientEmail,
-      from: 'support@hive-wellness.co.uk',
-      subject: 'Session Booking Confirmed - Hive Wellness',
-      html: emailContent
+      from: "support@hive-wellness.co.uk",
+      subject: "Session Booking Confirmed - Hive Wellness",
+      html: emailContent,
     });
 
     // Send to therapist
     await mailService.send({
       to: therapistEmail,
-      from: 'support@hive-wellness.co.uk',
-      subject: 'Session Booking Confirmed - Hive Wellness',
-      html: emailContent
+      from: "support@hive-wellness.co.uk",
+      subject: "Session Booking Confirmed - Hive Wellness",
+      html: emailContent,
     });
 
     // Send copy to Holly
     await mailService.send({
-      to: 'support@hive-wellness.co.uk',
+      to: "support@hive-wellness.co.uk",
 
-      from: 'support@hive-wellness.co.uk',
+      from: "support@hive-wellness.co.uk",
       subject: `[COPY] Session Booking Confirmation - ${sessionDetails.clientName} & ${sessionDetails.therapistName}`,
-      html: emailContent
+      html: emailContent,
     });
 
-    console.log(`Session booking confirmation sent to ${clientEmail}, ${therapistEmail} with copy to Holly`);
+    console.log(
+      `Session booking confirmation sent to ${clientEmail}, ${therapistEmail} with copy to Holly`
+    );
     return true;
   } catch (error) {
-    console.error('Error sending session booking confirmation:', error);
+    console.error("Error sending session booking confirmation:", error);
     return false;
   }
 }
 
-export async function sendTestEmail(to: string, subject: string, message: string, fromDomain: string = 'hive-wellness.co.uk'): Promise<boolean> {
+export async function sendTestEmail(
+  to: string,
+  subject: string,
+  message: string,
+  fromDomain: string = "hive-wellness.co.uk"
+): Promise<boolean> {
   try {
-    const fromEmail = fromDomain === 'hivewellness.nl' ? 'support@hivewellness.nl' : 'support@hive-wellness.co.uk';
-    
+    const fromEmail =
+      fromDomain === "hivewellness.nl" ? "support@hivewellness.nl" : "support@hive-wellness.co.uk";
+
     await mailService.send({
       to,
       from: fromEmail,
@@ -614,7 +632,7 @@ export async function sendTestEmail(to: string, subject: string, message: string
                     <div class="message">
                         <p style="margin-top: 0;">${message}</p>
                         <div class="status-badge">✓ System Operational</div>
-                        <p style="margin-bottom: 0;"><strong>Sent:</strong> ${new Date().toLocaleString('en-GB', { timeZone: 'Europe/London' })}</p>
+                        <p style="margin-bottom: 0;"><strong>Sent:</strong> ${new Date().toLocaleString("en-GB", { timeZone: "Europe/London" })}</p>
                     </div>
                 </div>
                 <div class="footer">
@@ -625,31 +643,35 @@ export async function sendTestEmail(to: string, subject: string, message: string
             </div>
         </body>
         </html>
-      `
+      `,
     });
     return true;
   } catch (error) {
-    console.error('Test email error:', error);
+    console.error("Test email error:", error);
     return false;
   }
 }
 
-export async function sendFormSubmissionNotification(params: FormSubmissionNotificationParams): Promise<boolean> {
+export async function sendFormSubmissionNotification(
+  params: FormSubmissionNotificationParams
+): Promise<boolean> {
   try {
     const { submissionId, formId, submissionData, userEmail, submittedAt } = params;
-    
+
     // Send to all admin email addresses to ensure notifications are received
-    const adminEmails = ['support@hive-wellness.co.uk', 'support@hivewellness.nl'];
-    
+    const adminEmails = ["support@hive-wellness.co.uk", "support@hivewellness.nl"];
+
     // Format the submission data for email
     const formatSubmissionData = (data: any): string => {
-      let formatted = '';
+      let formatted = "";
       for (const [key, value] of Object.entries(data)) {
-        if (value !== null && value !== undefined && value !== '') {
-          const formattedKey = key.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
-          
+        if (value !== null && value !== undefined && value !== "") {
+          const formattedKey = key
+            .replace(/([A-Z])/g, " $1")
+            .replace(/^./, (str) => str.toUpperCase());
+
           if (Array.isArray(value)) {
-            formatted += `${formattedKey}: ${value.join(', ')}\n`;
+            formatted += `${formattedKey}: ${value.join(", ")}\n`;
           } else {
             formatted += `${formattedKey}: ${value}\n`;
           }
@@ -659,7 +681,7 @@ export async function sendFormSubmissionNotification(params: FormSubmissionNotif
     };
 
     const formattedData = formatSubmissionData(submissionData);
-    
+
     // Create email content with Hive Wellness branding
     const emailContent = `
 <!DOCTYPE html>
@@ -686,13 +708,13 @@ export async function sendFormSubmissionNotification(params: FormSubmissionNotif
             <p><strong>Submission ID:</strong> <span class="badge">${submissionId}</span></p>
             <p><strong>Form Type:</strong> ${formId}</p>
             <p><strong>User Email:</strong> ${userEmail}</p>
-            <p><strong>Submitted At:</strong> ${submittedAt.toLocaleString('en-GB', { 
-              timeZone: 'Europe/London',
-              day: '2-digit',
-              month: '2-digit', 
-              year: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit'
+            <p><strong>Submitted At:</strong> ${submittedAt.toLocaleString("en-GB", {
+              timeZone: "Europe/London",
+              day: "2-digit",
+              month: "2-digit",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
             })}</p>
             
             <h4>📋 Form Data:</h4>
@@ -722,7 +744,7 @@ Submission Details:
 - Submission ID: ${submissionId}
 - Form Type: ${formId}
 - User Email: ${userEmail}
-- Submitted At: ${submittedAt.toLocaleString('en-GB', { timeZone: 'Europe/London' })}
+- Submitted At: ${submittedAt.toLocaleString("en-GB", { timeZone: "Europe/London" })}
 
 Form Data:
 ${formattedData}
@@ -736,7 +758,7 @@ This is an automated notification from Hive Wellness Portal.
     for (const adminEmail of adminEmails) {
       await mailService.send({
         to: adminEmail,
-        from: 'support@hivewellness.nl',
+        from: "support@hivewellness.nl",
         subject: `🎯 New Form Submission: ${formId} - ${userEmail}`,
         text: textContent,
         html: emailContent,
@@ -746,7 +768,7 @@ This is an automated notification from Hive Wellness Portal.
     console.log(`✅ Form submission notification sent to both admin emails for ${submissionId}`);
     return true;
   } catch (error) {
-    console.error('SendGrid email error:', error);
+    console.error("SendGrid email error:", error);
     return false;
   }
 }
@@ -765,12 +787,12 @@ export async function sendEmail(params: EmailParams): Promise<boolean> {
       to: params.to,
       from: params.from,
       subject: params.subject,
-      text: params.text || '',
+      text: params.text || "",
       html: params.html,
     });
     return true;
   } catch (error) {
-    console.error('SendGrid email error:', error);
+    console.error("SendGrid email error:", error);
     return false;
   }
 }
@@ -787,13 +809,25 @@ interface SessionBookingNotificationParams {
   sessionNotes?: string;
 }
 
-export async function sendSessionBookingNotification(params: SessionBookingNotificationParams): Promise<boolean> {
+export async function sendSessionBookingNotification(
+  params: SessionBookingNotificationParams
+): Promise<boolean> {
   try {
-    const { sessionId, clientEmail, clientName, therapistName, sessionType, scheduledAt, duration, price, sessionNotes } = params;
-    
+    const {
+      sessionId,
+      clientEmail,
+      clientName,
+      therapistName,
+      sessionType,
+      scheduledAt,
+      duration,
+      price,
+      sessionNotes,
+    } = params;
+
     // Send to all admin email addresses to ensure notifications are received
-    const adminEmails = ['support@hive-wellness.co.uk', 'support@hivewellness.nl'];
-    
+    const adminEmails = ["support@hive-wellness.co.uk", "support@hivewellness.nl"];
+
     // Create email content for session booking notification
     const emailContent = `
 <!DOCTYPE html>
@@ -822,19 +856,19 @@ export async function sendSessionBookingNotification(params: SessionBookingNotif
             <p><strong>Client:</strong> ${clientName} (${clientEmail})</p>
             <p><strong>Therapist:</strong> ${therapistName}</p>
             <p><strong>Session Type:</strong> ${sessionType}</p>
-            <p><strong>Scheduled:</strong> ${scheduledAt.toLocaleString('en-GB', { 
-              timeZone: 'Europe/London',
-              weekday: 'long',
-              day: '2-digit',
-              month: 'long', 
-              year: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit'
+            <p><strong>Scheduled:</strong> ${scheduledAt.toLocaleString("en-GB", {
+              timeZone: "Europe/London",
+              weekday: "long",
+              day: "2-digit",
+              month: "long",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
             })}</p>
             <p><strong>Duration:</strong> ${duration} minutes</p>
-            ${price ? `<p><strong>Session Fee:</strong> <span class="amount">£${(price / 100).toFixed(2)}</span></p>` : ''}
-            ${price ? `<p><strong>Therapist Earnings:</strong> <span class="amount">£${((price * 0.85) / 100).toFixed(2)} (85% split)</span></p>` : ''}
-            ${sessionNotes ? `<p><strong>Notes:</strong> ${sessionNotes}</p>` : ''}
+            ${price ? `<p><strong>Session Fee:</strong> <span class="amount">£${(price / 100).toFixed(2)}</span></p>` : ""}
+            ${price ? `<p><strong>Therapist Earnings:</strong> <span class="amount">£${((price * 0.85) / 100).toFixed(2)} (85% split)</span></p>` : ""}
+            ${sessionNotes ? `<p><strong>Notes:</strong> ${sessionNotes}</p>` : ""}
         </div>
         
         <div class="session-details">
@@ -861,7 +895,7 @@ export async function sendSessionBookingNotification(params: SessionBookingNotif
     for (const adminEmail of adminEmails) {
       await mailService.send({
         to: adminEmail,
-        from: 'support@hivewellness.nl',
+        from: "support@hivewellness.nl",
         subject: `🎯 New Session Booking: ${clientName} with ${therapistName}`,
         html: emailContent,
         text: `New session booking confirmed:
@@ -870,19 +904,21 @@ Session ID: ${sessionId}
 Client: ${clientName} (${clientEmail})
 Therapist: ${therapistName}
 Session Type: ${sessionType}
-Scheduled: ${scheduledAt.toLocaleString('en-GB')}
+Scheduled: ${scheduledAt.toLocaleString("en-GB")}
 Duration: ${duration} minutes
-${price ? `Session Fee: £${(price / 100).toFixed(2)}` : ''}
-${sessionNotes ? `Notes: ${sessionNotes}` : ''}
+${price ? `Session Fee: £${(price / 100).toFixed(2)}` : ""}
+${sessionNotes ? `Notes: ${sessionNotes}` : ""}
 
-This booking requires verification and support oversight.`
+This booking requires verification and support oversight.`,
       });
     }
 
-    console.log(`✅ Session booking notification sent to both admin emails for session ${sessionId}`);
+    console.log(
+      `✅ Session booking notification sent to both admin emails for session ${sessionId}`
+    );
     return true;
   } catch (error) {
-    console.error('SendGrid session booking notification error:', error);
+    console.error("SendGrid session booking notification error:", error);
     return false;
   }
 }
@@ -896,9 +932,9 @@ export async function sendPasswordResetEmail(params: {
 }): Promise<boolean> {
   try {
     // Use production URL to avoid security software blocking development domains
-    const baseUrl = process.env.PRODUCTION_URL || 'https://api.hive-wellness.co.uk';
+    const baseUrl = process.env.PRODUCTION_URL || "https://api.hive-wellness.co.uk";
     const resetUrl = `${baseUrl}/reset-password?token=${params.resetToken}&uid=${params.userId}`;
-    
+
     const emailContent = `
       <!DOCTYPE html>
       <html>
@@ -1068,14 +1104,14 @@ export async function sendPasswordResetEmail(params: {
     await mailService.send({
       to: params.to,
       from: {
-        email: 'support@hive-wellness.co.uk',
-        name: 'Hive Wellness'
+        email: "support@hive-wellness.co.uk",
+        name: "Hive Wellness",
       },
       replyTo: {
-        email: 'support@hive-wellness.co.uk',
-        name: 'Hive Wellness Support'
+        email: "support@hive-wellness.co.uk",
+        name: "Hive Wellness Support",
       },
-      subject: 'Reset Your Hive Wellness Password',
+      subject: "Reset Your Hive Wellness Password",
       html: emailContent,
       text: `Password Reset Request
       
@@ -1097,21 +1133,21 @@ Support: support@hive-wellness.co.uk
 Website: https://hive-wellness.co.uk`,
       trackingSettings: {
         clickTracking: { enable: false },
-        openTracking: { enable: false }
+        openTracking: { enable: false },
       },
       mailSettings: {
-        bypassListManagement: { enable: false }
-      }
+        bypassListManagement: { enable: false },
+      },
     });
 
     console.log(`✅ Password reset email sent successfully to ${params.to}`);
     console.log(`📧 Reset link: ${resetUrl}`);
     return true;
   } catch (error) {
-    console.error('❌ Failed to send password reset email:', error);
+    console.error("❌ Failed to send password reset email:", error);
     if (error instanceof Error) {
-      console.error('Error details:', error.message);
-      console.error('Error stack:', error.stack);
+      console.error("Error details:", error.message);
+      console.error("Error stack:", error.stack);
     }
     return false;
   }
@@ -1124,14 +1160,18 @@ export async function sendQuestionnaireWelcomeEmail(params: {
 }): Promise<boolean> {
   try {
     const { email, firstName } = params;
-    
+
     // Read the PDF file and convert to base64
-    const fs = await import('fs');
-    const path = await import('path');
-    const pdfPath = path.join(process.cwd(), 'attached_assets', 'HW-Client-Information-Pack_1760973440335.pdf');
+    const fs = await import("fs");
+    const path = await import("path");
+    const pdfPath = path.join(
+      process.cwd(),
+      "attached_assets",
+      "HW-Client-Information-Pack_1760973440335.pdf"
+    );
     const pdfContent = fs.readFileSync(pdfPath);
-    const pdfBase64 = pdfContent.toString('base64');
-    
+    const pdfBase64 = pdfContent.toString("base64");
+
     const emailContent = `
       <!DOCTYPE html>
       <html lang="en">
@@ -1313,41 +1353,41 @@ export async function sendQuestionnaireWelcomeEmail(params: {
     await mailService.send({
       to: email,
       from: {
-        email: 'support@hive-wellness.co.uk',
-        name: 'Hive Wellness Team'
+        email: "support@hive-wellness.co.uk",
+        name: "Hive Wellness Team",
       },
-      subject: 'Thank you for joining Hive Wellness - we\'re finding your perfect therapist',
+      subject: "Thank you for joining Hive Wellness - we're finding your perfect therapist",
       html: emailContent,
       attachments: [
         {
           content: pdfBase64,
-          filename: 'Hive-Wellness-Client-Information-Pack.pdf',
-          type: 'application/pdf',
-          disposition: 'attachment'
-        }
-      ]
+          filename: "Hive-Wellness-Client-Information-Pack.pdf",
+          type: "application/pdf",
+          disposition: "attachment",
+        },
+      ],
     });
 
     // Send copy to admin
     await mailService.send({
-      to: 'support@hive-wellness.co.uk',
-      from: 'support@hive-wellness.co.uk',
+      to: "support@hive-wellness.co.uk",
+      from: "support@hive-wellness.co.uk",
       subject: `[COPY] Questionnaire Welcome Email Sent to ${firstName} (${email})`,
       html: emailContent,
       attachments: [
         {
           content: pdfBase64,
-          filename: 'Hive-Wellness-Client-Information-Pack.pdf',
-          type: 'application/pdf',
-          disposition: 'attachment'
-        }
-      ]
+          filename: "Hive-Wellness-Client-Information-Pack.pdf",
+          type: "application/pdf",
+          disposition: "attachment",
+        },
+      ],
     });
 
     console.log(`✅ Questionnaire welcome email sent to ${email} with PDF attachment`);
     return true;
   } catch (error) {
-    console.error('Error sending questionnaire welcome email:', error);
+    console.error("Error sending questionnaire welcome email:", error);
     return false;
   }
 }
@@ -1375,11 +1415,11 @@ interface SessionNotesBackupParams {
 
 export async function sendSessionNotesBackup(params: SessionNotesBackupParams): Promise<boolean> {
   try {
-    const { 
-      noteId, 
-      therapistName, 
+    const {
+      noteId,
+      therapistName,
       therapistEmail,
-      clientName, 
+      clientName,
       sessionDate,
       sessionType,
       subjectiveFeedback,
@@ -1392,12 +1432,12 @@ export async function sendSessionNotesBackup(params: SessionNotesBackupParams): 
       nextSessionGoals,
       progressScore,
       clientEngagement,
-      riskLevel
+      riskLevel,
     } = params;
-    
+
     // Send to support email for backup
-    const adminEmail = 'support@hive-wellness.co.uk';
-    
+    const adminEmail = "support@hive-wellness.co.uk";
+
     // Create email content with Hive branding
     const emailContent = `
 <!DOCTYPE html>
@@ -1528,80 +1568,112 @@ export async function sendSessionNotesBackup(params: SessionNotesBackupParams): 
                 <p><span class="label">Note ID:</span> <span class="badge">${noteId}</span></p>
                 <p><span class="label">Client:</span> ${clientName}</p>
                 <p><span class="label">Therapist:</span> ${therapistName} (${therapistEmail})</p>
-                <p><span class="label">Session Date:</span> ${sessionDate.toLocaleString('en-GB', {
-                  timeZone: 'Europe/London',
-                  weekday: 'long',
-                  day: '2-digit',
-                  month: 'long',
-                  year: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit'
+                <p><span class="label">Session Date:</span> ${sessionDate.toLocaleString("en-GB", {
+                  timeZone: "Europe/London",
+                  weekday: "long",
+                  day: "2-digit",
+                  month: "long",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
                 })}</p>
-                ${sessionType ? `<p><span class="label">Session Type:</span> ${sessionType}</p>` : ''}
-                ${progressScore ? `<p><span class="label">Progress Score:</span> ${progressScore}/10</p>` : ''}
-                ${clientEngagement ? `<p><span class="label">Client Engagement:</span> ${clientEngagement}</p>` : ''}
-                ${riskLevel ? `<p><span class="label">Risk Level:</span> <span class="badge risk-${riskLevel}">${riskLevel.toUpperCase()}</span></p>` : ''}
+                ${sessionType ? `<p><span class="label">Session Type:</span> ${sessionType}</p>` : ""}
+                ${progressScore ? `<p><span class="label">Progress Score:</span> ${progressScore}/10</p>` : ""}
+                ${clientEngagement ? `<p><span class="label">Client Engagement:</span> ${clientEngagement}</p>` : ""}
+                ${riskLevel ? `<p><span class="label">Risk Level:</span> <span class="badge risk-${riskLevel}">${riskLevel.toUpperCase()}</span></p>` : ""}
             </div>
 
-            ${subjectiveFeedback ? `
+            ${
+              subjectiveFeedback
+                ? `
             <div class="section">
                 <div class="section-title">Subjective Feedback (Client's Experience)</div>
                 <p>${subjectiveFeedback}</p>
             </div>
-            ` : ''}
+            `
+                : ""
+            }
 
-            ${objectiveObservations ? `
+            ${
+              objectiveObservations
+                ? `
             <div class="section">
                 <div class="section-title">Objective Observations (Therapist's Clinical Notes)</div>
                 <p>${objectiveObservations}</p>
             </div>
-            ` : ''}
+            `
+                : ""
+            }
 
-            ${assessment ? `
+            ${
+              assessment
+                ? `
             <div class="section">
                 <div class="section-title">Clinical Assessment</div>
                 <p>${assessment}</p>
             </div>
-            ` : ''}
+            `
+                : ""
+            }
 
-            ${planAndGoals ? `
+            ${
+              planAndGoals
+                ? `
             <div class="section">
                 <div class="section-title">Treatment Plan & Goals</div>
                 <p>${planAndGoals}</p>
             </div>
-            ` : ''}
+            `
+                : ""
+            }
 
-            ${sessionFocus && sessionFocus.length > 0 ? `
+            ${
+              sessionFocus && sessionFocus.length > 0
+                ? `
             <div class="section">
                 <div class="section-title">Session Focus Areas</div>
                 <ul>
-                    ${sessionFocus.map(focus => `<li>${focus}</li>`).join('')}
+                    ${sessionFocus.map((focus) => `<li>${focus}</li>`).join("")}
                 </ul>
             </div>
-            ` : ''}
+            `
+                : ""
+            }
 
-            ${interventionsUsed && interventionsUsed.length > 0 ? `
+            ${
+              interventionsUsed && interventionsUsed.length > 0
+                ? `
             <div class="section">
                 <div class="section-title">Therapeutic Interventions Used</div>
                 <ul>
-                    ${interventionsUsed.map(intervention => `<li>${intervention}</li>`).join('')}
+                    ${interventionsUsed.map((intervention) => `<li>${intervention}</li>`).join("")}
                 </ul>
             </div>
-            ` : ''}
+            `
+                : ""
+            }
 
-            ${homeworkAssigned ? `
+            ${
+              homeworkAssigned
+                ? `
             <div class="section">
                 <div class="section-title">Homework Assigned</div>
                 <p>${homeworkAssigned}</p>
             </div>
-            ` : ''}
+            `
+                : ""
+            }
 
-            ${nextSessionGoals ? `
+            ${
+              nextSessionGoals
+                ? `
             <div class="section">
                 <div class="section-title">Next Session Goals</div>
                 <p>${nextSessionGoals}</p>
             </div>
-            ` : ''}
+            `
+                : ""
+            }
 
             <div class="info-box" style="margin-top: 30px; border-left-color: #97A5D0;">
                 <h3>ℹ️ Backup Information</h3>
@@ -1626,51 +1698,83 @@ SESSION NOTES BACKUP - HIVE WELLNESS
 Note ID: ${noteId}
 Client: ${clientName}
 Therapist: ${therapistName} (${therapistEmail})
-Session Date: ${sessionDate.toLocaleString('en-GB')}
-${sessionType ? `Session Type: ${sessionType}` : ''}
-${progressScore ? `Progress Score: ${progressScore}/10` : ''}
-${clientEngagement ? `Client Engagement: ${clientEngagement}` : ''}
-${riskLevel ? `Risk Level: ${riskLevel.toUpperCase()}` : ''}
+Session Date: ${sessionDate.toLocaleString("en-GB")}
+${sessionType ? `Session Type: ${sessionType}` : ""}
+${progressScore ? `Progress Score: ${progressScore}/10` : ""}
+${clientEngagement ? `Client Engagement: ${clientEngagement}` : ""}
+${riskLevel ? `Risk Level: ${riskLevel.toUpperCase()}` : ""}
 
-${subjectiveFeedback ? `
+${
+  subjectiveFeedback
+    ? `
 SUBJECTIVE FEEDBACK:
 ${subjectiveFeedback}
-` : ''}
+`
+    : ""
+}
 
-${objectiveObservations ? `
+${
+  objectiveObservations
+    ? `
 OBJECTIVE OBSERVATIONS:
 ${objectiveObservations}
-` : ''}
+`
+    : ""
+}
 
-${assessment ? `
+${
+  assessment
+    ? `
 CLINICAL ASSESSMENT:
 ${assessment}
-` : ''}
+`
+    : ""
+}
 
-${planAndGoals ? `
+${
+  planAndGoals
+    ? `
 TREATMENT PLAN & GOALS:
 ${planAndGoals}
-` : ''}
+`
+    : ""
+}
 
-${sessionFocus && sessionFocus.length > 0 ? `
+${
+  sessionFocus && sessionFocus.length > 0
+    ? `
 SESSION FOCUS AREAS:
-${sessionFocus.map(f => `- ${f}`).join('\n')}
-` : ''}
+${sessionFocus.map((f) => `- ${f}`).join("\n")}
+`
+    : ""
+}
 
-${interventionsUsed && interventionsUsed.length > 0 ? `
+${
+  interventionsUsed && interventionsUsed.length > 0
+    ? `
 THERAPEUTIC INTERVENTIONS:
-${interventionsUsed.map(i => `- ${i}`).join('\n')}
-` : ''}
+${interventionsUsed.map((i) => `- ${i}`).join("\n")}
+`
+    : ""
+}
 
-${homeworkAssigned ? `
+${
+  homeworkAssigned
+    ? `
 HOMEWORK ASSIGNED:
 ${homeworkAssigned}
-` : ''}
+`
+    : ""
+}
 
-${nextSessionGoals ? `
+${
+  nextSessionGoals
+    ? `
 NEXT SESSION GOALS:
 ${nextSessionGoals}
-` : ''}
+`
+    : ""
+}
 
 ---
 This is an automated backup of therapist session notes.
@@ -1680,16 +1784,16 @@ HIPAA Compliant • Secure Storage • Confidential Information
 
     await mailService.send({
       to: adminEmail,
-      from: 'support@hive-wellness.co.uk',
+      from: "support@hive-wellness.co.uk",
       subject: `📋 Session Notes Backup: ${clientName} with ${therapistName}`,
       html: emailContent,
-      text: textContent
+      text: textContent,
     });
 
     console.log(`✅ Session notes backup email sent to ${adminEmail} for note ${noteId}`);
     return true;
   } catch (error) {
-    console.error('SendGrid session notes backup error:', error);
+    console.error("SendGrid session notes backup error:", error);
     return false;
   }
 }

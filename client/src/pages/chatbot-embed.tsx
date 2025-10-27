@@ -1,5 +1,5 @@
-import React from 'react';
-import { ChatbotEmbed } from '@/components/chatbot/chatbot-embed';
+import React from "react";
+import { ChatbotEmbed } from "@/components/chatbot/chatbot-embed";
 
 export default function ChatbotEmbedPage() {
   return (

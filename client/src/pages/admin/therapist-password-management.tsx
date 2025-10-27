@@ -3,16 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { 
-  Key,
-  Mail,
-  Clock,
-  CheckCircle,
-  AlertCircle,
-  RefreshCw,
-  Shield,
-  User
-} from "lucide-react";
+import { Key, Mail, Clock, CheckCircle, AlertCircle, RefreshCw, Shield, User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { formatDistanceToNow } from "date-fns";
@@ -36,22 +27,29 @@ export default function TherapistPasswordManagement() {
   const { toast } = useToast();
 
   // Fetch therapist accounts
-  const { data: accountsData, isLoading, refetch } = useQuery({
-    queryKey: ['/api/admin/therapist-accounts'],
+  const {
+    data: accountsData,
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ["/api/admin/therapist-accounts"],
     staleTime: 2 * 60 * 1000, // 2 minutes
   });
 
   // Password reset mutation
   const resetPasswordMutation = useMutation({
     mutationFn: async (therapistId: string) => {
-      return await apiRequest("POST", `/api/admin/therapist-accounts/${therapistId}/reset-password`);
+      return await apiRequest(
+        "POST",
+        `/api/admin/therapist-accounts/${therapistId}/reset-password`
+      );
     },
     onSuccess: (data, therapistId) => {
       toast({
         title: "Password Reset Email Sent",
         description: "The therapist will receive a password reset link in their email.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/therapist-accounts'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/therapist-accounts"] });
     },
     onError: (error: any) => {
       toast({
@@ -115,7 +113,10 @@ export default function TherapistPasswordManagement() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-secondary text-hive-black/70">Total Accounts</p>
-                  <p className="text-2xl font-primary text-hive-purple" data-testid="text-total-accounts">
+                  <p
+                    className="text-2xl font-primary text-hive-purple"
+                    data-testid="text-total-accounts"
+                  >
                     {accounts.length}
                   </p>
                 </div>
@@ -129,8 +130,11 @@ export default function TherapistPasswordManagement() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-secondary text-hive-black/70">Active Accounts</p>
-                  <p className="text-2xl font-primary text-hive-blue" data-testid="text-active-accounts">
-                    {accounts.filter(a => a.isActive).length}
+                  <p
+                    className="text-2xl font-primary text-hive-blue"
+                    data-testid="text-active-accounts"
+                  >
+                    {accounts.filter((a) => a.isActive).length}
                   </p>
                 </div>
                 <CheckCircle className="w-8 h-8 text-hive-blue/60" />
@@ -143,8 +147,17 @@ export default function TherapistPasswordManagement() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-secondary text-hive-black/70">Recent Logins</p>
-                  <p className="text-2xl font-primary text-hive-light-blue" data-testid="text-recent-logins">
-                    {accounts.filter(a => a.lastLoginAt && new Date(a.lastLoginAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)).length}
+                  <p
+                    className="text-2xl font-primary text-hive-light-blue"
+                    data-testid="text-recent-logins"
+                  >
+                    {
+                      accounts.filter(
+                        (a) =>
+                          a.lastLoginAt &&
+                          new Date(a.lastLoginAt) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+                      ).length
+                    }
                   </p>
                   <p className="text-sm text-hive-black/50">Last 7 days</p>
                 </div>
@@ -173,25 +186,40 @@ export default function TherapistPasswordManagement() {
                 <table className="w-full">
                   <thead>
                     <tr className="border-b border-hive-black/10">
-                      <th className="text-left py-3 px-4 font-secondary text-sm text-hive-black/70">Name</th>
-                      <th className="text-left py-3 px-4 font-secondary text-sm text-hive-black/70">Email</th>
-                      <th className="text-left py-3 px-4 font-secondary text-sm text-hive-black/70">Status</th>
-                      <th className="text-left py-3 px-4 font-secondary text-sm text-hive-black/70">Last Login</th>
-                      <th className="text-left py-3 px-4 font-secondary text-sm text-hive-black/70">Last Reset</th>
-                      <th className="text-right py-3 px-4 font-secondary text-sm text-hive-black/70">Actions</th>
+                      <th className="text-left py-3 px-4 font-secondary text-sm text-hive-black/70">
+                        Name
+                      </th>
+                      <th className="text-left py-3 px-4 font-secondary text-sm text-hive-black/70">
+                        Email
+                      </th>
+                      <th className="text-left py-3 px-4 font-secondary text-sm text-hive-black/70">
+                        Status
+                      </th>
+                      <th className="text-left py-3 px-4 font-secondary text-sm text-hive-black/70">
+                        Last Login
+                      </th>
+                      <th className="text-left py-3 px-4 font-secondary text-sm text-hive-black/70">
+                        Last Reset
+                      </th>
+                      <th className="text-right py-3 px-4 font-secondary text-sm text-hive-black/70">
+                        Actions
+                      </th>
                     </tr>
                   </thead>
                   <tbody>
                     {accounts.map((account) => (
-                      <tr 
-                        key={account.id} 
+                      <tr
+                        key={account.id}
                         className="border-b border-hive-black/5 hover:bg-hive-purple/5 transition-colors"
                         data-testid={`row-therapist-${account.id}`}
                       >
                         <td className="py-4 px-4">
                           <div className="flex items-center gap-2">
                             <User className="w-4 h-4 text-hive-purple/60" />
-                            <span className="font-secondary text-hive-black" data-testid={`text-name-${account.id}`}>
+                            <span
+                              className="font-secondary text-hive-black"
+                              data-testid={`text-name-${account.id}`}
+                            >
                               {account.firstName} {account.lastName}
                             </span>
                           </div>
@@ -199,39 +227,59 @@ export default function TherapistPasswordManagement() {
                         <td className="py-4 px-4">
                           <div className="flex items-center gap-2">
                             <Mail className="w-4 h-4 text-hive-blue/60" />
-                            <span className="font-secondary text-hive-black/80 text-sm" data-testid={`text-email-${account.id}`}>
+                            <span
+                              className="font-secondary text-hive-black/80 text-sm"
+                              data-testid={`text-email-${account.id}`}
+                            >
                               {account.email}
                             </span>
                           </div>
                         </td>
                         <td className="py-4 px-4">
                           <div className="flex flex-col gap-1">
-                            <Badge 
+                            <Badge
                               variant={account.isActive ? "default" : "secondary"}
-                              className={account.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-700"}
+                              className={
+                                account.isActive
+                                  ? "bg-green-100 text-green-700"
+                                  : "bg-gray-100 text-gray-700"
+                              }
                               data-testid={`badge-status-${account.id}`}
                             >
-                              {account.isActive ? 'Active' : 'Inactive'}
+                              {account.isActive ? "Active" : "Inactive"}
                             </Badge>
                             {account.forcePasswordChange && (
-                              <Badge variant="outline" className="text-amber-600 border-amber-600 text-xs">
+                              <Badge
+                                variant="outline"
+                                className="text-amber-600 border-amber-600 text-xs"
+                              >
                                 Password Reset Required
                               </Badge>
                             )}
                           </div>
                         </td>
                         <td className="py-4 px-4">
-                          <span className="font-secondary text-hive-black/70 text-sm" data-testid={`text-last-login-${account.id}`}>
-                            {account.lastLoginAt 
-                              ? formatDistanceToNow(new Date(account.lastLoginAt), { addSuffix: true })
-                              : 'Never'}
+                          <span
+                            className="font-secondary text-hive-black/70 text-sm"
+                            data-testid={`text-last-login-${account.id}`}
+                          >
+                            {account.lastLoginAt
+                              ? formatDistanceToNow(new Date(account.lastLoginAt), {
+                                  addSuffix: true,
+                                })
+                              : "Never"}
                           </span>
                         </td>
                         <td className="py-4 px-4">
-                          <span className="font-secondary text-hive-black/70 text-sm" data-testid={`text-last-reset-${account.id}`}>
-                            {account.lastPasswordReset 
-                              ? formatDistanceToNow(new Date(account.lastPasswordReset), { addSuffix: true })
-                              : 'Never'}
+                          <span
+                            className="font-secondary text-hive-black/70 text-sm"
+                            data-testid={`text-last-reset-${account.id}`}
+                          >
+                            {account.lastPasswordReset
+                              ? formatDistanceToNow(new Date(account.lastPasswordReset), {
+                                  addSuffix: true,
+                                })
+                              : "Never"}
                           </span>
                         </td>
                         <td className="py-4 px-4 text-right">

@@ -32,10 +32,10 @@ interface TherapistCategoryAssignmentProps {
   onClose?: () => void;
 }
 
-export function TherapistCategoryAssignment({ 
-  therapistId, 
-  therapist, 
-  onClose 
+export function TherapistCategoryAssignment({
+  therapistId,
+  therapist,
+  onClose,
 }: TherapistCategoryAssignmentProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -51,7 +51,7 @@ export function TherapistCategoryAssignment({
   const assignCategoriesMutation = useMutation({
     mutationFn: async (categoryIds: string[]) => {
       return await apiRequest("POST", `/api/therapists/${therapistId}/assign-categories`, {
-        categoryIds
+        categoryIds,
       });
     },
     onSuccess: () => {
@@ -73,9 +73,9 @@ export function TherapistCategoryAssignment({
 
   const handleCategoryToggle = (categoryId: string, checked: boolean) => {
     if (checked) {
-      setSelectedCategories(prev => [...prev, categoryId]);
+      setSelectedCategories((prev) => [...prev, categoryId]);
     } else {
-      setSelectedCategories(prev => prev.filter(id => id !== categoryId));
+      setSelectedCategories((prev) => prev.filter((id) => id !== categoryId));
     }
   };
 
@@ -118,14 +118,14 @@ export function TherapistCategoryAssignment({
           Assign {therapist.firstName} {therapist.lastName} to therapy categories they can provide
         </p>
       </CardHeader>
-      
+
       <CardContent className="space-y-4">
         {/* Current assignments summary */}
         <div className="bg-gray-50 p-4 rounded-lg">
           <h4 className="font-medium text-sm text-gray-700 mb-2">Current Assignments:</h4>
           {selectedCategories.length > 0 ? (
             <div className="flex flex-wrap gap-2">
-              {selectedCategories.map(categoryId => {
+              {selectedCategories.map((categoryId) => {
                 const category = categories.find((c: TherapyCategory) => c.id === categoryId);
                 return category ? (
                   <Badge key={categoryId} variant="secondary" className="text-xs">
@@ -142,31 +142,27 @@ export function TherapistCategoryAssignment({
         {/* Category selection */}
         <div className="space-y-3">
           <h4 className="font-medium text-gray-900">Available Categories:</h4>
-          
+
           {categories.map((category: TherapyCategory) => (
-            <div 
-              key={category.id} 
+            <div
+              key={category.id}
               className="flex items-start space-x-3 p-3 border rounded-lg hover:bg-gray-50"
             >
               <Checkbox
                 id={category.id}
                 checked={selectedCategories.includes(category.id)}
-                onCheckedChange={(checked) => 
-                  handleCategoryToggle(category.id, checked as boolean)
-                }
+                onCheckedChange={(checked) => handleCategoryToggle(category.id, checked as boolean)}
                 className="mt-1"
               />
-              
+
               <div className="flex-1 min-w-0">
-                <label 
+                <label
                   htmlFor={category.id}
                   className="block text-sm font-medium text-gray-900 cursor-pointer"
                 >
                   {category.name}
                 </label>
-                <p className="text-xs text-gray-600 mt-1">
-                  {category.description}
-                </p>
+                <p className="text-xs text-gray-600 mt-1">{category.description}</p>
                 <div className="flex items-center gap-2 mt-2">
                   <Badge variant="outline" className="text-xs bg-green-50 text-green-700">
                     £{category.pricePerSession}/session
@@ -197,10 +193,7 @@ export function TherapistCategoryAssignment({
               Cancel
             </Button>
           )}
-          <Button 
-            onClick={handleSave}
-            disabled={assignCategoriesMutation.isPending}
-          >
+          <Button onClick={handleSave} disabled={assignCategoriesMutation.isPending}>
             {assignCategoriesMutation.isPending ? (
               "Saving..."
             ) : (

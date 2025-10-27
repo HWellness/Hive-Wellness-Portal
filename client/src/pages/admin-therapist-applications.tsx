@@ -4,7 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -21,7 +27,7 @@ interface TherapistApplication {
   qualifications: string[];
   yearsOfExperience: number;
   specializations: string[];
-  status: 'pending' | 'approved' | 'rejected';
+  status: "pending" | "approved" | "rejected";
   submittedAt: string;
   reviewedAt?: string;
   profileImageUrl?: string;
@@ -33,25 +39,25 @@ export default function AdminTherapistApplications() {
   const [adminNotes, setAdminNotes] = useState("");
 
   const { data: applications, isLoading } = useQuery({
-    queryKey: ['/api/admin/therapist-applications'],
+    queryKey: ["/api/admin/therapist-applications"],
     queryFn: async () => {
       const response = await apiRequest("GET", "/api/admin/therapist-applications");
-      if (!response.ok) throw new Error('Failed to fetch applications');
+      if (!response.ok) throw new Error("Failed to fetch applications");
       return response.json();
-    }
+    },
   });
 
   const updateApplicationMutation = useMutation({
     mutationFn: async ({ id, status, notes }: { id: string; status: string; notes: string }) => {
       const response = await apiRequest("PUT", `/api/admin/therapist-applications/${id}`, {
         status,
-        adminNotes: notes
+        adminNotes: notes,
       });
-      if (!response.ok) throw new Error('Failed to update application');
+      if (!response.ok) throw new Error("Failed to update application");
       return response.json();
     },
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/therapist-applications'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/therapist-applications"] });
       toast({
         title: "Application Updated",
         description: `Application ${variables.status} successfully.`,
@@ -61,35 +67,39 @@ export default function AdminTherapistApplications() {
     },
     onError: (error: any) => {
       toast({
-        title: "Update Failed", 
+        title: "Update Failed",
         description: error.message,
         variant: "destructive",
       });
-    }
+    },
   });
 
   const handleApprove = (application: TherapistApplication) => {
     updateApplicationMutation.mutate({
       id: application.id,
-      status: 'approved',
-      notes: adminNotes
+      status: "approved",
+      notes: adminNotes,
     });
   };
 
   const handleReject = (application: TherapistApplication) => {
     updateApplicationMutation.mutate({
       id: application.id,
-      status: 'rejected', 
-      notes: adminNotes
+      status: "rejected",
+      notes: adminNotes,
     });
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending': return 'bg-hive-light-blue text-hive-purple';
-      case 'approved': return 'bg-purple-100 text-purple-800';
-      case 'rejected': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "pending":
+        return "bg-hive-light-blue text-hive-purple";
+      case "approved":
+        return "bg-purple-100 text-purple-800";
+      case "rejected":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -135,7 +145,9 @@ export default function AdminTherapistApplications() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-secondary text-hive-black/70">Total Applications</p>
-                  <p className="text-2xl font-primary text-hive-purple">{applications?.length || 0}</p>
+                  <p className="text-2xl font-primary text-hive-purple">
+                    {applications?.length || 0}
+                  </p>
                 </div>
                 <Award className="w-8 h-8 text-hive-purple/60" />
               </div>
@@ -148,7 +160,8 @@ export default function AdminTherapistApplications() {
                 <div>
                   <p className="text-sm font-secondary text-hive-black/70">Pending Review</p>
                   <p className="text-2xl font-primary text-yellow-600">
-                    {applications?.filter((app: TherapistApplication) => app.status === 'pending').length || 0}
+                    {applications?.filter((app: TherapistApplication) => app.status === "pending")
+                      .length || 0}
                   </p>
                 </div>
                 <Calendar className="w-8 h-8 text-yellow-600/60" />
@@ -162,7 +175,8 @@ export default function AdminTherapistApplications() {
                 <div>
                   <p className="text-sm font-secondary text-hive-black/70">Approved</p>
                   <p className="text-2xl font-primary text-green-600">
-                    {applications?.filter((app: TherapistApplication) => app.status === 'approved').length || 0}
+                    {applications?.filter((app: TherapistApplication) => app.status === "approved")
+                      .length || 0}
                   </p>
                 </div>
                 <Check className="w-8 h-8 text-green-600/60" />
@@ -176,7 +190,8 @@ export default function AdminTherapistApplications() {
                 <div>
                   <p className="text-sm font-secondary text-hive-black/70">Rejected</p>
                   <p className="text-2xl font-primary text-red-600">
-                    {applications?.filter((app: TherapistApplication) => app.status === 'rejected').length || 0}
+                    {applications?.filter((app: TherapistApplication) => app.status === "rejected")
+                      .length || 0}
                   </p>
                 </div>
                 <X className="w-8 h-8 text-red-600/60" />
@@ -193,20 +208,24 @@ export default function AdminTherapistApplications() {
           <CardContent>
             <div className="space-y-4">
               {applications?.map((application: TherapistApplication) => (
-                <Card key={application.id} className="border border-gray-200 hover:border-hive-purple/30 transition-colors">
+                <Card
+                  key={application.id}
+                  className="border border-gray-200 hover:border-hive-purple/30 transition-colors"
+                >
                   <CardContent className="p-6">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-4">
                         {application.profileImageUrl ? (
-                          <img 
-                            src={application.profileImageUrl} 
+                          <img
+                            src={application.profileImageUrl}
                             alt={`${application.firstName} ${application.lastName}`}
                             className="w-12 h-12 rounded-full object-cover"
                           />
                         ) : (
                           <div className="w-12 h-12 rounded-full bg-hive-purple/10 flex items-center justify-center">
                             <span className="text-hive-purple font-semibold">
-                              {application.firstName.charAt(0)}{application.lastName.charAt(0)}
+                              {application.firstName.charAt(0)}
+                              {application.lastName.charAt(0)}
                             </span>
                           </div>
                         )}
@@ -228,7 +247,8 @@ export default function AdminTherapistApplications() {
                           </div>
                           <div className="flex items-center space-x-2 mt-2">
                             <Badge className={getStatusColor(application.status)}>
-                              {application.status.charAt(0).toUpperCase() + application.status.slice(1)}
+                              {application.status.charAt(0).toUpperCase() +
+                                application.status.slice(1)}
                             </Badge>
                             <span className="text-sm text-hive-black/70">
                               {application.yearsOfExperience} years experience
@@ -239,8 +259,8 @@ export default function AdminTherapistApplications() {
                       <div className="flex items-center space-x-2">
                         <Dialog>
                           <DialogTrigger asChild>
-                            <Button 
-                              variant="outline" 
+                            <Button
+                              variant="outline"
                               size="sm"
                               onClick={() => setSelectedApplication(application)}
                             >
@@ -258,8 +278,8 @@ export default function AdminTherapistApplications() {
                               {/* Profile Photo */}
                               {application.profileImageUrl && (
                                 <div className="text-center">
-                                  <img 
-                                    src={application.profileImageUrl} 
+                                  <img
+                                    src={application.profileImageUrl}
                                     alt={`${application.firstName} ${application.lastName}`}
                                     className="w-24 h-24 rounded-full object-cover mx-auto border-2 border-hive-purple/30"
                                   />
@@ -269,30 +289,42 @@ export default function AdminTherapistApplications() {
                               {/* Contact Information */}
                               <div className="grid grid-cols-2 gap-4">
                                 <div>
-                                  <Label className="font-secondary text-sm text-hive-black/70">Email</Label>
+                                  <Label className="font-secondary text-sm text-hive-black/70">
+                                    Email
+                                  </Label>
                                   <p className="font-secondary">{application.email}</p>
                                 </div>
                                 {application.phoneNumber && (
                                   <div>
-                                    <Label className="font-secondary text-sm text-hive-black/70">Phone</Label>
+                                    <Label className="font-secondary text-sm text-hive-black/70">
+                                      Phone
+                                    </Label>
                                     <p className="font-secondary">{application.phoneNumber}</p>
                                   </div>
                                 )}
                                 {application.location && (
                                   <div>
-                                    <Label className="font-secondary text-sm text-hive-black/70">Location</Label>
+                                    <Label className="font-secondary text-sm text-hive-black/70">
+                                      Location
+                                    </Label>
                                     <p className="font-secondary">{application.location}</p>
                                   </div>
                                 )}
                                 <div>
-                                  <Label className="font-secondary text-sm text-hive-black/70">Experience</Label>
-                                  <p className="font-secondary">{application.yearsOfExperience} years</p>
+                                  <Label className="font-secondary text-sm text-hive-black/70">
+                                    Experience
+                                  </Label>
+                                  <p className="font-secondary">
+                                    {application.yearsOfExperience} years
+                                  </p>
                                 </div>
                               </div>
 
                               {/* Qualifications */}
                               <div>
-                                <Label className="font-secondary text-sm text-hive-black/70">Qualifications</Label>
+                                <Label className="font-secondary text-sm text-hive-black/70">
+                                  Qualifications
+                                </Label>
                                 <div className="flex flex-wrap gap-2 mt-2">
                                   {application.qualifications?.map((qual, index) => (
                                     <Badge key={index} variant="outline" className="font-secondary">
@@ -304,7 +336,9 @@ export default function AdminTherapistApplications() {
 
                               {/* Specialisations */}
                               <div>
-                                <Label className="font-secondary text-sm text-hive-black/70">Specialisations</Label>
+                                <Label className="font-secondary text-sm text-hive-black/70">
+                                  Specialisations
+                                </Label>
                                 <div className="flex flex-wrap gap-2 mt-2">
                                   {application.specializations?.map((spec, index) => (
                                     <Badge key={index} variant="outline" className="font-secondary">
@@ -316,7 +350,10 @@ export default function AdminTherapistApplications() {
 
                               {/* Admin Notes */}
                               <div>
-                                <Label htmlFor="adminNotes" className="font-secondary text-sm text-hive-black/70">
+                                <Label
+                                  htmlFor="adminNotes"
+                                  className="font-secondary text-sm text-hive-black/70"
+                                >
                                   Admin Notes
                                 </Label>
                                 <Textarea
@@ -329,7 +366,7 @@ export default function AdminTherapistApplications() {
                               </div>
 
                               {/* Action Buttons */}
-                              {application.status === 'pending' && (
+                              {application.status === "pending" && (
                                 <div className="flex justify-end space-x-3 pt-4">
                                   <Button
                                     variant="outline"
@@ -361,7 +398,9 @@ export default function AdminTherapistApplications() {
               {(!applications || applications.length === 0) && (
                 <div className="text-center py-12">
                   <Award className="w-16 h-16 text-hive-purple/30 mx-auto mb-4" />
-                  <h3 className="font-primary text-hive-black font-semibold mb-2">No Applications Yet</h3>
+                  <h3 className="font-primary text-hive-black font-semibold mb-2">
+                    No Applications Yet
+                  </h3>
                   <p className="text-hive-black/70 font-secondary">
                     Therapist applications will appear here once submitted.
                   </p>

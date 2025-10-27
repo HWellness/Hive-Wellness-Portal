@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -6,16 +6,16 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Shield, Info } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { apiRequest, queryClient } from '@/lib/queryClient';
-import { useQuery } from '@tanstack/react-query';
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Shield, Info } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useQuery } from "@tanstack/react-query";
 
 interface ConsentPreferences {
   essential: boolean;
@@ -34,33 +34,33 @@ interface ConsentBannerProps {
 
 const CONSENT_DESCRIPTIONS = {
   essential: {
-    title: 'Essential Services',
+    title: "Essential Services",
     description:
-      'Required for the platform to function properly. This includes authentication, security features, and core therapy booking functionality. These cannot be disabled.',
+      "Required for the platform to function properly. This includes authentication, security features, and core therapy booking functionality. These cannot be disabled.",
     required: true,
   },
   functional: {
-    title: 'Functional Features',
+    title: "Functional Features",
     description:
-      'Enhanced features such as your preferences, settings, and personalised content. Helps improve your user experience.',
+      "Enhanced features such as your preferences, settings, and personalised content. Helps improve your user experience.",
     required: false,
   },
   analytics: {
-    title: 'Analytics & Performance',
+    title: "Analytics & Performance",
     description:
-      'Helps us understand how users interact with our platform so we can improve services and fix issues. All data is anonymised.',
+      "Helps us understand how users interact with our platform so we can improve services and fix issues. All data is anonymised.",
     required: false,
   },
   marketing: {
-    title: 'Marketing Communications',
+    title: "Marketing Communications",
     description:
-      'Receive updates about new services, therapy resources, wellness tips, and occasional promotional offers via email.',
+      "Receive updates about new services, therapy resources, wellness tips, and occasional promotional offers via email.",
     required: false,
   },
   medical_data_processing: {
-    title: 'AI-Powered Therapy Tools',
+    title: "AI-Powered Therapy Tools",
     description:
-      'Enables AI-powered features such as the therapy chatbot, therapist matching algorithm, and AI assistant for session analysis. Your data remains confidential and HIPAA-compliant.',
+      "Enables AI-powered features such as the therapy chatbot, therapist matching algorithm, and AI assistant for session analysis. Your data remains confidential and HIPAA-compliant.",
     required: false,
   },
 };
@@ -79,7 +79,7 @@ export function ConsentBanner({ open, onClose, onSave, isFirstTime = false }: Co
 
   // Fetch current consents if not first time
   const { data: currentConsents } = useQuery<{ success: boolean; consents: ConsentPreferences }>({
-    queryKey: ['/api/user/consent'],
+    queryKey: ["/api/user/consent"],
     enabled: !isFirstTime && open,
   });
 
@@ -90,7 +90,7 @@ export function ConsentBanner({ open, onClose, onSave, isFirstTime = false }: Co
   }, [currentConsents, isFirstTime]);
 
   const handleToggle = (key: keyof ConsentPreferences) => {
-    if (key === 'essential') return; // Cannot toggle essential
+    if (key === "essential") return; // Cannot toggle essential
     setConsents((prev) => ({
       ...prev,
       [key]: !prev[key],
@@ -98,7 +98,7 @@ export function ConsentBanner({ open, onClose, onSave, isFirstTime = false }: Co
   };
 
   const handleAcceptAll = async () => {
-    console.log('Accept All button clicked');
+    console.log("Accept All button clicked");
     const acceptAllPreferences = {
       essential: true,
       functional: true,
@@ -111,7 +111,7 @@ export function ConsentBanner({ open, onClose, onSave, isFirstTime = false }: Co
   };
 
   const handleRejectAll = async () => {
-    console.log('Reject Optional button clicked');
+    console.log("Reject Optional button clicked");
     const rejectOptionalPreferences = {
       essential: true,
       functional: false,
@@ -130,24 +130,24 @@ export function ConsentBanner({ open, onClose, onSave, isFirstTime = false }: Co
   const submitConsents = async (preferences: ConsentPreferences) => {
     setIsSubmitting(true);
     try {
-      await apiRequest('POST', '/api/user/consent', { consents: preferences });
+      await apiRequest("POST", "/api/user/consent", { consents: preferences });
 
       // Invalidate consent query to refresh
-      queryClient.invalidateQueries({ queryKey: ['/api/user/consent'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user/consent"] });
 
       toast({
-        title: 'Preferences saved',
-        description: 'Your consent preferences have been updated successfully.',
+        title: "Preferences saved",
+        description: "Your consent preferences have been updated successfully.",
       });
 
       // Mark consent as given and close dialog
       onSave();
     } catch (error) {
-      console.error('Error saving consents:', error);
+      console.error("Error saving consents:", error);
       toast({
-        title: 'Error',
-        description: 'Failed to save consent preferences. Please try again.',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to save consent preferences. Please try again.",
+        variant: "destructive",
       });
     } finally {
       setIsSubmitting(false);
@@ -155,9 +155,14 @@ export function ConsentBanner({ open, onClose, onSave, isFirstTime = false }: Co
   };
 
   return (
-    <Dialog open={open} onOpenChange={(isOpen) => { /* Prevent closing without explicit choice */ }}>
-      <DialogContent 
-        className="max-w-2xl max-h-[90vh]" 
+    <Dialog
+      open={open}
+      onOpenChange={(isOpen) => {
+        /* Prevent closing without explicit choice */
+      }}
+    >
+      <DialogContent
+        className="max-w-2xl max-h-[90vh]"
         data-testid="consent-banner-dialog"
         onEscapeKeyDown={(e) => e.preventDefault()}
         onPointerDownOutside={(e) => e.preventDefault()}
@@ -187,18 +192,24 @@ export function ConsentBanner({ open, onClose, onSave, isFirstTime = false }: Co
               <div className="flex items-start gap-2">
                 <Info className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
                 <p className="text-sm text-muted-foreground leading-relaxed">
-                  We use cookies and similar technologies to provide essential services, improve your experience, and
-                  analyse platform usage. You can customise your preferences or accept all to continue.
+                  We use cookies and similar technologies to provide essential services, improve
+                  your experience, and analyse platform usage. You can customise your preferences or
+                  accept all to continue.
                 </p>
               </div>
               <p className="text-sm text-muted-foreground">
-                By clicking "Accept All", you consent to our use of cookies and data processing as described in our{' '}
-                <a 
-                  href="https://hive-wellness.co.uk/privacy-policy/" 
-                  className="text-primary hover:underline font-medium" 
+                By clicking "Accept All", you consent to our use of cookies and data processing as
+                described in our{" "}
+                <a
+                  href="https://hive-wellness.co.uk/privacy-policy/"
+                  className="text-primary hover:underline font-medium"
                   onClick={(e) => {
                     e.preventDefault();
-                    window.open('https://hive-wellness.co.uk/privacy-policy/', '_blank', 'noopener,noreferrer');
+                    window.open(
+                      "https://hive-wellness.co.uk/privacy-policy/",
+                      "_blank",
+                      "noopener,noreferrer"
+                    );
                   }}
                   data-testid="link-privacy-policy"
                 >
@@ -222,7 +233,8 @@ export function ConsentBanner({ open, onClose, onSave, isFirstTime = false }: Co
           <ScrollArea className="max-h-[50vh] pr-4">
             <div className="space-y-6">
               <p className="text-sm text-muted-foreground">
-                Choose which services you'd like to enable. Essential services are required and cannot be disabled.
+                Choose which services you'd like to enable. Essential services are required and
+                cannot be disabled.
               </p>
 
               {(Object.keys(CONSENT_DESCRIPTIONS) as Array<keyof ConsentPreferences>).map((key) => {
@@ -251,7 +263,7 @@ export function ConsentBanner({ open, onClose, onSave, isFirstTime = false }: Co
                         data-testid={`consent-switch-${key}`}
                       />
                     </div>
-                    {key !== 'medical_data_processing' && <Separator />}
+                    {key !== "medical_data_processing" && <Separator />}
                   </div>
                 );
               })}
@@ -310,7 +322,7 @@ export function ConsentBanner({ open, onClose, onSave, isFirstTime = false }: Co
                 data-testid="button-save-preferences"
                 className="w-full sm:w-auto"
               >
-                {isSubmitting ? 'Saving...' : 'Save Preferences'}
+                {isSubmitting ? "Saving..." : "Save Preferences"}
               </Button>
             </>
           )}

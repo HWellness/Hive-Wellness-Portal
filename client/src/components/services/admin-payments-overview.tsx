@@ -4,16 +4,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { 
-  PoundSterling, 
-  TrendingUp, 
-  Users, 
-  CreditCard, 
+import {
+  PoundSterling,
+  TrendingUp,
+  Users,
+  CreditCard,
   Download,
   Calendar,
   ArrowUpRight,
   ArrowDownLeft,
-  Activity
+  Activity,
 } from "lucide-react";
 import type { User } from "@shared/schema";
 
@@ -45,26 +45,26 @@ export default function AdminPaymentsOverview({ user }: AdminPaymentsOverviewPro
 
   // Fetch platform financial data
   const { data: financials, isLoading: financialsLoading } = useQuery<PlatformFinancials>({
-    queryKey: ['/api/admin/platform-financials', selectedPeriod],
+    queryKey: ["/api/admin/platform-financials", selectedPeriod],
     retry: false,
   });
 
   // Fetch payment metrics
   const { data: metrics, isLoading: metricsLoading } = useQuery<PaymentMetrics>({
-    queryKey: ['/api/admin/payment-metrics', selectedPeriod],
+    queryKey: ["/api/admin/payment-metrics", selectedPeriod],
     retry: false,
   });
 
   // Production reset - all financial metrics start at zero
   const demoFinancials: PlatformFinancials = {
-    totalRevenue: 0.00,
-    therapistPayouts: 0.00,
-    platformCommission: 0.00,
-    stripeProcessingFees: 0.00,
-    netPlatformRevenue: 0.00,
+    totalRevenue: 0.0,
+    therapistPayouts: 0.0,
+    platformCommission: 0.0,
+    stripeProcessingFees: 0.0,
+    netPlatformRevenue: 0.0,
     totalSessions: 0,
-    averageSessionValue: 0.00,
-    monthlyGrowth: 0.0
+    averageSessionValue: 0.0,
+    monthlyGrowth: 0.0,
   };
 
   const demoMetrics: PaymentMetrics = {
@@ -72,13 +72,17 @@ export default function AdminPaymentsOverview({ user }: AdminPaymentsOverviewPro
     failedPayments: 0,
     refunds: 0,
     chargebacks: 0,
-    processingVolume: 0.00
+    processingVolume: 0.0,
   };
 
   const displayFinancials = financials || demoFinancials;
   const displayMetrics = metrics || demoMetrics;
 
-  const successRate = ((displayMetrics.successfulPayments / (displayMetrics.successfulPayments + displayMetrics.failedPayments)) * 100).toFixed(1);
+  const successRate = (
+    (displayMetrics.successfulPayments /
+      (displayMetrics.successfulPayments + displayMetrics.failedPayments)) *
+    100
+  ).toFixed(1);
 
   return (
     <div className="max-w-7xl mx-auto p-6 space-y-6">
@@ -88,8 +92,8 @@ export default function AdminPaymentsOverview({ user }: AdminPaymentsOverviewPro
           <p className="text-gray-600 mt-2">Complete financial overview and payment analytics</p>
         </div>
         <div className="flex gap-3">
-          <select 
-            value={selectedPeriod} 
+          <select
+            value={selectedPeriod}
             onChange={(e) => setSelectedPeriod(e.target.value)}
             className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-hive-purple focus:border-transparent"
           >
@@ -115,10 +119,12 @@ export default function AdminPaymentsOverview({ user }: AdminPaymentsOverviewPro
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-gray-900">£{displayFinancials.totalRevenue.toFixed(2)}</div>
+            <div className="text-2xl font-bold text-gray-900">
+              £{displayFinancials.totalRevenue.toFixed(2)}
+            </div>
             <div className="flex items-center text-green-600 text-sm mt-1">
-              <ArrowUpRight className="w-4 h-4 mr-1" />
-              +{displayFinancials.monthlyGrowth}% this month
+              <ArrowUpRight className="w-4 h-4 mr-1" />+{displayFinancials.monthlyGrowth}% this
+              month
             </div>
           </CardContent>
         </Card>
@@ -131,7 +137,9 @@ export default function AdminPaymentsOverview({ user }: AdminPaymentsOverviewPro
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-gray-900">£{displayFinancials.therapistPayouts.toFixed(2)}</div>
+            <div className="text-2xl font-bold text-gray-900">
+              £{displayFinancials.therapistPayouts.toFixed(2)}
+            </div>
             <div className="text-sm text-gray-500 mt-1">85% of session fees</div>
           </CardContent>
         </Card>
@@ -144,7 +152,9 @@ export default function AdminPaymentsOverview({ user }: AdminPaymentsOverviewPro
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-gray-900">£{displayFinancials.netPlatformRevenue.toFixed(2)}</div>
+            <div className="text-2xl font-bold text-gray-900">
+              £{displayFinancials.netPlatformRevenue.toFixed(2)}
+            </div>
             <div className="text-sm text-gray-500 mt-1">After Stripe fees</div>
           </CardContent>
         </Card>
@@ -157,8 +167,12 @@ export default function AdminPaymentsOverview({ user }: AdminPaymentsOverviewPro
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-gray-900">{displayFinancials.totalSessions}</div>
-            <div className="text-sm text-gray-500 mt-1">£{displayFinancials.averageSessionValue.toFixed(2)} avg</div>
+            <div className="text-2xl font-bold text-gray-900">
+              {displayFinancials.totalSessions}
+            </div>
+            <div className="text-sm text-gray-500 mt-1">
+              £{displayFinancials.averageSessionValue.toFixed(2)} avg
+            </div>
           </CardContent>
         </Card>
       </div>
@@ -184,19 +198,27 @@ export default function AdminPaymentsOverview({ user }: AdminPaymentsOverviewPro
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-600">Gross Revenue</span>
-                    <span className="font-semibold">£{displayFinancials.totalRevenue.toFixed(2)}</span>
+                    <span className="font-semibold">
+                      £{displayFinancials.totalRevenue.toFixed(2)}
+                    </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-600">Therapist Share (85%)</span>
-                    <span className="font-semibold text-blue-600">-£{displayFinancials.therapistPayouts.toFixed(2)}</span>
+                    <span className="font-semibold text-blue-600">
+                      -£{displayFinancials.therapistPayouts.toFixed(2)}
+                    </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-600">Stripe Processing Fees</span>
-                    <span className="font-semibold text-red-600">-£{displayFinancials.stripeProcessingFees.toFixed(2)}</span>
+                    <span className="font-semibold text-red-600">
+                      -£{displayFinancials.stripeProcessingFees.toFixed(2)}
+                    </span>
                   </div>
                   <div className="border-t pt-2 flex justify-between items-center">
                     <span className="font-medium">Net Platform Revenue</span>
-                    <span className="font-bold text-hive-purple">£{displayFinancials.netPlatformRevenue.toFixed(2)}</span>
+                    <span className="font-bold text-hive-purple">
+                      £{displayFinancials.netPlatformRevenue.toFixed(2)}
+                    </span>
                   </div>
                 </div>
               </CardContent>
@@ -212,18 +234,27 @@ export default function AdminPaymentsOverview({ user }: AdminPaymentsOverviewPro
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="text-center p-4 bg-gray-50 rounded-lg">
-                    <div className="text-2xl font-bold text-gray-900">{displayFinancials.totalSessions}</div>
+                    <div className="text-2xl font-bold text-gray-900">
+                      {displayFinancials.totalSessions}
+                    </div>
                     <div className="text-sm text-gray-600">Total Sessions</div>
                   </div>
                   <div className="text-center p-4 bg-gray-50 rounded-lg">
-                    <div className="text-2xl font-bold text-gray-900">£{displayFinancials.averageSessionValue.toFixed(0)}</div>
+                    <div className="text-2xl font-bold text-gray-900">
+                      £{displayFinancials.averageSessionValue.toFixed(0)}
+                    </div>
                     <div className="text-sm text-gray-600">Average Value</div>
                   </div>
                 </div>
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-600">Revenue per Session</span>
-                    <span className="font-semibold">£{(displayFinancials.netPlatformRevenue / displayFinancials.totalSessions).toFixed(2)}</span>
+                    <span className="font-semibold">
+                      £
+                      {(
+                        displayFinancials.netPlatformRevenue / displayFinancials.totalSessions
+                      ).toFixed(2)}
+                    </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-600">Platform Commission Rate</span>
@@ -287,17 +318,30 @@ export default function AdminPaymentsOverview({ user }: AdminPaymentsOverviewPro
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="text-center">
-                  <div className="text-2xl font-bold text-gray-900">£{displayMetrics.processingVolume.toFixed(2)}</div>
+                  <div className="text-2xl font-bold text-gray-900">
+                    £{displayMetrics.processingVolume.toFixed(2)}
+                  </div>
                   <div className="text-sm text-gray-600">Total Processed</div>
                 </div>
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-600">Average Transaction</span>
-                    <span className="font-semibold">£{(displayMetrics.processingVolume / displayMetrics.successfulPayments).toFixed(2)}</span>
+                    <span className="font-semibold">
+                      £
+                      {(
+                        displayMetrics.processingVolume / displayMetrics.successfulPayments
+                      ).toFixed(2)}
+                    </span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-600">Processing Fee Rate</span>
-                    <span className="font-semibold">{((displayFinancials.stripeProcessingFees / displayFinancials.totalRevenue) * 100).toFixed(1)}%</span>
+                    <span className="font-semibold">
+                      {(
+                        (displayFinancials.stripeProcessingFees / displayFinancials.totalRevenue) *
+                        100
+                      ).toFixed(1)}
+                      %
+                    </span>
                   </div>
                 </div>
               </CardContent>
@@ -316,9 +360,12 @@ export default function AdminPaymentsOverview({ user }: AdminPaymentsOverviewPro
             <CardContent>
               <div className="text-center py-12">
                 <TrendingUp className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                <div className="text-lg font-medium text-gray-900 mb-2">Growth Analytics Coming Soon</div>
+                <div className="text-lg font-medium text-gray-900 mb-2">
+                  Growth Analytics Coming Soon
+                </div>
                 <div className="text-gray-600 max-w-md mx-auto">
-                  Detailed financial trends and forecasting will be available as your platform grows and accumulates more transaction data.
+                  Detailed financial trends and forecasting will be available as your platform grows
+                  and accumulates more transaction data.
                 </div>
                 <div className="mt-6">
                   <Badge variant="secondary" className="bg-hive-purple/10 text-hive-purple">

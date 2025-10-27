@@ -1,41 +1,41 @@
-import { nanoid } from 'nanoid';
-import { db } from './db';
-import { 
-  openaiUsageLogs, 
-  openaiUsageAlerts, 
+import { nanoid } from "nanoid";
+import { db } from "./db";
+import {
+  openaiUsageLogs,
+  openaiUsageAlerts,
   openaiUsageThresholds,
   type InsertOpenAIUsageLog,
-  type InsertOpenAIUsageAlert 
-} from '@shared/schema';
-import { eq, and, gte, lte, sql, desc, asc } from 'drizzle-orm';
-import { logger } from './lib/logger';
-import { emailService } from './services/email-service.js';
-import OpenAI from 'openai';
+  type InsertOpenAIUsageAlert,
+} from "@shared/schema";
+import { eq, and, gte, lte, sql, desc, asc } from "drizzle-orm";
+import { logger } from "./lib/logger";
+import { emailService } from "./services/email-service.js";
+import OpenAI from "openai";
 
 // GPT-4o pricing (as of 2024) - prices per 1M tokens
 const PRICING = {
-  'gpt-4o': {
-    prompt: 2.50,      // $2.50 per 1M prompt tokens
-    completion: 10.00  // $10.00 per 1M completion tokens
+  "gpt-4o": {
+    prompt: 2.5, // $2.50 per 1M prompt tokens
+    completion: 10.0, // $10.00 per 1M completion tokens
   },
-  'gpt-4-turbo': {
-    prompt: 10.00,
-    completion: 30.00
+  "gpt-4-turbo": {
+    prompt: 10.0,
+    completion: 30.0,
   },
-  'gpt-4': {
-    prompt: 30.00,
-    completion: 60.00
+  "gpt-4": {
+    prompt: 30.0,
+    completion: 60.0,
   },
-  'gpt-3.5-turbo': {
-    prompt: 0.50,
-    completion: 1.50
-  }
+  "gpt-3.5-turbo": {
+    prompt: 0.5,
+    completion: 1.5,
+  },
 };
 
 export interface TrackingContext {
   userId?: string;
   sessionId?: string;
-  featureType: 'chatbot' | 'therapist_matching' | 'therapist_assistant' | 'other';
+  featureType: "chatbot" | "therapist_matching" | "therapist_assistant" | "other";
   metadata?: Record<string, any>;
   ipAddress?: string;
   userAgent?: string;
@@ -65,8 +65,8 @@ export class OpenAITrackingService {
       return response;
     } catch (error: any) {
       success = false;
-      errorMessage = error.message || 'Unknown OpenAI API error';
-      logger.error('OpenAI API call failed', { error, context });
+      errorMessage = error.message || "Unknown OpenAI API error";
+      logger.error("OpenAI API call failed", { error, context });
       throw error;
     } finally {
       const responseTime = Date.now() - startTime;
@@ -81,7 +81,7 @@ export class OpenAITrackingService {
           responseTime,
           success,
           errorMessage,
-          ...context
+          ...context,
         });
       }
     }
@@ -135,7 +135,7 @@ export class OpenAITrackingService {
       // Check for anomalies after logging
       await this.checkForAnomalies(data);
     } catch (error) {
-      logger.error('Failed to log OpenAI usage', { error, data });
+      logger.error("Failed to log OpenAI usage", { error, data });
     }
   }
 
@@ -143,11 +143,11 @@ export class OpenAITrackingService {
    * Calculate estimated cost based on model and token usage
    */
   private calculateCost(model: string, promptTokens: number, completionTokens: number): number {
-    const pricing = PRICING[model as keyof typeof PRICING] || PRICING['gpt-4o'];
-    
+    const pricing = PRICING[model as keyof typeof PRICING] || PRICING["gpt-4o"];
+
     const promptCost = (promptTokens / 1_000_000) * pricing.prompt;
     const completionCost = (completionTokens / 1_000_000) * pricing.completion;
-    
+
     return promptCost + completionCost;
   }
 
@@ -173,18 +173,15 @@ export class OpenAITrackingService {
       dayEnd.setHours(23, 59, 59, 999);
 
       // Check daily token threshold
-      const dailyTokenThreshold = thresholds.find(t => t.thresholdType === 'daily_tokens');
+      const dailyTokenThreshold = thresholds.find((t) => t.thresholdType === "daily_tokens");
       if (dailyTokenThreshold) {
         const todayUsage = await db
           .select({
-            total: sql<number>`SUM(${openaiUsageLogs.totalTokens})::int`
+            total: sql<number>`SUM(${openaiUsageLogs.totalTokens})::int`,
           })
           .from(openaiUsageLogs)
           .where(
-            and(
-              gte(openaiUsageLogs.createdAt, dayStart),
-              lte(openaiUsageLogs.createdAt, dayEnd)
-            )
+            and(gte(openaiUsageLogs.createdAt, dayStart), lte(openaiUsageLogs.createdAt, dayEnd))
           );
 
         const totalToday = todayUsage[0]?.total || 0;
@@ -193,32 +190,32 @@ export class OpenAITrackingService {
 
         if (totalToday >= limit) {
           await this.createAlert({
-            alertType: 'daily_threshold',
-            severity: 'critical',
+            alertType: "daily_threshold",
+            severity: "critical",
             triggerValue: totalToday.toString(),
             thresholdValue: limit.toString(),
             message: `Daily token limit exceeded: ${totalToday.toLocaleString()} / ${limit.toLocaleString()} tokens used today`,
-            metadata: { date: now.toISOString() }
+            metadata: { date: now.toISOString() },
           });
         } else if (totalToday >= warning) {
           await this.createAlert({
-            alertType: 'daily_threshold',
-            severity: 'medium',
+            alertType: "daily_threshold",
+            severity: "medium",
             triggerValue: totalToday.toString(),
             thresholdValue: warning.toString(),
             message: `Daily token warning: ${totalToday.toLocaleString()} / ${limit.toLocaleString()} tokens used today (${Math.round((totalToday / limit) * 100)}%)`,
-            metadata: { date: now.toISOString() }
+            metadata: { date: now.toISOString() },
           });
         }
       }
 
       // Check user-specific daily token threshold
       if (data.userId) {
-        const userDailyThreshold = thresholds.find(t => t.thresholdType === 'user_daily_tokens');
+        const userDailyThreshold = thresholds.find((t) => t.thresholdType === "user_daily_tokens");
         if (userDailyThreshold) {
           const userTodayUsage = await db
             .select({
-              total: sql<number>`SUM(${openaiUsageLogs.totalTokens})::int`
+              total: sql<number>`SUM(${openaiUsageLogs.totalTokens})::int`,
             })
             .from(openaiUsageLogs)
             .where(
@@ -234,13 +231,13 @@ export class OpenAITrackingService {
 
           if (userTotal >= limit) {
             await this.createAlert({
-              alertType: 'user_spike',
-              severity: 'high',
+              alertType: "user_spike",
+              severity: "high",
               triggerValue: userTotal.toString(),
               thresholdValue: limit.toString(),
               userId: data.userId,
               message: `User ${data.userId} exceeded daily token limit: ${userTotal.toLocaleString()} tokens`,
-              metadata: { date: now.toISOString(), featureType: data.featureType }
+              metadata: { date: now.toISOString(), featureType: data.featureType },
             });
           }
         }
@@ -249,13 +246,13 @@ export class OpenAITrackingService {
       // Check error rate
       if (!data.success) {
         const hourStart = new Date(now.getTime() - 60 * 60 * 1000); // Last hour
-        const errorRateThreshold = thresholds.find(t => t.thresholdType === 'error_rate');
-        
+        const errorRateThreshold = thresholds.find((t) => t.thresholdType === "error_rate");
+
         if (errorRateThreshold) {
           const hourlyStats = await db
             .select({
               total: sql<number>`COUNT(*)::int`,
-              errors: sql<number>`SUM(CASE WHEN ${openaiUsageLogs.success} = false THEN 1 ELSE 0 END)::int`
+              errors: sql<number>`SUM(CASE WHEN ${openaiUsageLogs.success} = false THEN 1 ELSE 0 END)::int`,
             })
             .from(openaiUsageLogs)
             .where(gte(openaiUsageLogs.createdAt, hourStart));
@@ -267,25 +264,25 @@ export class OpenAITrackingService {
 
           if (errorRate >= limit) {
             await this.createAlert({
-              alertType: 'error_rate',
-              severity: 'high',
+              alertType: "error_rate",
+              severity: "high",
               triggerValue: errorRate.toFixed(2),
               thresholdValue: limit.toString(),
               message: `High error rate detected: ${errorRate.toFixed(1)}% (${errors}/${total} requests failed in last hour)`,
-              metadata: { hourStart: hourStart.toISOString() }
+              metadata: { hourStart: hourStart.toISOString() },
             });
           }
         }
       }
     } catch (error) {
-      logger.error('Failed to check for usage anomalies', { error });
+      logger.error("Failed to check for usage anomalies", { error });
     }
   }
 
   /**
    * Create a usage alert
    */
-  private async createAlert(data: Omit<InsertOpenAIUsageAlert, 'id'>): Promise<void> {
+  private async createAlert(data: Omit<InsertOpenAIUsageAlert, "id">): Promise<void> {
     try {
       // Check if similar alert was created in last hour to avoid spam
       const hourAgo = new Date(Date.now() - 60 * 60 * 1000);
@@ -302,17 +299,17 @@ export class OpenAITrackingService {
         .limit(1);
 
       if (recentSimilarAlerts.length > 0) {
-        logger.info('Skipping duplicate alert', { alertType: data.alertType });
+        logger.info("Skipping duplicate alert", { alertType: data.alertType });
         return;
       }
 
       const alertId = nanoid();
       await db.insert(openaiUsageAlerts).values({
         id: alertId,
-        ...data
+        ...data,
       });
 
-      logger.warn('OpenAI usage alert created', { alert: data });
+      logger.warn("OpenAI usage alert created", { alert: data });
 
       // Send notification if configured
       const threshold = await db
@@ -321,7 +318,11 @@ export class OpenAITrackingService {
         .where(eq(openaiUsageThresholds.isActive, true))
         .limit(1);
 
-      if (threshold.length > 0 && threshold[0].notifyEmails && threshold[0].notifyEmails.length > 0) {
+      if (
+        threshold.length > 0 &&
+        threshold[0].notifyEmails &&
+        threshold[0].notifyEmails.length > 0
+      ) {
         for (const email of threshold[0].notifyEmails) {
           try {
             await emailService.sendEmail({
@@ -333,16 +334,16 @@ export class OpenAITrackingService {
                 <p><strong>${data.message}</strong></p>
                 <ul>
                   <li><strong>Alert Type:</strong> ${data.alertType}</li>
-                  <li><strong>Severity:</strong> <span style="color: ${data.severity === 'critical' ? 'red' : 'orange'}">${data.severity.toUpperCase()}</span></li>
+                  <li><strong>Severity:</strong> <span style="color: ${data.severity === "critical" ? "red" : "orange"}">${data.severity.toUpperCase()}</span></li>
                   <li><strong>Triggered:</strong> ${new Date().toLocaleString()}</li>
-                  ${data.userId ? `<li><strong>User ID:</strong> ${data.userId}</li>` : ''}
-                  ${data.featureType ? `<li><strong>Feature:</strong> ${data.featureType}</li>` : ''}
+                  ${data.userId ? `<li><strong>User ID:</strong> ${data.userId}</li>` : ""}
+                  ${data.featureType ? `<li><strong>Feature:</strong> ${data.featureType}</li>` : ""}
                 </ul>
                 <p>View details in the admin dashboard.</p>
-              `
+              `,
             });
           } catch (emailError) {
-            logger.error('Failed to send alert email', { emailError, email });
+            logger.error("Failed to send alert email", { emailError, email });
           }
         }
 
@@ -353,14 +354,17 @@ export class OpenAITrackingService {
           .where(eq(openaiUsageAlerts.id, alertId));
       }
     } catch (error) {
-      logger.error('Failed to create usage alert', { error, data });
+      logger.error("Failed to create usage alert", { error, data });
     }
   }
 
   /**
    * Get usage analytics for a specific time period
    */
-  async getUsageAnalytics(startDate: Date, endDate: Date): Promise<{
+  async getUsageAnalytics(
+    startDate: Date,
+    endDate: Date
+  ): Promise<{
     totalRequests: number;
     totalTokens: number;
     totalCost: number;
@@ -373,49 +377,46 @@ export class OpenAITrackingService {
       .select()
       .from(openaiUsageLogs)
       .where(
-        and(
-          gte(openaiUsageLogs.createdAt, startDate),
-          lte(openaiUsageLogs.createdAt, endDate)
-        )
+        and(gte(openaiUsageLogs.createdAt, startDate), lte(openaiUsageLogs.createdAt, endDate))
       );
 
     const totalRequests = logs.length;
     const totalTokens = logs.reduce((sum, log) => sum + log.totalTokens, 0);
     const totalCost = logs.reduce((sum, log) => sum + Number(log.estimatedCost || 0), 0);
-    const errors = logs.filter(log => !log.success).length;
+    const errors = logs.filter((log) => !log.success).length;
     const errorRate = totalRequests > 0 ? (errors / totalRequests) * 100 : 0;
 
     // Aggregate by feature type
     const byFeatureMap = new Map<string, { requests: number; tokens: number; cost: number }>();
-    logs.forEach(log => {
+    logs.forEach((log) => {
       const existing = byFeatureMap.get(log.featureType) || { requests: 0, tokens: 0, cost: 0 };
       byFeatureMap.set(log.featureType, {
         requests: existing.requests + 1,
         tokens: existing.tokens + log.totalTokens,
-        cost: existing.cost + Number(log.estimatedCost || 0)
+        cost: existing.cost + Number(log.estimatedCost || 0),
       });
     });
 
     // Aggregate by model
     const byModelMap = new Map<string, { requests: number; tokens: number; cost: number }>();
-    logs.forEach(log => {
+    logs.forEach((log) => {
       const existing = byModelMap.get(log.model) || { requests: 0, tokens: 0, cost: 0 };
       byModelMap.set(log.model, {
         requests: existing.requests + 1,
         tokens: existing.tokens + log.totalTokens,
-        cost: existing.cost + Number(log.estimatedCost || 0)
+        cost: existing.cost + Number(log.estimatedCost || 0),
       });
     });
 
     // Aggregate by user
     const byUserMap = new Map<string, { requests: number; tokens: number; cost: number }>();
-    logs.forEach(log => {
+    logs.forEach((log) => {
       if (log.userId) {
         const existing = byUserMap.get(log.userId) || { requests: 0, tokens: 0, cost: 0 };
         byUserMap.set(log.userId, {
           requests: existing.requests + 1,
           tokens: existing.tokens + log.totalTokens,
-          cost: existing.cost + Number(log.estimatedCost || 0)
+          cost: existing.cost + Number(log.estimatedCost || 0),
         });
       }
     });
@@ -426,29 +427,34 @@ export class OpenAITrackingService {
       totalCost,
       byFeature: Array.from(byFeatureMap.entries()).map(([featureType, stats]) => ({
         featureType,
-        ...stats
+        ...stats,
       })),
       byModel: Array.from(byModelMap.entries()).map(([model, stats]) => ({
         model,
-        ...stats
+        ...stats,
       })),
-      byUser: Array.from(byUserMap.entries()).map(([userId, stats]) => ({
-        userId,
-        ...stats
-      })).sort((a, b) => b.cost - a.cost).slice(0, 10), // Top 10 users by cost
-      errorRate
+      byUser: Array.from(byUserMap.entries())
+        .map(([userId, stats]) => ({
+          userId,
+          ...stats,
+        }))
+        .sort((a, b) => b.cost - a.cost)
+        .slice(0, 10), // Top 10 users by cost
+      errorRate,
     };
   }
 
   /**
    * Get daily usage trend
    */
-  async getDailyUsageTrend(days: number = 30): Promise<Array<{
-    date: string;
-    requests: number;
-    tokens: number;
-    cost: number;
-  }>> {
+  async getDailyUsageTrend(days: number = 30): Promise<
+    Array<{
+      date: string;
+      requests: number;
+      tokens: number;
+      cost: number;
+    }>
+  > {
     const endDate = new Date();
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
@@ -458,26 +464,23 @@ export class OpenAITrackingService {
         date: sql<string>`DATE(${openaiUsageLogs.createdAt})`,
         requests: sql<number>`COUNT(*)::int`,
         tokens: sql<number>`SUM(${openaiUsageLogs.totalTokens})::int`,
-        cost: sql<number>`SUM(${openaiUsageLogs.estimatedCost})::numeric`
+        cost: sql<number>`SUM(${openaiUsageLogs.estimatedCost})::numeric`,
       })
       .from(openaiUsageLogs)
       .where(
-        and(
-          gte(openaiUsageLogs.createdAt, startDate),
-          lte(openaiUsageLogs.createdAt, endDate)
-        )
+        and(gte(openaiUsageLogs.createdAt, startDate), lte(openaiUsageLogs.createdAt, endDate))
       )
       .groupBy(sql`DATE(${openaiUsageLogs.createdAt})`)
       .orderBy(asc(sql`DATE(${openaiUsageLogs.createdAt})`));
 
-    return result.map(row => ({
+    return result.map((row) => ({
       date: row.date,
       requests: row.requests,
       tokens: row.tokens,
-      cost: Number(row.cost)
+      cost: Number(row.cost),
     }));
   }
 }
 
 // Export singleton instance
-export const openaiTracking = new OpenAITrackingService(process.env.OPENAI_API_KEY || '');
+export const openaiTracking = new OpenAITrackingService(process.env.OPENAI_API_KEY || "");

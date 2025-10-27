@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from 'express';
-import { logSecurityEvent } from './security-audit';
+import { Request, Response, NextFunction } from "express";
+import { logSecurityEvent } from "./security-audit";
 
 // Enhanced session security tracking
 interface SessionSecurityData {
@@ -34,9 +34,9 @@ export const setSessionStore = (store: any) => {
 
 // Get trusted IP consistently across all security modules
 const getTrustedIP = (req: Request): string => {
-  return req.headers['x-forwarded-for'] ? 
-    (req.headers['x-forwarded-for'] as string).split(',')[0].trim() : 
-    (req.ip || 'unknown');
+  return req.headers["x-forwarded-for"]
+    ? (req.headers["x-forwarded-for"] as string).split(",")[0].trim()
+    : req.ip || "unknown";
 };
 
 // Destroy specific session in session store
@@ -44,7 +44,7 @@ const destroySpecificSession = (sessionId: string) => {
   if (sessionStore && sessionStore.destroy) {
     sessionStore.destroy(sessionId, (err: any) => {
       if (err) {
-        console.error('Failed to destroy session:', sessionId, err);
+        console.error("Failed to destroy session:", sessionId, err);
       }
     });
   }
@@ -53,13 +53,13 @@ const destroySpecificSession = (sessionId: string) => {
 // Enhanced session tracking middleware
 export const enhancedSessionTracking = (req: Request, res: Response, next: NextFunction) => {
   const user = (req as any).user;
-  const sessionId = (req as any).sessionID || 'anonymous';
-  
+  const sessionId = (req as any).sessionID || "anonymous";
+
   if (user && user.id) {
     const userId = user.id;
     const now = Date.now();
     const clientIP = getTrustedIP(req);
-    const userAgent = req.get('User-Agent') || 'unknown';
+    const userAgent = req.get("User-Agent") || "unknown";
 
     // Get or create session security data
     let sessionData = sessionSecurityData.get(sessionId);
@@ -71,7 +71,7 @@ export const enhancedSessionTracking = (req: Request, res: Response, next: NextF
         userAgent: userAgent,
         sessionId: sessionId,
         securityViolations: 0,
-        concurrentSessions: 0
+        concurrentSessions: 0,
       };
       sessionSecurityData.set(sessionId, sessionData);
 
@@ -83,55 +83,55 @@ export const enhancedSessionTracking = (req: Request, res: Response, next: NextF
 
       // Log new session creation
       logSecurityEvent({
-        type: 'authentication',
-        severity: 'low',
+        type: "authentication",
+        severity: "low",
         ip: clientIP,
         userAgent: userAgent,
         userId: userId,
         details: {
-          event: 'session_created',
+          event: "session_created",
           sessionId: sessionId,
-          loginTime: new Date(now).toISOString()
+          loginTime: new Date(now).toISOString(),
         },
         url: req.url,
-        method: req.method
+        method: req.method,
       });
     }
 
     // Check for session timeout BEFORE updating activity
     if (now - sessionData.lastActivity > SESSION_SECURITY_CONFIG.SESSION_TIMEOUT_MS) {
       logSecurityEvent({
-        type: 'authentication',
-        severity: 'low',
+        type: "authentication",
+        severity: "low",
         ip: clientIP,
         userAgent: userAgent,
         userId: userId,
         details: {
-          event: 'session_timeout',
+          event: "session_timeout",
           sessionId: sessionId,
-          inactiveTime: now - sessionData.lastActivity
+          inactiveTime: now - sessionData.lastActivity,
         },
         url: req.url,
-        method: req.method
+        method: req.method,
       });
 
       // Properly destroy session
       destroySpecificSession(sessionId);
       userSessions.get(userId)?.delete(sessionId);
       sessionSecurityData.delete(sessionId);
-      
+
       // Safe session destruction without requiring Passport
       if (req.session) {
         req.session.destroy((err) => {
-          res.status(401).json({ 
-            error: 'Session expired due to inactivity',
-            code: 'SESSION_TIMEOUT'
+          res.status(401).json({
+            error: "Session expired due to inactivity",
+            code: "SESSION_TIMEOUT",
           });
         });
       } else {
-        res.status(401).json({ 
-          error: 'Session expired due to inactivity',
-          code: 'SESSION_TIMEOUT'
+        res.status(401).json({
+          error: "Session expired due to inactivity",
+          code: "SESSION_TIMEOUT",
         });
       }
       return;
@@ -144,25 +144,28 @@ export const enhancedSessionTracking = (req: Request, res: Response, next: NextF
     // Check for concurrent session violations
     if (sessionData.concurrentSessions > SESSION_SECURITY_CONFIG.MAX_CONCURRENT_SESSIONS) {
       logSecurityEvent({
-        type: 'suspicious_activity',
-        severity: 'medium',
+        type: "suspicious_activity",
+        severity: "medium",
         ip: clientIP,
         userAgent: userAgent,
         userId: userId,
         details: {
-          event: 'excessive_concurrent_sessions',
+          event: "excessive_concurrent_sessions",
           sessionCount: sessionData.concurrentSessions,
-          maxAllowed: SESSION_SECURITY_CONFIG.MAX_CONCURRENT_SESSIONS
+          maxAllowed: SESSION_SECURITY_CONFIG.MAX_CONCURRENT_SESSIONS,
         },
         url: req.url,
-        method: req.method
+        method: req.method,
       });
 
       // Properly terminate oldest sessions by destroying them in session store
       const userSessionSet = userSessions.get(userId)!;
-      const sessionsToTerminate = Array.from(userSessionSet).slice(0, -SESSION_SECURITY_CONFIG.MAX_CONCURRENT_SESSIONS);
-      
-      sessionsToTerminate.forEach(oldSessionId => {
+      const sessionsToTerminate = Array.from(userSessionSet).slice(
+        0,
+        -SESSION_SECURITY_CONFIG.MAX_CONCURRENT_SESSIONS
+      );
+
+      sessionsToTerminate.forEach((oldSessionId) => {
         // Destroy specific session in session store
         destroySpecificSession(oldSessionId);
         sessionSecurityData.delete(oldSessionId);
@@ -173,21 +176,21 @@ export const enhancedSessionTracking = (req: Request, res: Response, next: NextF
     // Detect suspicious login patterns using trusted IP
     if (sessionData.loginIP !== clientIP) {
       sessionData.securityViolations++;
-      
+
       logSecurityEvent({
-        type: 'suspicious_activity',
-        severity: 'high',
+        type: "suspicious_activity",
+        severity: "high",
         ip: clientIP,
         userAgent: userAgent,
         userId: userId,
         details: {
-          event: 'ip_address_change',
+          event: "ip_address_change",
           originalIP: sessionData.loginIP,
           newIP: clientIP,
-          violationCount: sessionData.securityViolations
+          violationCount: sessionData.securityViolations,
         },
         url: req.url,
-        method: req.method
+        method: req.method,
       });
 
       // Properly invalidate session if too many violations
@@ -196,19 +199,19 @@ export const enhancedSessionTracking = (req: Request, res: Response, next: NextF
         destroySpecificSession(sessionId);
         userSessions.get(userId)?.delete(sessionId);
         sessionSecurityData.delete(sessionId);
-        
+
         // Safe session destruction
         if (req.session) {
           req.session.destroy((err) => {
-            res.status(401).json({ 
-              error: 'Session invalidated due to security violations',
-              code: 'SECURITY_VIOLATION'
+            res.status(401).json({
+              error: "Session invalidated due to security violations",
+              code: "SECURITY_VIOLATION",
             });
           });
         } else {
-          res.status(401).json({ 
-            error: 'Session invalidated due to security violations',
-            code: 'SECURITY_VIOLATION'
+          res.status(401).json({
+            error: "Session invalidated due to security violations",
+            code: "SECURITY_VIOLATION",
           });
         }
         return;
@@ -225,7 +228,8 @@ export const enhancedSessionTracking = (req: Request, res: Response, next: NextF
 // Session cleanup middleware
 export const sessionCleanup = (req: Request, res: Response, next: NextFunction) => {
   // Clean up expired sessions periodically
-  if (Math.random() < 0.01) { // 1% chance to run cleanup
+  if (Math.random() < 0.01) {
+    // 1% chance to run cleanup
     const now = Date.now();
     const expiredSessions: string[] = [];
 
@@ -235,7 +239,7 @@ export const sessionCleanup = (req: Request, res: Response, next: NextFunction) 
       }
     });
 
-    expiredSessions.forEach(sessionId => {
+    expiredSessions.forEach((sessionId) => {
       const data = sessionSecurityData.get(sessionId);
       if (data) {
         // Remove from user sessions tracking
@@ -245,7 +249,7 @@ export const sessionCleanup = (req: Request, res: Response, next: NextFunction) 
             userSessions.delete(userId);
           }
         });
-        
+
         sessionSecurityData.delete(sessionId);
       }
     });
@@ -255,25 +259,25 @@ export const sessionCleanup = (req: Request, res: Response, next: NextFunction) 
 };
 
 // Force logout all sessions for a user (security incident response)
-export const forceLogoutUser = (userId: string, reason: string = 'security_incident') => {
+export const forceLogoutUser = (userId: string, reason: string = "security_incident") => {
   const userSessionSet = userSessions.get(userId);
   if (userSessionSet) {
-    userSessionSet.forEach(sessionId => {
+    userSessionSet.forEach((sessionId) => {
       const sessionData = sessionSecurityData.get(sessionId);
       if (sessionData) {
         logSecurityEvent({
-          type: 'authentication',
-          severity: 'high',
+          type: "authentication",
+          severity: "high",
           ip: sessionData.loginIP,
           userAgent: sessionData.userAgent,
           userId: userId,
           details: {
-            event: 'forced_logout',
+            event: "forced_logout",
             reason: reason,
-            sessionId: sessionId
+            sessionId: sessionId,
           },
-          url: '/security/force-logout',
-          method: 'POST'
+          url: "/security/force-logout",
+          method: "POST",
         });
       }
       sessionSecurityData.delete(sessionId);
@@ -291,18 +295,18 @@ export const getSessionSecurityMetrics = () => {
     averageSessionDuration: 0,
     suspiciousSessions: 0,
     concurrentSessionViolations: 0,
-    recentSecurityEvents: 0
+    recentSecurityEvents: 0,
   };
 
   let totalDuration = 0;
-  sessionSecurityData.forEach(data => {
+  sessionSecurityData.forEach((data) => {
     const sessionDuration = now - data.loginTime;
     totalDuration += sessionDuration;
-    
+
     if (data.securityViolations > 0) {
       metrics.suspiciousSessions++;
     }
-    
+
     if (data.concurrentSessions > SESSION_SECURITY_CONFIG.MAX_CONCURRENT_SESSIONS) {
       metrics.concurrentSessionViolations++;
     }
@@ -320,11 +324,11 @@ export const requireFreshSession = (maxAgeMinutes: number = 15) => {
   return (req: Request, res: Response, next: NextFunction) => {
     const sessionId = (req as any).sessionID;
     const sessionData = sessionSecurityData.get(sessionId);
-    
+
     if (!sessionData) {
-      return res.status(401).json({ 
-        error: 'Session data not found',
-        code: 'SESSION_INVALID'
+      return res.status(401).json({
+        error: "Session data not found",
+        code: "SESSION_INVALID",
       });
     }
 
@@ -334,24 +338,24 @@ export const requireFreshSession = (maxAgeMinutes: number = 15) => {
 
     if (sessionAge > maxAge) {
       logSecurityEvent({
-        type: 'authorization',
-        severity: 'medium',
-        ip: req.ip || 'unknown',
-        userAgent: req.get('User-Agent') || 'unknown',
+        type: "authorization",
+        severity: "medium",
+        ip: req.ip || "unknown",
+        userAgent: req.get("User-Agent") || "unknown",
         userId: (req as any).user?.id,
         details: {
-          event: 'stale_session_rejected',
+          event: "stale_session_rejected",
           sessionAge: sessionAge,
           maxAllowedAge: maxAge,
-          operation: req.url
+          operation: req.url,
         },
         url: req.url,
-        method: req.method
+        method: req.method,
       });
 
-      return res.status(403).json({ 
-        error: 'Session too old for this operation. Please re-authenticate.',
-        code: 'SESSION_STALE'
+      return res.status(403).json({
+        error: "Session too old for this operation. Please re-authenticate.",
+        code: "SESSION_STALE",
       });
     }
 

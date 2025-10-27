@@ -1,8 +1,8 @@
-import sgMail from '@sendgrid/mail';
-import { db } from '../db.js';
-import { notifications, sendgridWebhooks, emailTemplates } from '../../shared/schema.js';
-import { eq } from 'drizzle-orm';
-import { nanoid } from 'nanoid';
+import sgMail from "@sendgrid/mail";
+import { db } from "../db.js";
+import { notifications, sendgridWebhooks, emailTemplates } from "../../shared/schema.js";
+import { eq } from "drizzle-orm";
+import { nanoid } from "nanoid";
 
 export interface EmailOptions {
   to: string;
@@ -24,7 +24,7 @@ export interface EmailResponse {
 
 export class EmailService {
   private initialized = false;
-  private fromEmail: string = 'support@hivewellness.nl';
+  private fromEmail: string = "support@hivewellness.nl";
 
   constructor() {
     this.initializeService();
@@ -33,18 +33,18 @@ export class EmailService {
   private initializeService() {
     try {
       const apiKey = process.env.SENDGRID_API_KEY;
-      this.fromEmail = process.env.FROM_EMAIL || 'support@hivewellness.nl';
+      this.fromEmail = process.env.FROM_EMAIL || "support@hivewellness.nl";
 
       if (!apiKey) {
-        console.warn('SendGrid API key not configured. Email services will be disabled.');
+        console.warn("SendGrid API key not configured. Email services will be disabled.");
         return;
       }
 
       sgMail.setApiKey(apiKey);
       this.initialized = true;
-      console.log('SendGrid email service initialized successfully');
+      console.log("SendGrid email service initialized successfully");
     } catch (error) {
-      console.error('Failed to initialize SendGrid service:', error);
+      console.error("Failed to initialize SendGrid service:", error);
     }
   }
 
@@ -52,7 +52,7 @@ export class EmailService {
     if (!this.initialized) {
       return {
         success: false,
-        error: 'SendGrid service not initialized',
+        error: "SendGrid service not initialized",
       };
     }
 
@@ -75,16 +75,16 @@ export class EmailService {
           },
         },
         customArgs: {
-          notificationId: options.notificationId || '',
-          userId: options.userId || '',
-          templateId: options.templateId || '',
+          notificationId: options.notificationId || "",
+          userId: options.userId || "",
+          templateId: options.templateId || "",
         },
       };
 
       const response = await sgMail.send(msg);
-      
+
       // Extract message ID from response
-      const messageId = response[0]?.headers?.['x-message-id'] || nanoid();
+      const messageId = response[0]?.headers?.["x-message-id"] || nanoid();
 
       return {
         success: true,
@@ -94,13 +94,12 @@ export class EmailService {
           response: response[0]?.statusCode,
         },
       };
-
     } catch (error: any) {
-      console.error('Failed to send email:', error);
-      
+      console.error("Failed to send email:", error);
+
       return {
         success: false,
-        error: error.message || 'Failed to send email',
+        error: error.message || "Failed to send email",
         metadata: {
           errorCode: error.code,
           errorMessage: error.message,
@@ -110,15 +109,19 @@ export class EmailService {
   }
 
   // Helper method to send admin notifications to all admin email addresses
-  async sendAdminNotification(subject: string, body: string, isHtml = true): Promise<EmailResponse[]> {
-    const adminEmails = ['support@hive-wellness.co.uk', 'support@hivewellness.nl'];
+  async sendAdminNotification(
+    subject: string,
+    body: string,
+    isHtml = true
+  ): Promise<EmailResponse[]> {
+    const adminEmails = ["support@hive-wellness.co.uk", "support@hivewellness.nl"];
     return this.sendBulkEmail(adminEmails, subject, body, isHtml);
   }
 
   // Helper method to send therapist assignment notifications
   async sendAssignmentNotification(
-    clientEmail: string, 
-    clientName: string, 
+    clientEmail: string,
+    clientName: string,
     therapistFirstName: string,
     therapistLastName: string,
     therapistEmail: string,
@@ -128,7 +131,9 @@ export class EmailService {
     const therapistSurnameInitial = therapistLastName.charAt(0).toUpperCase();
     const therapistDisplayName = `${therapistFirstName} ${therapistSurnameInitial}`;
     const therapistFullName = `${therapistFirstName} ${therapistLastName}`;
-    const baseUrl = process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : 'http://localhost:5000';
+    const baseUrl = process.env.REPLIT_DEV_DOMAIN
+      ? `https://${process.env.REPLIT_DEV_DOMAIN}`
+      : "http://localhost:5000";
     const clientTemplate = `
       <!DOCTYPE html>
       <html>
@@ -154,7 +159,7 @@ export class EmailService {
             <p style="margin: 10px 0 0 0; opacity: 0.9;">Hive Wellness</p>
           </div>
           <div class="content">
-            <h2 style="color: #9306B1;">Hello ${clientName.split(' ')[0]},</h2>
+            <h2 style="color: #9306B1;">Hello ${clientName.split(" ")[0]},</h2>
             <p>We're pleased to let you know that you've been connected with a Hive Wellness therapist who's best suited to support your needs.</p>
             
             <div class="info-box">
@@ -164,9 +169,13 @@ export class EmailService {
               <div class="info-row">
                 <span class="info-label">Type:</span> Online one-to-one therapy
               </div>
-              ${sessionFee ? `<div class="info-row">
+              ${
+                sessionFee
+                  ? `<div class="info-row">
                 <span class="info-label">Fee:</span> £${sessionFee} per session
-              </div>` : ''}
+              </div>`
+                  : ""
+              }
               <div class="info-row">
                 <span class="info-label">Duration:</span> 50 minutes
               </div>
@@ -234,27 +243,32 @@ export class EmailService {
     const results = await Promise.all([
       this.sendEmail({
         to: clientEmail,
-        subject: '🎉 Your Therapist Assignment - Hive Wellness',
+        subject: "🎉 Your Therapist Assignment - Hive Wellness",
         body: clientTemplate,
         isHtml: true,
-        templateId: 'client_assignment'
+        templateId: "client_assignment",
       }),
       this.sendEmail({
         to: therapistEmail,
-        subject: '👥 New Client Assignment - Hive Wellness',
+        subject: "👥 New Client Assignment - Hive Wellness",
         body: therapistTemplate,
         isHtml: true,
-        templateId: 'therapist_assignment'
-      })
+        templateId: "therapist_assignment",
+      }),
     ]);
 
     return results;
   }
 
   // Helper method to send therapist onboarding email with messaging examples
-  async sendTherapistOnboardingEmail(therapistEmail: string, therapistName: string): Promise<EmailResponse> {
-    const baseUrl = process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : 'http://localhost:5000';
-    
+  async sendTherapistOnboardingEmail(
+    therapistEmail: string,
+    therapistName: string
+  ): Promise<EmailResponse> {
+    const baseUrl = process.env.REPLIT_DEV_DOMAIN
+      ? `https://${process.env.REPLIT_DEV_DOMAIN}`
+      : "http://localhost:5000";
+
     const template = `
       <!DOCTYPE html>
       <html>
@@ -364,19 +378,26 @@ export class EmailService {
 
     return await this.sendEmail({
       to: therapistEmail,
-      subject: '💬 Welcome to Hive Wellness - Your Messaging Guide',
+      subject: "💬 Welcome to Hive Wellness - Your Messaging Guide",
       body: template,
       isHtml: true,
-      templateId: 'therapist_onboarding_messaging'
+      templateId: "therapist_onboarding_messaging",
     });
   }
 
-  async sendBulkEmail(recipients: string[], subject: string, body: string, isHtml = true): Promise<EmailResponse[]> {
+  async sendBulkEmail(
+    recipients: string[],
+    subject: string,
+    body: string,
+    isHtml = true
+  ): Promise<EmailResponse[]> {
     if (!this.initialized) {
-      return [{
-        success: false,
-        error: 'SendGrid service not initialized',
-      }];
+      return [
+        {
+          success: false,
+          error: "SendGrid service not initialized",
+        },
+      ];
     }
 
     try {
@@ -384,10 +405,10 @@ export class EmailService {
         from: this.fromEmail,
         subject,
         ...(isHtml ? { html: body } : { text: body }),
-        personalizations: recipients.map(email => ({
+        personalizations: recipients.map((email) => ({
           to: [{ email }],
           customArgs: {
-            bulkEmail: 'true',
+            bulkEmail: "true",
             timestamp: new Date().toISOString(),
           },
         })),
@@ -406,22 +427,21 @@ export class EmailService {
       };
 
       const response = await sgMail.send(msg);
-      
+
       return recipients.map((email, index) => ({
         success: true,
-        messageId: (response as any)[index]?.headers?.['x-message-id'] || nanoid(),
+        messageId: (response as any)[index]?.headers?.["x-message-id"] || nanoid(),
         metadata: {
           recipient: email,
           response: (response as any)[index]?.statusCode,
         },
       }));
-
     } catch (error: any) {
-      console.error('Failed to send bulk email:', error);
-      
-      return recipients.map(email => ({
+      console.error("Failed to send bulk email:", error);
+
+      return recipients.map((email) => ({
         success: false,
-        error: error.message || 'Failed to send email',
+        error: error.message || "Failed to send email",
         metadata: {
           recipient: email,
           errorCode: error.code,
@@ -431,7 +451,11 @@ export class EmailService {
     }
   }
 
-  async sendTemplatedEmail(templateId: string, to: string, variables: Record<string, any>): Promise<EmailResponse> {
+  async sendTemplatedEmail(
+    templateId: string,
+    to: string,
+    variables: Record<string, any>
+  ): Promise<EmailResponse> {
     try {
       // Get template from database
       const template = await db.query.emailTemplates.findFirst({
@@ -441,7 +465,7 @@ export class EmailService {
       if (!template) {
         return {
           success: false,
-          error: 'Template not found',
+          error: "Template not found",
         };
       }
 
@@ -450,9 +474,9 @@ export class EmailService {
       let body = template.content;
 
       for (const [key, value] of Object.entries(variables)) {
-        const regex = new RegExp(`{${key}}`, 'g');
-        subject = subject.replace(regex, String(value || ''));
-        body = body.replace(regex, String(value || ''));
+        const regex = new RegExp(`{${key}}`, "g");
+        subject = subject.replace(regex, String(value || ""));
+        body = body.replace(regex, String(value || ""));
       }
 
       // Send email
@@ -470,7 +494,8 @@ export class EmailService {
 
       // Update template usage
       if (result.success) {
-        await db.update(emailTemplates)
+        await db
+          .update(emailTemplates)
           .set({
             usage: template.usage + 1,
             lastUsed: new Date(),
@@ -479,13 +504,12 @@ export class EmailService {
       }
 
       return result;
-
     } catch (error: any) {
-      console.error('Failed to send templated email:', error);
-      
+      console.error("Failed to send templated email:", error);
+
       return {
         success: false,
-        error: error.message || 'Failed to send templated email',
+        error: error.message || "Failed to send templated email",
       };
     }
   }
@@ -499,7 +523,7 @@ export class EmailService {
           email,
           event: eventType,
           timestamp,
-          'smtp-id': smtpId,
+          "smtp-id": smtpId,
           category,
           sg_event_id,
           sg_message_id,
@@ -536,31 +560,33 @@ export class EmailService {
 
         // Update notification status if we can find it
         const notification = await db.query.notifications.findFirst({
-          where: (notifications, { eq }) => eq(notifications.metadata, { messageId: sg_message_id }),
+          where: (notifications, { eq }) =>
+            eq(notifications.metadata, { messageId: sg_message_id }),
         });
 
         if (notification) {
-          let status = 'sent';
+          let status = "sent";
           let deliveredAt = null;
           let readAt = null;
 
           switch (eventType) {
-            case 'delivered':
-              status = 'delivered';
+            case "delivered":
+              status = "delivered";
               deliveredAt = new Date(timestamp * 1000);
               break;
-            case 'open':
-              status = 'read';
+            case "open":
+              status = "read";
               readAt = new Date(timestamp * 1000);
               break;
-            case 'bounce':
-            case 'dropped':
-            case 'spamreport':
-              status = 'failed';
+            case "bounce":
+            case "dropped":
+            case "spamreport":
+              status = "failed";
               break;
           }
 
-          await db.update(notifications)
+          await db
+            .update(notifications)
             .set({
               status: status as any,
               deliveredAt,
@@ -571,34 +597,31 @@ export class EmailService {
             .where(eq(notifications.id, notification.id));
         }
       }
-
     } catch (error) {
-      console.error('Error processing SendGrid webhook:', error);
+      console.error("Error processing SendGrid webhook:", error);
     }
   }
 
   async getEmailStats(userId?: string): Promise<any> {
     try {
-      const query = userId 
+      const query = userId
         ? db.query.notifications.findMany({
-            where: (notifications, { and, eq }) => and(
-              eq(notifications.userId, userId),
-              eq(notifications.channel, 'email')
-            ),
+            where: (notifications, { and, eq }) =>
+              and(eq(notifications.userId, userId), eq(notifications.channel, "email")),
           })
         : db.query.notifications.findMany({
-            where: (notifications, { eq }) => eq(notifications.channel, 'email'),
+            where: (notifications, { eq }) => eq(notifications.channel, "email"),
           });
 
       const emailNotifications = await query;
 
       const stats = {
         total: emailNotifications.length,
-        sent: emailNotifications.filter(n => n.status === 'sent').length,
-        delivered: emailNotifications.filter(n => n.status === 'delivered').length,
-        read: emailNotifications.filter(n => n.status === 'read').length,
-        failed: emailNotifications.filter(n => n.status === 'failed').length,
-        pending: emailNotifications.filter(n => n.status === 'pending').length,
+        sent: emailNotifications.filter((n) => n.status === "sent").length,
+        delivered: emailNotifications.filter((n) => n.status === "delivered").length,
+        read: emailNotifications.filter((n) => n.status === "read").length,
+        failed: emailNotifications.filter((n) => n.status === "failed").length,
+        pending: emailNotifications.filter((n) => n.status === "pending").length,
       };
 
       return {
@@ -607,9 +630,8 @@ export class EmailService {
         openRate: stats.delivered > 0 ? (stats.read / stats.delivered) * 100 : 0,
         failureRate: stats.total > 0 ? (stats.failed / stats.total) * 100 : 0,
       };
-
     } catch (error) {
-      console.error('Error getting email stats:', error);
+      console.error("Error getting email stats:", error);
       return {
         total: 0,
         sent: 0,
@@ -635,7 +657,7 @@ export class EmailService {
     resetUrl: string;
     expiresIn: string;
   }): Promise<EmailResponse> {
-    const subject = 'Reset Your Hive Wellness Password';
+    const subject = "Reset Your Hive Wellness Password";
     const body = `
       <!DOCTYPE html>
       <html>
@@ -713,10 +735,10 @@ export class EmailService {
       body,
       isHtml: true,
       metadata: {
-        type: 'password_reset',
+        type: "password_reset",
         resetToken: options.resetToken,
-        expiresIn: options.expiresIn
-      }
+        expiresIn: options.expiresIn,
+      },
     });
   }
 
@@ -731,7 +753,7 @@ export class EmailService {
     activationUrl: string;
     expiresIn: string;
   }): Promise<EmailResponse> {
-    const subject = 'Welcome to Hive Wellness - Create Your Account';
+    const subject = "Welcome to Hive Wellness - Create Your Account";
 
     const body = `
       <!DOCTYPE html>
@@ -828,7 +850,7 @@ export class EmailService {
                 <li>Click the "Create My Account" button below</li>
                 <li>Set up your secure password</li>
                 <li>Complete your profile</li>
-                <li>Book your first session with ${options.therapistName.split(' ')[0]}</li>
+                <li>Book your first session with ${options.therapistName.split(" ")[0]}</li>
               </ol>
             </div>
             
@@ -871,10 +893,10 @@ export class EmailService {
       body,
       isHtml: true,
       metadata: {
-        type: 'client_activation',
+        type: "client_activation",
         therapistName: options.therapistName,
-        expiresIn: options.expiresIn
-      }
+        expiresIn: options.expiresIn,
+      },
     });
   }
 }

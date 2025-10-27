@@ -6,17 +6,29 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { 
-  MessageSquare, 
-  Mail, 
-  Send, 
-  Users, 
+import {
+  MessageSquare,
+  Mail,
+  Send,
+  Users,
   Filter,
   Search,
   Clock,
@@ -26,7 +38,7 @@ import {
   Bell,
   Plus,
   Edit,
-  Settings
+  Settings,
 } from "lucide-react";
 import type { User } from "@shared/schema";
 
@@ -36,13 +48,13 @@ interface CommunicationsAndRemindersProps {
 
 interface CommunicationMessage {
   id: string;
-  type: 'email' | 'sms' | 'whatsapp' | 'in-app' | 'notification';
+  type: "email" | "sms" | "whatsapp" | "in-app" | "notification";
   from: string;
   to: string[];
   subject: string;
   content: string;
-  status: 'draft' | 'sent' | 'delivered' | 'failed';
-  priority: 'high' | 'normal' | 'low';
+  status: "draft" | "sent" | "delivered" | "failed";
+  priority: "high" | "normal" | "low";
   sentAt?: string;
   readAt?: string;
   threadId?: string;
@@ -54,7 +66,7 @@ interface CommunicationMessage {
 interface CommunicationTemplate {
   id: string;
   name: string;
-  type: 'email' | 'sms' | 'whatsapp' | 'notification';
+  type: "email" | "sms" | "whatsapp" | "notification";
   subject: string;
   content: string;
   variables: string[];
@@ -66,8 +78,8 @@ interface CommunicationTemplate {
 
 interface ReminderConfiguration {
   id: string;
-  reminderType: 'email' | 'sms';
-  eventType: 'session_reminder' | 'follow_up' | 'appointment_confirmation';
+  reminderType: "email" | "sms";
+  eventType: "session_reminder" | "follow_up" | "appointment_confirmation";
   isEnabled: boolean;
   timeBefore: number;
   subject?: string;
@@ -79,8 +91,8 @@ interface ReminderConfiguration {
 }
 
 interface ReminderConfigurationFormData {
-  reminderType: 'email' | 'sms';
-  eventType: 'session_reminder' | 'follow_up' | 'appointment_confirmation';
+  reminderType: "email" | "sms";
+  eventType: "session_reminder" | "follow_up" | "appointment_confirmation";
   timeBefore: number;
   subject?: string;
   recipientPhone?: string;
@@ -89,13 +101,13 @@ interface ReminderConfigurationFormData {
 }
 
 const defaultReminderFormData: ReminderConfigurationFormData = {
-  reminderType: 'email',
-  eventType: 'session_reminder',
+  reminderType: "email",
+  eventType: "session_reminder",
   timeBefore: 1440,
-  subject: '',
-  recipientPhone: '',
-  message: '',
-  isEnabled: true
+  subject: "",
+  recipientPhone: "",
+  message: "",
+  isEnabled: true,
 };
 
 export default function CommunicationsAndReminders({ user }: CommunicationsAndRemindersProps) {
@@ -105,26 +117,27 @@ export default function CommunicationsAndReminders({ user }: CommunicationsAndRe
   const [filterType, setFilterType] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [newMessage, setNewMessage] = useState({
-    type: 'email' as 'email' | 'sms' | 'whatsapp' | 'in-app',
-    to: '',
-    subject: '',
-    content: '',
-    priority: 'normal' as 'high' | 'normal' | 'low'
+    type: "email" as "email" | "sms" | "whatsapp" | "in-app",
+    to: "",
+    subject: "",
+    content: "",
+    priority: "normal" as "high" | "normal" | "low",
   });
 
   // Reminder configuration state
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedConfig, setSelectedConfig] = useState<ReminderConfiguration | null>(null);
-  const [reminderFormData, setReminderFormData] = useState<ReminderConfigurationFormData>(defaultReminderFormData);
+  const [reminderFormData, setReminderFormData] =
+    useState<ReminderConfigurationFormData>(defaultReminderFormData);
   const [pendingReminders, setPendingReminders] = useState<number>(0);
 
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   // Admin-only access control
-  const isAdmin = user?.role === 'admin';
-  
+  const isAdmin = user?.role === "admin";
+
   if (!isAdmin) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -137,7 +150,8 @@ export default function CommunicationsAndReminders({ user }: CommunicationsAndRe
               Communications management and messaging automation are restricted to admin users only.
             </p>
             <p className="text-sm text-gray-500">
-              Therapist accounts cannot access messaging automation controls for security and compliance reasons.
+              Therapist accounts cannot access messaging automation controls for security and
+              compliance reasons.
             </p>
           </CardContent>
         </Card>
@@ -147,24 +161,26 @@ export default function CommunicationsAndReminders({ user }: CommunicationsAndRe
 
   // Fetch messages
   const { data: messages = [], isLoading: messagesLoading } = useQuery({
-    queryKey: ['/api/communications/messages', filterStatus, filterType],
+    queryKey: ["/api/communications/messages", filterStatus, filterType],
   });
 
   // Fetch templates
   const { data: templates = [], isLoading: templatesLoading } = useQuery({
-    queryKey: ['/api/communications/templates'],
+    queryKey: ["/api/communications/templates"],
   });
 
   // Fetch reminder configurations
-  const { data: configurations = [], isLoading: configurationsLoading } = useQuery<ReminderConfiguration[]>({
-    queryKey: ['/api/admin/reminder-configurations'],
-    refetchInterval: 30000
+  const { data: configurations = [], isLoading: configurationsLoading } = useQuery<
+    ReminderConfiguration[]
+  >({
+    queryKey: ["/api/admin/reminder-configurations"],
+    refetchInterval: 30000,
   });
 
   // Fetch pending reminders count
   const { data: reminderQueue = [] } = useQuery({
-    queryKey: ['/api/admin/reminder-queue'],
-    refetchInterval: 30000
+    queryKey: ["/api/admin/reminder-queue"],
+    refetchInterval: 30000,
   });
 
   useEffect(() => {
@@ -174,15 +190,15 @@ export default function CommunicationsAndReminders({ user }: CommunicationsAndRe
   // Send message mutation
   const sendMessageMutation = useMutation({
     mutationFn: async (messageData: any) => {
-      return await apiRequest('POST', '/api/communications/send', messageData);
+      return await apiRequest("POST", "/api/communications/send", messageData);
     },
     onSuccess: () => {
       toast({
         title: "Message Sent",
         description: "Your message has been sent successfully.",
       });
-      setNewMessage({ type: 'email', to: '', subject: '', content: '', priority: 'normal' });
-      queryClient.invalidateQueries({ queryKey: ['/api/communications/messages'] });
+      setNewMessage({ type: "email", to: "", subject: "", content: "", priority: "normal" });
+      queryClient.invalidateQueries({ queryKey: ["/api/communications/messages"] });
     },
     onError: () => {
       toast({
@@ -196,10 +212,10 @@ export default function CommunicationsAndReminders({ user }: CommunicationsAndRe
   // Create reminder configuration
   const createReminderMutation = useMutation({
     mutationFn: async (data: ReminderConfigurationFormData) => {
-      return await apiRequest('POST', '/api/admin/reminder-configurations', data);
+      return await apiRequest("POST", "/api/admin/reminder-configurations", data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/reminder-configurations'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/reminder-configurations"] });
       setIsCreateDialogOpen(false);
       setReminderFormData(defaultReminderFormData);
       toast({
@@ -218,11 +234,17 @@ export default function CommunicationsAndReminders({ user }: CommunicationsAndRe
 
   // Update reminder configuration
   const updateReminderMutation = useMutation({
-    mutationFn: async ({ id, data }: { id: string; data: Partial<ReminderConfigurationFormData> }) => {
-      return await apiRequest('PUT', `/api/admin/reminder-configurations/${id}`, data);
+    mutationFn: async ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: Partial<ReminderConfigurationFormData>;
+    }) => {
+      return await apiRequest("PUT", `/api/admin/reminder-configurations/${id}`, data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/reminder-configurations'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/reminder-configurations"] });
       setIsEditDialogOpen(false);
       setSelectedConfig(null);
       setReminderFormData(defaultReminderFormData);
@@ -243,10 +265,10 @@ export default function CommunicationsAndReminders({ user }: CommunicationsAndRe
   // Delete reminder configuration
   const deleteReminderMutation = useMutation({
     mutationFn: async (id: string) => {
-      return await apiRequest('DELETE', `/api/admin/reminder-configurations/${id}`);
+      return await apiRequest("DELETE", `/api/admin/reminder-configurations/${id}`);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/reminder-configurations'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/reminder-configurations"] });
       toast({
         title: "Success",
         description: "Reminder configuration deleted successfully",
@@ -277,8 +299,8 @@ export default function CommunicationsAndReminders({ user }: CommunicationsAndRe
       reminderType: config.reminderType,
       eventType: config.eventType,
       timeBefore: config.timeBefore,
-      subject: config.subject || '',
-      recipientPhone: config.recipientPhone || '',
+      subject: config.subject || "",
+      recipientPhone: config.recipientPhone || "",
       message: config.message,
       isEnabled: config.isEnabled,
     });
@@ -286,17 +308,21 @@ export default function CommunicationsAndReminders({ user }: CommunicationsAndRe
   };
 
   const handleDeleteReminder = (id: string) => {
-    if (confirm('Are you sure you want to delete this reminder configuration?')) {
+    if (confirm("Are you sure you want to delete this reminder configuration?")) {
       deleteReminderMutation.mutate(id);
     }
   };
 
   const getEventTypeLabel = (eventType: string) => {
     switch (eventType) {
-      case 'session_reminder': return 'Session Reminder';
-      case 'follow_up': return 'Follow-up';
-      case 'appointment_confirmation': return 'Appointment Confirmation';
-      default: return eventType;
+      case "session_reminder":
+        return "Session Reminder";
+      case "follow_up":
+        return "Follow-up";
+      case "appointment_confirmation":
+        return "Appointment Confirmation";
+      default:
+        return eventType;
     }
   };
 
@@ -309,48 +335,51 @@ export default function CommunicationsAndReminders({ user }: CommunicationsAndRe
   // Demo data for messages
   const demoMessages: CommunicationMessage[] = [
     {
-      id: '1',
-      type: 'email',
-      from: 'admin@hivewellness.com',
-      to: ['client1@example.com'],
-      subject: 'Welcome to Hive Wellness',
-      content: 'Thank you for joining our therapy platform...',
-      status: 'delivered',
-      priority: 'normal',
-      sentAt: '2025-01-06T10:30:00Z',
-      readAt: '2025-01-06T11:15:00Z',
-      tags: ['welcome', 'onboarding'],
-      createdAt: '2025-01-06T10:30:00Z'
+      id: "1",
+      type: "email",
+      from: "admin@hivewellness.com",
+      to: ["client1@example.com"],
+      subject: "Welcome to Hive Wellness",
+      content: "Thank you for joining our therapy platform...",
+      status: "delivered",
+      priority: "normal",
+      sentAt: "2025-01-06T10:30:00Z",
+      readAt: "2025-01-06T11:15:00Z",
+      tags: ["welcome", "onboarding"],
+      createdAt: "2025-01-06T10:30:00Z",
     },
     {
-      id: '2',
-      type: 'sms',
-      from: 'Hive Wellness',
-      to: ['+44123456789'],
-      subject: '',
-      content: 'Reminder: Your therapy session is scheduled for tomorrow at 2:00 PM.',
-      status: 'delivered',
-      priority: 'normal',
-      sentAt: '2025-01-06T16:00:00Z',
-      tags: ['reminder', 'appointment'],
-      createdAt: '2025-01-06T16:00:00Z'
+      id: "2",
+      type: "sms",
+      from: "Hive Wellness",
+      to: ["+44123456789"],
+      subject: "",
+      content: "Reminder: Your therapy session is scheduled for tomorrow at 2:00 PM.",
+      status: "delivered",
+      priority: "normal",
+      sentAt: "2025-01-06T16:00:00Z",
+      tags: ["reminder", "appointment"],
+      createdAt: "2025-01-06T16:00:00Z",
     },
     {
-      id: '3',
-      type: 'whatsapp',
-      from: 'Hive Wellness',
-      to: ['+44123456789'],
-      subject: '',
-      content: 'Hi! Your therapy session with Dr. Emma is confirmed for tomorrow at 2:00 PM.',
-      status: 'delivered',
-      priority: 'normal',
-      sentAt: '2025-01-06T18:00:00Z',
-      tags: ['appointment', 'whatsapp'],
-      createdAt: '2025-01-06T18:00:00Z'
-    }
+      id: "3",
+      type: "whatsapp",
+      from: "Hive Wellness",
+      to: ["+44123456789"],
+      subject: "",
+      content: "Hi! Your therapy session with Dr. Emma is confirmed for tomorrow at 2:00 PM.",
+      status: "delivered",
+      priority: "normal",
+      sentAt: "2025-01-06T18:00:00Z",
+      tags: ["appointment", "whatsapp"],
+      createdAt: "2025-01-06T18:00:00Z",
+    },
   ];
 
-  const displayMessages = (messages as CommunicationMessage[]).length > 0 ? (messages as CommunicationMessage[]) : demoMessages;
+  const displayMessages =
+    (messages as CommunicationMessage[]).length > 0
+      ? (messages as CommunicationMessage[])
+      : demoMessages;
 
   return (
     <div className="space-y-6">
@@ -411,22 +440,32 @@ export default function CommunicationsAndReminders({ user }: CommunicationsAndRe
             <CardContent>
               <div className="space-y-3">
                 {displayMessages.map((message) => (
-                  <div key={message.id} className="flex items-center justify-between p-4 border rounded hover:bg-gray-50">
+                  <div
+                    key={message.id}
+                    className="flex items-center justify-between p-4 border rounded hover:bg-gray-50"
+                  >
                     <div className="flex items-center gap-4">
-                      {message.type === 'email' && <Mail className="h-5 w-5 text-blue-600" />}
-                      {message.type === 'sms' && <MessageSquare className="h-5 w-5 text-green-600" />}
-                      {message.type === 'whatsapp' && <MessageSquare className="h-5 w-5 text-green-500" />}
+                      {message.type === "email" && <Mail className="h-5 w-5 text-blue-600" />}
+                      {message.type === "sms" && (
+                        <MessageSquare className="h-5 w-5 text-green-600" />
+                      )}
+                      {message.type === "whatsapp" && (
+                        <MessageSquare className="h-5 w-5 text-green-500" />
+                      )}
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="font-medium">{message.subject || message.content.substring(0, 50)}</span>
+                          <span className="font-medium">
+                            {message.subject || message.content.substring(0, 50)}
+                          </span>
                           <Badge variant="outline">{message.type}</Badge>
                         </div>
                         <div className="text-sm text-gray-600">
-                          To: {message.to.join(', ')} • {new Date(message.sentAt || message.createdAt).toLocaleString()}
+                          To: {message.to.join(", ")} •{" "}
+                          {new Date(message.sentAt || message.createdAt).toLocaleString()}
                         </div>
                       </div>
                     </div>
-                    <Badge variant={message.status === 'delivered' ? 'default' : 'secondary'}>
+                    <Badge variant={message.status === "delivered" ? "default" : "secondary"}>
                       {message.status}
                     </Badge>
                   </div>
@@ -461,7 +500,10 @@ export default function CommunicationsAndReminders({ user }: CommunicationsAndRe
             </div>
             <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
               <DialogTrigger asChild>
-                <Button className="bg-hive-purple hover:bg-hive-purple/90 text-white" data-testid="button-create-reminder">
+                <Button
+                  className="bg-hive-purple hover:bg-hive-purple/90 text-white"
+                  data-testid="button-create-reminder"
+                >
                   <Plus className="h-4 w-4 mr-2" />
                   New Reminder
                 </Button>
@@ -476,8 +518,8 @@ export default function CommunicationsAndReminders({ user }: CommunicationsAndRe
                       <Label>Reminder Type</Label>
                       <Select
                         value={reminderFormData.reminderType}
-                        onValueChange={(value: 'email' | 'sms') => 
-                          setReminderFormData(prev => ({ ...prev, reminderType: value }))
+                        onValueChange={(value: "email" | "sms") =>
+                          setReminderFormData((prev) => ({ ...prev, reminderType: value }))
                         }
                       >
                         <SelectTrigger data-testid="select-reminder-type">
@@ -493,9 +535,9 @@ export default function CommunicationsAndReminders({ user }: CommunicationsAndRe
                       <Label>Event Type</Label>
                       <Select
                         value={reminderFormData.eventType}
-                        onValueChange={(value: 'session_reminder' | 'follow_up' | 'appointment_confirmation') => 
-                          setReminderFormData(prev => ({ ...prev, eventType: value }))
-                        }
+                        onValueChange={(
+                          value: "session_reminder" | "follow_up" | "appointment_confirmation"
+                        ) => setReminderFormData((prev) => ({ ...prev, eventType: value }))}
                       >
                         <SelectTrigger data-testid="select-event-type">
                           <SelectValue />
@@ -503,7 +545,9 @@ export default function CommunicationsAndReminders({ user }: CommunicationsAndRe
                         <SelectContent>
                           <SelectItem value="session_reminder">Session Reminder</SelectItem>
                           <SelectItem value="follow_up">Follow-up</SelectItem>
-                          <SelectItem value="appointment_confirmation">Appointment Confirmation</SelectItem>
+                          <SelectItem value="appointment_confirmation">
+                            Appointment Confirmation
+                          </SelectItem>
                         </SelectContent>
                       </Select>
                     </div>
@@ -514,7 +558,12 @@ export default function CommunicationsAndReminders({ user }: CommunicationsAndRe
                     <Input
                       type="number"
                       value={reminderFormData.timeBefore}
-                      onChange={(e) => setReminderFormData(prev => ({ ...prev, timeBefore: parseInt(e.target.value) || 0 }))}
+                      onChange={(e) =>
+                        setReminderFormData((prev) => ({
+                          ...prev,
+                          timeBefore: parseInt(e.target.value) || 0,
+                        }))
+                      }
                       placeholder="1440"
                       data-testid="input-time-before"
                     />
@@ -523,29 +572,36 @@ export default function CommunicationsAndReminders({ user }: CommunicationsAndRe
                     </p>
                   </div>
 
-                  {reminderFormData.reminderType === 'email' && (
+                  {reminderFormData.reminderType === "email" && (
                     <div>
                       <Label>Email Subject</Label>
                       <Input
-                        value={reminderFormData.subject || ''}
-                        onChange={(e) => setReminderFormData(prev => ({ ...prev, subject: e.target.value }))}
+                        value={reminderFormData.subject || ""}
+                        onChange={(e) =>
+                          setReminderFormData((prev) => ({ ...prev, subject: e.target.value }))
+                        }
                         placeholder="Your therapy session reminder"
                         data-testid="input-subject"
                       />
                     </div>
                   )}
 
-                  {reminderFormData.reminderType === 'sms' && (
+                  {reminderFormData.reminderType === "sms" && (
                     <div>
                       <Label>Recipient Phone Number</Label>
                       <Input
-                        value={reminderFormData.recipientPhone || ''}
-                        onChange={(e) => setReminderFormData(prev => ({ ...prev, recipientPhone: e.target.value }))}
+                        value={reminderFormData.recipientPhone || ""}
+                        onChange={(e) =>
+                          setReminderFormData((prev) => ({
+                            ...prev,
+                            recipientPhone: e.target.value,
+                          }))
+                        }
                         placeholder="Enter phone number or use {{client_phone}} or {{therapist_phone}}"
                         data-testid="input-recipient-phone"
                       />
                       <p className="text-xs text-gray-500 mt-1">
-                        Use variables: {'{client_phone}'}, {'{therapist_phone}'}
+                        Use variables: {"{client_phone}"}, {"{therapist_phone}"}
                       </p>
                     </div>
                   )}
@@ -554,7 +610,9 @@ export default function CommunicationsAndReminders({ user }: CommunicationsAndRe
                     <Label>Message</Label>
                     <Textarea
                       value={reminderFormData.message}
-                      onChange={(e) => setReminderFormData(prev => ({ ...prev, message: e.target.value }))}
+                      onChange={(e) =>
+                        setReminderFormData((prev) => ({ ...prev, message: e.target.value }))
+                      }
                       placeholder="Hi {{client_name}}, this is a reminder about your upcoming therapy session..."
                       rows={4}
                       data-testid="textarea-message"
@@ -567,23 +625,29 @@ export default function CommunicationsAndReminders({ user }: CommunicationsAndRe
                   <div className="flex items-center space-x-2">
                     <Switch
                       checked={reminderFormData.isEnabled}
-                      onCheckedChange={(checked) => setReminderFormData(prev => ({ ...prev, isEnabled: checked }))}
+                      onCheckedChange={(checked) =>
+                        setReminderFormData((prev) => ({ ...prev, isEnabled: checked }))
+                      }
                       data-testid="switch-enabled"
                     />
                     <Label>Enable this reminder</Label>
                   </div>
 
                   <div className="flex justify-end space-x-2 pt-4">
-                    <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)} data-testid="button-cancel">
+                    <Button
+                      variant="outline"
+                      onClick={() => setIsCreateDialogOpen(false)}
+                      data-testid="button-cancel"
+                    >
                       Cancel
                     </Button>
-                    <Button 
-                      onClick={handleCreateReminder} 
+                    <Button
+                      onClick={handleCreateReminder}
                       disabled={createReminderMutation.isPending}
                       className="bg-hive-purple hover:bg-hive-purple/90 text-white"
                       data-testid="button-submit-reminder"
                     >
-                      {createReminderMutation.isPending ? 'Creating...' : 'Create Reminder'}
+                      {createReminderMutation.isPending ? "Creating..." : "Create Reminder"}
                     </Button>
                   </div>
                 </div>
@@ -600,7 +664,7 @@ export default function CommunicationsAndReminders({ user }: CommunicationsAndRe
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold" data-testid="stat-active-reminders">
-                  {configurations.filter(c => c.isEnabled).length}
+                  {configurations.filter((c) => c.isEnabled).length}
                 </div>
                 <p className="text-xs text-muted-foreground">Currently enabled</p>
               </CardContent>
@@ -641,15 +705,19 @@ export default function CommunicationsAndReminders({ user }: CommunicationsAndRe
             <CardContent>
               <div className="space-y-4">
                 {configurations.map((config) => (
-                  <div key={config.id} className="flex items-center justify-between p-4 border rounded" data-testid={`reminder-config-${config.id}`}>
+                  <div
+                    key={config.id}
+                    className="flex items-center justify-between p-4 border rounded"
+                    data-testid={`reminder-config-${config.id}`}
+                  >
                     <div className="flex items-center space-x-4">
                       <div className="flex items-center space-x-2">
-                        {config.reminderType === 'email' ? (
+                        {config.reminderType === "email" ? (
                           <Mail className="h-4 w-4 text-blue-600" />
                         ) : (
                           <MessageSquare className="h-4 w-4 text-green-600" />
                         )}
-                        <Badge variant={config.isEnabled ? 'default' : 'secondary'}>
+                        <Badge variant={config.isEnabled ? "default" : "secondary"}>
                           {config.reminderType.toUpperCase()}
                         </Badge>
                       </div>
@@ -661,8 +729,8 @@ export default function CommunicationsAndReminders({ user }: CommunicationsAndRe
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">
-                      <Badge variant={config.isEnabled ? 'default' : 'secondary'}>
-                        {config.isEnabled ? 'Enabled' : 'Disabled'}
+                      <Badge variant={config.isEnabled ? "default" : "secondary"}>
+                        {config.isEnabled ? "Enabled" : "Disabled"}
                       </Badge>
                       <Button
                         variant="outline"
@@ -684,7 +752,7 @@ export default function CommunicationsAndReminders({ user }: CommunicationsAndRe
                     </div>
                   </div>
                 ))}
-                
+
                 {configurations.length === 0 && (
                   <div className="text-center py-8 text-gray-500">
                     <Bell className="h-8 w-8 mx-auto mb-2 opacity-50" />
@@ -708,8 +776,8 @@ export default function CommunicationsAndReminders({ user }: CommunicationsAndRe
                     <Label>Reminder Type</Label>
                     <Select
                       value={reminderFormData.reminderType}
-                      onValueChange={(value: 'email' | 'sms') => 
-                        setReminderFormData(prev => ({ ...prev, reminderType: value }))
+                      onValueChange={(value: "email" | "sms") =>
+                        setReminderFormData((prev) => ({ ...prev, reminderType: value }))
                       }
                     >
                       <SelectTrigger>
@@ -725,9 +793,9 @@ export default function CommunicationsAndReminders({ user }: CommunicationsAndRe
                     <Label>Event Type</Label>
                     <Select
                       value={reminderFormData.eventType}
-                      onValueChange={(value: 'session_reminder' | 'follow_up' | 'appointment_confirmation') => 
-                        setReminderFormData(prev => ({ ...prev, eventType: value }))
-                      }
+                      onValueChange={(
+                        value: "session_reminder" | "follow_up" | "appointment_confirmation"
+                      ) => setReminderFormData((prev) => ({ ...prev, eventType: value }))}
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -735,7 +803,9 @@ export default function CommunicationsAndReminders({ user }: CommunicationsAndRe
                       <SelectContent>
                         <SelectItem value="session_reminder">Session Reminder</SelectItem>
                         <SelectItem value="follow_up">Follow-up</SelectItem>
-                        <SelectItem value="appointment_confirmation">Appointment Confirmation</SelectItem>
+                        <SelectItem value="appointment_confirmation">
+                          Appointment Confirmation
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -746,7 +816,12 @@ export default function CommunicationsAndReminders({ user }: CommunicationsAndRe
                   <Input
                     type="number"
                     value={reminderFormData.timeBefore}
-                    onChange={(e) => setReminderFormData(prev => ({ ...prev, timeBefore: parseInt(e.target.value) || 0 }))}
+                    onChange={(e) =>
+                      setReminderFormData((prev) => ({
+                        ...prev,
+                        timeBefore: parseInt(e.target.value) || 0,
+                      }))
+                    }
                     placeholder="1440"
                   />
                   <p className="text-xs text-gray-500 mt-1">
@@ -754,27 +829,31 @@ export default function CommunicationsAndReminders({ user }: CommunicationsAndRe
                   </p>
                 </div>
 
-                {reminderFormData.reminderType === 'email' && (
+                {reminderFormData.reminderType === "email" && (
                   <div>
                     <Label>Email Subject</Label>
                     <Input
-                      value={reminderFormData.subject || ''}
-                      onChange={(e) => setReminderFormData(prev => ({ ...prev, subject: e.target.value }))}
+                      value={reminderFormData.subject || ""}
+                      onChange={(e) =>
+                        setReminderFormData((prev) => ({ ...prev, subject: e.target.value }))
+                      }
                       placeholder="Your therapy session reminder"
                     />
                   </div>
                 )}
 
-                {reminderFormData.reminderType === 'sms' && (
+                {reminderFormData.reminderType === "sms" && (
                   <div>
                     <Label>Recipient Phone Number</Label>
                     <Input
-                      value={reminderFormData.recipientPhone || ''}
-                      onChange={(e) => setReminderFormData(prev => ({ ...prev, recipientPhone: e.target.value }))}
+                      value={reminderFormData.recipientPhone || ""}
+                      onChange={(e) =>
+                        setReminderFormData((prev) => ({ ...prev, recipientPhone: e.target.value }))
+                      }
                       placeholder="Enter phone number or use {{client_phone}} or {{therapist_phone}}"
                     />
                     <p className="text-xs text-gray-500 mt-1">
-                      Use variables: {'{client_phone}'}, {'{therapist_phone}'}
+                      Use variables: {"{client_phone}"}, {"{therapist_phone}"}
                     </p>
                   </div>
                 )}
@@ -783,7 +862,9 @@ export default function CommunicationsAndReminders({ user }: CommunicationsAndRe
                   <Label>Message</Label>
                   <Textarea
                     value={reminderFormData.message}
-                    onChange={(e) => setReminderFormData(prev => ({ ...prev, message: e.target.value }))}
+                    onChange={(e) =>
+                      setReminderFormData((prev) => ({ ...prev, message: e.target.value }))
+                    }
                     placeholder="Hi {{client_name}}, this is a reminder about your upcoming therapy session..."
                     rows={4}
                   />
@@ -795,7 +876,9 @@ export default function CommunicationsAndReminders({ user }: CommunicationsAndRe
                 <div className="flex items-center space-x-2">
                   <Switch
                     checked={reminderFormData.isEnabled}
-                    onCheckedChange={(checked) => setReminderFormData(prev => ({ ...prev, isEnabled: checked }))}
+                    onCheckedChange={(checked) =>
+                      setReminderFormData((prev) => ({ ...prev, isEnabled: checked }))
+                    }
                   />
                   <Label>Enable this reminder</Label>
                 </div>
@@ -804,12 +887,12 @@ export default function CommunicationsAndReminders({ user }: CommunicationsAndRe
                   <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
                     Cancel
                   </Button>
-                  <Button 
-                    onClick={handleUpdateReminder} 
+                  <Button
+                    onClick={handleUpdateReminder}
                     disabled={updateReminderMutation.isPending}
                     className="bg-hive-purple hover:bg-hive-purple/90 text-white"
                   >
-                    {updateReminderMutation.isPending ? 'Updating...' : 'Update Reminder'}
+                    {updateReminderMutation.isPending ? "Updating..." : "Update Reminder"}
                   </Button>
                 </div>
               </div>

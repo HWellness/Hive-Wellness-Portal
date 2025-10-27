@@ -20,13 +20,13 @@ export default function ProfileCompletionPage() {
   useEffect(() => {
     if (!isLoading) {
       if (!isAuthenticated) {
-        setLocation('/auth');
+        setLocation("/auth");
         return;
       }
-      
+
       // Check if profile is already complete
       if (user && (user as any).profileComplete) {
-        setLocation('/');
+        setLocation("/");
         return;
       }
     }
@@ -41,8 +41,8 @@ export default function ProfileCompletionPage() {
   }
 
   // Only render for client role
-  if ((user as any).role !== 'client') {
-    setLocation('/');
+  if ((user as any).role !== "client") {
+    setLocation("/");
     return <LoadingSpinner />;
   }
 

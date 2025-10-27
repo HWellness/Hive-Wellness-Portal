@@ -1,13 +1,13 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { useToast } from '@/hooks/use-toast';
-import { Video, VideoOff, Mic, MicOff, Users, Phone, RefreshCw, Wifi, WifiOff } from 'lucide-react';
-import ServiceNavigation from '@/components/ui/service-navigation';
+import React, { useState, useRef, useEffect, useCallback } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import { Video, VideoOff, Mic, MicOff, Users, Phone, RefreshCw, Wifi, WifiOff } from "lucide-react";
+import ServiceNavigation from "@/components/ui/service-navigation";
 
 interface VideoSessionsSimpleProps {
-  user: { id: string; role: string; firstName?: string; lastName?: string; email?: string; };
+  user: { id: string; role: string; firstName?: string; lastName?: string; email?: string };
   onBackToDashboard?: () => void;
   sessionId?: string;
   isIntroductionCall?: boolean;
@@ -15,61 +15,66 @@ interface VideoSessionsSimpleProps {
 
 interface VideoSession {
   id: string;
-  sessionType: 'therapy' | 'consultation';
+  sessionType: "therapy" | "consultation";
   clientId: string;
   therapistId: string;
   scheduledAt: string;
   duration: number;
-  status: 'scheduled' | 'in-progress' | 'completed' | 'cancelled';
+  status: "scheduled" | "in-progress" | "completed" | "cancelled";
   meetingLink?: string;
   notes?: string;
   clientName?: string;
   therapistName?: string;
 }
 
-export default function VideoSessionsService({ user, onBackToDashboard, sessionId, isIntroductionCall }: VideoSessionsSimpleProps) {
+export default function VideoSessionsService({
+  user,
+  onBackToDashboard,
+  sessionId,
+  isIntroductionCall,
+}: VideoSessionsSimpleProps) {
   const [hasMediaAccess, setHasMediaAccess] = useState(false);
   const [isVideoEnabled, setIsVideoEnabled] = useState(true);
   const [isAudioEnabled, setIsAudioEnabled] = useState(true);
   const [currentSession, setCurrentSession] = useState<VideoSession | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
-  const [streamStatus, setStreamStatus] = useState<string>('Not started');
-  const [connectionStatus, setConnectionStatus] = useState<string>('Disconnected');
+  const [streamStatus, setStreamStatus] = useState<string>("Not started");
+  const [connectionStatus, setConnectionStatus] = useState<string>("Disconnected");
   const [hasRemoteStream, setHasRemoteStream] = useState(false);
-  
+
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
   const remoteStreamRef = useRef<MediaStream | null>(null);
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
   const websocketRef = useRef<WebSocket | null>(null);
-  
+
   const { toast } = useToast();
 
   // Demo session data - SHARED session room where both client and therapist can connect
   const getDemoSession = (): VideoSession => {
     // Use a SHARED session ID so both client and therapist join the same room
     const baseSession = {
-      id: 'shared-demo-session', // Same session ID for both roles
-      sessionType: 'therapy' as const,
+      id: "shared-demo-session", // Same session ID for both roles
+      sessionType: "therapy" as const,
       scheduledAt: new Date().toISOString(),
       duration: 60,
-      status: 'scheduled' as const,
-      clientId: 'demo-client-1',
-      therapistId: 'demo-therapist-1',
+      status: "scheduled" as const,
+      clientId: "demo-client-1",
+      therapistId: "demo-therapist-1",
     };
 
-    if (user.role === 'therapist') {
+    if (user.role === "therapist") {
       return {
         ...baseSession,
-        clientName: 'Demo Client',
-        therapistName: `${user.firstName} ${user.lastName}`.trim() || 'Dr. Demo'
+        clientName: "Demo Client",
+        therapistName: `${user.firstName} ${user.lastName}`.trim() || "Dr. Demo",
       };
     } else {
       return {
         ...baseSession,
-        clientName: `${user.firstName} ${user.lastName}`.trim() || 'Demo Client',
-        therapistName: 'Dr. Demo Therapist'
+        clientName: `${user.firstName} ${user.lastName}`.trim() || "Demo Client",
+        therapistName: "Dr. Demo Therapist",
       };
     }
   };
@@ -79,9 +84,9 @@ export default function VideoSessionsService({ user, onBackToDashboard, sessionI
   // WebRTC configuration
   const rtcConfiguration = {
     iceServers: [
-      { urls: 'stun:stun.l.google.com:19302' },
-      { urls: 'stun:stun1.l.google.com:19302' }
-    ]
+      { urls: "stun:stun.l.google.com:19302" },
+      { urls: "stun:stun1.l.google.com:19302" },
+    ],
   };
 
   // Initialize WebSocket connection
@@ -92,133 +97,134 @@ export default function VideoSessionsService({ user, onBackToDashboard, sessionI
 
     // Only initialize WebSocket when actively joining a session
     if (!hasMediaAccess) {
-      console.log('⚡ Skipping WebSocket connection - no media access yet');
+      console.log("⚡ Skipping WebSocket connection - no media access yet");
       return;
     }
 
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const wsUrl = `${protocol}//${window.location.host}/ws/video-sessions`;
-    
-    console.log('🔌 Connecting to WebSocket:', wsUrl);
-    
+
+    console.log("🔌 Connecting to WebSocket:", wsUrl);
+
     try {
       const ws = new WebSocket(wsUrl);
-    
-    ws.onopen = () => {
-      console.log('✅ WebSocket connected');
-      setConnectionStatus('Connected');
-      
-      // Join the session using the correct message type
-      const targetSessionId = isIntroductionCall && sessionId ? sessionId : demoSession.id;
-      const joinMessage = {
-        type: 'join-session',
-        sessionId: targetSessionId,
-        userId: user.id,
-        userRole: user.role,
-        userName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || user.id
+
+      ws.onopen = () => {
+        console.log("✅ WebSocket connected");
+        setConnectionStatus("Connected");
+
+        // Join the session using the correct message type
+        const targetSessionId = isIntroductionCall && sessionId ? sessionId : demoSession.id;
+        const joinMessage = {
+          type: "join-session",
+          sessionId: targetSessionId,
+          userId: user.id,
+          userRole: user.role,
+          userName: `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.id,
+        };
+        console.log("🚀 Sending join message:", joinMessage);
+        ws.send(JSON.stringify(joinMessage));
       };
-      console.log('🚀 Sending join message:', joinMessage);
-      ws.send(JSON.stringify(joinMessage));
-    };
-    
-    ws.onmessage = async (event) => {
-      const message = JSON.parse(event.data);
-      console.log('📨 WebSocket message:', message);
-      
-      switch (message.type) {
-        case 'session-joined':
-          console.log('✅ Session joined successfully');
-          setConnectionStatus('Connected');
-          break;
-          
-        case 'participant-joined':
-          console.log('👥 Participant joined:', message.participant);
-          console.log('👥 Participant count:', message.participantCount);
-          console.log('👥 Room status:', message.roomStatus);
-          
-          if (message.participant.userId !== user.id) {
-            console.log('🤝 OTHER PARTICIPANT DETECTED! Creating offer...');
-            console.log('🎯 My ID:', user.id, 'Other ID:', message.participant.userId);
-            
-            // Set up the peer connection immediately
-            initializePeerConnection();
-            
-            // Create offer if we're the therapist or if we're alphabetically first
-            const shouldCreateOffer = user.role === 'therapist' || user.id < message.participant.userId;
-            console.log('🎯 Should create offer?', shouldCreateOffer, '(role:', user.role, ')');
-            
-            if (shouldCreateOffer) {
-              console.log('🚀 Creating offer as', user.role);
-              setTimeout(async () => {
-                await createOffer();
-              }, 500);
+
+      ws.onmessage = async (event) => {
+        const message = JSON.parse(event.data);
+        console.log("📨 WebSocket message:", message);
+
+        switch (message.type) {
+          case "session-joined":
+            console.log("✅ Session joined successfully");
+            setConnectionStatus("Connected");
+            break;
+
+          case "participant-joined":
+            console.log("👥 Participant joined:", message.participant);
+            console.log("👥 Participant count:", message.participantCount);
+            console.log("👥 Room status:", message.roomStatus);
+
+            if (message.participant.userId !== user.id) {
+              console.log("🤝 OTHER PARTICIPANT DETECTED! Creating offer...");
+              console.log("🎯 My ID:", user.id, "Other ID:", message.participant.userId);
+
+              // Set up the peer connection immediately
+              initializePeerConnection();
+
+              // Create offer if we're the therapist or if we're alphabetically first
+              const shouldCreateOffer =
+                user.role === "therapist" || user.id < message.participant.userId;
+              console.log("🎯 Should create offer?", shouldCreateOffer, "(role:", user.role, ")");
+
+              if (shouldCreateOffer) {
+                console.log("🚀 Creating offer as", user.role);
+                setTimeout(async () => {
+                  await createOffer();
+                }, 500);
+              } else {
+                console.log("⏳ Waiting for offer from other participant");
+              }
             } else {
-              console.log('⏳ Waiting for offer from other participant');
+              console.log("👤 This is my own join confirmation");
             }
-          } else {
-            console.log('👤 This is my own join confirmation');
-          }
-          break;
-          
-        case 'offer':
-          console.log('📨 Received offer from:', message.userId);
-          if (message.userId !== user.id) {
-            console.log('📥 Processing offer from other participant');
-            await handleOffer(message.offer);
-          } else {
-            console.log('🔄 Ignoring my own offer');
-          }
-          break;
-          
-        case 'answer':
-          console.log('📨 Received answer from:', message.userId);
-          if (message.userId !== user.id) {
-            console.log('📤 Processing answer from other participant');
-            await handleAnswer(message.answer);
-          } else {
-            console.log('🔄 Ignoring my own answer');
-          }
-          break;
-          
-        case 'ice-candidate':
-          if (message.userId !== user.id) {
-            await handleIceCandidate(message.candidate);
-          }
-          break;
-          
-        case 'participant-left':
-          console.log('👋 Participant left:', message.userId);
-          if (message.userId !== user.id) {
+            break;
+
+          case "offer":
+            console.log("📨 Received offer from:", message.userId);
+            if (message.userId !== user.id) {
+              console.log("📥 Processing offer from other participant");
+              await handleOffer(message.offer);
+            } else {
+              console.log("🔄 Ignoring my own offer");
+            }
+            break;
+
+          case "answer":
+            console.log("📨 Received answer from:", message.userId);
+            if (message.userId !== user.id) {
+              console.log("📤 Processing answer from other participant");
+              await handleAnswer(message.answer);
+            } else {
+              console.log("🔄 Ignoring my own answer");
+            }
+            break;
+
+          case "ice-candidate":
+            if (message.userId !== user.id) {
+              await handleIceCandidate(message.candidate);
+            }
+            break;
+
+          case "participant-left":
+            console.log("👋 Participant left:", message.userId);
+            if (message.userId !== user.id) {
+              handleUserLeft();
+            }
+            break;
+
+          case "session-ended":
+            console.log("📞 Session ended:", message.reason);
             handleUserLeft();
-          }
-          break;
-          
-        case 'session-ended':
-          console.log('📞 Session ended:', message.reason);
-          handleUserLeft();
-          break;
-          
-        case 'error':
-          console.error('❌ WebSocket error:', message.error);
-          setConnectionStatus('Error');
-          break;
-      }
-    };
-    
-    ws.onclose = () => {
-      console.log('❌ WebSocket disconnected');
-      setConnectionStatus('Disconnected');
-    };
-    
-      ws.onerror = (error) => {
-        console.error('❌ WebSocket error:', error);
-        setConnectionStatus('Error');
+            break;
+
+          case "error":
+            console.error("❌ WebSocket error:", message.error);
+            setConnectionStatus("Error");
+            break;
+        }
       };
-      
+
+      ws.onclose = () => {
+        console.log("❌ WebSocket disconnected");
+        setConnectionStatus("Disconnected");
+      };
+
+      ws.onerror = (error) => {
+        console.error("❌ WebSocket error:", error);
+        setConnectionStatus("Error");
+      };
+
       websocketRef.current = ws;
     } catch (error) {
-      console.warn('WebSocket connection failed (normal during development):', error);
-      setConnectionStatus('Disconnected');
+      console.warn("WebSocket connection failed (normal during development):", error);
+      setConnectionStatus("Disconnected");
     }
   }, [user.id, user.role]);
 
@@ -227,45 +233,47 @@ export default function VideoSessionsService({ user, onBackToDashboard, sessionI
     if (peerConnectionRef.current) {
       return peerConnectionRef.current;
     }
-    
-    console.log('🔗 Creating peer connection');
+
+    console.log("🔗 Creating peer connection");
     const pc = new RTCPeerConnection(rtcConfiguration);
-    
+
     pc.onicecandidate = (event) => {
       if (event.candidate && websocketRef.current?.readyState === WebSocket.OPEN) {
-        console.log('🧊 Sending ICE candidate');
-        websocketRef.current.send(JSON.stringify({
-          type: 'ice-candidate',
-          sessionId: 'shared-demo-session',
-          candidate: event.candidate,
-          userId: user.id
-        }));
+        console.log("🧊 Sending ICE candidate");
+        websocketRef.current.send(
+          JSON.stringify({
+            type: "ice-candidate",
+            sessionId: "shared-demo-session",
+            candidate: event.candidate,
+            userId: user.id,
+          })
+        );
       }
     };
-    
+
     pc.ontrack = (event) => {
-      console.log('📺 Remote stream received');
+      console.log("📺 Remote stream received");
       const remoteStream = event.streams[0];
       remoteStreamRef.current = remoteStream;
       setHasRemoteStream(true);
-      
+
       if (remoteVideoRef.current) {
         remoteVideoRef.current.srcObject = remoteStream;
       }
     };
-    
+
     pc.onconnectionstatechange = () => {
-      console.log('🔄 Connection state:', pc.connectionState);
+      console.log("🔄 Connection state:", pc.connectionState);
       setConnectionStatus(pc.connectionState);
     };
-    
+
     // Add local stream to peer connection
     if (localStreamRef.current) {
-      localStreamRef.current.getTracks().forEach(track => {
+      localStreamRef.current.getTracks().forEach((track) => {
         pc.addTrack(track, localStreamRef.current!);
       });
     }
-    
+
     peerConnectionRef.current = pc;
     return pc;
   }, [user.id]);
@@ -273,90 +281,97 @@ export default function VideoSessionsService({ user, onBackToDashboard, sessionI
   // Create offer
   const createOffer = useCallback(async () => {
     if (!localStreamRef.current) {
-      console.log('❌ No local stream available for offer');
+      console.log("❌ No local stream available for offer");
       return;
     }
-    
+
     const pc = initializePeerConnection();
-    
+
     // Ensure local stream tracks are added before creating offer
-    localStreamRef.current.getTracks().forEach(track => {
-      if (pc.getSenders().find(sender => sender.track === track)) {
-        console.log('🎯 Track already added:', track.kind);
+    localStreamRef.current.getTracks().forEach((track) => {
+      if (pc.getSenders().find((sender) => sender.track === track)) {
+        console.log("🎯 Track already added:", track.kind);
         return;
       }
-      console.log('🎵 Adding track to peer connection:', track.kind);
+      console.log("🎵 Adding track to peer connection:", track.kind);
       pc.addTrack(track, localStreamRef.current!);
     });
-    
+
     try {
-      console.log('📞 Creating offer with', localStreamRef.current.getTracks().length, 'tracks');
+      console.log("📞 Creating offer with", localStreamRef.current.getTracks().length, "tracks");
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
-      
-      console.log('📤 Sending offer via WebSocket');
+
+      console.log("📤 Sending offer via WebSocket");
       if (websocketRef.current?.readyState === WebSocket.OPEN) {
-        websocketRef.current.send(JSON.stringify({
-          type: 'offer',
-          sessionId: demoSession.id,
-          offer: offer,
-          userId: user.id
-        }));
+        websocketRef.current.send(
+          JSON.stringify({
+            type: "offer",
+            sessionId: demoSession.id,
+            offer: offer,
+            userId: user.id,
+          })
+        );
       }
     } catch (error) {
-      console.error('❌ Error creating offer:', error);
+      console.error("❌ Error creating offer:", error);
     }
   }, [initializePeerConnection, user.id]);
 
   // Handle offer
-  const handleOffer = useCallback(async (offer: RTCSessionDescriptionInit) => {
-    if (!localStreamRef.current) {
-      console.log('❌ No local stream available for handling offer');
-      return;
-    }
-    
-    const pc = initializePeerConnection();
-    
-    // Ensure local stream tracks are added before handling offer
-    localStreamRef.current.getTracks().forEach(track => {
-      if (pc.getSenders().find(sender => sender.track === track)) {
-        console.log('🎯 Track already added:', track.kind);
+  const handleOffer = useCallback(
+    async (offer: RTCSessionDescriptionInit) => {
+      if (!localStreamRef.current) {
+        console.log("❌ No local stream available for handling offer");
         return;
       }
-      console.log('🎵 Adding track to peer connection:', track.kind);
-      pc.addTrack(track, localStreamRef.current!);
-    });
-    
-    try {
-      console.log('📥 Handling offer with', localStreamRef.current.getTracks().length, 'tracks');
-      await pc.setRemoteDescription(offer);
-      
-      const answer = await pc.createAnswer();
-      await pc.setLocalDescription(answer);
-      
-      console.log('📤 Sending answer via WebSocket');
-      if (websocketRef.current?.readyState === WebSocket.OPEN) {
-        websocketRef.current.send(JSON.stringify({
-          type: 'answer',
-          sessionId: demoSession.id,
-          answer: answer,
-          userId: user.id
-        }));
+
+      const pc = initializePeerConnection();
+
+      // Ensure local stream tracks are added before handling offer
+      localStreamRef.current.getTracks().forEach((track) => {
+        if (pc.getSenders().find((sender) => sender.track === track)) {
+          console.log("🎯 Track already added:", track.kind);
+          return;
+        }
+        console.log("🎵 Adding track to peer connection:", track.kind);
+        pc.addTrack(track, localStreamRef.current!);
+      });
+
+      try {
+        console.log("📥 Handling offer with", localStreamRef.current.getTracks().length, "tracks");
+        await pc.setRemoteDescription(offer);
+
+        const answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+
+        console.log("📤 Sending answer via WebSocket");
+        if (websocketRef.current?.readyState === WebSocket.OPEN) {
+          websocketRef.current.send(
+            JSON.stringify({
+              type: "answer",
+              sessionId: demoSession.id,
+              answer: answer,
+              userId: user.id,
+            })
+          );
+        }
+      } catch (error) {
+        console.error("❌ Error handling offer:", error);
       }
-    } catch (error) {
-      console.error('❌ Error handling offer:', error);
-    }
-  }, [initializePeerConnection, user.id]);
+    },
+    [initializePeerConnection, user.id]
+  );
 
   // Handle answer
   const handleAnswer = useCallback(async (answer: RTCSessionDescriptionInit) => {
     const pc = peerConnectionRef.current;
     if (pc) {
       try {
-        console.log('📤 Handling answer');
+        console.log("📤 Handling answer");
         await pc.setRemoteDescription(answer);
       } catch (error) {
-        console.error('❌ Error handling answer:', error);
+        console.error("❌ Error handling answer:", error);
       }
     }
   }, []);
@@ -366,17 +381,17 @@ export default function VideoSessionsService({ user, onBackToDashboard, sessionI
     const pc = peerConnectionRef.current;
     if (pc) {
       try {
-        console.log('🧊 Adding ICE candidate');
+        console.log("🧊 Adding ICE candidate");
         await pc.addIceCandidate(candidate);
       } catch (error) {
-        console.error('❌ Error adding ICE candidate:', error);
+        console.error("❌ Error adding ICE candidate:", error);
       }
     }
   }, []);
 
   // Handle user left
   const handleUserLeft = useCallback(() => {
-    console.log('👋 Remote user left');
+    console.log("👋 Remote user left");
     setHasRemoteStream(false);
     if (remoteVideoRef.current) {
       remoteVideoRef.current.srcObject = null;
@@ -387,19 +402,19 @@ export default function VideoSessionsService({ user, onBackToDashboard, sessionI
   // Apply stream to video element
   const applyStreamToVideo = useCallback((videoElement: HTMLVideoElement, stream: MediaStream) => {
     if (videoElement && stream) {
-      console.log('📺 Applying stream to video element');
+      console.log("📺 Applying stream to video element");
       videoElement.srcObject = stream;
       videoElement.autoplay = true;
       videoElement.playsInline = true;
       videoElement.muted = true;
-      
+
       videoElement.onloadedmetadata = () => {
-        console.log('✅ Video metadata loaded');
-        setStreamStatus('Video stream active');
+        console.log("✅ Video metadata loaded");
+        setStreamStatus("Video stream active");
       };
-      
-      videoElement.play().catch(error => {
-        console.error('❌ Video play failed:', error);
+
+      videoElement.play().catch((error) => {
+        console.error("❌ Video play failed:", error);
       });
     }
   }, []);
@@ -408,48 +423,47 @@ export default function VideoSessionsService({ user, onBackToDashboard, sessionI
   const requestMediaAccess = useCallback(async () => {
     try {
       setIsConnecting(true);
-      setStreamStatus('Requesting camera access...');
-      
-      console.log('🎥 Requesting camera access...');
-      
+      setStreamStatus("Requesting camera access...");
+
+      console.log("🎥 Requesting camera access...");
+
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { width: 640, height: 480 },
-        audio: true
+        audio: true,
       });
-      
-      console.log('✅ Camera access granted');
-      console.log('📊 Stream details:', {
+
+      console.log("✅ Camera access granted");
+      console.log("📊 Stream details:", {
         id: stream.id,
         active: stream.active,
         tracks: stream.getTracks().length,
         videoTracks: stream.getVideoTracks().length,
-        audioTracks: stream.getAudioTracks().length
+        audioTracks: stream.getAudioTracks().length,
       });
-      
+
       localStreamRef.current = stream;
       setHasMediaAccess(true);
-      setStreamStatus('Camera access granted');
-      
+      setStreamStatus("Camera access granted");
+
       // Apply stream to video element if it exists
       if (localVideoRef.current) {
         applyStreamToVideo(localVideoRef.current, stream);
       }
-      
+
       // Add stream to peer connection if it exists
       if (peerConnectionRef.current) {
-        stream.getTracks().forEach(track => {
+        stream.getTracks().forEach((track) => {
           peerConnectionRef.current!.addTrack(track, stream);
         });
       }
-      
+
       toast({
         title: "Camera Access Granted",
         description: "Your camera is now active",
       });
-      
     } catch (error) {
-      console.error('❌ Camera access failed:', error);
-      setStreamStatus('Camera access denied');
+      console.error("❌ Camera access failed:", error);
+      setStreamStatus("Camera access denied");
       toast({
         title: "Camera Access Denied",
         description: "Please grant camera permission to use video sessions",
@@ -465,13 +479,13 @@ export default function VideoSessionsService({ user, onBackToDashboard, sessionI
     if (!hasMediaAccess) {
       await requestMediaAccess();
     }
-    
+
     // Initialize WebSocket connection
     initializeWebSocket();
-    
+
     setCurrentSession(demoSession);
-    setStreamStatus('In session');
-    
+    setStreamStatus("In session");
+
     toast({
       title: "Session Joined",
       description: "You've joined the demo video session",
@@ -482,32 +496,34 @@ export default function VideoSessionsService({ user, onBackToDashboard, sessionI
   const endSession = useCallback(() => {
     // Close WebSocket connection
     if (websocketRef.current) {
-      websocketRef.current.send(JSON.stringify({
-        type: 'leave-session',
-        sessionId: 'shared-demo-session',
-        userId: user.id
-      }));
+      websocketRef.current.send(
+        JSON.stringify({
+          type: "leave-session",
+          sessionId: "shared-demo-session",
+          userId: user.id,
+        })
+      );
       websocketRef.current.close();
       websocketRef.current = null;
     }
-    
+
     // Close peer connection
     if (peerConnectionRef.current) {
       peerConnectionRef.current.close();
       peerConnectionRef.current = null;
     }
-    
+
     // Reset state
     setCurrentSession(null);
-    setStreamStatus('Session ended');
-    setConnectionStatus('Disconnected');
+    setStreamStatus("Session ended");
+    setConnectionStatus("Disconnected");
     setHasRemoteStream(false);
-    
+
     // Clear remote video
     if (remoteVideoRef.current) {
       remoteVideoRef.current.srcObject = null;
     }
-    
+
     toast({
       title: "Session Ended",
       description: "You've left the video session",
@@ -517,7 +533,7 @@ export default function VideoSessionsService({ user, onBackToDashboard, sessionI
   // Force refresh video
   const refreshVideo = useCallback(() => {
     if (localStreamRef.current && localVideoRef.current) {
-      console.log('🔄 Refreshing video stream');
+      console.log("🔄 Refreshing video stream");
       applyStreamToVideo(localVideoRef.current, localStreamRef.current);
     }
   }, [applyStreamToVideo]);
@@ -529,7 +545,7 @@ export default function VideoSessionsService({ user, onBackToDashboard, sessionI
       if (videoTrack) {
         videoTrack.enabled = !videoTrack.enabled;
         setIsVideoEnabled(videoTrack.enabled);
-        
+
         toast({
           title: videoTrack.enabled ? "Video Enabled" : "Video Disabled",
           description: videoTrack.enabled ? "Your camera is now on" : "Your camera is now off",
@@ -545,10 +561,12 @@ export default function VideoSessionsService({ user, onBackToDashboard, sessionI
       if (audioTrack) {
         audioTrack.enabled = !audioTrack.enabled;
         setIsAudioEnabled(audioTrack.enabled);
-        
+
         toast({
           title: audioTrack.enabled ? "Audio Enabled" : "Audio Disabled",
-          description: audioTrack.enabled ? "Your microphone is now on" : "Your microphone is now off",
+          description: audioTrack.enabled
+            ? "Your microphone is now on"
+            : "Your microphone is now off",
         });
       }
     }
@@ -565,7 +583,7 @@ export default function VideoSessionsService({ user, onBackToDashboard, sessionI
   useEffect(() => {
     return () => {
       if (localStreamRef.current) {
-        localStreamRef.current.getTracks().forEach(track => track.stop());
+        localStreamRef.current.getTracks().forEach((track) => track.stop());
       }
     };
   }, []);
@@ -574,241 +592,278 @@ export default function VideoSessionsService({ user, onBackToDashboard, sessionI
     <>
       {/* Navigation Bar */}
       {onBackToDashboard && (
-        <ServiceNavigation 
+        <ServiceNavigation
           serviceName="Video Sessions"
           onBackToDashboard={onBackToDashboard}
-          user={{ ...user, email: user.email || '' }}
+          user={{ ...user, email: user.email || "" }}
         />
       )}
-      
+
       <div className="max-w-6xl mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <p className="text-gray-600 mt-1">Demo session for {user.role === 'therapist' ? 'therapists' : 'clients'} - join the shared demo room</p>
-        </div>
-        <div className="flex gap-2">
-          <Badge variant="outline" className="bg-blue-50 text-blue-600">
-            {streamStatus}
-          </Badge>
-          <Badge variant="outline" className={`flex items-center gap-1 ${
-            connectionStatus === 'Connected' || connectionStatus === 'connected' ? 'bg-green-50 text-green-600' : 
-            connectionStatus === 'Error' ? 'bg-red-50 text-red-600' : 'bg-gray-50 text-gray-600'
-          }`}>
-            {connectionStatus === 'Connected' || connectionStatus === 'connected' ? 
-              <Wifi className="h-3 w-3" /> : <WifiOff className="h-3 w-3" />
-            }
-            {connectionStatus}
-          </Badge>
-        </div>
-      </div>
-
-      {/* Camera Access Section */}
-      {!hasMediaAccess && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Video className="h-5 w-5" />
-              Camera Access Required
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-gray-600 mb-4">
-              To use video sessions, please grant camera and microphone access.
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-gray-600 mt-1">
+              Demo session for {user.role === "therapist" ? "therapists" : "clients"} - join the
+              shared demo room
             </p>
-            <Button 
-              onClick={requestMediaAccess}
-              disabled={isConnecting}
-              className="w-full"
+          </div>
+          <div className="flex gap-2">
+            <Badge variant="outline" className="bg-blue-50 text-blue-600">
+              {streamStatus}
+            </Badge>
+            <Badge
+              variant="outline"
+              className={`flex items-center gap-1 ${
+                connectionStatus === "Connected" || connectionStatus === "connected"
+                  ? "bg-green-50 text-green-600"
+                  : connectionStatus === "Error"
+                    ? "bg-red-50 text-red-600"
+                    : "bg-gray-50 text-gray-600"
+              }`}
             >
-              {isConnecting ? 'Requesting Access...' : 'Grant Camera Access'}
-            </Button>
-          </CardContent>
-        </Card>
-      )}
+              {connectionStatus === "Connected" || connectionStatus === "connected" ? (
+                <Wifi className="h-3 w-3" />
+              ) : (
+                <WifiOff className="h-3 w-3" />
+              )}
+              {connectionStatus}
+            </Badge>
+          </div>
+        </div>
 
-      {/* Video Session Interface */}
-      {hasMediaAccess && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Video className="h-5 w-5" />
-              {currentSession ? 'Video Session Active' : 'Camera Ready'}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {!currentSession ? (
-              <div className="space-y-4">
-                {/* Camera Preview */}
-                <div className="relative bg-gray-900 rounded-lg overflow-hidden" style={{ height: '300px' }}>
-                  <video
-                    ref={localVideoRef}
-                    className="w-full h-full object-cover"
-                    autoPlay
-                    playsInline
-                    muted
-                    style={{ backgroundColor: 'black' }}
-                  />
-                  <div className="absolute top-4 left-4">
-                    <Badge variant="secondary">Camera Preview</Badge>
-                  </div>
-                  <div className="absolute bottom-4 right-4">
-                    <Button
-                      onClick={refreshVideo}
-                      size="sm"
-                      variant="outline"
-                      className="bg-hive-purple text-white border-hive-purple hover:bg-white hover:text-hive-purple"
-                      title="Test your camera - Click to refresh if camera appears frozen"
-                    >
-                      <RefreshCw className="h-4 w-4 mr-1" />
-                      Test Camera
-                    </Button>
-                  </div>
-                </div>
+        {/* Camera Access Section */}
+        {!hasMediaAccess && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Video className="h-5 w-5" />
+                Camera Access Required
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-600 mb-4">
+                To use video sessions, please grant camera and microphone access.
+              </p>
+              <Button onClick={requestMediaAccess} disabled={isConnecting} className="w-full">
+                {isConnecting ? "Requesting Access..." : "Grant Camera Access"}
+              </Button>
+            </CardContent>
+          </Card>
+        )}
 
-                {/* Camera Testing Instructions */}
-                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                  <div className="flex items-start space-x-3">
-                    <Video className="h-5 w-5 text-blue-600 mt-0.5" />
-                    <div>
-                      <h4 className="text-sm font-medium text-blue-800 mb-2">Camera Testing Instructions</h4>
-                      <ul className="text-sm text-blue-700 space-y-1">
-                        <li>• Check that your camera preview is showing clearly above</li>
-                        <li>• If the camera appears frozen or black, click the "Test Camera" button</li>
-                        <li>• Make sure you have good lighting and your camera is positioned properly</li>
-                        <li>• Test your audio by speaking - you should see no echo in the preview</li>
-                      </ul>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Stream Status */}
-                <div className="grid grid-cols-3 gap-4 text-sm">
-                  <div className="flex items-center justify-between">
-                    <span>Status:</span>
-                    <Badge variant={hasMediaAccess ? "default" : "secondary"}>
-                      {hasMediaAccess ? 'Active' : 'Inactive'}
-                    </Badge>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span>Video:</span>
-                    <span>{localStreamRef.current?.getVideoTracks().length || 0}</span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span>Audio:</span>
-                    <span>{localStreamRef.current?.getAudioTracks().length || 0}</span>
-                  </div>
-                </div>
-
-                {/* Join Session */}
-                <div className="text-center pt-4">
-                  <div className="mb-3">
-                    <Badge variant="outline" className="mb-2">
-                      {user.role === 'therapist' ? 'Therapist Video Session' : 'Client Video Session'}
-                    </Badge>
-                    <p className="text-sm text-gray-600">
-                      {user.role === 'therapist' 
-                        ? 'Join as therapist to connect with your clients'
-                        : 'Join as client to connect with your therapist'
-                      }
-                    </p>
-                  </div>
-                  <Button onClick={joinDemoSession} className="w-full">
-                    Join {user.role === 'therapist' ? 'Therapist' : 'Client'} Video Session
-                  </Button>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-semibold">{currentSession.clientName} & {currentSession.therapistName}</h3>
-                    <p className="text-sm text-gray-600">Duration: {currentSession.duration} minutes</p>
-                  </div>
-                  <Button onClick={endSession} variant="destructive" size="sm">
-                    <Phone className="h-4 w-4 mr-2" />
-                    End Session
-                  </Button>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {/* Remote Video */}
-                  <div className="relative bg-gray-900 rounded-lg overflow-hidden" style={{ height: '300px' }}>
-                    <video
-                      ref={remoteVideoRef}
-                      className="w-full h-full object-cover"
-                      autoPlay
-                      playsInline
-                      style={{ backgroundColor: 'black' }}
-                    />
-                    <div className="absolute top-4 left-4">
-                      <Badge variant="secondary">Remote Participant</Badge>
-                    </div>
-                    {!hasRemoteStream && (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="text-center text-white">
-                          <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                          <p className="text-lg font-medium">
-                            {connectionStatus === 'Connected' || connectionStatus === 'connected' 
-                              ? 'Waiting for participant...' 
-                              : 'Connecting...'}
-                          </p>
-
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Local Video */}
-                  <div className="relative bg-gray-900 rounded-lg overflow-hidden" style={{ height: '300px' }}>
+        {/* Video Session Interface */}
+        {hasMediaAccess && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Video className="h-5 w-5" />
+                {currentSession ? "Video Session Active" : "Camera Ready"}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {!currentSession ? (
+                <div className="space-y-4">
+                  {/* Camera Preview */}
+                  <div
+                    className="relative bg-gray-900 rounded-lg overflow-hidden"
+                    style={{ height: "300px" }}
+                  >
                     <video
                       ref={localVideoRef}
                       className="w-full h-full object-cover"
                       autoPlay
                       playsInline
                       muted
-                      style={{ 
-                        backgroundColor: 'black',
-                        opacity: isVideoEnabled ? 1 : 0.3 
-                      }}
+                      style={{ backgroundColor: "black" }}
                     />
-                    {!isVideoEnabled && (
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="text-center text-white">
-                          <VideoOff className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                          <p className="text-sm">Camera Off</p>
-                        </div>
-                      </div>
-                    )}
                     <div className="absolute top-4 left-4">
-                      <Badge variant="secondary">You</Badge>
+                      <Badge variant="secondary">Camera Preview</Badge>
+                    </div>
+                    <div className="absolute bottom-4 right-4">
+                      <Button
+                        onClick={refreshVideo}
+                        size="sm"
+                        variant="outline"
+                        className="bg-hive-purple text-white border-hive-purple hover:bg-white hover:text-hive-purple"
+                        title="Test your camera - Click to refresh if camera appears frozen"
+                      >
+                        <RefreshCw className="h-4 w-4 mr-1" />
+                        Test Camera
+                      </Button>
                     </div>
                   </div>
+
+                  {/* Camera Testing Instructions */}
+                  <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div className="flex items-start space-x-3">
+                      <Video className="h-5 w-5 text-blue-600 mt-0.5" />
+                      <div>
+                        <h4 className="text-sm font-medium text-blue-800 mb-2">
+                          Camera Testing Instructions
+                        </h4>
+                        <ul className="text-sm text-blue-700 space-y-1">
+                          <li>• Check that your camera preview is showing clearly above</li>
+                          <li>
+                            • If the camera appears frozen or black, click the "Test Camera" button
+                          </li>
+                          <li>
+                            • Make sure you have good lighting and your camera is positioned
+                            properly
+                          </li>
+                          <li>
+                            • Test your audio by speaking - you should see no echo in the preview
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Stream Status */}
+                  <div className="grid grid-cols-3 gap-4 text-sm">
+                    <div className="flex items-center justify-between">
+                      <span>Status:</span>
+                      <Badge variant={hasMediaAccess ? "default" : "secondary"}>
+                        {hasMediaAccess ? "Active" : "Inactive"}
+                      </Badge>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span>Video:</span>
+                      <span>{localStreamRef.current?.getVideoTracks().length || 0}</span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span>Audio:</span>
+                      <span>{localStreamRef.current?.getAudioTracks().length || 0}</span>
+                    </div>
+                  </div>
+
+                  {/* Join Session */}
+                  <div className="text-center pt-4">
+                    <div className="mb-3">
+                      <Badge variant="outline" className="mb-2">
+                        {user.role === "therapist"
+                          ? "Therapist Video Session"
+                          : "Client Video Session"}
+                      </Badge>
+                      <p className="text-sm text-gray-600">
+                        {user.role === "therapist"
+                          ? "Join as therapist to connect with your clients"
+                          : "Join as client to connect with your therapist"}
+                      </p>
+                    </div>
+                    <Button onClick={joinDemoSession} className="w-full">
+                      Join {user.role === "therapist" ? "Therapist" : "Client"} Video Session
+                    </Button>
+                  </div>
                 </div>
-                
-                {/* Session Controls */}
-                <div className="flex justify-center space-x-4 pt-4">
-                  <Button
-                    onClick={toggleVideo}
-                    variant={isVideoEnabled ? "default" : "secondary"}
-                    size="sm"
-                    title={isVideoEnabled ? "Turn off camera" : "Turn on camera"}
-                  >
-                    {isVideoEnabled ? <Video className="h-4 w-4" /> : <VideoOff className="h-4 w-4" />}
-                  </Button>
-                  <Button
-                    onClick={toggleAudio}
-                    variant={isAudioEnabled ? "default" : "secondary"}
-                    size="sm"
-                    title={isAudioEnabled ? "Mute microphone" : "Unmute microphone"}
-                  >
-                    {isAudioEnabled ? <Mic className="h-4 w-4" /> : <MicOff className="h-4 w-4" />}
-                  </Button>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-semibold">
+                        {currentSession.clientName} & {currentSession.therapistName}
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        Duration: {currentSession.duration} minutes
+                      </p>
+                    </div>
+                    <Button onClick={endSession} variant="destructive" size="sm">
+                      <Phone className="h-4 w-4 mr-2" />
+                      End Session
+                    </Button>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Remote Video */}
+                    <div
+                      className="relative bg-gray-900 rounded-lg overflow-hidden"
+                      style={{ height: "300px" }}
+                    >
+                      <video
+                        ref={remoteVideoRef}
+                        className="w-full h-full object-cover"
+                        autoPlay
+                        playsInline
+                        style={{ backgroundColor: "black" }}
+                      />
+                      <div className="absolute top-4 left-4">
+                        <Badge variant="secondary">Remote Participant</Badge>
+                      </div>
+                      {!hasRemoteStream && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="text-center text-white">
+                            <Users className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                            <p className="text-lg font-medium">
+                              {connectionStatus === "Connected" || connectionStatus === "connected"
+                                ? "Waiting for participant..."
+                                : "Connecting..."}
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Local Video */}
+                    <div
+                      className="relative bg-gray-900 rounded-lg overflow-hidden"
+                      style={{ height: "300px" }}
+                    >
+                      <video
+                        ref={localVideoRef}
+                        className="w-full h-full object-cover"
+                        autoPlay
+                        playsInline
+                        muted
+                        style={{
+                          backgroundColor: "black",
+                          opacity: isVideoEnabled ? 1 : 0.3,
+                        }}
+                      />
+                      {!isVideoEnabled && (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <div className="text-center text-white">
+                            <VideoOff className="h-12 w-12 mx-auto mb-2 opacity-50" />
+                            <p className="text-sm">Camera Off</p>
+                          </div>
+                        </div>
+                      )}
+                      <div className="absolute top-4 left-4">
+                        <Badge variant="secondary">You</Badge>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Session Controls */}
+                  <div className="flex justify-center space-x-4 pt-4">
+                    <Button
+                      onClick={toggleVideo}
+                      variant={isVideoEnabled ? "default" : "secondary"}
+                      size="sm"
+                      title={isVideoEnabled ? "Turn off camera" : "Turn on camera"}
+                    >
+                      {isVideoEnabled ? (
+                        <Video className="h-4 w-4" />
+                      ) : (
+                        <VideoOff className="h-4 w-4" />
+                      )}
+                    </Button>
+                    <Button
+                      onClick={toggleAudio}
+                      variant={isAudioEnabled ? "default" : "secondary"}
+                      size="sm"
+                      title={isAudioEnabled ? "Mute microphone" : "Unmute microphone"}
+                    >
+                      {isAudioEnabled ? (
+                        <Mic className="h-4 w-4" />
+                      ) : (
+                        <MicOff className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
+              )}
+            </CardContent>
+          </Card>
+        )}
       </div>
     </>
   );

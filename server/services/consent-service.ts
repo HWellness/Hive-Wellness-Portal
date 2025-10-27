@@ -1,10 +1,21 @@
-import { db } from '../db.js';
-import { userConsents, consentAuditLog, type InsertUserConsent, type InsertConsentAuditLog, type UserConsent } from '../../shared/schema.js';
-import { eq, and, desc } from 'drizzle-orm';
-import { nanoid } from 'nanoid';
-import { logger } from '../lib/logger.js';
+import { db } from "../db.js";
+import {
+  userConsents,
+  consentAuditLog,
+  type InsertUserConsent,
+  type InsertConsentAuditLog,
+  type UserConsent,
+} from "../../shared/schema.js";
+import { eq, and, desc } from "drizzle-orm";
+import { nanoid } from "nanoid";
+import { logger } from "../lib/logger.js";
 
-export type ConsentType = 'essential' | 'functional' | 'analytics' | 'marketing' | 'medical_data_processing';
+export type ConsentType =
+  | "essential"
+  | "functional"
+  | "analytics"
+  | "marketing"
+  | "medical_data_processing";
 
 export interface ConsentPreferences {
   essential: boolean; // Always true, required for platform
@@ -32,7 +43,7 @@ export interface ConsentUpdateOptions {
 export interface ConsentHistoryEntry {
   id: string;
   consentType: ConsentType;
-  action: 'granted' | 'withdrawn' | 'updated';
+  action: "granted" | "withdrawn" | "updated";
   previousValue: boolean | null;
   newValue: boolean;
   ipAddress: string | null;
@@ -49,19 +60,19 @@ export class ConsentService {
   async initializeUserConsents(userId: string, context: ConsentContext): Promise<void> {
     try {
       const consentTypes: ConsentType[] = [
-        'essential',
-        'functional',
-        'analytics',
-        'marketing',
-        'medical_data_processing'
+        "essential",
+        "functional",
+        "analytics",
+        "marketing",
+        "medical_data_processing",
       ];
 
-      const defaultConsents: ConsentUpdateOptions[] = consentTypes.map(type => ({
+      const defaultConsents: ConsentUpdateOptions[] = consentTypes.map((type) => ({
         userId,
         consentType: type,
-        granted: type === 'essential', // Only essential is granted by default
+        granted: type === "essential", // Only essential is granted by default
         context,
-        consentVersion: '1.0'
+        consentVersion: "1.0",
       }));
 
       // Create all default consents
@@ -69,9 +80,9 @@ export class ConsentService {
         await this.recordConsent(consentOpt);
       }
 
-      logger.info('User consents initialized', { userId });
+      logger.info("User consents initialized", { userId });
     } catch (error) {
-      logger.error('Failed to initialize user consents', { userId, error });
+      logger.error("Failed to initialize user consents", { userId, error });
       throw error;
     }
   }
@@ -80,42 +91,39 @@ export class ConsentService {
    * Record or update a single consent
    */
   async recordConsent(options: ConsentUpdateOptions): Promise<UserConsent> {
-    const { userId, consentType, granted, context, consentVersion = '1.0' } = options;
+    const { userId, consentType, granted, context, consentVersion = "1.0" } = options;
 
     try {
       // Check if consent already exists
       const existing = await db.query.userConsents.findFirst({
-        where: and(
-          eq(userConsents.userId, userId),
-          eq(userConsents.consentType, consentType)
-        )
+        where: and(eq(userConsents.userId, userId), eq(userConsents.consentType, consentType)),
       });
 
       const now = new Date();
-      
+
       // Determine if there's an actual change to log
       const hasChanged = !existing || existing.granted !== granted;
-      
+
       if (!hasChanged) {
         // No change in consent value, skip update and logging
-        logger.debug('Consent unchanged, skipping update', { userId, consentType, granted });
+        logger.debug("Consent unchanged, skipping update", { userId, consentType, granted });
         return existing!;
       }
 
       // Determine the correct action for audit trail
-      let action: 'granted' | 'withdrawn' | 'updated';
+      let action: "granted" | "withdrawn" | "updated";
       if (!existing) {
         // New consent record - always logged as 'granted' (even if initially denied)
-        action = 'granted';
+        action = "granted";
       } else if (existing.granted && !granted) {
         // Was granted, now withdrawn
-        action = 'withdrawn';
+        action = "withdrawn";
       } else if (!existing.granted && granted) {
         // Was denied/withdrawn, now granted
-        action = 'granted';
+        action = "granted";
       } else {
         // Should not reach here due to hasChanged check, but handle as update
-        action = 'updated';
+        action = "updated";
       }
 
       const consentData: InsertUserConsent = {
@@ -142,7 +150,7 @@ export class ConsentService {
         ipAddress: context.ipAddress || null,
         userAgent: context.userAgent || null,
         consentVersion,
-        triggeredBy: context.triggeredBy || 'user',
+        triggeredBy: context.triggeredBy || "user",
         metadata: context.metadata || null,
       });
 
@@ -153,21 +161,18 @@ export class ConsentService {
           .set(consentData)
           .where(eq(userConsents.id, existing.id))
           .returning();
-        
-        logger.info('Consent updated', { userId, consentType, granted, action });
+
+        logger.info("Consent updated", { userId, consentType, granted, action });
         return updated;
       } else {
         // Insert new consent
-        const [inserted] = await db
-          .insert(userConsents)
-          .values(consentData)
-          .returning();
-        
-        logger.info('Consent recorded', { userId, consentType, granted, action });
+        const [inserted] = await db.insert(userConsents).values(consentData).returning();
+
+        logger.info("Consent recorded", { userId, consentType, granted, action });
         return inserted;
       }
     } catch (error) {
-      logger.error('Failed to record consent', { userId, consentType, error });
+      logger.error("Failed to record consent", { userId, consentType, error });
       throw error;
     }
   }
@@ -185,13 +190,13 @@ export class ConsentService {
 
       // Essential consent cannot be withdrawn
       const consentTypes = Object.entries(preferences) as [ConsentType, boolean][];
-      
+
       for (const [consentType, granted] of consentTypes) {
-        if (consentType === 'essential' && !granted) {
-          logger.warn('Attempted to withdraw essential consent', { userId });
+        if (consentType === "essential" && !granted) {
+          logger.warn("Attempted to withdraw essential consent", { userId });
           continue; // Skip - essential cannot be withdrawn
         }
-        
+
         updates.push({
           userId,
           consentType,
@@ -206,10 +211,10 @@ export class ConsentService {
         results.push(result);
       }
 
-      logger.info('User consents updated', { userId, count: results.length });
+      logger.info("User consents updated", { userId, count: results.length });
       return results;
     } catch (error) {
-      logger.error('Failed to update user consents', { userId, error });
+      logger.error("Failed to update user consents", { userId, error });
       throw error;
     }
   }
@@ -240,7 +245,7 @@ export class ConsentService {
 
       return preferences;
     } catch (error) {
-      logger.error('Failed to get user consents', { userId, error });
+      logger.error("Failed to get user consents", { userId, error });
       throw error;
     }
   }
@@ -258,7 +263,7 @@ export class ConsentService {
 
       return consents.length > 0;
     } catch (error) {
-      logger.error('Failed to check user consent response status', { userId, error });
+      logger.error("Failed to check user consent response status", { userId, error });
       return false; // Default to false on error to show banner
     }
   }
@@ -269,15 +274,12 @@ export class ConsentService {
   async hasConsent(userId: string, consentType: ConsentType): Promise<boolean> {
     try {
       const consent = await db.query.userConsents.findFirst({
-        where: and(
-          eq(userConsents.userId, userId),
-          eq(userConsents.consentType, consentType)
-        ),
+        where: and(eq(userConsents.userId, userId), eq(userConsents.consentType, consentType)),
       });
 
       return consent?.granted || false;
     } catch (error) {
-      logger.error('Failed to check consent', { userId, consentType, error });
+      logger.error("Failed to check consent", { userId, consentType, error });
       return false;
     }
   }
@@ -285,14 +287,14 @@ export class ConsentService {
   /**
    * Get consent history for a user (for transparency/audit)
    */
-  async getConsentHistory(userId: string, consentType?: ConsentType): Promise<ConsentHistoryEntry[]> {
+  async getConsentHistory(
+    userId: string,
+    consentType?: ConsentType
+  ): Promise<ConsentHistoryEntry[]> {
     try {
       let query = db.query.consentAuditLog.findMany({
         where: consentType
-          ? and(
-              eq(consentAuditLog.userId, userId),
-              eq(consentAuditLog.consentType, consentType)
-            )
+          ? and(eq(consentAuditLog.userId, userId), eq(consentAuditLog.consentType, consentType))
           : eq(consentAuditLog.userId, userId),
         orderBy: [desc(consentAuditLog.timestamp)],
         limit: 100,
@@ -300,10 +302,10 @@ export class ConsentService {
 
       const history = await query;
 
-      return history.map(entry => ({
+      return history.map((entry) => ({
         id: entry.id,
         consentType: entry.consentType as ConsentType,
-        action: entry.action as 'granted' | 'withdrawn' | 'updated',
+        action: entry.action as "granted" | "withdrawn" | "updated",
         previousValue: entry.previousValue,
         newValue: entry.newValue,
         ipAddress: entry.ipAddress,
@@ -312,7 +314,7 @@ export class ConsentService {
         timestamp: entry.timestamp!,
       }));
     } catch (error) {
-      logger.error('Failed to get consent history', { userId, error });
+      logger.error("Failed to get consent history", { userId, error });
       throw error;
     }
   }
@@ -320,28 +322,30 @@ export class ConsentService {
   /**
    * Get consent statistics (for admin analytics)
    */
-  async getConsentStatistics(): Promise<{
-    consentType: ConsentType;
-    totalUsers: number;
-    granted: number;
-    withdrawn: number;
-    grantRate: number;
-  }[]> {
+  async getConsentStatistics(): Promise<
+    {
+      consentType: ConsentType;
+      totalUsers: number;
+      granted: number;
+      withdrawn: number;
+      grantRate: number;
+    }[]
+  > {
     try {
       const allConsents = await db.query.userConsents.findMany();
 
       const consentTypes: ConsentType[] = [
-        'essential',
-        'functional',
-        'analytics',
-        'marketing',
-        'medical_data_processing'
+        "essential",
+        "functional",
+        "analytics",
+        "marketing",
+        "medical_data_processing",
       ];
 
-      const stats = consentTypes.map(type => {
-        const typeConsents = allConsents.filter(c => c.consentType === type);
-        const granted = typeConsents.filter(c => c.granted).length;
-        const withdrawn = typeConsents.filter(c => !c.granted).length;
+      const stats = consentTypes.map((type) => {
+        const typeConsents = allConsents.filter((c) => c.consentType === type);
+        const granted = typeConsents.filter((c) => c.granted).length;
+        const withdrawn = typeConsents.filter((c) => !c.granted).length;
         const total = typeConsents.length;
 
         return {
@@ -355,7 +359,7 @@ export class ConsentService {
 
       return stats;
     } catch (error) {
-      logger.error('Failed to get consent statistics', { error });
+      logger.error("Failed to get consent statistics", { error });
       throw error;
     }
   }
@@ -370,7 +374,7 @@ export class ConsentService {
         ...data,
       });
     } catch (error) {
-      logger.error('Failed to log consent change', { error });
+      logger.error("Failed to log consent change", { error });
       // Don't throw - audit logging failure shouldn't break consent recording
     }
   }
@@ -386,7 +390,7 @@ export class ConsentService {
 
       for (const consent of consents) {
         // Skip essential consent
-        if (consent.consentType === 'essential') {
+        if (consent.consentType === "essential") {
           continue;
         }
 
@@ -398,9 +402,9 @@ export class ConsentService {
         });
       }
 
-      logger.info('All non-essential consents withdrawn', { userId });
+      logger.info("All non-essential consents withdrawn", { userId });
     } catch (error) {
-      logger.error('Failed to withdraw all consents', { userId, error });
+      logger.error("Failed to withdraw all consents", { userId, error });
       throw error;
     }
   }

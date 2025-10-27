@@ -3,10 +3,10 @@
  * Manages webhook channel lifecycle, renewal, and monitoring
  */
 
-import { calendarService } from './calendar-service';
-import { storage } from '../storage';
-import { calendarWebhookHandler } from './calendar-webhook-handler';
-import cron from 'node-cron';
+import { calendarService } from "./calendar-service";
+import { storage } from "../storage";
+import { calendarWebhookHandler } from "./calendar-webhook-handler";
+import cron from "node-cron";
 
 export interface ChannelStats {
   totalChannels: number;
@@ -24,7 +24,7 @@ export class CalendarChannelManager {
     activeChannels: 0,
     expiringChannels: 0,
     errorChannels: 0,
-    nextRenewalCheck: new Date()
+    nextRenewalCheck: new Date(),
   };
 
   /**
@@ -32,19 +32,19 @@ export class CalendarChannelManager {
    */
   async initialize(): Promise<void> {
     if (this.isInitialized) {
-      console.log('📋 CalendarChannelManager already initialized');
+      console.log("📋 CalendarChannelManager already initialized");
       return;
     }
 
     try {
-      console.log('🚀 Initializing CalendarChannelManager...');
+      console.log("🚀 Initializing CalendarChannelManager...");
 
       // Initial channel health check
       await this.checkChannelHealth();
 
       // Set up automatic channel renewal (every 6 hours)
-      this.cronJob = cron.schedule('0 */6 * * *', async () => {
-        console.log('⏰ Running scheduled channel renewal check...');
+      this.cronJob = cron.schedule("0 */6 * * *", async () => {
+        console.log("⏰ Running scheduled channel renewal check...");
         await this.processChannelRenewals();
       });
 
@@ -52,10 +52,9 @@ export class CalendarChannelManager {
       this.cronJob.start();
 
       this.isInitialized = true;
-      console.log('✅ CalendarChannelManager initialized successfully');
-
+      console.log("✅ CalendarChannelManager initialized successfully");
     } catch (error: any) {
-      console.error('❌ Failed to initialize CalendarChannelManager:', error);
+      console.error("❌ Failed to initialize CalendarChannelManager:", error);
       throw error;
     }
   }
@@ -65,8 +64,8 @@ export class CalendarChannelManager {
    */
   async checkChannelHealth(): Promise<ChannelStats> {
     try {
-      console.log('🔍 Checking webhook channel health...');
-      
+      console.log("🔍 Checking webhook channel health...");
+
       const calendars = await storage.listTherapistCalendars();
       const now = new Date();
       const expiryWarningTime = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours
@@ -80,7 +79,7 @@ export class CalendarChannelManager {
         if (calendar.channelId) {
           totalChannels++;
 
-          if (calendar.integrationStatus === 'error') {
+          if (calendar.integrationStatus === "error") {
             errorChannels++;
             continue;
           }
@@ -88,7 +87,7 @@ export class CalendarChannelManager {
           if (calendar.channelExpiresAt) {
             if (calendar.channelExpiresAt > now) {
               activeChannels++;
-              
+
               if (calendar.channelExpiresAt <= expiryWarningTime) {
                 expiringChannels++;
               }
@@ -104,11 +103,10 @@ export class CalendarChannelManager {
       this.stats.errorChannels = errorChannels;
       this.stats.nextRenewalCheck = new Date(now.getTime() + 6 * 60 * 60 * 1000); // Next 6 hours
 
-      console.log('📊 Channel health check complete:', this.stats);
+      console.log("📊 Channel health check complete:", this.stats);
       return { ...this.stats };
-
     } catch (error: any) {
-      console.error('❌ Error checking channel health:', error);
+      console.error("❌ Error checking channel health:", error);
       throw error;
     }
   }
@@ -120,7 +118,7 @@ export class CalendarChannelManager {
     const result = {
       renewed: 0,
       failed: 0,
-      errors: [] as string[]
+      errors: [] as string[],
     };
 
     try {
@@ -129,9 +127,9 @@ export class CalendarChannelManager {
       expiryBuffer.setHours(expiryBuffer.getHours() + 24);
 
       const calendarsToRenew = await storage.getCalendarsNeedingChannelRenewal(expiryBuffer);
-      
+
       if (calendarsToRenew.length === 0) {
-        console.log('✅ No channels need renewal at this time');
+        console.log("✅ No channels need renewal at this time");
         return result;
       }
 
@@ -143,13 +141,14 @@ export class CalendarChannelManager {
         }
 
         try {
-          console.log(`🔄 Renewing channel for therapist ${calendar.therapistId} (${calendar.googleCalendarId})`);
-          
+          console.log(
+            `🔄 Renewing channel for therapist ${calendar.therapistId} (${calendar.googleCalendarId})`
+          );
+
           const newChannel = await calendarService.renewChannel(calendar.channelId);
-          
+
           result.renewed++;
           console.log(`✅ Successfully renewed channel: ${calendar.channelId} -> ${newChannel.id}`);
-
         } catch (error: any) {
           result.failed++;
           const errorMsg = `Failed to renew channel ${calendar.channelId}: ${error.message}`;
@@ -159,19 +158,20 @@ export class CalendarChannelManager {
           // Mark calendar as having errors
           try {
             await storage.updateTherapistCalendar(calendar.id, {
-              integrationStatus: 'error'
+              integrationStatus: "error",
             });
           } catch (updateError) {
-            console.error('❌ Failed to update calendar status:', updateError);
+            console.error("❌ Failed to update calendar status:", updateError);
           }
         }
       }
 
-      console.log(`📊 Channel renewal complete: ${result.renewed} renewed, ${result.failed} failed`);
+      console.log(
+        `📊 Channel renewal complete: ${result.renewed} renewed, ${result.failed} failed`
+      );
       return result;
-
     } catch (error: any) {
-      console.error('❌ Error processing channel renewals:', error);
+      console.error("❌ Error processing channel renewals:", error);
       result.errors.push(error.message);
       return result;
     }
@@ -197,12 +197,11 @@ export class CalendarChannelManager {
       await storage.updateWebhookChannel(calendar.id, {
         channelId: channel.id,
         channelResourceId: channel.resourceId,
-        channelExpiresAt: channel.expiration
+        channelExpiresAt: channel.expiration,
       });
 
       console.log(`✅ Webhook channel setup complete for calendar ${calendarId}: ${channel.id}`);
       return true;
-
     } catch (error: any) {
       console.error(`❌ Failed to setup webhook channel for calendar ${calendarId}:`, error);
       return false;
@@ -218,7 +217,7 @@ export class CalendarChannelManager {
 
       // Find calendar record
       const calendars = await storage.listTherapistCalendars();
-      const calendar = calendars.find(cal => cal.googleCalendarId === calendarId);
+      const calendar = calendars.find((cal) => cal.googleCalendarId === calendarId);
 
       if (!calendar || !calendar.channelId) {
         console.log(`⚠️ No active channel found for calendar ${calendarId}`);
@@ -230,14 +229,13 @@ export class CalendarChannelManager {
 
       // Clear channel info from database
       await storage.updateWebhookChannel(calendar.id, {
-        channelId: '',
-        channelResourceId: '',
-        channelExpiresAt: new Date(0) // Set to epoch
+        channelId: "",
+        channelResourceId: "",
+        channelExpiresAt: new Date(0), // Set to epoch
       });
 
       console.log(`✅ Webhook channel removed for calendar ${calendarId}`);
       return true;
-
     } catch (error: any) {
       console.error(`❌ Failed to remove webhook channel for calendar ${calendarId}:`, error);
       return false;
@@ -251,15 +249,15 @@ export class CalendarChannelManager {
     const result = {
       success: 0,
       failed: 0,
-      errors: [] as string[]
+      errors: [] as string[],
     };
 
     try {
-      console.log('🔄 Recreating all webhook channels...');
+      console.log("🔄 Recreating all webhook channels...");
 
       const calendars = await storage.listTherapistCalendars();
-      const activeCalendars = calendars.filter(cal => 
-        cal.integrationStatus === 'active' && cal.googleCalendarId
+      const activeCalendars = calendars.filter(
+        (cal) => cal.integrationStatus === "active" && cal.googleCalendarId
       );
 
       console.log(`📋 Found ${activeCalendars.length} active calendars to recreate channels for`);
@@ -287,7 +285,6 @@ export class CalendarChannelManager {
             result.failed++;
             result.errors.push(`Failed to setup channel for ${calendar.googleCalendarId}`);
           }
-
         } catch (error: any) {
           result.failed++;
           const errorMsg = `Error recreating channel for ${calendar.googleCalendarId}: ${error.message}`;
@@ -296,11 +293,12 @@ export class CalendarChannelManager {
         }
       }
 
-      console.log(`📊 Channel recreation complete: ${result.success} success, ${result.failed} failed`);
+      console.log(
+        `📊 Channel recreation complete: ${result.success} success, ${result.failed} failed`
+      );
       return result;
-
     } catch (error: any) {
-      console.error('❌ Error recreating all channels:', error);
+      console.error("❌ Error recreating all channels:", error);
       result.errors.push(error.message);
       return result;
     }
@@ -318,7 +316,7 @@ export class CalendarChannelManager {
    * Manual trigger for channel renewal check
    */
   async triggerRenewalCheck(): Promise<void> {
-    console.log('🔄 Manually triggering channel renewal check...');
+    console.log("🔄 Manually triggering channel renewal check...");
     await this.processChannelRenewals();
   }
 
@@ -331,32 +329,32 @@ export class CalendarChannelManager {
       this.cronJob = null;
     }
     this.isInitialized = false;
-    console.log('📋 CalendarChannelManager shutdown complete');
+    console.log("📋 CalendarChannelManager shutdown complete");
   }
 
   /**
    * Health check for the channel manager
    */
-  async healthCheck(): Promise<{ status: 'healthy' | 'unhealthy'; details: any }> {
+  async healthCheck(): Promise<{ status: "healthy" | "unhealthy"; details: any }> {
     try {
       const stats = await this.getStats();
       const isHealthy = stats.errorChannels < stats.totalChannels * 0.1; // Less than 10% error rate
 
       return {
-        status: isHealthy ? 'healthy' : 'unhealthy',
+        status: isHealthy ? "healthy" : "unhealthy",
         details: {
           initialized: this.isInitialized,
           cronRunning: this.cronJob?.running || false,
-          stats
-        }
+          stats,
+        },
       };
     } catch (error: any) {
       return {
-        status: 'unhealthy',
+        status: "unhealthy",
         details: {
           error: error.message,
-          initialized: this.isInitialized
-        }
+          initialized: this.isInitialized,
+        },
       };
     }
   }

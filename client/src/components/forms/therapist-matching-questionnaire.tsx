@@ -31,30 +31,95 @@ type QuestionnaireData = z.infer<typeof questionnaireSchema>;
 
 const mentalHealthSymptoms = [
   // Overwhelmed and stressed
-  { category: "Overwhelmed and stressed", items: ["Never", "Rarely", "Sometimes", "Often", "Always"] },
+  {
+    category: "Overwhelmed and stressed",
+    items: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+  },
   // Anxious or worried
   { category: "Anxious or worried", items: ["Never", "Rarely", "Sometimes", "Often", "Always"] },
   // Sad or hopeless
   { category: "Sad or hopeless", items: ["Never", "Rarely", "Sometimes", "Often", "Always"] },
   // Disconnected from others
-  { category: "Disconnected from others", items: ["Never", "Rarely", "Sometimes", "Often", "Always"] },
+  {
+    category: "Disconnected from others",
+    items: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+  },
   // Struggling with motivation
-  { category: "Struggling with motivation", items: ["Never", "Rarely", "Sometimes", "Often", "Always"] },
+  {
+    category: "Struggling with motivation",
+    items: ["Never", "Rarely", "Sometimes", "Often", "Always"],
+  },
 ];
 
 const supportAreas = [
-  "Abuse recovery", "Addiction & recovery", "Adoption & fostering", "Anger management", "Anxiety", "Autism", "Bipolar disorder", "Bullying", "Chronic illness", "Codependency", "Coping skills", "Depression", "Domestic violence", "Eating disorders", "Emotional regulation", "Family conflict", "Grief & loss", "Infertility", "Life transitions", "Marital & premarital counselling", "Meditation & mindfulness", "Narcissistic abuse", "Obsessive-compulsive disorder", "Panic disorders", "Parenting support", "Phobias", "Psychosis", "PTSD", "Racial trauma", "Relationship issues", "Religious trauma", "School issues", "Self-esteem", "Self-harm", "Sexual abuse", "Sleep disorders", "Stress management", "Suicidal ideation", "Trauma & PTSD", "Weight management", "Work-related stress"
+  "Abuse recovery",
+  "Addiction & recovery",
+  "Adoption & fostering",
+  "Anger management",
+  "Anxiety",
+  "Autism",
+  "Bipolar disorder",
+  "Bullying",
+  "Chronic illness",
+  "Codependency",
+  "Coping skills",
+  "Depression",
+  "Domestic violence",
+  "Eating disorders",
+  "Emotional regulation",
+  "Family conflict",
+  "Grief & loss",
+  "Infertility",
+  "Life transitions",
+  "Marital & premarital counselling",
+  "Meditation & mindfulness",
+  "Narcissistic abuse",
+  "Obsessive-compulsive disorder",
+  "Panic disorders",
+  "Parenting support",
+  "Phobias",
+  "Psychosis",
+  "PTSD",
+  "Racial trauma",
+  "Relationship issues",
+  "Religious trauma",
+  "School issues",
+  "Self-esteem",
+  "Self-harm",
+  "Sexual abuse",
+  "Sleep disorders",
+  "Stress management",
+  "Suicidal ideation",
+  "Trauma & PTSD",
+  "Weight management",
+  "Work-related stress",
 ];
 
 const therapyTypes = [
-  "Counselling", "Emotion-Focused Therapy (EFT)", "Motivational Interviewing", "Solution-Focused Therapy", "Acceptance and Commitment Therapy (ACT)", "Cognitive Analytic Therapy (CAT)", "Cognitive Behavioural Therapy (CBT)", "Compassion-Focused Therapy (CFT)", "Dialectical Behaviour Therapy (DBT)", "Psychodynamic Therapy", "Trauma-Focused CBT", "Eye Movement Desensitisation and Reprocessing (EMDR)", "Psychosexual Therapy", "I don't know, this is too much choice!", "Other (please specify)"
+  "Counselling",
+  "Emotion-Focused Therapy (EFT)",
+  "Motivational Interviewing",
+  "Solution-Focused Therapy",
+  "Acceptance and Commitment Therapy (ACT)",
+  "Cognitive Analytic Therapy (CAT)",
+  "Cognitive Behavioural Therapy (CBT)",
+  "Compassion-Focused Therapy (CFT)",
+  "Dialectical Behaviour Therapy (DBT)",
+  "Psychodynamic Therapy",
+  "Trauma-Focused CBT",
+  "Eye Movement Desensitisation and Reprocessing (EMDR)",
+  "Psychosexual Therapy",
+  "I don't know, this is too much choice!",
+  "Other (please specify)",
 ];
 
 interface TherapistMatchingQuestionnaireProps {
   onComplete?: (data: QuestionnaireData) => void;
 }
 
-export default function TherapistMatchingQuestionnaire({ onComplete }: TherapistMatchingQuestionnaireProps) {
+export default function TherapistMatchingQuestionnaire({
+  onComplete,
+}: TherapistMatchingQuestionnaireProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [wellbeingRating, setWellbeingRating] = useState(5);
   const [mentalHealthResponses, setMentalHealthResponses] = useState<Record<string, string>>({});
@@ -84,20 +149,22 @@ export default function TherapistMatchingQuestionnaire({ onComplete }: Therapist
   const nextStep = () => {
     // Validate step 7 (mental health symptoms)
     if (currentStep === 7) {
-      const allCategoriesAnswered = mentalHealthSymptoms.every(symptom => 
-        mentalHealthResponses[symptom.category] && mentalHealthResponses[symptom.category].trim() !== ''
+      const allCategoriesAnswered = mentalHealthSymptoms.every(
+        (symptom) =>
+          mentalHealthResponses[symptom.category] &&
+          mentalHealthResponses[symptom.category].trim() !== ""
       );
-      
+
       if (!allCategoriesAnswered) {
         toast({
           title: "Please Complete All Questions",
           description: "Please answer all mental health frequency questions before continuing.",
-          variant: "destructive"
+          variant: "destructive",
         });
         return;
       }
     }
-    
+
     if (currentStep < 10) {
       setCurrentStep(currentStep + 1);
     }
@@ -114,16 +181,19 @@ export default function TherapistMatchingQuestionnaire({ onComplete }: Therapist
       const submissionData = {
         ...data,
         step6WellbeingRating: wellbeingRating,
-        step7MentalHealthSymptoms: Object.keys(mentalHealthResponses).map(key => `${key}: ${mentalHealthResponses[key]}`),
+        step7MentalHealthSymptoms: Object.keys(mentalHealthResponses).map(
+          (key) => `${key}: ${mentalHealthResponses[key]}`
+        ),
         step8SupportAreas: selectedSupportAreas,
         step9TherapyTypes: selectedTherapyTypes,
       };
 
       await apiRequest("POST", "/api/therapist-matching-questionnaire", submissionData);
-      
+
       toast({
         title: "Questionnaire Submitted",
-        description: "Your responses have been saved. Our AI will analyse your preferences and our admin team will review your matches.",
+        description:
+          "Your responses have been saved. Our AI will analyse your preferences and our admin team will review your matches.",
       });
 
       if (onComplete) {
@@ -144,13 +214,19 @@ export default function TherapistMatchingQuestionnaire({ onComplete }: Therapist
         return (
           <div className="space-y-6">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Are you 18 years old or over?</h2>
-              <p className="text-gray-600 mb-4">You must be 18 or older to complete this questionnaire.</p>
-              <p className="text-gray-600 mb-6">If you are under 18, you will be redirected to resources appropriate for your age.</p>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Are you 18 years old or over?
+              </h2>
+              <p className="text-gray-600 mb-4">
+                You must be 18 or older to complete this questionnaire.
+              </p>
+              <p className="text-gray-600 mb-6">
+                If you are under 18, you will be redirected to resources appropriate for your age.
+              </p>
             </div>
-            
-            <RadioGroup 
-              value={form.watch("step1Age")} 
+
+            <RadioGroup
+              value={form.watch("step1Age")}
               onValueChange={(value) => form.setValue("step1Age", value)}
             >
               <div className="flex items-center space-x-2">
@@ -171,7 +247,7 @@ export default function TherapistMatchingQuestionnaire({ onComplete }: Therapist
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-6">What is your full name?</h2>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="firstName">First Name</Label>
@@ -190,7 +266,7 @@ export default function TherapistMatchingQuestionnaire({ onComplete }: Therapist
                 />
               </div>
             </div>
-            
+
             <div>
               <Label htmlFor="email">Email *</Label>
               <Input
@@ -210,9 +286,9 @@ export default function TherapistMatchingQuestionnaire({ onComplete }: Therapist
               <h2 className="text-2xl font-bold text-gray-900 mb-2">How old are you?</h2>
               <p className="text-gray-600 mb-6">Select one</p>
             </div>
-            
-            <RadioGroup 
-              value={form.watch("step3AgeRange")} 
+
+            <RadioGroup
+              value={form.watch("step3AgeRange")}
               onValueChange={(value) => form.setValue("step3AgeRange", value)}
             >
               {["18-25", "26-35", "36-45", "46-55", "56-65", "Over 65"].map((range) => (
@@ -229,11 +305,13 @@ export default function TherapistMatchingQuestionnaire({ onComplete }: Therapist
         return (
           <div className="space-y-6">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">How do you describe your gender?</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                How do you describe your gender?
+              </h2>
             </div>
-            
-            <RadioGroup 
-              value={form.watch("step4Gender")} 
+
+            <RadioGroup
+              value={form.watch("step4Gender")}
               onValueChange={(value) => form.setValue("step4Gender", value)}
             >
               {["Female", "Male", "Non-binary"].map((gender) => (
@@ -250,14 +328,22 @@ export default function TherapistMatchingQuestionnaire({ onComplete }: Therapist
         return (
           <div className="space-y-6">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">What are your preferred pronouns?</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                What are your preferred pronouns?
+              </h2>
             </div>
-            
-            <RadioGroup 
-              value={form.watch("step5Pronouns")} 
+
+            <RadioGroup
+              value={form.watch("step5Pronouns")}
               onValueChange={(value) => form.setValue("step5Pronouns", value)}
             >
-              {["She/Her/Hers", "He/Him/His", "They/Them/Theirs", "Any pronouns", "Prefer not to say"].map((pronoun) => (
+              {[
+                "She/Her/Hers",
+                "He/Him/His",
+                "They/Them/Theirs",
+                "Any pronouns",
+                "Prefer not to say",
+              ].map((pronoun) => (
                 <div key={pronoun} className="flex items-center space-x-2">
                   <RadioGroupItem value={pronoun} id={pronoun} />
                   <Label htmlFor={pronoun}>{pronoun}</Label>
@@ -271,11 +357,15 @@ export default function TherapistMatchingQuestionnaire({ onComplete }: Therapist
         return (
           <div className="space-y-6">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Current well-being and mental health</h2>
-              <p className="text-gray-600 mb-6">On a scale of 1-10 how would you rate your overall well-being right now?</p>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Current well-being and mental health
+              </h2>
+              <p className="text-gray-600 mb-6">
+                On a scale of 1-10 how would you rate your overall well-being right now?
+              </p>
               <p className="text-sm text-gray-500 mb-6">(1 = very low, 10 = excellent)</p>
             </div>
-            
+
             <div className="space-y-4">
               <div className="flex justify-between text-sm text-gray-600">
                 <span>0</span>
@@ -312,14 +402,17 @@ export default function TherapistMatchingQuestionnaire({ onComplete }: Therapist
               <h2 className="text-2xl font-bold text-gray-900 mb-2">In the past two weeks,</h2>
               <h2 className="text-2xl font-bold text-gray-900 mb-6">how often have you felt:</h2>
             </div>
-            
+
             <div className="space-y-6">
               {mentalHealthSymptoms.map((symptom) => (
                 <div key={symptom.category} className="space-y-3">
                   <h3 className="font-semibold text-gray-900">{symptom.category}</h3>
                   <div className="space-y-2">
                     {symptom.items.map((item) => (
-                      <div key={`${symptom.category}-${item}`} className="flex items-center space-x-2">
+                      <div
+                        key={`${symptom.category}-${item}`}
+                        className="flex items-center space-x-2"
+                      >
                         <input
                           type="radio"
                           id={`${symptom.category}-${item}`}
@@ -347,10 +440,12 @@ export default function TherapistMatchingQuestionnaire({ onComplete }: Therapist
         return (
           <div className="space-y-6">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">What areas do you need support with?</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                What areas do you need support with?
+              </h2>
               <p className="text-gray-600 mb-6">Please select all that apply</p>
             </div>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-96 overflow-y-auto">
               {supportAreas.map((area) => (
                 <div key={area} className="flex items-center space-x-2">
@@ -361,11 +456,15 @@ export default function TherapistMatchingQuestionnaire({ onComplete }: Therapist
                       if (checked) {
                         setSelectedSupportAreas([...selectedSupportAreas, area]);
                       } else {
-                        setSelectedSupportAreas(selectedSupportAreas.filter(item => item !== area));
+                        setSelectedSupportAreas(
+                          selectedSupportAreas.filter((item) => item !== area)
+                        );
                       }
                     }}
                   />
-                  <Label htmlFor={area} className="text-sm">{area}</Label>
+                  <Label htmlFor={area} className="text-sm">
+                    {area}
+                  </Label>
                 </div>
               ))}
             </div>
@@ -376,10 +475,12 @@ export default function TherapistMatchingQuestionnaire({ onComplete }: Therapist
         return (
           <div className="space-y-6">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Are there any therapies you are interested in exploring?</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                Are there any therapies you are interested in exploring?
+              </h2>
               <p className="text-gray-600 mb-6">(It's okay if you're unsure)</p>
             </div>
-            
+
             <div className="space-y-3">
               {therapyTypes.map((therapy) => (
                 <div key={therapy} className="flex items-center space-x-2">
@@ -390,11 +491,15 @@ export default function TherapistMatchingQuestionnaire({ onComplete }: Therapist
                       if (checked) {
                         setSelectedTherapyTypes([...selectedTherapyTypes, therapy]);
                       } else {
-                        setSelectedTherapyTypes(selectedTherapyTypes.filter(item => item !== therapy));
+                        setSelectedTherapyTypes(
+                          selectedTherapyTypes.filter((item) => item !== therapy)
+                        );
                       }
                     }}
                   />
-                  <Label htmlFor={therapy} className="text-sm">{therapy}</Label>
+                  <Label htmlFor={therapy} className="text-sm">
+                    {therapy}
+                  </Label>
                 </div>
               ))}
             </div>
@@ -405,14 +510,20 @@ export default function TherapistMatchingQuestionnaire({ onComplete }: Therapist
         return (
           <div className="space-y-6">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Have you ever sought support for these difficulties before?</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">
+                Have you ever sought support for these difficulties before?
+              </h2>
             </div>
-            
-            <RadioGroup 
-              value={form.watch("step10PreviousTherapy")} 
+
+            <RadioGroup
+              value={form.watch("step10PreviousTherapy")}
               onValueChange={(value) => form.setValue("step10PreviousTherapy", value)}
             >
-              {["I've spoken to friends/family", "I have had therapy in the past", "I have never had therapy"].map((option) => (
+              {[
+                "I've spoken to friends/family",
+                "I have had therapy in the past",
+                "I have never had therapy",
+              ].map((option) => (
                 <div key={option} className="flex items-center space-x-2">
                   <RadioGroupItem value={option} id={option} />
                   <Label htmlFor={option}>{option}</Label>
@@ -433,36 +544,27 @@ export default function TherapistMatchingQuestionnaire({ onComplete }: Therapist
         <CardHeader>
           <div className="flex justify-between items-center">
             <CardTitle className="text-2xl font-bold">Questionnaire</CardTitle>
-            <div className="text-sm text-gray-600">
-              Step {currentStep} of 10
-            </div>
+            <div className="text-sm text-gray-600">Step {currentStep} of 10</div>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
-            <div 
+            <div
               className="bg-hive-purple h-2 rounded-full transition-all duration-300"
               style={{ width: `${(currentStep / 10) * 100}%` }}
             />
           </div>
         </CardHeader>
         <CardContent>
-          <div className="min-h-[400px]">
-            {renderStep()}
-          </div>
-          
+          <div className="min-h-[400px]">{renderStep()}</div>
+
           <div className="flex justify-between mt-8">
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={prevStep}
-              disabled={currentStep === 1}
-            >
+            <Button type="button" variant="outline" onClick={prevStep} disabled={currentStep === 1}>
               <ChevronLeft className="w-4 h-4 mr-2" />
               Previous
             </Button>
-            
+
             {currentStep < 10 ? (
-              <Button 
-                type="button" 
+              <Button
+                type="button"
                 onClick={nextStep}
                 className="bg-hive-purple hover:bg-hive-purple/90"
               >
@@ -470,8 +572,8 @@ export default function TherapistMatchingQuestionnaire({ onComplete }: Therapist
                 <ChevronRight className="w-4 h-4 ml-2" />
               </Button>
             ) : (
-              <Button 
-                type="button" 
+              <Button
+                type="button"
                 onClick={form.handleSubmit(handleSubmit)}
                 className="bg-green-600 hover:bg-green-700"
               >

@@ -1,7 +1,13 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { Repeat } from "lucide-react";
@@ -11,7 +17,7 @@ interface BulkBookingDialogProps {
   onOpenChange: (open: boolean) => void;
   selectedTherapist?: any;
   onBulkBooking?: (bulkData: {
-    bulkBookingType: 'weekly' | 'monthly' | 'custom';
+    bulkBookingType: "weekly" | "monthly" | "custom";
     numberOfSessions: number;
     recurringTime: string;
     startDate: Date;
@@ -20,13 +26,19 @@ interface BulkBookingDialogProps {
   isLoading?: boolean;
 }
 
-export function BulkBookingDialog({ open, onOpenChange, selectedTherapist, onBulkBooking, isLoading }: BulkBookingDialogProps) {
+export function BulkBookingDialog({
+  open,
+  onOpenChange,
+  selectedTherapist,
+  onBulkBooking,
+  isLoading,
+}: BulkBookingDialogProps) {
   const { toast } = useToast();
-  
+
   // Bulk booking state
-  const [bulkBookingType, setBulkBookingType] = useState<'weekly' | 'monthly' | 'custom'>('weekly');
+  const [bulkBookingType, setBulkBookingType] = useState<"weekly" | "monthly" | "custom">("weekly");
   const [numberOfSessions, setNumberOfSessions] = useState(4);
-  const [recurringTime, setRecurringTime] = useState<string>('');
+  const [recurringTime, setRecurringTime] = useState<string>("");
   const [recurringDay, setRecurringDay] = useState<number>(1);
   const [startDate, setStartDate] = useState<Date>(new Date());
 
@@ -47,7 +59,7 @@ export function BulkBookingDialog({ open, onOpenChange, selectedTherapist, onBul
         numberOfSessions,
         recurringTime,
         startDate,
-        selectedTherapist
+        selectedTherapist,
       });
     } else {
       // Fallback to local handling if no parent handler
@@ -68,29 +80,29 @@ export function BulkBookingDialog({ open, onOpenChange, selectedTherapist, onBul
             Bulk Booking - Multiple Sessions
           </DialogTitle>
         </DialogHeader>
-        
+
         <div className="space-y-6">
           {/* Booking Type Selection */}
           <div>
             <Label className="text-sm font-medium">Booking Pattern</Label>
             <div className="grid grid-cols-3 gap-2 mt-2">
               <Button
-                variant={bulkBookingType === 'weekly' ? 'default' : 'outline'}
-                onClick={() => setBulkBookingType('weekly')}
+                variant={bulkBookingType === "weekly" ? "default" : "outline"}
+                onClick={() => setBulkBookingType("weekly")}
                 className="text-xs"
               >
                 Weekly
               </Button>
               <Button
-                variant={bulkBookingType === 'monthly' ? 'default' : 'outline'}
-                onClick={() => setBulkBookingType('monthly')}
+                variant={bulkBookingType === "monthly" ? "default" : "outline"}
+                onClick={() => setBulkBookingType("monthly")}
                 className="text-xs"
               >
                 Monthly
               </Button>
               <Button
-                variant={bulkBookingType === 'custom' ? 'default' : 'outline'}
-                onClick={() => setBulkBookingType('custom')}
+                variant={bulkBookingType === "custom" ? "default" : "outline"}
+                onClick={() => setBulkBookingType("custom")}
                 className="text-xs"
               >
                 Custom
@@ -101,7 +113,10 @@ export function BulkBookingDialog({ open, onOpenChange, selectedTherapist, onBul
           {/* Number of Sessions */}
           <div>
             <Label className="text-sm font-medium">Number of Sessions</Label>
-            <Select value={numberOfSessions.toString()} onValueChange={(value) => setNumberOfSessions(Number(value))}>
+            <Select
+              value={numberOfSessions.toString()}
+              onValueChange={(value) => setNumberOfSessions(Number(value))}
+            >
               <SelectTrigger className="w-full mt-2">
                 <SelectValue />
               </SelectTrigger>
@@ -120,7 +135,7 @@ export function BulkBookingDialog({ open, onOpenChange, selectedTherapist, onBul
             <Label className="text-sm font-medium">Start Date</Label>
             <input
               type="date"
-              value={startDate.toISOString().split('T')[0]}
+              value={startDate.toISOString().split("T")[0]}
               onChange={(e) => setStartDate(new Date(e.target.value))}
               className="w-full mt-2 p-3 border border-input rounded-md bg-background"
             />
@@ -147,10 +162,13 @@ export function BulkBookingDialog({ open, onOpenChange, selectedTherapist, onBul
           </div>
 
           {/* Day of Week (for weekly) */}
-          {bulkBookingType === 'weekly' && (
+          {bulkBookingType === "weekly" && (
             <div>
               <Label className="text-sm font-medium">Day of Week</Label>
-              <Select value={recurringDay.toString()} onValueChange={(value) => setRecurringDay(Number(value))}>
+              <Select
+                value={recurringDay.toString()}
+                onValueChange={(value) => setRecurringDay(Number(value))}
+              >
                 <SelectTrigger className="w-full mt-2">
                   <SelectValue />
                 </SelectTrigger>
@@ -195,14 +213,10 @@ export function BulkBookingDialog({ open, onOpenChange, selectedTherapist, onBul
 
           {/* Action Buttons */}
           <div className="flex gap-3">
-            <Button 
-              variant="outline" 
-              onClick={() => onOpenChange(false)}
-              className="flex-1"
-            >
+            <Button variant="outline" onClick={() => onOpenChange(false)} className="flex-1">
               Cancel
             </Button>
-            <Button 
+            <Button
               onClick={handleBulkBooking}
               disabled={!recurringTime || !startDate || !selectedTherapist || isLoading}
               className="flex-1"

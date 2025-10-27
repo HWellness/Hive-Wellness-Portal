@@ -2,20 +2,26 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info, CheckCircle, AlertTriangle } from "lucide-react";
 
 interface FormGuidanceProps {
-  type: 'info' | 'success' | 'warning' | 'error';
+  type: "info" | "success" | "warning" | "error";
   title?: string;
   message: string;
   suggestions?: string[];
   className?: string;
 }
 
-export function FormGuidance({ type, title, message, suggestions, className = "" }: FormGuidanceProps) {
+export function FormGuidance({
+  type,
+  title,
+  message,
+  suggestions,
+  className = "",
+}: FormGuidanceProps) {
   const getIcon = () => {
     switch (type) {
-      case 'success':
+      case "success":
         return <CheckCircle className="h-4 w-4" />;
-      case 'warning':
-      case 'error':
+      case "warning":
+      case "error":
         return <AlertTriangle className="h-4 w-4" />;
       default:
         return <Info className="h-4 w-4" />;
@@ -24,10 +30,10 @@ export function FormGuidance({ type, title, message, suggestions, className = ""
 
   const getVariant = () => {
     switch (type) {
-      case 'error':
-        return 'destructive';
+      case "error":
+        return "destructive";
       default:
-        return 'default';
+        return "default";
     }
   };
 
@@ -91,11 +97,14 @@ export function ValidatedInput({
 
   return (
     <div className="space-y-2">
-      <label htmlFor={id} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+      <label
+        htmlFor={id}
+        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+      >
         {label}
         {required && <span className="text-red-500 ml-1">*</span>}
       </label>
-      
+
       <input
         id={id}
         type={type}
@@ -103,18 +112,16 @@ export function ValidatedInput({
         value={value}
         onChange={handleChange}
         className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
-          validation && !validation.isValid ? 'border-red-500 focus-visible:ring-red-500' : ''
+          validation && !validation.isValid ? "border-red-500 focus-visible:ring-red-500" : ""
         }`}
       />
-      
-      {helpText && !showValidation && (
-        <FormGuidance type="info" message={helpText} />
-      )}
-      
+
+      {helpText && !showValidation && <FormGuidance type="info" message={helpText} />}
+
       {showValidation && (
         <FormGuidance
-          type={validation.isValid ? 'success' : 'error'}
-          message={validation.message || ''}
+          type={validation.isValid ? "success" : "error"}
+          message={validation.message || ""}
           suggestions={validation.suggestions}
         />
       )}
@@ -123,7 +130,11 @@ export function ValidatedInput({
 }
 
 // Pre-configured validation inputs for common fields
-export const PhoneInput = ({ value, onChange, ...props }: Omit<ValidatedInputProps, 'id' | 'label' | 'type'>) => (
+export const PhoneInput = ({
+  value,
+  onChange,
+  ...props
+}: Omit<ValidatedInputProps, "id" | "label" | "type">) => (
   <ValidatedInput
     id="phone"
     label="Phone Number"
@@ -136,7 +147,11 @@ export const PhoneInput = ({ value, onChange, ...props }: Omit<ValidatedInputPro
   />
 );
 
-export const PostcodeInput = ({ value, onChange, ...props }: Omit<ValidatedInputProps, 'id' | 'label' | 'type'>) => (
+export const PostcodeInput = ({
+  value,
+  onChange,
+  ...props
+}: Omit<ValidatedInputProps, "id" | "label" | "type">) => (
   <ValidatedInput
     id="postcode"
     label="Postcode"
@@ -146,7 +161,7 @@ export const PostcodeInput = ({ value, onChange, ...props }: Omit<ValidatedInput
     onChange={onChange}
     helpText="UK postcode format. Space will be added automatically."
     formatValue={(value) => {
-      const cleaned = value.replace(/\s+/g, '').toUpperCase();
+      const cleaned = value.replace(/\s+/g, "").toUpperCase();
       if (cleaned.length >= 5) {
         return `${cleaned.slice(0, -3)} ${cleaned.slice(-3)}`;
       }
@@ -156,7 +171,11 @@ export const PostcodeInput = ({ value, onChange, ...props }: Omit<ValidatedInput
   />
 );
 
-export const EmailInput = ({ value, onChange, ...props }: Omit<ValidatedInputProps, 'id' | 'label' | 'type'>) => (
+export const EmailInput = ({
+  value,
+  onChange,
+  ...props
+}: Omit<ValidatedInputProps, "id" | "label" | "type">) => (
   <ValidatedInput
     id="email"
     label="Email Address"

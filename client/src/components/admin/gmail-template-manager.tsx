@@ -1,16 +1,29 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { useToast } from '@/hooks/use-toast';
-import { Mail, Plus, Edit, Trash2, Send, Eye, Copy, Save } from 'lucide-react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
+import { Mail, Plus, Edit, Trash2, Send, Eye, Copy, Save } from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface EmailTemplate {
   id: string;
@@ -32,128 +45,139 @@ interface TemplateVariable {
 export function GmailTemplateManager() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
+
   const [selectedTemplate, setSelectedTemplate] = useState<EmailTemplate | null>(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [previewMode, setPreviewMode] = useState<'html' | 'text'>('html');
-  const [testEmail, setTestEmail] = useState('');
+  const [previewMode, setPreviewMode] = useState<"html" | "text">("html");
+  const [testEmail, setTestEmail] = useState("");
   const [templateVariables, setTemplateVariables] = useState<TemplateVariable[]>([
-    { key: 'clientName', value: 'John Smith' },
-    { key: 'appointmentDate', value: '2025-08-20' },
-    { key: 'appointmentTime', value: '10:00 AM' },
-    { key: 'meetingUrl', value: 'https://meet.google.com/abc-defg-hij' }
+    { key: "clientName", value: "John Smith" },
+    { key: "appointmentDate", value: "2025-08-20" },
+    { key: "appointmentTime", value: "10:00 AM" },
+    { key: "meetingUrl", value: "https://meet.google.com/abc-defg-hij" },
   ]);
 
   // Form state
   const [formData, setFormData] = useState({
-    name: '',
-    subject: '',
-    htmlContent: '',
-    textContent: '',
+    name: "",
+    subject: "",
+    htmlContent: "",
+    textContent: "",
     tags: [] as string[],
-    isActive: true
+    isActive: true,
   });
 
   // Get templates
   const { data: templates = [], isLoading } = useQuery<EmailTemplate[]>({
-    queryKey: ['/api/admin/gmail-templates'],
-    refetchInterval: 30000 // Refresh every 30 seconds
+    queryKey: ["/api/admin/gmail-templates"],
+    refetchInterval: 30000, // Refresh every 30 seconds
   });
 
   // Create template mutation
   const createTemplateMutation = useMutation({
-    mutationFn: async (templateData: Omit<EmailTemplate, 'id' | 'createdAt' | 'updatedAt'>) => {
-      const response = await fetch('/api/admin/gmail-templates', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(templateData)
+    mutationFn: async (templateData: Omit<EmailTemplate, "id" | "createdAt" | "updatedAt">) => {
+      const response = await fetch("/api/admin/gmail-templates", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(templateData),
       });
-      
-      if (!response.ok) throw new Error('Failed to create template');
+
+      if (!response.ok) throw new Error("Failed to create template");
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/gmail-templates'] });
-      toast({ title: 'Template created successfully', description: 'Your email template has been saved to Gmail drafts' });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/gmail-templates"] });
+      toast({
+        title: "Template created successfully",
+        description: "Your email template has been saved to Gmail drafts",
+      });
       resetForm();
     },
     onError: () => {
-      toast({ title: 'Failed to create template', variant: 'destructive' });
-    }
+      toast({ title: "Failed to create template", variant: "destructive" });
+    },
   });
 
   // Update template mutation
   const updateTemplateMutation = useMutation({
     mutationFn: async ({ id, ...updates }: Partial<EmailTemplate> & { id: string }) => {
       const response = await fetch(`/api/admin/gmail-templates/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updates)
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updates),
       });
-      
-      if (!response.ok) throw new Error('Failed to update template');
+
+      if (!response.ok) throw new Error("Failed to update template");
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/gmail-templates'] });
-      toast({ title: 'Template updated successfully' });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/gmail-templates"] });
+      toast({ title: "Template updated successfully" });
       setIsEditing(false);
       setSelectedTemplate(null);
     },
     onError: () => {
-      toast({ title: 'Failed to update template', variant: 'destructive' });
-    }
+      toast({ title: "Failed to update template", variant: "destructive" });
+    },
   });
 
   // Delete template mutation
   const deleteTemplateMutation = useMutation({
     mutationFn: async (id: string) => {
       const response = await fetch(`/api/admin/gmail-templates/${id}`, {
-        method: 'DELETE'
+        method: "DELETE",
       });
-      
-      if (!response.ok) throw new Error('Failed to delete template');
+
+      if (!response.ok) throw new Error("Failed to delete template");
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/gmail-templates'] });
-      toast({ title: 'Template deleted successfully' });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/gmail-templates"] });
+      toast({ title: "Template deleted successfully" });
       setSelectedTemplate(null);
     },
     onError: () => {
-      toast({ title: 'Failed to delete template', variant: 'destructive' });
-    }
+      toast({ title: "Failed to delete template", variant: "destructive" });
+    },
   });
 
   // Send test email mutation
   const sendTestEmailMutation = useMutation({
-    mutationFn: async ({ templateId, to, variables }: { templateId: string; to: string; variables: Record<string, string> }) => {
-      const response = await fetch('/api/admin/gmail-templates/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ templateId, to, variables })
+    mutationFn: async ({
+      templateId,
+      to,
+      variables,
+    }: {
+      templateId: string;
+      to: string;
+      variables: Record<string, string>;
+    }) => {
+      const response = await fetch("/api/admin/gmail-templates/send", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ templateId, to, variables }),
       });
-      
-      if (!response.ok) throw new Error('Failed to send test email');
+
+      if (!response.ok) throw new Error("Failed to send test email");
       return response.json();
     },
     onSuccess: () => {
-      toast({ title: 'Test email sent successfully', description: `Email sent to ${testEmail}` });
-      setTestEmail('');
+      toast({ title: "Test email sent successfully", description: `Email sent to ${testEmail}` });
+      setTestEmail("");
     },
     onError: () => {
-      toast({ title: 'Failed to send test email', variant: 'destructive' });
-    }
+      toast({ title: "Failed to send test email", variant: "destructive" });
+    },
   });
 
   const resetForm = () => {
     setFormData({
-      name: '',
-      subject: '',
-      htmlContent: '',
-      textContent: '',
+      name: "",
+      subject: "",
+      htmlContent: "",
+      textContent: "",
       tags: [],
-      isActive: true
+      isActive: true,
     });
     setIsEditing(false);
     setSelectedTemplate(null);
@@ -161,7 +185,10 @@ export function GmailTemplateManager() {
 
   const handleSaveTemplate = () => {
     if (!formData.name || !formData.subject || !formData.htmlContent) {
-      toast({ title: 'Missing required fields', description: 'Please fill in name, subject, and HTML content' });
+      toast({
+        title: "Missing required fields",
+        description: "Please fill in name, subject, and HTML content",
+      });
       return;
     }
 
@@ -178,16 +205,19 @@ export function GmailTemplateManager() {
       name: template.name,
       subject: template.subject,
       htmlContent: template.htmlContent,
-      textContent: template.textContent || '',
+      textContent: template.textContent || "",
       tags: template.tags,
-      isActive: template.isActive
+      isActive: template.isActive,
     });
     setIsEditing(true);
   };
 
   const handleSendTestEmail = () => {
     if (!selectedTemplate || !testEmail) {
-      toast({ title: 'Missing information', description: 'Please select a template and enter test email address' });
+      toast({
+        title: "Missing information",
+        description: "Please select a template and enter test email address",
+      });
       return;
     }
 
@@ -195,18 +225,19 @@ export function GmailTemplateManager() {
     sendTestEmailMutation.mutate({
       templateId: selectedTemplate.id,
       to: testEmail,
-      variables
+      variables,
     });
   };
 
   const previewContent = () => {
-    if (!selectedTemplate) return '';
+    if (!selectedTemplate) return "";
 
-    let content = previewMode === 'html' ? selectedTemplate.htmlContent : selectedTemplate.textContent || '';
-    
+    let content =
+      previewMode === "html" ? selectedTemplate.htmlContent : selectedTemplate.textContent || "";
+
     // Replace variables for preview
-    templateVariables.forEach(v => {
-      const regex = new RegExp(`{{${v.key}}}`, 'g');
+    templateVariables.forEach((v) => {
+      const regex = new RegExp(`{{${v.key}}}`, "g");
       content = content.replace(regex, v.value);
     });
 
@@ -215,8 +246,8 @@ export function GmailTemplateManager() {
 
   const commonTemplates = [
     {
-      name: 'Appointment Confirmation',
-      subject: 'Your appointment is confirmed - {{appointmentDate}} at {{appointmentTime}}',
+      name: "Appointment Confirmation",
+      subject: "Your appointment is confirmed - {{appointmentDate}} at {{appointmentTime}}",
       htmlContent: `
         <h2>Appointment Confirmed</h2>
         <p>Dear {{clientName}},</p>
@@ -224,11 +255,11 @@ export function GmailTemplateManager() {
         <p><a href="{{meetingUrl}}" class="cta-button">Join Video Session</a></p>
         <p>If you need to reschedule, please contact us at least 24 hours in advance.</p>
         <p>We look forward to our session!</p>
-      `
+      `,
     },
     {
-      name: 'Welcome New Client',
-      subject: 'Welcome to Hive Wellness, {{clientName}}!',
+      name: "Welcome New Client",
+      subject: "Welcome to Hive Wellness, {{clientName}}!",
       htmlContent: `
         <h2>Welcome to Hive Wellness!</h2>
         <p>Dear {{clientName}},</p>
@@ -236,11 +267,11 @@ export function GmailTemplateManager() {
         <p>Your therapist will be in touch soon to arrange your first session.</p>
         <p>In the meantime, feel free to explore our resources and tools in your client portal.</p>
         <p>If you have any questions, don't hesitate to reach out.</p>
-      `
+      `,
     },
     {
-      name: 'Session Reminder',
-      subject: 'Reminder: Session tomorrow at {{appointmentTime}}',
+      name: "Session Reminder",
+      subject: "Reminder: Session tomorrow at {{appointmentTime}}",
       htmlContent: `
         <h2>Session Reminder</h2>
         <p>Dear {{clientName}},</p>
@@ -248,8 +279,8 @@ export function GmailTemplateManager() {
         <p><a href="{{meetingUrl}}" class="cta-button">Join Video Session</a></p>
         <p>Please ensure you're in a private, comfortable space with a stable internet connection.</p>
         <p>We look forward to seeing you!</p>
-      `
-    }
+      `,
+    },
   ];
 
   return (
@@ -273,18 +304,19 @@ export function GmailTemplateManager() {
           </DialogTrigger>
           <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>{isEditing ? 'Edit Template' : 'Create New Template'}</DialogTitle>
+              <DialogTitle>{isEditing ? "Edit Template" : "Create New Template"}</DialogTitle>
               <DialogDescription>
-                Design your email template with Hive Wellness branding. Templates are saved as Gmail drafts.
+                Design your email template with Hive Wellness branding. Templates are saved as Gmail
+                drafts.
               </DialogDescription>
             </DialogHeader>
-            
+
             <Tabs defaultValue="editor" className="w-full">
               <TabsList>
                 <TabsTrigger value="editor">Template Editor</TabsTrigger>
                 <TabsTrigger value="common">Common Templates</TabsTrigger>
               </TabsList>
-              
+
               <TabsContent value="editor" className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -292,7 +324,7 @@ export function GmailTemplateManager() {
                     <Input
                       id="name"
                       value={formData.name}
-                      onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                      onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
                       placeholder="e.g., Appointment Confirmation"
                     />
                   </div>
@@ -300,46 +332,59 @@ export function GmailTemplateManager() {
                     <Label htmlFor="tags">Tags (comma separated)</Label>
                     <Input
                       id="tags"
-                      value={formData.tags.join(', ')}
-                      onChange={(e) => setFormData(prev => ({ ...prev, tags: e.target.value.split(',').map(t => t.trim()).filter(Boolean) }))}
+                      value={formData.tags.join(", ")}
+                      onChange={(e) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          tags: e.target.value
+                            .split(",")
+                            .map((t) => t.trim())
+                            .filter(Boolean),
+                        }))
+                      }
                       placeholder="appointment, confirmation, client"
                     />
                   </div>
                 </div>
-                
+
                 <div>
                   <Label htmlFor="subject">Subject Line *</Label>
                   <Input
                     id="subject"
                     value={formData.subject}
-                    onChange={(e) => setFormData(prev => ({ ...prev, subject: e.target.value }))}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, subject: e.target.value }))}
                     placeholder="Use {{variables}} for dynamic content"
                   />
                 </div>
-                
+
                 <div>
                   <Label htmlFor="htmlContent">HTML Content *</Label>
                   <Textarea
                     id="htmlContent"
                     value={formData.htmlContent}
-                    onChange={(e) => setFormData(prev => ({ ...prev, htmlContent: e.target.value }))}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, htmlContent: e.target.value }))
+                    }
                     placeholder="Write your email content here. Use {{variables}} for dynamic content."
                     rows={12}
                     className="font-mono text-sm"
                   />
                 </div>
-                
+
                 <div className="flex gap-2">
-                  <Button onClick={handleSaveTemplate} disabled={createTemplateMutation.isPending || updateTemplateMutation.isPending}>
+                  <Button
+                    onClick={handleSaveTemplate}
+                    disabled={createTemplateMutation.isPending || updateTemplateMutation.isPending}
+                  >
                     <Save className="h-4 w-4 mr-2" />
-                    {isEditing ? 'Update Template' : 'Save Template'}
+                    {isEditing ? "Update Template" : "Save Template"}
                   </Button>
                   <Button variant="outline" onClick={resetForm}>
                     Cancel
                   </Button>
                 </div>
               </TabsContent>
-              
+
               <TabsContent value="common" className="space-y-4">
                 <div className="grid gap-4">
                   {commonTemplates.map((template, index) => (
@@ -356,9 +401,9 @@ export function GmailTemplateManager() {
                               name: template.name,
                               subject: template.subject,
                               htmlContent: template.htmlContent,
-                              textContent: '',
-                              tags: ['appointment', 'client'],
-                              isActive: true
+                              textContent: "",
+                              tags: ["appointment", "client"],
+                              isActive: true,
                             });
                           }}
                         >
@@ -381,9 +426,7 @@ export function GmailTemplateManager() {
           <Card>
             <CardHeader>
               <CardTitle>Email Templates</CardTitle>
-              <CardDescription>
-                {templates.length} templates saved in Gmail
-              </CardDescription>
+              <CardDescription>{templates.length} templates saved in Gmail</CardDescription>
             </CardHeader>
             <CardContent className="p-0">
               {isLoading ? (
@@ -393,13 +436,15 @@ export function GmailTemplateManager() {
                   {templates.map((template) => (
                     <div
                       key={template.id}
-                      className={`p-4 cursor-pointer hover:bg-muted/50 ${selectedTemplate?.id === template.id ? 'bg-muted' : ''}`}
+                      className={`p-4 cursor-pointer hover:bg-muted/50 ${selectedTemplate?.id === template.id ? "bg-muted" : ""}`}
                       onClick={() => setSelectedTemplate(template)}
                     >
                       <div className="font-medium">{template.name}</div>
-                      <div className="text-sm text-muted-foreground truncate">{template.subject}</div>
+                      <div className="text-sm text-muted-foreground truncate">
+                        {template.subject}
+                      </div>
                       <div className="flex gap-1 mt-2">
-                        {template.tags.map(tag => (
+                        {template.tags.map((tag) => (
                           <Badge key={tag} variant="secondary" className="text-xs">
                             {tag}
                           </Badge>
@@ -407,7 +452,7 @@ export function GmailTemplateManager() {
                       </div>
                     </div>
                   ))}
-                  
+
                   {templates.length === 0 && (
                     <div className="p-4 text-center text-muted-foreground">
                       No templates found. Create your first template!
@@ -431,13 +476,17 @@ export function GmailTemplateManager() {
                       <CardDescription>{selectedTemplate.subject}</CardDescription>
                     </div>
                     <div className="flex gap-2">
-                      <Button size="sm" variant="outline" onClick={() => handleEditTemplate(selectedTemplate)}>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleEditTemplate(selectedTemplate)}
+                      >
                         <Edit className="h-4 w-4 mr-2" />
                         Edit
                       </Button>
-                      <Button 
-                        size="sm" 
-                        variant="destructive" 
+                      <Button
+                        size="sm"
+                        variant="destructive"
                         onClick={() => deleteTemplateMutation.mutate(selectedTemplate.id)}
                       >
                         <Trash2 className="h-4 w-4 mr-2" />
@@ -447,18 +496,21 @@ export function GmailTemplateManager() {
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <Tabs value={previewMode} onValueChange={(v) => setPreviewMode(v as 'html' | 'text')}>
+                  <Tabs
+                    value={previewMode}
+                    onValueChange={(v) => setPreviewMode(v as "html" | "text")}
+                  >
                     <TabsList>
                       <TabsTrigger value="html">HTML Preview</TabsTrigger>
                       <TabsTrigger value="text">Text Version</TabsTrigger>
                     </TabsList>
-                    
+
                     <TabsContent value="html" className="mt-4">
                       <div className="border rounded-md p-4 bg-white max-h-96 overflow-y-auto">
                         <div dangerouslySetInnerHTML={{ __html: previewContent() }} />
                       </div>
                     </TabsContent>
-                    
+
                     <TabsContent value="text" className="mt-4">
                       <pre className="border rounded-md p-4 bg-muted text-sm max-h-96 overflow-y-auto whitespace-pre-wrap">
                         {previewContent()}
@@ -472,15 +524,15 @@ export function GmailTemplateManager() {
               <Card>
                 <CardHeader>
                   <CardTitle>Send Test Email</CardTitle>
-                  <CardDescription>
-                    Test this template with sample variables
-                  </CardDescription>
+                  <CardDescription>Test this template with sample variables</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     {templateVariables.map((templateVariable, index) => (
                       <div key={templateVariable.key}>
-                        <Label htmlFor={`var-${templateVariable.key}`}>{`{{${templateVariable.key}}}`}</Label>
+                        <Label
+                          htmlFor={`var-${templateVariable.key}`}
+                        >{`{{${templateVariable.key}}}`}</Label>
                         <Input
                           id={`var-${templateVariable.key}`}
                           value={templateVariable.value}
@@ -493,7 +545,7 @@ export function GmailTemplateManager() {
                       </div>
                     ))}
                   </div>
-                  
+
                   <div className="flex gap-2">
                     <Input
                       placeholder="Test email address"
@@ -501,7 +553,7 @@ export function GmailTemplateManager() {
                       onChange={(e) => setTestEmail(e.target.value)}
                       className="flex-1"
                     />
-                    <Button 
+                    <Button
                       onClick={handleSendTestEmail}
                       disabled={sendTestEmailMutation.isPending}
                     >

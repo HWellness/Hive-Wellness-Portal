@@ -6,15 +6,27 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { 
-  Users, 
-  Search, 
-  Plus, 
+import {
+  Users,
+  Search,
+  Plus,
   Edit,
   Calendar,
   Mail,
@@ -63,7 +75,7 @@ import {
   Smartphone,
   Globe,
   DollarSign,
-  CreditCard
+  CreditCard,
 } from "lucide-react";
 import type { User } from "@shared/schema";
 
@@ -90,8 +102,8 @@ interface ClientRecord {
     name: string;
     specialisation: string;
   } | null;
-  status: 'active' | 'inactive' | 'pending' | 'on-hold' | 'discharged';
-  riskLevel: 'low' | 'medium' | 'high' | 'critical';
+  status: "active" | "inactive" | "pending" | "on-hold" | "discharged";
+  riskLevel: "low" | "medium" | "high" | "critical";
   registrationDate: string;
   lastActivity: string;
   nextAppointment: string | null;
@@ -107,13 +119,13 @@ interface ClientRecord {
     policyNumber: string;
     copay: number;
   };
-  paymentStatus: 'current' | 'overdue' | 'pending';
+  paymentStatus: "current" | "overdue" | "pending";
   progressNotes: {
     id: string;
     date: string;
     therapist: string;
     content: string;
-    type: 'session' | 'phone' | 'email' | 'assessment';
+    type: "session" | "phone" | "email" | "assessment";
   }[];
   documents: {
     id: string;
@@ -124,18 +136,21 @@ interface ClientRecord {
   }[];
   flags: {
     id: string;
-    type: 'medical' | 'administrative' | 'billing' | 'clinical';
+    type: "medical" | "administrative" | "billing" | "clinical";
     description: string;
-    priority: 'high' | 'medium' | 'low';
+    priority: "high" | "medium" | "low";
     createdDate: string;
     resolved: boolean;
   }[];
 }
 
-export default function ClientManagementComprehensive({ user, onNavigateToService }: ClientManagementProps) {
+export default function ClientManagementComprehensive({
+  user,
+  onNavigateToService,
+}: ClientManagementProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
+
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [riskFilter, setRiskFilter] = useState<string>("all");
@@ -160,12 +175,12 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
       emergencyContact: {
         name: "James Johnson",
         phone: "+44 7987 654321",
-        relationship: "Spouse"
+        relationship: "Spouse",
       },
       assignedTherapist: {
         id: "therapist-001",
         name: "Dr. Sarah Wilson",
-        specialisation: "Anxiety & Depression"
+        specialisation: "Anxiety & Depression",
       },
       status: "active",
       riskLevel: "low",
@@ -182,7 +197,7 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
       insuranceInfo: {
         provider: "Bupa Healthcare",
         policyNumber: "BH-2024-001",
-        copay: 25
+        copay: 25,
       },
       paymentStatus: "current",
       progressNotes: [
@@ -190,16 +205,18 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
           id: "note-001",
           date: "2024-12-20",
           therapist: "Dr. Sarah Wilson",
-          content: "Client showing significant improvement in anxiety management. Homework completed successfully.",
-          type: "session"
+          content:
+            "Client showing significant improvement in anxiety management. Homework completed successfully.",
+          type: "session",
         },
         {
           id: "note-002",
           date: "2024-12-18",
           therapist: "Dr. Sarah Wilson",
-          content: "Phone check-in: Client reported improved sleep quality after implementing relaxation techniques.",
-          type: "phone"
-        }
+          content:
+            "Phone check-in: Client reported improved sleep quality after implementing relaxation techniques.",
+          type: "phone",
+        },
       ],
       documents: [
         {
@@ -207,15 +224,15 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
           name: "Initial Assessment Form",
           type: "PDF",
           uploadDate: "2024-01-15",
-          size: "2.3 MB"
+          size: "2.3 MB",
         },
         {
           id: "doc-002",
           name: "Therapy Plan",
           type: "PDF",
           uploadDate: "2024-01-20",
-          size: "1.8 MB"
-        }
+          size: "1.8 MB",
+        },
       ],
       flags: [
         {
@@ -224,9 +241,9 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
           description: "Requires medication review next session",
           priority: "medium",
           createdDate: "2024-12-15",
-          resolved: false
-        }
-      ]
+          resolved: false,
+        },
+      ],
     },
     {
       id: "client-002",
@@ -239,12 +256,12 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
       emergencyContact: {
         name: "Lisa Chen",
         phone: "+44 7789 123456",
-        relationship: "Sister"
+        relationship: "Sister",
       },
       assignedTherapist: {
         id: "therapist-002",
         name: "Dr. James Mitchell",
-        specialisation: "PTSD & Trauma"
+        specialisation: "PTSD & Trauma",
       },
       status: "active",
       riskLevel: "medium",
@@ -261,7 +278,7 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
       insuranceInfo: {
         provider: "AXA Health",
         policyNumber: "AXA-2024-002",
-        copay: 30
+        copay: 30,
       },
       paymentStatus: "current",
       progressNotes: [
@@ -270,8 +287,8 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
           date: "2024-12-19",
           therapist: "Dr. James Mitchell",
           content: "EMDR session focused on processing traumatic memory. Client tolerated well.",
-          type: "session"
-        }
+          type: "session",
+        },
       ],
       documents: [
         {
@@ -279,8 +296,8 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
           name: "PTSD Assessment",
           type: "PDF",
           uploadDate: "2024-02-01",
-          size: "3.1 MB"
-        }
+          size: "3.1 MB",
+        },
       ],
       flags: [
         {
@@ -289,9 +306,9 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
           description: "Monitor for dissociation during EMDR",
           priority: "high",
           createdDate: "2024-12-01",
-          resolved: false
-        }
-      ]
+          resolved: false,
+        },
+      ],
     },
     {
       id: "client-003",
@@ -304,7 +321,7 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
       emergencyContact: {
         name: "David Williams",
         phone: "+44 7123 789456",
-        relationship: "Father"
+        relationship: "Father",
       },
       assignedTherapist: null,
       status: "pending",
@@ -322,7 +339,7 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
       insuranceInfo: {
         provider: "Vitality Health",
         policyNumber: "VH-2024-003",
-        copay: 20
+        copay: 20,
       },
       paymentStatus: "pending",
       progressNotes: [
@@ -330,9 +347,10 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
           id: "note-004",
           date: "2024-12-15",
           therapist: "Intake Coordinator",
-          content: "Initial intake completed. Client requires specialised eating disorder treatment.",
-          type: "assessment"
-        }
+          content:
+            "Initial intake completed. Client requires specialised eating disorder treatment.",
+          type: "assessment",
+        },
       ],
       documents: [
         {
@@ -340,8 +358,8 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
           name: "Intake Assessment",
           type: "PDF",
           uploadDate: "2024-12-15",
-          size: "2.8 MB"
-        }
+          size: "2.8 MB",
+        },
       ],
       flags: [
         {
@@ -350,69 +368,69 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
           description: "Requires specialist therapist assignment",
           priority: "high",
           createdDate: "2024-12-15",
-          resolved: false
-        }
-      ]
-    }
+          resolved: false,
+        },
+      ],
+    },
   ];
 
   // Fetch clients data
   const { data: clients = demoClients, isLoading } = useQuery({
-    queryKey: ['/api/clients'],
+    queryKey: ["/api/clients"],
     retry: false,
   });
 
   // Filter clients based on search and filters
   const filteredClients = clients.filter((client: ClientRecord) => {
-    const matchesSearch = 
+    const matchesSearch =
       client.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       client.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       client.email.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const matchesStatus = statusFilter === "all" || client.status === statusFilter;
     const matchesRisk = riskFilter === "all" || client.riskLevel === riskFilter;
-    
+
     return matchesSearch && matchesStatus && matchesRisk;
   });
 
   // Status color mapping
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active':
-        return 'bg-green-100 text-green-800';
-      case 'inactive':
-        return 'bg-gray-100 text-gray-800';
-      case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'on-hold':
-        return 'bg-orange-100 text-orange-800';
-      case 'discharged':
-        return 'bg-blue-100 text-blue-800';
+      case "active":
+        return "bg-green-100 text-green-800";
+      case "inactive":
+        return "bg-gray-100 text-gray-800";
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "on-hold":
+        return "bg-orange-100 text-orange-800";
+      case "discharged":
+        return "bg-blue-100 text-blue-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   // Risk level color mapping
   const getRiskColor = (risk: string) => {
     switch (risk) {
-      case 'low':
-        return 'bg-green-100 text-green-800';
-      case 'medium':
-        return 'bg-yellow-100 text-yellow-800';
-      case 'high':
-        return 'bg-orange-100 text-orange-800';
-      case 'critical':
-        return 'bg-red-100 text-red-800';
+      case "low":
+        return "bg-green-100 text-green-800";
+      case "medium":
+        return "bg-yellow-100 text-yellow-800";
+      case "high":
+        return "bg-orange-100 text-orange-800";
+      case "critical":
+        return "bg-red-100 text-red-800";
       default:
-        return 'bg-gray-100 text-gray-800';
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   // Document handling functions
   const handleViewDocument = (doc: any) => {
     // Create a preview window or modal for the document
-    if (doc.type === 'PDF') {
+    if (doc.type === "PDF") {
       // For PDFs, open in a new window/tab
       const previewContent = `
         <!DOCTYPE html>
@@ -435,7 +453,7 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
             <h2>${doc.name}</h2>
             <p><strong>Type:</strong> ${doc.type}</p>
             <p><strong>Size:</strong> ${doc.size}</p>
-            <p><strong>Upload Date:</strong> ${new Date(doc.uploadDate).toLocaleDateString('en-GB')}</p>
+            <p><strong>Upload Date:</strong> ${new Date(doc.uploadDate).toLocaleDateString("en-GB")}</p>
             <div style="margin-top: 2rem; padding: 2rem; background: #f8f9fa; border-radius: 0.5rem;">
               <h3>Document Preview</h3>
               <p>This is a preview of the ${doc.name} document. In a production environment, this would display the actual document content.</p>
@@ -450,8 +468,8 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
         </body>
         </html>
       `;
-      
-      const newWindow = window.open('', '_blank');
+
+      const newWindow = window.open("", "_blank");
       if (newWindow) {
         newWindow.document.write(previewContent);
         newWindow.document.close();
@@ -517,7 +535,7 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
       <body>
         <div class="header">
           <h1>📄 ${doc.name}</h1>
-          <p>Hive Wellness Document - ${new Date().toLocaleDateString('en-GB')}</p>
+          <p>Hive Wellness Document - ${new Date().toLocaleDateString("en-GB")}</p>
         </div>
         
         <div class="document-info">
@@ -525,7 +543,7 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
           <p><strong>Document Name:</strong> ${doc.name}</p>
           <p><strong>Document Type:</strong> ${doc.type}</p>
           <p><strong>File Size:</strong> ${doc.size}</p>
-          <p><strong>Upload Date:</strong> ${new Date(doc.uploadDate).toLocaleDateString('en-GB')}</p>
+          <p><strong>Upload Date:</strong> ${new Date(doc.uploadDate).toLocaleDateString("en-GB")}</p>
           <p><strong>Client:</strong> Emma Johnson (emma.johnson@email.com)</p>
         </div>
 
@@ -560,13 +578,13 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
       </html>
     `;
 
-    const newWindow = window.open('', '_blank');
+    const newWindow = window.open("", "_blank");
     if (newWindow) {
       newWindow.document.write(documentContent);
       newWindow.document.close();
       newWindow.document.title = `${doc.name} - Hive Wellness`;
     }
-    
+
     toast({
       title: "Document Opened",
       description: `${doc.name} opened in new window. Use Ctrl+S to save.`,
@@ -579,7 +597,7 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
       return apiRequest("POST", "/api/clients", clientData);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/clients'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/clients"] });
       toast({
         title: "Client Added",
         description: "New client record has been created successfully.",
@@ -607,9 +625,9 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
       const newDocument = {
         id: `doc-${Date.now()}`,
         name: file.name,
-        type: file.type.split('/')[1]?.toUpperCase() || 'FILE',
+        type: file.type.split("/")[1]?.toUpperCase() || "FILE",
         uploadDate: new Date().toISOString(),
-        size: `${(file.size / 1024 / 1024).toFixed(1)} MB`
+        size: `${(file.size / 1024 / 1024).toFixed(1)} MB`,
       };
 
       // In production, this would upload the file to the server
@@ -621,7 +639,7 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
       setUploadingFile(false);
       // Reset file input
       if (fileInputRef.current) {
-        fileInputRef.current.value = '';
+        fileInputRef.current.value = "";
       }
     }, 2000);
   };
@@ -661,15 +679,15 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => setShowBulkActions(!showBulkActions)}
             className="flex items-center gap-2 border-hive-purple/20 hover:border-hive-purple hover:bg-hive-purple/5"
           >
             <Settings className="w-4 h-4 text-hive-purple" />
             <span className="text-hive-black">Bulk Actions</span>
           </Button>
-          <Button 
+          <Button
             onClick={() => setShowAddClientDialog(true)}
             className="bg-hive-purple hover:bg-hive-purple/90 text-white flex items-center gap-2"
           >
@@ -693,14 +711,14 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
             </p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-hive-black/70">Active Clients</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-hive-black">
-              {clients.filter(c => c.status === 'active').length}
+              {clients.filter((c) => c.status === "active").length}
             </div>
             <p className="text-xs text-green-600 flex items-center gap-1">
               <CheckCircle className="w-3 h-3" />
@@ -708,14 +726,16 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
             </p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-hive-black/70">Pending Assignment</CardTitle>
+            <CardTitle className="text-sm font-medium text-hive-black/70">
+              Pending Assignment
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-orange-600">
-              {clients.filter(c => c.status === 'pending').length}
+              {clients.filter((c) => c.status === "pending").length}
             </div>
             <p className="text-xs text-orange-600 flex items-center gap-1">
               <AlertCircle className="w-3 h-3" />
@@ -723,14 +743,14 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
             </p>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-hive-black/70">High Risk</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-red-600">
-              {clients.filter(c => c.riskLevel === 'high' || c.riskLevel === 'critical').length}
+              {clients.filter((c) => c.riskLevel === "high" || c.riskLevel === "critical").length}
             </div>
             <p className="text-xs text-red-600 flex items-center gap-1">
               <AlertCircle className="w-3 h-3" />
@@ -751,7 +771,7 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
             className="pl-10"
           />
         </div>
-        
+
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-40">
             <SelectValue placeholder="All Statuses" />
@@ -765,7 +785,7 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
             <SelectItem value="discharged">Discharged</SelectItem>
           </SelectContent>
         </Select>
-        
+
         <Select value={riskFilter} onValueChange={setRiskFilter}>
           <SelectTrigger className="w-40">
             <SelectValue placeholder="All Risk Levels" />
@@ -785,10 +805,10 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
         {/* Client Cards */}
         <div className="space-y-4">
           {filteredClients.map((client) => (
-            <Card 
-              key={client.id} 
+            <Card
+              key={client.id}
               className={`cursor-pointer transition-all hover:shadow-md ${
-                selectedClient?.id === client.id ? 'ring-2 ring-hive-purple' : ''
+                selectedClient?.id === client.id ? "ring-2 ring-hive-purple" : ""
               }`}
               onClick={() => setSelectedClient(client)}
             >
@@ -806,9 +826,7 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
                     </div>
                   </div>
                   <div className="flex flex-col items-end gap-1">
-                    <Badge className={getStatusColor(client.status)}>
-                      {client.status}
-                    </Badge>
+                    <Badge className={getStatusColor(client.status)}>{client.status}</Badge>
                     <Badge className={getRiskColor(client.riskLevel)}>
                       {client.riskLevel} risk
                     </Badge>
@@ -827,28 +845,31 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
                   </div>
                   <div className="flex items-center gap-2">
                     <Activity className="w-4 h-4 text-hive-purple" />
-                    <span className="text-hive-black/70">Last: {new Date(client.lastActivity).toLocaleDateString('en-GB')}</span>
+                    <span className="text-hive-black/70">
+                      Last: {new Date(client.lastActivity).toLocaleDateString("en-GB")}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4 text-hive-purple" />
                     <span className="text-hive-black/70">
-                      {client.nextAppointment 
-                        ? new Date(client.nextAppointment).toLocaleDateString('en-GB')
-                        : 'No upcoming'
-                      }
+                      {client.nextAppointment
+                        ? new Date(client.nextAppointment).toLocaleDateString("en-GB")
+                        : "No upcoming"}
                     </span>
                   </div>
                 </div>
-                
+
                 {client.assignedTherapist && (
                   <div className="mt-3 p-2 bg-hive-light-blue/20 rounded-md">
                     <p className="text-sm text-hive-black">
                       <strong>Therapist:</strong> {client.assignedTherapist.name}
                     </p>
-                    <p className="text-xs text-hive-black/70">{client.assignedTherapist.specialisation}</p>
+                    <p className="text-xs text-hive-black/70">
+                      {client.assignedTherapist.specialisation}
+                    </p>
                   </div>
                 )}
-                
+
                 {client.flags.length > 0 && (
                   <div className="mt-3 space-y-1">
                     {client.flags.slice(0, 2).map((flag) => (
@@ -882,8 +903,8 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
                     </div>
                   </div>
                   <div className="flex gap-2">
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="sm"
                       onClick={() => {
                         toast({
@@ -896,17 +917,20 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
                     >
                       <Edit className="w-4 h-4" />
                     </Button>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="sm"
                       onClick={() => {
-                        console.log('Message button clicked - onNavigateToService:', !!onNavigateToService);
+                        console.log(
+                          "Message button clicked - onNavigateToService:",
+                          !!onNavigateToService
+                        );
                         // Navigate to messaging service
                         if (onNavigateToService) {
-                          console.log('Calling onNavigateToService with messaging');
-                          onNavigateToService('messaging');
+                          console.log("Calling onNavigateToService with messaging");
+                          onNavigateToService("messaging");
                         } else {
-                          console.log('No onNavigateToService prop, showing toast');
+                          console.log("No onNavigateToService prop, showing toast");
                           toast({
                             title: "Message Interface",
                             description: `Opening messaging with ${selectedClient.firstName} ${selectedClient.lastName}`,
@@ -918,17 +942,20 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
                       <MessageSquare className="w-4 h-4" />
                       Message
                     </Button>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="sm"
                       onClick={() => {
-                        console.log('Start Session button clicked - onNavigateToService:', !!onNavigateToService);
+                        console.log(
+                          "Start Session button clicked - onNavigateToService:",
+                          !!onNavigateToService
+                        );
                         // Navigate to video sessions service
                         if (onNavigateToService) {
-                          console.log('Calling onNavigateToService with video-sessions');
-                          onNavigateToService('video-sessions');
+                          console.log("Calling onNavigateToService with video-sessions");
+                          onNavigateToService("video-sessions");
                         } else {
-                          console.log('No onNavigateToService prop, showing toast');
+                          console.log("No onNavigateToService prop, showing toast");
                           toast({
                             title: "Video Session",
                             description: `Starting video session with ${selectedClient.firstName} ${selectedClient.lastName}`,
@@ -951,16 +978,20 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
                     <TabsTrigger value="documents">Documents</TabsTrigger>
                     <TabsTrigger value="notes">Notes</TabsTrigger>
                   </TabsList>
-                  
+
                   <TabsContent value="overview" className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <Label className="text-sm font-medium">Date of Birth</Label>
-                        <p className="text-sm">{new Date(selectedClient.dateOfBirth).toLocaleDateString('en-GB')}</p>
+                        <p className="text-sm">
+                          {new Date(selectedClient.dateOfBirth).toLocaleDateString("en-GB")}
+                        </p>
                       </div>
                       <div>
                         <Label className="text-sm font-medium">Registration Date</Label>
-                        <p className="text-sm">{new Date(selectedClient.registrationDate).toLocaleDateString('en-GB')}</p>
+                        <p className="text-sm">
+                          {new Date(selectedClient.registrationDate).toLocaleDateString("en-GB")}
+                        </p>
                       </div>
                       <div>
                         <Label className="text-sm font-medium">Phone</Label>
@@ -968,41 +999,50 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
                       </div>
                       <div>
                         <Label className="text-sm font-medium">Payment Status</Label>
-                        <Badge className={selectedClient.paymentStatus === 'current' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}>
+                        <Badge
+                          className={
+                            selectedClient.paymentStatus === "current"
+                              ? "bg-green-100 text-green-800"
+                              : "bg-red-100 text-red-800"
+                          }
+                        >
                           {selectedClient.paymentStatus}
                         </Badge>
                       </div>
                     </div>
-                    
+
                     <div>
                       <Label className="text-sm font-medium">Address</Label>
                       <p className="text-sm">{selectedClient.address}</p>
                     </div>
-                    
+
                     <div>
                       <Label className="text-sm font-medium">Emergency Contact</Label>
                       <p className="text-sm">
-                        {selectedClient.emergencyContact.name} ({selectedClient.emergencyContact.relationship})
+                        {selectedClient.emergencyContact.name} (
+                        {selectedClient.emergencyContact.relationship})
                       </p>
-                      <p className="text-sm text-hive-black/70">{selectedClient.emergencyContact.phone}</p>
+                      <p className="text-sm text-hive-black/70">
+                        {selectedClient.emergencyContact.phone}
+                      </p>
                     </div>
-                    
+
                     <div>
                       <Label className="text-sm font-medium">Insurance Information</Label>
                       <p className="text-sm">{selectedClient.insuranceInfo.provider}</p>
                       <p className="text-sm text-hive-black/70">
-                        Policy: {selectedClient.insuranceInfo.policyNumber} | 
-                        Copay: £{selectedClient.insuranceInfo.copay}
+                        Policy: {selectedClient.insuranceInfo.policyNumber} | Copay: £
+                        {selectedClient.insuranceInfo.copay}
                       </p>
                     </div>
                   </TabsContent>
-                  
+
                   <TabsContent value="clinical" className="space-y-4">
                     <div>
                       <Label className="text-sm font-medium">Current Therapy Plan</Label>
                       <p className="text-sm">{selectedClient.currentTherapyPlan}</p>
                     </div>
-                    
+
                     <div>
                       <Label className="text-sm font-medium">Diagnoses</Label>
                       <div className="flex flex-wrap gap-2 mt-1">
@@ -1013,7 +1053,7 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
                         ))}
                       </div>
                     </div>
-                    
+
                     <div>
                       <Label className="text-sm font-medium">Current Medications</Label>
                       <div className="flex flex-wrap gap-2 mt-1">
@@ -1024,7 +1064,7 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
                         ))}
                       </div>
                     </div>
-                    
+
                     <div>
                       <Label className="text-sm font-medium">Allergies</Label>
                       <div className="flex flex-wrap gap-2 mt-1">
@@ -1035,28 +1075,34 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
                         ))}
                       </div>
                     </div>
-                    
+
                     <div className="grid grid-cols-3 gap-4">
                       <div>
                         <Label className="text-sm font-medium">Total Sessions</Label>
-                        <p className="text-2xl font-bold text-hive-purple">{selectedClient.totalSessions}</p>
+                        <p className="text-2xl font-bold text-hive-purple">
+                          {selectedClient.totalSessions}
+                        </p>
                       </div>
                       <div>
                         <Label className="text-sm font-medium">Completed</Label>
-                        <p className="text-2xl font-bold text-green-600">{selectedClient.completedSessions}</p>
+                        <p className="text-2xl font-bold text-green-600">
+                          {selectedClient.completedSessions}
+                        </p>
                       </div>
                       <div>
                         <Label className="text-sm font-medium">Missed</Label>
-                        <p className="text-2xl font-bold text-red-600">{selectedClient.missedSessions}</p>
+                        <p className="text-2xl font-bold text-red-600">
+                          {selectedClient.missedSessions}
+                        </p>
                       </div>
                     </div>
                   </TabsContent>
-                  
+
                   <TabsContent value="documents" className="space-y-4">
                     <div className="flex items-center justify-between">
                       <Label className="text-sm font-medium">Client Documents</Label>
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         size="sm"
                         onClick={triggerFileUpload}
                         disabled={uploadingFile}
@@ -1065,7 +1111,7 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
                       >
                         <Upload className="w-4 h-4 mr-2 text-hive-purple" />
                         <span className="text-hive-black">
-                          {uploadingFile ? 'Uploading...' : 'Upload'}
+                          {uploadingFile ? "Uploading..." : "Upload"}
                         </span>
                       </Button>
                       <input
@@ -1073,25 +1119,29 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
                         type="file"
                         onChange={handleFileUpload}
                         accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png"
-                        style={{ display: 'none' }}
+                        style={{ display: "none" }}
                       />
                     </div>
-                    
+
                     <div className="space-y-2">
                       {selectedClient.documents.map((doc) => (
-                        <div key={doc.id} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div
+                          key={doc.id}
+                          className="flex items-center justify-between p-3 border rounded-lg"
+                        >
                           <div className="flex items-center gap-3">
                             <FileText className="w-5 h-5 text-hive-purple" />
                             <div>
                               <p className="text-sm font-medium text-hive-black">{doc.name}</p>
                               <p className="text-xs text-hive-black/70">
-                                {doc.type} • {doc.size} • {new Date(doc.uploadDate).toLocaleDateString('en-GB')}
+                                {doc.type} • {doc.size} •{" "}
+                                {new Date(doc.uploadDate).toLocaleDateString("en-GB")}
                               </p>
                             </div>
                           </div>
                           <div className="flex gap-2">
-                            <Button 
-                              variant="ghost" 
+                            <Button
+                              variant="ghost"
                               size="sm"
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -1102,8 +1152,8 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
                             >
                               <Eye className="w-4 h-4 text-hive-purple" />
                             </Button>
-                            <Button 
-                              variant="ghost" 
+                            <Button
+                              variant="ghost"
                               size="sm"
                               onClick={(e) => {
                                 e.stopPropagation();
@@ -1119,7 +1169,7 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
                       ))}
                     </div>
                   </TabsContent>
-                  
+
                   <TabsContent value="notes" className="space-y-4">
                     <div className="flex items-center justify-between">
                       <Label className="text-sm font-medium">Progress Notes</Label>
@@ -1128,7 +1178,7 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
                         Add Note
                       </Button>
                     </div>
-                    
+
                     <div className="space-y-3">
                       {selectedClient.progressNotes.map((note) => (
                         <div key={note.id} className="p-3 border rounded-lg">
@@ -1140,7 +1190,7 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
                               <span className="text-sm font-medium">{note.therapist}</span>
                             </div>
                             <span className="text-xs text-gray-600">
-                              {new Date(note.date).toLocaleDateString('en-GB')}
+                              {new Date(note.date).toLocaleDateString("en-GB")}
                             </span>
                           </div>
                           <p className="text-sm">{note.content}</p>
@@ -1176,15 +1226,17 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
           <CardContent>
             <div className="space-y-4">
               <div className="flex items-center gap-4">
-                <span className="text-sm font-medium">Selected: {selectedClients.length} clients</span>
+                <span className="text-sm font-medium">
+                  Selected: {selectedClients.length} clients
+                </span>
                 <Button variant="outline" size="sm" onClick={() => setSelectedClients([])}>
                   Clear Selection
                 </Button>
               </div>
-              
+
               <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="flex items-center gap-2"
                   onClick={() => {
                     toast({
@@ -1196,8 +1248,8 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
                   <Mail className="w-4 h-4" />
                   Send Email
                 </Button>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="flex items-center gap-2"
                   onClick={() => {
                     toast({
@@ -1209,8 +1261,8 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
                   <MessageSquare className="w-4 h-4" />
                   Send Message
                 </Button>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="flex items-center gap-2"
                   onClick={() => {
                     toast({
@@ -1222,8 +1274,8 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
                   <Archive className="w-4 h-4" />
                   Archive
                 </Button>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="flex items-center gap-2"
                   onClick={() => {
                     toast({
@@ -1236,7 +1288,7 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
                   Bulk Edit
                 </Button>
               </div>
-              
+
               <div className="text-xs text-gray-500">
                 Select clients from the list below to perform bulk actions.
               </div>
@@ -1254,7 +1306,7 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
               Add New Client
             </DialogTitle>
           </DialogHeader>
-          
+
           <div className="space-y-6">
             {/* Personal Information */}
             <div className="space-y-4">
@@ -1269,7 +1321,7 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
                   <Input id="lastName" placeholder="Enter last name" />
                 </div>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="email">Email Address</Label>
@@ -1280,12 +1332,12 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
                   <Input id="phone" placeholder="+44 7xxx xxx xxx" />
                 </div>
               </div>
-              
+
               <div>
                 <Label htmlFor="dateOfBirth">Date of Birth</Label>
                 <Input id="dateOfBirth" type="date" />
               </div>
-              
+
               <div>
                 <Label htmlFor="address">Address</Label>
                 <Textarea id="address" placeholder="Full address" />
@@ -1356,7 +1408,7 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
                   </Select>
                 </div>
               </div>
-              
+
               <div>
                 <Label htmlFor="concerns">Primary Concerns</Label>
                 <Textarea id="concerns" placeholder="Describe primary mental health concerns..." />
@@ -1368,7 +1420,7 @@ export default function ClientManagementComprehensive({ user, onNavigateToServic
               <Button variant="outline" onClick={() => setShowAddClientDialog(false)}>
                 Cancel
               </Button>
-              <Button 
+              <Button
                 onClick={() => {
                   // In production, this would submit the form data
                   toast({

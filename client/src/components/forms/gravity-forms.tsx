@@ -22,17 +22,19 @@ const leadCaptureSchema = z.object({
 });
 
 // PDF Test Form Schema
-const pdfTestSchema = z.object({
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
-  email: z.string().email("Please enter a valid email address"),
-  confirmEmail: z.string().email("Please enter a valid email address"),
-  complianceCuff: z.string().optional(),
-  comments: z.string().max(600, "Comments must be 600 characters or less").optional(),
-}).refine((data) => data.email === data.confirmEmail, {
-  message: "Emails must match",
-  path: ["confirmEmail"],
-});
+const pdfTestSchema = z
+  .object({
+    firstName: z.string().min(1, "First name is required"),
+    lastName: z.string().min(1, "Last name is required"),
+    email: z.string().email("Please enter a valid email address"),
+    confirmEmail: z.string().email("Please enter a valid email address"),
+    complianceCuff: z.string().optional(),
+    comments: z.string().max(600, "Comments must be 600 characters or less").optional(),
+  })
+  .refine((data) => data.email === data.confirmEmail, {
+    message: "Emails must match",
+    path: ["confirmEmail"],
+  });
 
 // University DSA Form Schema
 const universityDSASchema = z.object({
@@ -48,32 +50,32 @@ const workWithUsSchema = z.object({
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
   email: z.string().email("Please enter a valid email address"),
-  
+
   // Step 2: Location
   city: z.string().min(1, "City is required"),
   country: z.string().min(1, "Country is required"),
-  
+
   // Step 3: Religion (optional)
   religion: z.string().optional(),
-  
+
   // Step 4: Limited Company
   hasLimitedCompany: z.enum(["yes", "no"]),
   wantsSupportSettingUp: z.enum(["yes", "no"]).optional(),
-  
+
   // Step 5: Qualifications
   qualificationLevel: z.string().min(1, "Qualification level is required"),
-  
+
   // Step 6: Professional Body
   professionalBody: z.string().min(1, "Professional body is required"),
-  
+
   // Step 7: Therapeutic Approaches
   counsellingApproaches: z.array(z.string()).optional(),
   psychologicalTherapies: z.array(z.string()).optional(),
   specialistTherapies: z.array(z.string()).optional(),
-  
+
   // Step 8: Specialisations
   therapeuticSpecialisations: z.array(z.string()).optional(),
-  
+
   // Step 9: Personality
   personalityTraits: z.array(z.string()).max(2, "Select up to 2 personality traits").optional(),
 });
@@ -84,7 +86,13 @@ type UniversityDSAFormData = z.infer<typeof universityDSASchema>;
 type WorkWithUsFormData = z.infer<typeof workWithUsSchema>;
 
 interface GravityFormProps {
-  formType: "lead-capture" | "pdf-test" | "therapist-matching" | "therapist-onboarding" | "university-dsa" | "work-with-us";
+  formType:
+    | "lead-capture"
+    | "pdf-test"
+    | "therapist-matching"
+    | "therapist-onboarding"
+    | "university-dsa"
+    | "work-with-us";
   title?: string;
   description?: string;
   onSuccess?: (data: any) => void;
@@ -129,13 +137,13 @@ export default function GravityForm({ formType, title, description, onSuccess }:
         title: "Form Submitted Successfully",
         description: "Thank you for your submission. We'll be in touch soon!",
       });
-      
+
       if (formType === "lead-capture") {
         leadCaptureForm.reset();
       } else {
         pdfTestForm.reset();
       }
-      
+
       onSuccess?.(data);
     },
     onError: (error) => {
@@ -167,18 +175,17 @@ export default function GravityForm({ formType, title, description, onSuccess }:
             <Mail className="w-5 h-5 text-hive-purple" />
             {title || "Lead Capture (Welcome Pack)"}
           </CardTitle>
-          {description && (
-            <p className="text-sm text-gray-600 mt-2">{description}</p>
-          )}
+          {description && <p className="text-sm text-gray-600 mt-2">{description}</p>}
           <p className="text-sm text-gray-600">
             The lead capture form displayed on bottom of homepage for "Joining the Hive Network".
           </p>
-          <p className="text-sm text-gray-500 italic">
-            "*" indicates required fields
-          </p>
+          <p className="text-sm text-gray-500 italic">"*" indicates required fields</p>
         </CardHeader>
         <CardContent>
-          <form onSubmit={leadCaptureForm.handleSubmit(handleLeadCaptureSubmit)} className="space-y-4">
+          <form
+            onSubmit={leadCaptureForm.handleSubmit(handleLeadCaptureSubmit)}
+            className="space-y-4"
+          >
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="firstName">Enter your first name *</Label>
@@ -207,7 +214,7 @@ export default function GravityForm({ formType, title, description, onSuccess }:
                 )}
               </div>
             </div>
-            
+
             <div>
               <Label htmlFor="email">Enter your email *</Label>
               <Input
@@ -224,10 +231,11 @@ export default function GravityForm({ formType, title, description, onSuccess }:
             </div>
 
             <div className="bg-gray-50 p-4 rounded-lg text-sm text-gray-600">
-              We respect your inbox and your privacy. If you ever decide you no longer wish to receive our newsletters, 
-              you can easily opt out at any time. Simply click the 'unsubscribe' link at the bottom of any of our emails, 
-              or update your preferences through your account settings. We're committed to ensuring you have control over 
-              the information you receive from us.
+              We respect your inbox and your privacy. If you ever decide you no longer wish to
+              receive our newsletters, you can easily opt out at any time. Simply click the
+              'unsubscribe' link at the bottom of any of our emails, or update your preferences
+              through your account settings. We're committed to ensuring you have control over the
+              information you receive from us.
             </div>
 
             <Button
@@ -251,15 +259,9 @@ export default function GravityForm({ formType, title, description, onSuccess }:
             <FileText className="w-5 h-5 text-hive-purple" />
             {title || "PDF Test"}
           </CardTitle>
-          {description && (
-            <p className="text-sm text-gray-600 mt-2">{description}</p>
-          )}
-          <p className="text-sm text-gray-600">
-            Testing PDF Contract
-          </p>
-          <p className="text-sm text-gray-500 italic">
-            "*" indicates required fields
-          </p>
+          {description && <p className="text-sm text-gray-600 mt-2">{description}</p>}
+          <p className="text-sm text-gray-600">Testing PDF Contract</p>
+          <p className="text-sm text-gray-500 italic">"*" indicates required fields</p>
         </CardHeader>
         <CardContent>
           <form onSubmit={pdfTestForm.handleSubmit(handlePDFTestSubmit)} className="space-y-4">
@@ -267,11 +269,10 @@ export default function GravityForm({ formType, title, description, onSuccess }:
               <Label className="text-base font-medium">Name *</Label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
                 <div>
-                  <Label htmlFor="firstName" className="text-sm text-gray-600">First</Label>
-                  <Input
-                    id="firstName"
-                    {...pdfTestForm.register("firstName")}
-                  />
+                  <Label htmlFor="firstName" className="text-sm text-gray-600">
+                    First
+                  </Label>
+                  <Input id="firstName" {...pdfTestForm.register("firstName")} />
                   {pdfTestForm.formState.errors.firstName && (
                     <p className="text-sm text-red-500 mt-1">
                       {pdfTestForm.formState.errors.firstName.message}
@@ -279,11 +280,10 @@ export default function GravityForm({ formType, title, description, onSuccess }:
                   )}
                 </div>
                 <div>
-                  <Label htmlFor="lastName" className="text-sm text-gray-600">Last</Label>
-                  <Input
-                    id="lastName"
-                    {...pdfTestForm.register("lastName")}
-                  />
+                  <Label htmlFor="lastName" className="text-sm text-gray-600">
+                    Last
+                  </Label>
+                  <Input id="lastName" {...pdfTestForm.register("lastName")} />
                   {pdfTestForm.formState.errors.lastName && (
                     <p className="text-sm text-red-500 mt-1">
                       {pdfTestForm.formState.errors.lastName.message}
@@ -297,12 +297,10 @@ export default function GravityForm({ formType, title, description, onSuccess }:
               <Label className="text-base font-medium">Email *</Label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-2">
                 <div>
-                  <Label htmlFor="email" className="text-sm text-gray-600">Enter Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    {...pdfTestForm.register("email")}
-                  />
+                  <Label htmlFor="email" className="text-sm text-gray-600">
+                    Enter Email
+                  </Label>
+                  <Input id="email" type="email" {...pdfTestForm.register("email")} />
                   {pdfTestForm.formState.errors.email && (
                     <p className="text-sm text-red-500 mt-1">
                       {pdfTestForm.formState.errors.email.message}
@@ -310,12 +308,10 @@ export default function GravityForm({ formType, title, description, onSuccess }:
                   )}
                 </div>
                 <div>
-                  <Label htmlFor="confirmEmail" className="text-sm text-gray-600">Confirm Email</Label>
-                  <Input
-                    id="confirmEmail"
-                    type="email"
-                    {...pdfTestForm.register("confirmEmail")}
-                  />
+                  <Label htmlFor="confirmEmail" className="text-sm text-gray-600">
+                    Confirm Email
+                  </Label>
+                  <Input id="confirmEmail" type="email" {...pdfTestForm.register("confirmEmail")} />
                   {pdfTestForm.formState.errors.confirmEmail && (
                     <p className="text-sm text-red-500 mt-1">
                       {pdfTestForm.formState.errors.confirmEmail.message}
@@ -326,7 +322,9 @@ export default function GravityForm({ formType, title, description, onSuccess }:
             </div>
 
             <div>
-              <Label htmlFor="complianceCuff" className="text-base font-medium">Compliance Cuff</Label>
+              <Label htmlFor="complianceCuff" className="text-base font-medium">
+                Compliance Cuff
+              </Label>
               <Input
                 id="complianceCuff"
                 className="mt-2"
@@ -335,7 +333,9 @@ export default function GravityForm({ formType, title, description, onSuccess }:
             </div>
 
             <div>
-              <Label htmlFor="comments" className="text-base font-medium">Comments</Label>
+              <Label htmlFor="comments" className="text-base font-medium">
+                Comments
+              </Label>
               <p className="text-sm text-gray-600 mt-1">
                 Please let us know what's on your mind. Have a question for us? Ask away.
               </p>
@@ -345,9 +345,7 @@ export default function GravityForm({ formType, title, description, onSuccess }:
                 className="mt-2"
                 {...pdfTestForm.register("comments")}
               />
-              <p className="text-sm text-gray-500 mt-1">
-                0 of 600 max characters
-              </p>
+              <p className="text-sm text-gray-500 mt-1">0 of 600 max characters</p>
               {pdfTestForm.formState.errors.comments && (
                 <p className="text-sm text-red-500 mt-1">
                   {pdfTestForm.formState.errors.comments.message}
@@ -386,12 +384,12 @@ export default function GravityForm({ formType, title, description, onSuccess }:
         formType: "university-dsa",
         data,
       });
-      
+
       toast({
         title: "Message Sent!",
         description: "Thank you for your inquiry. We'll get back to you soon.",
       });
-      
+
       universityDSAForm.reset();
       onSuccess?.(data);
     } catch (error) {
@@ -413,15 +411,14 @@ export default function GravityForm({ formType, title, description, onSuccess }:
             <Shield className="w-5 h-5 text-hive-purple" />
             {title || "Universities And DSA"}
           </CardTitle>
-          {description && (
-            <p className="text-sm text-gray-600 mt-2">{description}</p>
-          )}
-          <p className="text-sm text-gray-500 italic">
-            "*" indicates required fields
-          </p>
+          {description && <p className="text-sm text-gray-600 mt-2">{description}</p>}
+          <p className="text-sm text-gray-500 italic">"*" indicates required fields</p>
         </CardHeader>
         <CardContent>
-          <form onSubmit={universityDSAForm.handleSubmit(handleUniversityDSASubmit)} className="space-y-4">
+          <form
+            onSubmit={universityDSAForm.handleSubmit(handleUniversityDSASubmit)}
+            className="space-y-4"
+          >
             <div>
               <Label htmlFor="organisationName" className="text-sm font-medium">
                 Enter organisation name *
@@ -489,7 +486,8 @@ export default function GravityForm({ formType, title, description, onSuccess }:
             </div>
 
             <div className="text-sm text-gray-600">
-              The information you share with us through this form will be collected and processed in line with our{" "}
+              The information you share with us through this form will be collected and processed in
+              line with our{" "}
               <a href="/privacy-policy" className="text-hive-purple hover:underline">
                 Privacy Policy
               </a>
@@ -515,7 +513,8 @@ export default function GravityForm({ formType, title, description, onSuccess }:
         onComplete={(data) => {
           toast({
             title: "Application Submitted!",
-            description: "Thank you for your interest in working with us. We'll review your application and get back to you soon.",
+            description:
+              "Thank you for your interest in working with us. We'll review your application and get back to you soon.",
           });
           onSuccess?.(data);
         }}
@@ -525,7 +524,7 @@ export default function GravityForm({ formType, title, description, onSuccess }:
 
   if (formType === "therapist-matching") {
     return (
-      <TherapistMatchingQuestionnaire 
+      <TherapistMatchingQuestionnaire
         onComplete={(data) => {
           toast({
             title: "Questionnaire Completed",

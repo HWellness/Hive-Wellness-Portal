@@ -1,4 +1,4 @@
-import { google } from 'googleapis';
+import { google } from "googleapis";
 
 /**
  * Gmail API Service for sending emails via Google Workspace
@@ -6,7 +6,7 @@ import { google } from 'googleapis';
  */
 export class GmailService {
   private static gmail: any = null;
-  
+
   /**
    * Initialize Gmail API client
    */
@@ -16,25 +16,28 @@ export class GmailService {
         const serviceAccountKey = JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_KEY);
         const auth = new google.auth.GoogleAuth({
           credentials: serviceAccountKey,
-          scopes: ['https://www.googleapis.com/auth/gmail.send']
+          scopes: ["https://www.googleapis.com/auth/gmail.send"],
         });
-        
+
         const client = await auth.getClient();
-        
+
         // Create a new JWT client for domain-wide delegation
         const jwtClient = new google.auth.JWT(
           serviceAccountKey.client_email,
           null,
           serviceAccountKey.private_key,
-          ['https://www.googleapis.com/auth/gmail.send'],
-          'support@hive-wellness.co.uk'  // Subject for domain-wide delegation
+          ["https://www.googleapis.com/auth/gmail.send"],
+          "support@hive-wellness.co.uk" // Subject for domain-wide delegation
         );
-        
-        this.gmail = google.gmail({ version: 'v1', auth: jwtClient });
-        console.log('Gmail service initialized with domain-wide delegation');
+
+        this.gmail = google.gmail({ version: "v1", auth: jwtClient });
+        console.log("Gmail service initialized with domain-wide delegation");
         return this.gmail;
       } catch (error) {
-        console.log('Gmail service initialization failed:', error instanceof Error ? error.message : 'Unknown error');
+        console.log(
+          "Gmail service initialization failed:",
+          error instanceof Error ? error.message : "Unknown error"
+        );
         return null;
       }
     }
@@ -48,7 +51,7 @@ export class GmailService {
     to,
     subject,
     htmlContent,
-    textContent
+    textContent,
   }: {
     to: string[];
     subject: string;
@@ -58,35 +61,39 @@ export class GmailService {
     try {
       const gmail = await this.getGmailClient();
       if (!gmail) {
-        throw new Error('Gmail service not available');
+        throw new Error("Gmail service not available");
       }
 
       // Create email message
       const message = [
         `From: Hive Wellness <support@hive-wellness.co.uk>`,
-        `To: ${to.join(', ')}`,
+        `To: ${to.join(", ")}`,
         `Subject: ${subject}`,
-        'MIME-Version: 1.0',
-        'Content-Type: text/html; charset=utf-8',
-        '',
-        htmlContent
-      ].join('\n');
+        "MIME-Version: 1.0",
+        "Content-Type: text/html; charset=utf-8",
+        "",
+        htmlContent,
+      ].join("\n");
 
       // Encode message
-      const encodedMessage = Buffer.from(message).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      const encodedMessage = Buffer.from(message)
+        .toString("base64")
+        .replace(/\+/g, "-")
+        .replace(/\//g, "_")
+        .replace(/=+$/, "");
 
       // Send email
       const response = await gmail.users.messages.send({
-        userId: 'me',
+        userId: "me",
         requestBody: {
-          raw: encodedMessage
-        }
+          raw: encodedMessage,
+        },
       });
 
-      console.log('Email sent successfully via Gmail API:', response.data.id);
+      console.log("Email sent successfully via Gmail API:", response.data.id);
       return true;
     } catch (error) {
-      console.error('Gmail send error:', error instanceof Error ? error.message : 'Unknown error');
+      console.error("Gmail send error:", error instanceof Error ? error.message : "Unknown error");
       return false;
     }
   }
@@ -98,8 +105,8 @@ export class GmailService {
     const testEmails = [
       // Admin Test Email
       {
-        to: ['admin@demo.hive'],
-        subject: '🔔 New Booking: Sarah Johnson - Monday, 26 August 2025 at 10:30',
+        to: ["admin@demo.hive"],
+        subject: "🔔 New Booking: Sarah Johnson - Monday, 26 August 2025 at 10:30",
         htmlContent: `
           <div style="font-family: 'Open Sans', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f8f9fa;">
             <div style="background: #9306B1; color: white; padding: 20px; text-align: center;">
@@ -143,13 +150,13 @@ export class GmailService {
               <p>© 2025 Hive Wellness. All rights reserved.</p>
             </div>
           </div>
-        `
+        `,
       },
 
       // Client Test Email
       {
-        to: ['sarah.johnson@example.com'],
-        subject: '✅ Your Hive Wellness Session is Confirmed - Monday, 26 August at 10:30 AM',
+        to: ["sarah.johnson@example.com"],
+        subject: "✅ Your Hive Wellness Session is Confirmed - Monday, 26 August at 10:30 AM",
         htmlContent: `
           <div style="font-family: 'Open Sans', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f8f9fa;">
             <div style="background: #9306B1; color: white; padding: 20px; text-align: center;">
@@ -193,13 +200,13 @@ export class GmailService {
               <p>© 2025 Hive Wellness. All rights reserved.</p>
             </div>
           </div>
-        `
+        `,
       },
 
       // Therapist Test Email
       {
-        to: ['therapist@demo.hive'],
-        subject: '📅 New Client Session: Michael Thompson - Tuesday, 27 August at 3:00 PM',
+        to: ["therapist@demo.hive"],
+        subject: "📅 New Client Session: Michael Thompson - Tuesday, 27 August at 3:00 PM",
         htmlContent: `
           <div style="font-family: 'Open Sans', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f8f9fa;">
             <div style="background: #9306B1; color: white; padding: 20px; text-align: center;">
@@ -246,13 +253,13 @@ export class GmailService {
               <p>© 2025 Hive Wellness. All rights reserved.</p>
             </div>
           </div>
-        `
+        `,
       },
 
       // Institution Test Email
       {
-        to: ['institution@demo.hive'],
-        subject: '📊 Hive Wellness Activity Summary - 2 New Sessions Booked',
+        to: ["institution@demo.hive"],
+        subject: "📊 Hive Wellness Activity Summary - 2 New Sessions Booked",
         htmlContent: `
           <div style="font-family: 'Open Sans', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #f8f9fa;">
             <div style="background: #9306B1; color: white; padding: 20px; text-align: center;">
@@ -312,14 +319,14 @@ export class GmailService {
               <p>© 2025 Hive Wellness. All rights reserved.</p>
             </div>
           </div>
-        `
-      }
+        `,
+      },
     ];
 
-    console.log('Sending test emails to all account types...');
+    console.log("Sending test emails to all account types...");
     for (const email of testEmails) {
       const success = await this.sendEmail(email);
-      console.log(`Test email sent to ${email.to[0]}: ${success ? 'SUCCESS' : 'FAILED'}`);
+      console.log(`Test email sent to ${email.to[0]}: ${success ? "SUCCESS" : "FAILED"}`);
     }
   }
 }

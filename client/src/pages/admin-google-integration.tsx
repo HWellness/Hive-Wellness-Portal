@@ -1,5 +1,5 @@
-import React from 'react';
-import { GoogleIntegrationPanel } from '@/components/admin/google-integration-panel';
+import React from "react";
+import { GoogleIntegrationPanel } from "@/components/admin/google-integration-panel";
 
 export default function AdminGoogleIntegrationPage() {
   return (

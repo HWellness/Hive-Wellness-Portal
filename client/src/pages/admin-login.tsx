@@ -5,7 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Eye, EyeOff, LogIn, Mail, Lock, AlertTriangle, Shield } from "lucide-react";
 import { useLocation, Link } from "wouter";
@@ -21,24 +27,24 @@ export default function AdminLogin() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [showPasswordChangeModal, setShowPasswordChangeModal] = useState(false);
   const [passwordChangeData, setPasswordChangeData] = useState<any>(null);
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [isChangingPassword, setIsChangingPassword] = useState(false);
-  
+
   // Forgot Password state
   const [showForgotPasswordModal, setShowForgotPasswordModal] = useState(false);
-  const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState("");
   const [isRequestingReset, setIsRequestingReset] = useState(false);
 
   // Redirect if already authenticated as admin
   useEffect(() => {
-    if (isAuthenticated && (user as any)?.role === 'admin') {
-      setLocation('/admin-dashboard');
+    if (isAuthenticated && (user as any)?.role === "admin") {
+      setLocation("/admin-dashboard");
     }
   }, [isAuthenticated, user, setLocation]);
 
   // Fast redirect without loading spinner for better performance
-  if (isAuthenticated && (user as any)?.role === 'admin') {
+  if (isAuthenticated && (user as any)?.role === "admin") {
     return null;
   }
 
@@ -49,23 +55,23 @@ export default function AdminLogin() {
     try {
       const response = await apiRequest("POST", "/api/auth/login", { email, password });
       const result = await response.json();
-      
+
       if (!response.ok) {
-        throw new Error(result.message || 'Invalid email or password');
+        throw new Error(result.message || "Invalid email or password");
       }
-      
+
       // Check if MFA is required
       if (result.requiresMfa) {
         toast({
           title: "MFA Required",
           description: "Please complete multi-factor authentication.",
         });
-        setLocation('/mfa-verify');
+        setLocation("/mfa-verify");
         return;
       }
-      
+
       // Check if user is admin
-      if (result.user.role !== 'admin') {
+      if (result.user.role !== "admin") {
         toast({
           title: "Access Denied",
           description: "This page is for administrators only.",
@@ -73,26 +79,25 @@ export default function AdminLogin() {
         });
         return;
       }
-      
+
       // Check if password change is required
       if (result.forcePasswordChange) {
         setPasswordChangeData(result);
         setShowPasswordChangeModal(true);
         return;
       }
-      
-      // Force immediate cache update and invalidation  
-      await queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
-      queryClient.setQueryData(['/api/auth/user'], result.user);
-      
+
+      // Force immediate cache update and invalidation
+      await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      queryClient.setQueryData(["/api/auth/user"], result.user);
+
       toast({
-        title: "Admin Login Successful", 
+        title: "Admin Login Successful",
         description: "Welcome to the admin dashboard.",
       });
-      
+
       // Immediate redirect
-      setLocation('/admin-dashboard');
-      
+      setLocation("/admin-dashboard");
     } catch (error: any) {
       console.error("Login error:", error);
       toast({
@@ -130,27 +135,26 @@ export default function AdminLogin() {
       const response = await apiRequest("POST", "/api/auth/change-password", {
         userId: passwordChangeData.user.id,
         tempPassword: password,
-        newPassword: newPassword
+        newPassword: newPassword,
       });
 
       const result = await response.json();
-      
+
       if (!response.ok) {
-        throw new Error(result.message || 'Failed to change password');
+        throw new Error(result.message || "Failed to change password");
       }
 
       // Update auth cache with the user data
-      await queryClient.invalidateQueries({ queryKey: ['/api/auth/user'] });
-      queryClient.setQueryData(['/api/auth/user'], result.user);
-      
+      await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      queryClient.setQueryData(["/api/auth/user"], result.user);
+
       toast({
         title: "Password Changed Successfully",
         description: "Your password has been updated. Redirecting to dashboard.",
       });
-      
+
       setShowPasswordChangeModal(false);
-      setLocation('/admin-dashboard');
-      
+      setLocation("/admin-dashboard");
     } catch (error: any) {
       console.error("Password change error:", error);
       toast({
@@ -177,21 +181,22 @@ export default function AdminLogin() {
 
     try {
       const response = await apiRequest("POST", "/api/auth/reset-password", {
-        email: forgotPasswordEmail
+        email: forgotPasswordEmail,
       });
 
       if (response.ok) {
         toast({
           title: "Reset Email Sent",
-          description: "If an admin account exists with this email, you'll receive password reset instructions.",
+          description:
+            "If an admin account exists with this email, you'll receive password reset instructions.",
         });
         setShowForgotPasswordModal(false);
-        setForgotPasswordEmail('');
+        setForgotPasswordEmail("");
       } else {
-        throw new Error('Failed to send reset email');
+        throw new Error("Failed to send reset email");
       }
     } catch (error) {
-      console.error('Password reset error:', error);
+      console.error("Password reset error:", error);
       toast({
         title: "Error",
         description: "Failed to send reset email. Please try again later.",
@@ -208,11 +213,7 @@ export default function AdminLogin() {
         {/* Header with Horizontal Logo */}
         <div className="text-center mb-8">
           <div className="flex justify-center items-center">
-            <img 
-              src={hiveWellnessLogo} 
-              alt="Hive Wellness" 
-              className="h-96 w-auto mx-auto"
-            />
+            <img src={hiveWellnessLogo} alt="Hive Wellness" className="h-96 w-auto mx-auto" />
           </div>
           <h1 className="text-4xl font-century font-bold text-hive-purple mb-3 tracking-tight -mt-20">
             Admin Portal
@@ -233,7 +234,10 @@ export default function AdminLogin() {
           <CardContent className="space-y-6">
             <form onSubmit={handleLogin} className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email" className="text-hive-black font-secondary font-medium flex items-center gap-2">
+                <Label
+                  htmlFor="email"
+                  className="text-hive-black font-secondary font-medium flex items-center gap-2"
+                >
                   <Mail className="w-4 h-4 text-hive-purple" />
                   Admin Email
                 </Label>
@@ -247,9 +251,12 @@ export default function AdminLogin() {
                   required
                 />
               </div>
-              
+
               <div className="space-y-2">
-                <Label htmlFor="password" className="text-hive-black font-secondary font-medium flex items-center gap-2">
+                <Label
+                  htmlFor="password"
+                  className="text-hive-black font-secondary font-medium flex items-center gap-2"
+                >
                   <Lock className="w-4 h-4 text-hive-purple" />
                   Password
                 </Label>
@@ -278,9 +285,9 @@ export default function AdminLogin() {
                   </Button>
                 </div>
               </div>
-              
-              <Button 
-                type="submit" 
+
+              <Button
+                type="submit"
                 className="w-full h-12 bg-hive-purple hover:bg-hive-purple/90 text-white font-secondary font-medium text-base"
                 disabled={isLoggingIn}
               >
@@ -315,7 +322,7 @@ export default function AdminLogin() {
                 <div>
                   <p className="text-sm font-medium text-amber-800">Administrator Access Only</p>
                   <p className="text-xs text-amber-700 mt-1">
-                    This portal is restricted to authorised Hive Wellness administrators. 
+                    This portal is restricted to authorised Hive Wellness administrators.
                     Unauthorised access attempts are logged and monitored.
                   </p>
                 </div>
@@ -325,12 +332,20 @@ export default function AdminLogin() {
             {/* Navigation Links */}
             <div className="flex justify-center gap-4 mt-6 pt-6 border-t border-hive-purple/10">
               <Link to="/therapist-login">
-                <Button variant="outline" size="sm" className="text-hive-purple border-hive-purple/30 hover:border-hive-purple">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-hive-purple border-hive-purple/30 hover:border-hive-purple"
+                >
                   Therapist Login
                 </Button>
               </Link>
               <Link to="/login">
-                <Button variant="outline" size="sm" className="text-hive-purple border-hive-purple/30 hover:border-hive-purple">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-hive-purple border-hive-purple/30 hover:border-hive-purple"
+                >
                   Client Login
                 </Button>
               </Link>
@@ -342,14 +357,18 @@ export default function AdminLogin() {
         <Dialog open={showPasswordChangeModal} onOpenChange={setShowPasswordChangeModal}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle className="font-primary text-hive-purple">Password Change Required</DialogTitle>
+              <DialogTitle className="font-primary text-hive-purple">
+                Password Change Required
+              </DialogTitle>
               <DialogDescription className="font-secondary">
                 Your temporary password must be changed before accessing the admin dashboard.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 mt-4">
               <div className="space-y-2">
-                <Label htmlFor="newPassword" className="font-secondary">New Password</Label>
+                <Label htmlFor="newPassword" className="font-secondary">
+                  New Password
+                </Label>
                 <Input
                   id="newPassword"
                   type="password"
@@ -360,7 +379,9 @@ export default function AdminLogin() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword" className="font-secondary">Confirm New Password</Label>
+                <Label htmlFor="confirmPassword" className="font-secondary">
+                  Confirm New Password
+                </Label>
                 <Input
                   id="confirmPassword"
                   type="password"
@@ -370,7 +391,7 @@ export default function AdminLogin() {
                   className="font-secondary"
                 />
               </div>
-              <Button 
+              <Button
                 onClick={handlePasswordChange}
                 disabled={isChangingPassword}
                 className="w-full bg-hive-purple hover:bg-hive-purple/90 font-secondary"
@@ -392,14 +413,18 @@ export default function AdminLogin() {
         <Dialog open={showForgotPasswordModal} onOpenChange={setShowForgotPasswordModal}>
           <DialogContent className="sm:max-w-md">
             <DialogHeader>
-              <DialogTitle className="font-primary text-hive-purple">Reset Admin Password</DialogTitle>
+              <DialogTitle className="font-primary text-hive-purple">
+                Reset Admin Password
+              </DialogTitle>
               <DialogDescription className="font-secondary">
                 Enter your admin email address and we'll send you a password reset link.
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 mt-4">
               <div className="space-y-2">
-                <Label htmlFor="resetEmail" className="font-secondary">Admin Email Address</Label>
+                <Label htmlFor="resetEmail" className="font-secondary">
+                  Admin Email Address
+                </Label>
                 <Input
                   id="resetEmail"
                   type="email"
@@ -410,14 +435,14 @@ export default function AdminLogin() {
                 />
               </div>
               <div className="flex gap-2">
-                <Button 
+                <Button
                   variant="outline"
                   onClick={() => setShowForgotPasswordModal(false)}
                   className="flex-1 font-secondary"
                 >
                   Cancel
                 </Button>
-                <Button 
+                <Button
                   onClick={handlePasswordChange}
                   disabled={isRequestingReset}
                   className="flex-1 bg-hive-purple hover:bg-hive-purple/90 font-secondary"

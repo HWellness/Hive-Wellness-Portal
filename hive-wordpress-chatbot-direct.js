@@ -1,28 +1,28 @@
 /**
  * WORDPRESS DIRECT INTEGRATION - Hive Wellness Chatbot
- * 
+ *
  * Copy this entire script into your WordPress site.
  * No external file dependencies - works independently.
  * Connects to real AI backend for professional responses.
  */
 
-(function() {
-'use strict';
+(function () {
+  "use strict";
 
-// Configuration
-const CONFIG = {
-  apiEndpoint: 'https://api.hive-wellness.co.uk',
-  primaryColor: '#9306B1',
-  position: 'bottom-right'
-};
+  // Configuration
+  const CONFIG = {
+    apiEndpoint: "https://api.hive-wellness.co.uk",
+    primaryColor: "#9306B1",
+    position: "bottom-right",
+  };
 
-let isOpen = false;
-let conversationId = '';
-let isLoading = false;
+  let isOpen = false;
+  let conversationId = "";
+  let isLoading = false;
 
-// Inject CSS styles
-const styles = document.createElement('style');
-styles.textContent = `
+  // Inject CSS styles
+  const styles = document.createElement("style");
+  styles.textContent = `
   .hive-chatbot-container {
     position: fixed !important;
     bottom: 24px !important;
@@ -282,10 +282,10 @@ styles.textContent = `
     }
   }
 `;
-document.head.appendChild(styles);
+  document.head.appendChild(styles);
 
-// Create chatbot HTML
-const chatbotHTML = `
+  // Create chatbot HTML
+  const chatbotHTML = `
   <div class="hive-chatbot-container" id="hive-chatbot">
     <div class="hive-window" id="hive-window">
       <div class="hive-header">
@@ -330,116 +330,122 @@ const chatbotHTML = `
   </div>
 `;
 
-// Insert chatbot into page
-document.body.insertAdjacentHTML('beforeend', chatbotHTML);
+  // Insert chatbot into page
+  document.body.insertAdjacentHTML("beforeend", chatbotHTML);
 
-// Functions
-function toggleHiveChat() {
-  const window_elem = document.getElementById('hive-window');
-  isOpen = !isOpen;
-  window_elem.classList.toggle('open', isOpen);
-}
-
-function closeHiveChat() {
-  const window_elem = document.getElementById('hive-window');
-  window_elem.classList.remove('open');
-  isOpen = false;
-}
-
-function addHiveMessage(content, isUser) {
-  const messages = document.getElementById('hive-messages');
-  const messageDiv = document.createElement('div');
-  messageDiv.className = `hive-message ${isUser ? 'user' : 'bot'}`;
-  messageDiv.innerHTML = `<div class="hive-message-content">${content}</div>`;
-  messages.appendChild(messageDiv);
-  messages.scrollTop = messages.scrollHeight;
-}
-
-function showHiveTyping() {
-  const messages = document.getElementById('hive-messages');
-  const typingDiv = document.createElement('div');
-  typingDiv.className = 'hive-typing';
-  typingDiv.id = 'hive-typing-indicator';
-  typingDiv.innerHTML = '<div class="hive-typing-dot"></div><div class="hive-typing-dot"></div><div class="hive-typing-dot"></div>';
-  messages.appendChild(typingDiv);
-  messages.scrollTop = messages.scrollHeight;
-}
-
-function removeHiveTyping() {
-  const typing = document.getElementById('hive-typing-indicator');
-  if (typing) typing.remove();
-}
-
-function sendQuickHiveMessage(message) {
-  sendHiveMessage(message);
-}
-
-async function sendHiveMessage(messageText = null) {
-  const input = document.getElementById('hive-input');
-  const sendBtn = document.getElementById('hive-send');
-  
-  const userMessage = messageText || input.value.trim();
-  if (!userMessage || isLoading) return;
-  
-  // Hide welcome section after first message
-  const welcome = document.getElementById('hive-welcome');
-  if (welcome) {
-    welcome.style.display = 'none';
+  // Functions
+  function toggleHiveChat() {
+    const window_elem = document.getElementById("hive-window");
+    isOpen = !isOpen;
+    window_elem.classList.toggle("open", isOpen);
   }
-  
-  // Add user message
-  addHiveMessage(userMessage, true);
-  
-  if (!messageText) {
-    input.value = '';
-  }
-  
-  // Show typing and disable send
-  showHiveTyping();
-  isLoading = true;
-  sendBtn.disabled = true;
-  
-  try {
-    // Send to real AI API
-    const response = await fetch(`${CONFIG.apiEndpoint}/api/chatbot/chat`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        message: userMessage,
-        conversationId: conversationId || undefined
-      })
-    });
 
-    const data = await response.json();
-    
-    if (data.conversationId) {
-      conversationId = data.conversationId;
+  function closeHiveChat() {
+    const window_elem = document.getElementById("hive-window");
+    window_elem.classList.remove("open");
+    isOpen = false;
+  }
+
+  function addHiveMessage(content, isUser) {
+    const messages = document.getElementById("hive-messages");
+    const messageDiv = document.createElement("div");
+    messageDiv.className = `hive-message ${isUser ? "user" : "bot"}`;
+    messageDiv.innerHTML = `<div class="hive-message-content">${content}</div>`;
+    messages.appendChild(messageDiv);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  function showHiveTyping() {
+    const messages = document.getElementById("hive-messages");
+    const typingDiv = document.createElement("div");
+    typingDiv.className = "hive-typing";
+    typingDiv.id = "hive-typing-indicator";
+    typingDiv.innerHTML =
+      '<div class="hive-typing-dot"></div><div class="hive-typing-dot"></div><div class="hive-typing-dot"></div>';
+    messages.appendChild(typingDiv);
+    messages.scrollTop = messages.scrollHeight;
+  }
+
+  function removeHiveTyping() {
+    const typing = document.getElementById("hive-typing-indicator");
+    if (typing) typing.remove();
+  }
+
+  function sendQuickHiveMessage(message) {
+    sendHiveMessage(message);
+  }
+
+  async function sendHiveMessage(messageText = null) {
+    const input = document.getElementById("hive-input");
+    const sendBtn = document.getElementById("hive-send");
+
+    const userMessage = messageText || input.value.trim();
+    if (!userMessage || isLoading) return;
+
+    // Hide welcome section after first message
+    const welcome = document.getElementById("hive-welcome");
+    if (welcome) {
+      welcome.style.display = "none";
     }
-    
-    removeHiveTyping();
-    addHiveMessage(data.response || 'I apologize, but I\'m having trouble responding right now. Please try again.', false);
-    
-  } catch (error) {
-    console.error('Chatbot API Error:', error);
-    removeHiveTyping();
-    addHiveMessage('I\'m experiencing some technical difficulties. Please contact our support team at support@hive-wellness.co.uk', false);
-  } finally {
-    isLoading = false;
-    sendBtn.disabled = false;
-    input.focus();
+
+    // Add user message
+    addHiveMessage(userMessage, true);
+
+    if (!messageText) {
+      input.value = "";
+    }
+
+    // Show typing and disable send
+    showHiveTyping();
+    isLoading = true;
+    sendBtn.disabled = true;
+
+    try {
+      // Send to real AI API
+      const response = await fetch(`${CONFIG.apiEndpoint}/api/chatbot/chat`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          message: userMessage,
+          conversationId: conversationId || undefined,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.conversationId) {
+        conversationId = data.conversationId;
+      }
+
+      removeHiveTyping();
+      addHiveMessage(
+        data.response ||
+          "I apologize, but I'm having trouble responding right now. Please try again.",
+        false
+      );
+    } catch (error) {
+      console.error("Chatbot API Error:", error);
+      removeHiveTyping();
+      addHiveMessage(
+        "I'm experiencing some technical difficulties. Please contact our support team at support@hive-wellness.co.uk",
+        false
+      );
+    } finally {
+      isLoading = false;
+      sendBtn.disabled = false;
+      input.focus();
+    }
   }
-}
 
-// Event listeners
-document.getElementById('hive-input').addEventListener('keydown', function(e) {
-  if (e.key === 'Enter' && !e.shiftKey) {
-    e.preventDefault();
-    sendHiveMessage();
-  }
-});
+  // Event listeners
+  document.getElementById("hive-input").addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      sendHiveMessage();
+    }
+  });
 
-console.log('✅ Hive Wellness Direct Chatbot loaded successfully');
-
+  console.log("✅ Hive Wellness Direct Chatbot loaded successfully");
 })();

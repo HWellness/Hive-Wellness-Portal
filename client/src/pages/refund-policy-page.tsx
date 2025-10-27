@@ -1,15 +1,15 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'wouter';
-import { ArrowLeft, Home } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import RefundPolicyComponent from '@/components/refund-policy';
+import { useEffect, useState } from "react";
+import { Link } from "wouter";
+import { ArrowLeft, Home } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import RefundPolicyComponent from "@/components/refund-policy";
 
 export default function RefundPolicyPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     // Set page title
-    document.title = 'Refund Policy - Hive Wellness';
+    document.title = "Refund Policy - Hive Wellness";
     setIsLoading(false);
   }, []);
 
@@ -40,7 +40,9 @@ export default function RefundPolicyPage() {
             </Link>
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Refund Policy</h1>
-              <p className="text-muted-foreground">Transparent terms for therapy session cancellations</p>
+              <p className="text-muted-foreground">
+                Transparent terms for therapy session cancellations
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-2">
@@ -65,7 +67,12 @@ export default function RefundPolicyPage() {
 
         {/* Additional Information */}
         <div className="mt-8 text-center text-sm text-muted-foreground">
-          <p>Questions about our refund policy? Contact us at <a href="mailto:support@hivewellness.nl" className="text-[#9306B1] hover:underline">support@hivewellness.nl</a></p>
+          <p>
+            Questions about our refund policy? Contact us at{" "}
+            <a href="mailto:support@hivewellness.nl" className="text-[#9306B1] hover:underline">
+              support@hivewellness.nl
+            </a>
+          </p>
         </div>
       </div>
     </div>

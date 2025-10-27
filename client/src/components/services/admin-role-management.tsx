@@ -2,7 +2,13 @@ import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -46,7 +52,7 @@ export default function AdminRoleManagement() {
   const [searchTerm, setSearchTerm] = useState("");
 
   const { data, isLoading } = useQuery<UsersResponse>({
-    queryKey: ['/api/admin/users'],
+    queryKey: ["/api/admin/users"],
   });
 
   const users = data?.users || [];
@@ -56,12 +62,12 @@ export default function AdminRoleManagement() {
       const response = await apiRequest("PATCH", `/api/admin/users/${userId}/role`, { newRole });
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || 'Failed to update role');
+        throw new Error(error.message || "Failed to update role");
       }
       return response.json();
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] });
       toast({
         title: "Role Updated",
         description: `User role changed from ${data.previousRole} to ${data.newRole}`,
@@ -80,19 +86,26 @@ export default function AdminRoleManagement() {
     updateRoleMutation.mutate({ userId, newRole });
   };
 
-  const filteredUsers = users?.filter(user =>
-    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.lastName.toLowerCase().includes(searchTerm.toLowerCase())
-  ) || [];
+  const filteredUsers =
+    users?.filter(
+      (user) =>
+        user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.lastName.toLowerCase().includes(searchTerm.toLowerCase())
+    ) || [];
 
   const getRoleBadgeVariant = (role: string) => {
     switch (role) {
-      case 'admin': return 'destructive';
-      case 'therapist': return 'default';
-      case 'client': return 'secondary';
-      case 'institution': return 'outline';
-      default: return 'secondary';
+      case "admin":
+        return "destructive";
+      case "therapist":
+        return "default";
+      case "client":
+        return "secondary";
+      case "institution":
+        return "outline";
+      default:
+        return "secondary";
     }
   };
 
@@ -125,7 +138,7 @@ export default function AdminRoleManagement() {
               <Button
                 variant="outline"
                 size="icon"
-                onClick={() => queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] })}
+                onClick={() => queryClient.invalidateQueries({ queryKey: ["/api/admin/users"] })}
                 data-testid="button-refresh-users"
               >
                 <RefreshCw className="h-4 w-4" />
@@ -169,12 +182,15 @@ export default function AdminRoleManagement() {
                         </TableCell>
                         <TableCell className="text-hive-black/70">{user.email}</TableCell>
                         <TableCell>
-                          <Badge variant={getRoleBadgeVariant(user.role)} data-testid={`badge-role-${user.id}`}>
+                          <Badge
+                            variant={getRoleBadgeVariant(user.role)}
+                            data-testid={`badge-role-${user.id}`}
+                          >
                             {user.role}
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          {user.status === 'active' ? (
+                          {user.status === "active" ? (
                             <div className="flex items-center gap-1 text-green-600">
                               <CheckCircle className="h-4 w-4" />
                               <span className="text-xs">Active</span>
@@ -184,9 +200,7 @@ export default function AdminRoleManagement() {
                           )}
                         </TableCell>
                         <TableCell className="text-sm text-hive-black/70">
-                          {user.lastLogin 
-                            ? new Date(user.lastLogin).toLocaleDateString()
-                            : 'Never'}
+                          {user.lastLogin ? new Date(user.lastLogin).toLocaleDateString() : "Never"}
                         </TableCell>
                         <TableCell className="text-right">
                           <Select
@@ -216,8 +230,9 @@ export default function AdminRoleManagement() {
       </Card>
 
       <div className="text-sm text-hive-black/60 bg-yellow-50 border border-yellow-200 rounded-md p-4">
-        <strong className="text-yellow-800">⚠️ Security Note:</strong> Changing user roles affects their access permissions immediately. 
-        Admin roles should only be granted to trusted personnel. You cannot change your own admin role.
+        <strong className="text-yellow-800">⚠️ Security Note:</strong> Changing user roles affects
+        their access permissions immediately. Admin roles should only be granted to trusted
+        personnel. You cannot change your own admin role.
       </div>
     </div>
   );

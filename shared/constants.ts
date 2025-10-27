@@ -11,7 +11,8 @@ export const PRICING_INFO = {
   MIN_SESSION_PRICE_GBP: 65,
   SESSION_DURATION_MINUTES: 50,
   CONSULTATION_PRICE_GBP: 0, // Free consultation
-  PRICING_MESSAGE: 'Therapy sessions are priced at £65, £80, £90, or £120 depending on the therapist\'s experience and specialisation. All therapists provide exceptional care.',
+  PRICING_MESSAGE:
+    "Therapy sessions are priced at £65, £80, £90, or £120 depending on the therapist's experience and specialisation. All therapists provide exceptional care.",
 } as const;
 
 export const REVENUE_SPLIT = {

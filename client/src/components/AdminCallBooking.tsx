@@ -1,10 +1,10 @@
-import { useState } from 'react';
-import { Calendar } from '@/components/ui/calendar';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { CalendarDays, Clock, CheckCircle2 } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { apiRequest } from '@/lib/queryClient';
+import { useState } from "react";
+import { Calendar } from "@/components/ui/calendar";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { CalendarDays, Clock, CheckCircle2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
 interface AdminCallBookingProps {
   therapistEmail: string;
@@ -12,54 +12,70 @@ interface AdminCallBookingProps {
 
 export function AdminCallBooking({ therapistEmail }: AdminCallBookingProps) {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
-  const [selectedTime, setSelectedTime] = useState<string>('');
+  const [selectedTime, setSelectedTime] = useState<string>("");
   const [isBooked, setIsBooked] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
 
   // Available time slots (admin availability - 9 AM to 8 PM)
   const timeSlots = [
-    '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
-    '14:00', '14:30', '15:00', '15:30', '16:00', '16:30',
-    '17:00', '17:30', '18:00', '18:30', '19:00', '19:30', '20:00'
+    "09:00",
+    "09:30",
+    "10:00",
+    "10:30",
+    "11:00",
+    "11:30",
+    "14:00",
+    "14:30",
+    "15:00",
+    "15:30",
+    "16:00",
+    "16:30",
+    "17:00",
+    "17:30",
+    "18:00",
+    "18:30",
+    "19:00",
+    "19:30",
+    "20:00",
   ];
 
   const handleBookCall = async () => {
     if (!selectedDate || !selectedTime) {
       toast({
-        title: 'Missing Information',
-        description: 'Please select both a date and time for your introduction call.',
-        variant: 'destructive',
+        title: "Missing Information",
+        description: "Please select both a date and time for your introduction call.",
+        variant: "destructive",
       });
       return;
     }
 
     setIsLoading(true);
-    
+
     try {
       const bookingData = {
         therapistEmail,
-        date: selectedDate.toISOString().split('T')[0],
+        date: selectedDate.toISOString().split("T")[0],
         time: selectedTime,
-        timezone: 'Europe/London'
+        timezone: "Europe/London",
       };
 
-      const response = await apiRequest('POST', '/api/admin-call-booking', bookingData);
+      const response = await apiRequest("POST", "/api/admin-call-booking", bookingData);
 
       if (response.ok) {
         setIsBooked(true);
         toast({
-          title: 'Call Booked Successfully!',
-          description: 'You will receive a confirmation email with meeting details.',
+          title: "Call Booked Successfully!",
+          description: "You will receive a confirmation email with meeting details.",
         });
       } else {
-        throw new Error('Booking failed');
+        throw new Error("Booking failed");
       }
     } catch (error) {
       toast({
-        title: 'Booking Failed',
-        description: 'There was an error booking your call. Please try again or contact support.',
-        variant: 'destructive',
+        title: "Booking Failed",
+        description: "There was an error booking your call. Please try again or contact support.",
+        variant: "destructive",
       });
     } finally {
       setIsLoading(false);
@@ -74,7 +90,9 @@ export function AdminCallBooking({ therapistEmail }: AdminCallBookingProps) {
             <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
               <CheckCircle2 className="h-6 w-6 text-green-600" />
             </div>
-            <CardTitle className="text-2xl font-bold text-hive-purple">Call Booked Successfully!</CardTitle>
+            <CardTitle className="text-2xl font-bold text-hive-purple">
+              Call Booked Successfully!
+            </CardTitle>
             <CardDescription>
               Your introduction call has been scheduled with the Hive Wellness team.
             </CardDescription>
@@ -91,8 +109,11 @@ export function AdminCallBooking({ therapistEmail }: AdminCallBookingProps) {
             </div>
             <div className="text-center">
               <p className="text-sm text-gray-600">
-                Questions? Contact us at{' '}
-                <a href="mailto:support@hive-wellness.co.uk" className="text-hive-purple hover:underline">
+                Questions? Contact us at{" "}
+                <a
+                  href="mailto:support@hive-wellness.co.uk"
+                  className="text-hive-purple hover:underline"
+                >
                   support@hive-wellness.co.uk
                 </a>
               </p>
@@ -107,7 +128,9 @@ export function AdminCallBooking({ therapistEmail }: AdminCallBookingProps) {
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-purple-50 to-blue-50 p-4">
       <Card className="w-full max-w-4xl">
         <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-bold text-hive-purple">Book Your Introduction Call</CardTitle>
+          <CardTitle className="text-3xl font-bold text-hive-purple">
+            Book Your Introduction Call
+          </CardTitle>
           <CardDescription className="text-lg">
             Schedule a 30-minute call with the Hive Wellness team to discuss your application
           </CardDescription>
@@ -143,11 +166,11 @@ export function AdminCallBooking({ therapistEmail }: AdminCallBookingProps) {
                 {timeSlots.map((time) => (
                   <Button
                     key={time}
-                    variant={selectedTime === time ? 'default' : 'outline'}
+                    variant={selectedTime === time ? "default" : "outline"}
                     className={`justify-center ${
                       selectedTime === time
-                        ? 'bg-hive-purple hover:bg-hive-purple/90'
-                        : 'hover:border-hive-purple hover:text-hive-purple'
+                        ? "bg-hive-purple hover:bg-hive-purple/90"
+                        : "hover:border-hive-purple hover:text-hive-purple"
                     }`}
                     onClick={() => setSelectedTime(time)}
                   >
@@ -167,23 +190,32 @@ export function AdminCallBooking({ therapistEmail }: AdminCallBookingProps) {
                 <CardContent className="p-4">
                   <h4 className="font-semibold text-hive-purple mb-2">Booking Summary</h4>
                   <div className="space-y-1 text-sm">
-                    <p><strong>Date:</strong> {selectedDate.toLocaleDateString('en-GB', { 
-                      weekday: 'long', 
-                      year: 'numeric', 
-                      month: 'long', 
-                      day: 'numeric' 
-                    })}</p>
-                    <p><strong>Time:</strong> {selectedTime} (Europe/London)</p>
-                    <p><strong>Duration:</strong> 15 minutes</p>
-                    <p><strong>Meeting Type:</strong> Video call via Hive Wellness Portal</p>
+                    <p>
+                      <strong>Date:</strong>{" "}
+                      {selectedDate.toLocaleDateString("en-GB", {
+                        weekday: "long",
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
+                      })}
+                    </p>
+                    <p>
+                      <strong>Time:</strong> {selectedTime} (Europe/London)
+                    </p>
+                    <p>
+                      <strong>Duration:</strong> 15 minutes
+                    </p>
+                    <p>
+                      <strong>Meeting Type:</strong> Video call via Hive Wellness Portal
+                    </p>
                   </div>
-                  
-                  <Button 
-                    className="w-full mt-4 bg-hive-purple hover:bg-hive-purple/90" 
+
+                  <Button
+                    className="w-full mt-4 bg-hive-purple hover:bg-hive-purple/90"
                     onClick={handleBookCall}
                     disabled={isLoading}
                   >
-                    {isLoading ? 'Booking Call...' : 'Confirm Booking'}
+                    {isLoading ? "Booking Call..." : "Confirm Booking"}
                   </Button>
                 </CardContent>
               </Card>

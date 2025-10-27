@@ -3,7 +3,17 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Video, Clock, UserCheck, AlertCircle, Phone, PhoneOff, Mic, MicOff, VideoOff } from "lucide-react";
+import {
+  Video,
+  Clock,
+  UserCheck,
+  AlertCircle,
+  Phone,
+  PhoneOff,
+  Mic,
+  MicOff,
+  VideoOff,
+} from "lucide-react";
 import { useLocation } from "wouter";
 import hiveWellnessLogo from "@assets/Hive Logo_1752073128164.png";
 
@@ -31,14 +41,14 @@ export default function VideoMeetingPage() {
       alert("Please enter your name and email to join the meeting");
       return;
     }
-    
+
     setIsJoining(true);
-    
+
     try {
       // Request camera and microphone access
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: true, 
-        audio: true 
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true,
       });
       setLocalStream(stream);
       setInVideoCall(true);
@@ -52,7 +62,7 @@ export default function VideoMeetingPage() {
 
   const handleEndCall = () => {
     if (localStream) {
-      localStream.getTracks().forEach(track => track.stop());
+      localStream.getTracks().forEach((track) => track.stop());
       setLocalStream(null);
     }
     setInVideoCall(false);
@@ -83,7 +93,7 @@ export default function VideoMeetingPage() {
   // Connect video stream to video element
   useEffect(() => {
     if (localStream && inVideoCall) {
-      const videoElement = document.getElementById('localVideo') as HTMLVideoElement;
+      const videoElement = document.getElementById("localVideo") as HTMLVideoElement;
       if (videoElement) {
         videoElement.srcObject = localStream;
       }
@@ -91,10 +101,10 @@ export default function VideoMeetingPage() {
   }, [localStream, inVideoCall]);
 
   const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('en-GB', { 
-      hour: '2-digit', 
-      minute: '2-digit',
-      second: '2-digit'
+    return date.toLocaleTimeString("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
     });
   };
 
@@ -109,7 +119,7 @@ export default function VideoMeetingPage() {
             autoPlay
             muted
             playsInline
-            className={`w-full h-full object-cover ${isVideoOff ? 'hidden' : ''}`}
+            className={`w-full h-full object-cover ${isVideoOff ? "hidden" : ""}`}
           />
           {isVideoOff && (
             <div className="w-full h-full flex items-center justify-center bg-gray-800">
@@ -133,7 +143,7 @@ export default function VideoMeetingPage() {
             >
               {isMuted ? <MicOff className="w-6 h-6" /> : <Mic className="w-6 h-6" />}
             </Button>
-            
+
             <Button
               onClick={toggleVideo}
               variant={isVideoOff ? "destructive" : "secondary"}
@@ -142,7 +152,7 @@ export default function VideoMeetingPage() {
             >
               {isVideoOff ? <VideoOff className="w-6 h-6" /> : <Video className="w-6 h-6" />}
             </Button>
-            
+
             <Button
               onClick={handleEndCall}
               variant="destructive"
@@ -180,11 +190,7 @@ export default function VideoMeetingPage() {
           {/* Header */}
           <div className="text-center mb-8">
             <div className="mb-6">
-              <img 
-                src={hiveWellnessLogo} 
-                alt="Hive Wellness" 
-                className="h-20 mx-auto mb-4"
-              />
+              <img src={hiveWellnessLogo} alt="Hive Wellness" className="h-20 mx-auto mb-4" />
             </div>
             <h1 className="text-3xl font-bold text-hive-black font-century mb-2">
               Video Consultation
@@ -214,7 +220,7 @@ export default function VideoMeetingPage() {
                     <div className="text-sm text-green-600">Your consultation link is active</div>
                   </div>
                 </div>
-                
+
                 <div className="flex items-center gap-3 p-3 bg-hive-purple/10 rounded-lg">
                   <Clock className="w-5 h-5 text-hive-purple" />
                   <div>
@@ -236,7 +242,7 @@ export default function VideoMeetingPage() {
                     className="mt-1"
                   />
                 </div>
-                
+
                 <div>
                   <Label htmlFor="email">Email Address</Label>
                   <Input
@@ -294,7 +300,10 @@ export default function VideoMeetingPage() {
           <div className="text-center mt-6 text-sm text-hive-black/60">
             <p>
               Having technical issues? Email us at{" "}
-              <a href="mailto:support@hive-wellness.co.uk" className="text-hive-purple hover:underline">
+              <a
+                href="mailto:support@hive-wellness.co.uk"
+                className="text-hive-purple hover:underline"
+              >
                 support@hive-wellness.co.uk
               </a>
             </p>

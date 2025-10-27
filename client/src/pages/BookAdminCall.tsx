@@ -1,13 +1,13 @@
-import { useEffect, useState } from 'react';
-import { AdminCallBooking } from '@/components/AdminCallBooking';
+import { useEffect, useState } from "react";
+import { AdminCallBooking } from "@/components/AdminCallBooking";
 
 export default function BookAdminCall() {
-  const [therapistEmail, setTherapistEmail] = useState<string>('');
+  const [therapistEmail, setTherapistEmail] = useState<string>("");
 
   useEffect(() => {
     // Get therapist email from URL parameters
     const urlParams = new URLSearchParams(window.location.search);
-    const email = urlParams.get('therapist');
+    const email = urlParams.get("therapist");
     if (email) {
       setTherapistEmail(decodeURIComponent(email));
     }

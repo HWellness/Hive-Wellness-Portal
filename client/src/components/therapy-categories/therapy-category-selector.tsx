@@ -23,22 +23,22 @@ interface TherapyCategorySelectorProps {
   showContinueButton?: boolean;
 }
 
-export function TherapyCategorySelector({ 
-  selectedCategory, 
-  onCategorySelect, 
+export function TherapyCategorySelector({
+  selectedCategory,
+  onCategorySelect,
   showPrices = true,
   onContinue,
-  showContinueButton = true
+  showContinueButton = true,
 }: TherapyCategorySelectorProps) {
   const { user } = useAuth();
   const { data: categories = [], isLoading } = useQuery<TherapyCategory[]>({
     queryKey: ["/api/therapy-categories"],
   });
-  
+
   // Check if user is eligible for free first session
   const { data: freeSessionEligibility } = useQuery<{ isEligible: boolean; message: string }>({
-    queryKey: ['/api/free-session/check'],
-    enabled: !!user && user.role === 'client',
+    queryKey: ["/api/free-session/check"],
+    enabled: !!user && user.role === "client",
   });
 
   if (isLoading) {
@@ -64,12 +64,12 @@ export function TherapyCategorySelector({
     <div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {categories.map((category: TherapyCategory) => (
-          <Card 
+          <Card
             key={category.id}
             className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
-              selectedCategory === category.id 
-                ? 'ring-2 ring-purple-500 bg-purple-50' 
-                : 'hover:shadow-md border-gray-200'
+              selectedCategory === category.id
+                ? "ring-2 ring-purple-500 bg-purple-50"
+                : "hover:shadow-md border-gray-200"
             }`}
             onClick={() => onCategorySelect(category)}
           >
@@ -111,19 +111,19 @@ export function TherapyCategorySelector({
                 )}
               </div>
             </CardHeader>
-            
+
             <CardContent className="pt-0">
               <CardDescription className="text-sm text-gray-600 mb-4 leading-relaxed">
                 {category.description}
               </CardDescription>
-              
+
               <div className="space-y-2">
                 <p className="text-xs font-medium text-gray-700">Available Therapists:</p>
                 <div className="flex flex-wrap gap-1">
                   {category.availableTherapistTypes.map((type, index) => (
-                    <Badge 
-                      key={index} 
-                      variant="outline" 
+                    <Badge
+                      key={index}
+                      variant="outline"
                       className="text-xs px-2 py-1 bg-white border-gray-200"
                     >
                       {type}
@@ -138,7 +138,7 @@ export function TherapyCategorySelector({
 
       {showContinueButton && selectedCategory && (
         <div className="mt-6 text-center">
-          <Button 
+          <Button
             onClick={() => onContinue?.(selectedCategory)}
             className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 text-lg font-medium"
             size="lg"

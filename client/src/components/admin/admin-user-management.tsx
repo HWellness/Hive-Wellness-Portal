@@ -33,16 +33,16 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { 
-  UserPlus, 
-  Edit, 
-  Trash2, 
-  Shield, 
-  Users, 
-  Mail, 
+import {
+  UserPlus,
+  Edit,
+  Trash2,
+  Shield,
+  Users,
+  Mail,
   Calendar,
   CheckCircle,
-  XCircle
+  XCircle,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
@@ -64,7 +64,7 @@ function CreateAdminDialog() {
     email: "",
     firstName: "",
     lastName: "",
-    password: ""
+    password: "",
   });
 
   const createAdminMutation = useMutation({
@@ -85,9 +85,9 @@ function CreateAdminDialog() {
       toast({
         title: "Error",
         description: error.message || "Failed to create admin user",
-        variant: "destructive"
+        variant: "destructive",
       });
-    }
+    },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -96,7 +96,7 @@ function CreateAdminDialog() {
       toast({
         title: "Validation Error",
         description: "Email, first name, and last name are required",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -106,7 +106,10 @@ function CreateAdminDialog() {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-hive-purple hover:bg-hive-purple/90" data-testid="button-create-admin">
+        <Button
+          className="bg-hive-purple hover:bg-hive-purple/90"
+          data-testid="button-create-admin"
+        >
           <UserPlus className="w-4 h-4 mr-2" />
           Create Admin User
         </Button>
@@ -176,8 +179,8 @@ function CreateAdminDialog() {
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={createAdminMutation.isPending}
               className="bg-hive-purple hover:bg-hive-purple/90"
               data-testid="button-submit-admin"
@@ -198,7 +201,7 @@ function EditAdminDialog({ admin }: { admin: AdminUser }) {
     firstName: admin.firstName,
     lastName: admin.lastName,
     email: admin.email,
-    isActive: admin.isActive
+    isActive: admin.isActive,
   });
 
   const updateAdminMutation = useMutation({
@@ -218,9 +221,9 @@ function EditAdminDialog({ admin }: { admin: AdminUser }) {
       toast({
         title: "Error",
         description: error.message || "Failed to update admin user",
-        variant: "destructive"
+        variant: "destructive",
       });
-    }
+    },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -241,9 +244,7 @@ function EditAdminDialog({ admin }: { admin: AdminUser }) {
             <Edit className="w-5 h-5 text-hive-blue" />
             Edit Admin User
           </DialogTitle>
-          <DialogDescription>
-            Update the administrator account details.
-          </DialogDescription>
+          <DialogDescription>Update the administrator account details.</DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
@@ -292,8 +293,8 @@ function EditAdminDialog({ admin }: { admin: AdminUser }) {
             <Button type="button" variant="outline" onClick={() => setOpen(false)}>
               Cancel
             </Button>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={updateAdminMutation.isPending}
               className="bg-hive-blue hover:bg-hive-blue/90"
               data-testid="button-submit-edit-admin"
@@ -326,15 +327,20 @@ function DeleteAdminDialog({ admin }: { admin: AdminUser }) {
       toast({
         title: "Error",
         description: error.message || "Failed to delete admin user",
-        variant: "destructive"
+        variant: "destructive",
       });
-    }
+    },
   });
 
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
-        <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700" data-testid={`button-delete-admin-${admin.id}`}>
+        <Button
+          variant="outline"
+          size="sm"
+          className="text-red-600 hover:text-red-700"
+          data-testid={`button-delete-admin-${admin.id}`}
+        >
           <Trash2 className="w-4 h-4" />
         </Button>
       </AlertDialogTrigger>
@@ -343,8 +349,10 @@ function DeleteAdminDialog({ admin }: { admin: AdminUser }) {
           <AlertDialogTitle>Delete Admin User</AlertDialogTitle>
           <AlertDialogDescription>
             Are you sure you want to delete the admin account for{" "}
-            <strong>{admin.firstName} {admin.lastName}</strong> ({admin.email})?
-            This action cannot be undone.
+            <strong>
+              {admin.firstName} {admin.lastName}
+            </strong>{" "}
+            ({admin.email})? This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
@@ -366,7 +374,11 @@ function DeleteAdminDialog({ admin }: { admin: AdminUser }) {
 export default function AdminUserManagement() {
   const { toast } = useToast();
 
-  const { data: adminUsersData, isLoading, error } = useQuery({
+  const {
+    data: adminUsersData,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["/api/admin/users/admins"],
     staleTime: 1000 * 60 * 5, // 5 minutes
   });
@@ -436,15 +448,17 @@ export default function AdminUserManagement() {
             <div className="mb-4 flex items-center gap-4 text-sm text-hive-black/70">
               <div className="flex items-center gap-1">
                 <Shield className="w-4 h-4" />
-                <span>{adminUsers.length} Admin{adminUsers.length !== 1 ? 's' : ''}</span>
+                <span>
+                  {adminUsers.length} Admin{adminUsers.length !== 1 ? "s" : ""}
+                </span>
               </div>
               <div className="flex items-center gap-1">
                 <CheckCircle className="w-4 h-4 text-green-600" />
-                <span>{adminUsers.filter(admin => admin.isActive).length} Active</span>
+                <span>{adminUsers.filter((admin) => admin.isActive).length} Active</span>
               </div>
               <div className="flex items-center gap-1">
                 <XCircle className="w-4 h-4 text-red-600" />
-                <span>{adminUsers.filter(admin => !admin.isActive).length} Inactive</span>
+                <span>{adminUsers.filter((admin) => !admin.isActive).length} Inactive</span>
               </div>
             </div>
 
@@ -478,7 +492,7 @@ export default function AdminUserManagement() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge 
+                        <Badge
                           variant={admin.isActive ? "default" : "destructive"}
                           className={admin.isActive ? "bg-green-100 text-green-800" : ""}
                         >
@@ -493,10 +507,9 @@ export default function AdminUserManagement() {
                       </TableCell>
                       <TableCell>
                         <div className="text-sm text-hive-black/60">
-                          {admin.lastLoginAt 
+                          {admin.lastLoginAt
                             ? new Date(admin.lastLoginAt).toLocaleDateString()
-                            : "Never"
-                          }
+                            : "Never"}
                         </div>
                       </TableCell>
                       <TableCell className="text-right">

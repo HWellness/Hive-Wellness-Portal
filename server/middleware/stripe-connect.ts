@@ -9,7 +9,7 @@ export interface StripeConnectAccountData {
   email: string;
   firstName: string;
   lastName: string;
-  businessType: 'individual' | 'company';
+  businessType: "individual" | "company";
   country: string;
   phone?: string;
   dateOfBirth?: {
@@ -28,7 +28,7 @@ export interface StripeConnectAccountData {
   bankAccount?: {
     account_number: string;
     routing_number: string;
-    account_holder_type: 'individual' | 'company';
+    account_holder_type: "individual" | "company";
   };
   businessProfile?: {
     name: string;
@@ -55,31 +55,39 @@ export class StripeConnectManager {
   async createExpressAccount(accountData: StripeConnectAccountData): Promise<string> {
     try {
       const account = await stripe.accounts.create({
-        type: 'express',
+        type: "express",
         country: accountData.country,
         email: accountData.email,
         business_type: accountData.businessType,
-        individual: accountData.businessType === 'individual' ? {
-          email: accountData.email,
-          first_name: accountData.firstName,
-          last_name: accountData.lastName,
-          phone: accountData.phone,
-          dob: accountData.dateOfBirth,
-          address: accountData.address,
-        } : undefined,
-        company: accountData.businessType === 'company' ? {
-          name: accountData.businessProfile?.name,
-          phone: accountData.phone,
-          address: accountData.address,
-        } : undefined,
-        business_profile: accountData.businessProfile ? {
-          name: accountData.businessProfile.name,
-          product_description: accountData.businessProfile.product_description,
-          support_phone: accountData.businessProfile.support_phone,
-          support_email: accountData.businessProfile.support_email,
-          url: accountData.businessProfile.url,
-          mcc: '8999', // Social Services - Mental Health Services
-        } : undefined,
+        individual:
+          accountData.businessType === "individual"
+            ? {
+                email: accountData.email,
+                first_name: accountData.firstName,
+                last_name: accountData.lastName,
+                phone: accountData.phone,
+                dob: accountData.dateOfBirth,
+                address: accountData.address,
+              }
+            : undefined,
+        company:
+          accountData.businessType === "company"
+            ? {
+                name: accountData.businessProfile?.name,
+                phone: accountData.phone,
+                address: accountData.address,
+              }
+            : undefined,
+        business_profile: accountData.businessProfile
+          ? {
+              name: accountData.businessProfile.name,
+              product_description: accountData.businessProfile.product_description,
+              support_phone: accountData.businessProfile.support_phone,
+              support_email: accountData.businessProfile.support_email,
+              url: accountData.businessProfile.url,
+              mcc: "8999", // Social Services - Mental Health Services
+            }
+          : undefined,
         capabilities: {
           card_payments: { requested: true },
           transfers: { requested: true },
@@ -87,36 +95,40 @@ export class StripeConnectManager {
         settings: {
           payouts: {
             schedule: {
-              interval: 'weekly',
-              weekly_anchor: 'friday'
-            }
-          }
-        }
+              interval: "weekly",
+              weekly_anchor: "friday",
+            },
+          },
+        },
       });
 
       return account.id;
     } catch (error) {
-      console.error('Error creating Stripe Connect account:', error);
-      throw new Error('Failed to create Stripe Connect account');
+      console.error("Error creating Stripe Connect account:", error);
+      throw new Error("Failed to create Stripe Connect account");
     }
   }
 
   /**
    * Create an onboarding link for Express account setup
    */
-  async createAccountLink(accountId: string, refreshUrl: string, returnUrl: string): Promise<string> {
+  async createAccountLink(
+    accountId: string,
+    refreshUrl: string,
+    returnUrl: string
+  ): Promise<string> {
     try {
       const accountLink = await stripe.accountLinks.create({
         account: accountId,
         refresh_url: refreshUrl,
         return_url: returnUrl,
-        type: 'account_onboarding',
+        type: "account_onboarding",
       });
 
       return accountLink.url;
     } catch (error) {
-      console.error('Error creating account link:', error);
-      throw new Error('Failed to create account onboarding link');
+      console.error("Error creating account link:", error);
+      throw new Error("Failed to create account onboarding link");
     }
   }
 
@@ -126,7 +138,7 @@ export class StripeConnectManager {
   async getAccountStatus(accountId: string): Promise<any> {
     try {
       const account = await stripe.accounts.retrieve(accountId);
-      
+
       return {
         id: account.id,
         type: account.type,
@@ -145,18 +157,22 @@ export class StripeConnectManager {
         },
         capabilities: account.capabilities,
         business_profile: account.business_profile,
-        individual: account.individual ? {
-          first_name: account.individual.first_name,
-          last_name: account.individual.last_name,
-          email: account.individual.email,
-        } : null,
-        company: account.company ? {
-          name: account.company.name,
-        } : null,
+        individual: account.individual
+          ? {
+              first_name: account.individual.first_name,
+              last_name: account.individual.last_name,
+              email: account.individual.email,
+            }
+          : null,
+        company: account.company
+          ? {
+              name: account.company.name,
+            }
+          : null,
       };
     } catch (error) {
-      console.error('Error retrieving account status:', error);
-      throw new Error('Failed to retrieve account status');
+      console.error("Error retrieving account status:", error);
+      throw new Error("Failed to retrieve account status");
     }
   }
 
@@ -164,9 +180,9 @@ export class StripeConnectManager {
    * Create a transfer to a connected account (therapist payout)
    */
   async createTransfer(
-    accountId: string, 
-    amount: number, 
-    currency: string = 'gbp',
+    accountId: string,
+    amount: number,
+    currency: string = "gbp",
     transferGroup?: string,
     metadata?: Record<string, string>
   ): Promise<string> {
@@ -181,38 +197,36 @@ export class StripeConnectManager {
 
       return transfer.id;
     } catch (error) {
-      console.error('Error creating transfer:', error);
-      throw new Error('Failed to create transfer');
+      console.error("Error creating transfer:", error);
+      throw new Error("Failed to create transfer");
     }
   }
 
   /**
    * Process a therapy session payment with automatic therapist payout
    */
-  async processSessionPayment(
-    sessionPaymentData: {
-      clientId: string;
-      therapistId: string;
-      appointmentId: string;
-      totalAmount: number;
-      platformFeePercentage: number;
-      currency?: string;
-      paymentMethodId: string;
-    }
-  ): Promise<{
+  async processSessionPayment(sessionPaymentData: {
+    clientId: string;
+    therapistId: string;
+    appointmentId: string;
+    totalAmount: number;
+    platformFeePercentage: number;
+    currency?: string;
+    paymentMethodId: string;
+  }): Promise<{
     paymentIntentId: string;
     transferId?: string;
     platformFee: number;
     therapistPayout: number;
   }> {
     try {
-      const { 
-        totalAmount, 
-        platformFeePercentage, 
-        currency = 'gbp',
+      const {
+        totalAmount,
+        platformFeePercentage,
+        currency = "gbp",
         paymentMethodId,
         therapistId,
-        appointmentId 
+        appointmentId,
       } = sessionPaymentData;
 
       // Calculate fees
@@ -222,7 +236,7 @@ export class StripeConnectManager {
       // Get therapist's Stripe account
       const therapistProfile = await storage.getTherapistProfile(therapistId);
       if (!therapistProfile?.stripeConnectAccountId) {
-        throw new Error('Therapist has not completed Stripe Connect onboarding');
+        throw new Error("Therapist has not completed Stripe Connect onboarding");
       }
 
       // Create payment intent
@@ -250,7 +264,7 @@ export class StripeConnectManager {
         appointmentId,
         amount: totalAmount.toString(),
         currency,
-        status: paymentIntent.status === 'succeeded' ? 'completed' : 'pending',
+        status: paymentIntent.status === "succeeded" ? "completed" : "pending",
         stripePaymentIntentId: paymentIntent.id,
         platformFee: platformFee.toString(),
         therapistPayout: therapistPayout.toString(),
@@ -262,8 +276,8 @@ export class StripeConnectManager {
         therapistPayout,
       };
     } catch (error) {
-      console.error('Error processing session payment:', error);
-      throw new Error('Failed to process session payment');
+      console.error("Error processing session payment:", error);
+      throw new Error("Failed to process session payment");
     }
   }
 
@@ -277,18 +291,18 @@ export class StripeConnectManager {
         limit,
       });
 
-      return transfers.data.map(transfer => ({
+      return transfers.data.map((transfer) => ({
         id: transfer.id,
         amount: transfer.amount / 100, // Convert from pence
         currency: transfer.currency,
         created: new Date(transfer.created * 1000),
         description: transfer.description,
         metadata: transfer.metadata,
-        status: transfer.status || 'completed',
+        status: transfer.status || "completed",
       }));
     } catch (error) {
-      console.error('Error retrieving transfers:', error);
-      throw new Error('Failed to retrieve transfer history');
+      console.error("Error retrieving transfers:", error);
+      throw new Error("Failed to retrieve transfer history");
     }
   }
 
@@ -296,8 +310,8 @@ export class StripeConnectManager {
    * Get earnings summary for a therapist
    */
   async getTherapistEarnings(
-    accountId: string, 
-    startDate: Date, 
+    accountId: string,
+    startDate: Date,
     endDate: Date
   ): Promise<{
     totalEarnings: number;
@@ -319,8 +333,10 @@ export class StripeConnectManager {
         stripeAccount: accountId,
       });
 
-      const totalEarnings = transfers.data.reduce((sum, transfer) => sum + transfer.amount, 0) / 100;
-      const pendingEarnings = balance.pending.reduce((sum, pending) => sum + pending.amount, 0) / 100;
+      const totalEarnings =
+        transfers.data.reduce((sum, transfer) => sum + transfer.amount, 0) / 100;
+      const pendingEarnings =
+        balance.pending.reduce((sum, pending) => sum + pending.amount, 0) / 100;
 
       return {
         totalEarnings,
@@ -329,8 +345,8 @@ export class StripeConnectManager {
         transferCount: transfers.data.length,
       };
     } catch (error) {
-      console.error('Error retrieving earnings:', error);
-      throw new Error('Failed to retrieve earnings summary');
+      console.error("Error retrieving earnings:", error);
+      throw new Error("Failed to retrieve earnings summary");
     }
   }
 
@@ -342,23 +358,23 @@ export class StripeConnectManager {
     bankAccountData: {
       account_number: string;
       routing_number: string;
-      account_holder_type: 'individual' | 'company';
+      account_holder_type: "individual" | "company";
     }
   ): Promise<void> {
     try {
       await stripe.accounts.createExternalAccount(accountId, {
         external_account: {
-          object: 'bank_account',
-          country: 'GB',
-          currency: 'gbp',
+          object: "bank_account",
+          country: "GB",
+          currency: "gbp",
           account_number: bankAccountData.account_number,
           routing_number: bankAccountData.routing_number,
           account_holder_type: bankAccountData.account_holder_type,
         },
       });
     } catch (error) {
-      console.error('Error updating bank account:', error);
-      throw new Error('Failed to update bank account');
+      console.error("Error updating bank account:", error);
+      throw new Error("Failed to update bank account");
     }
   }
 
@@ -370,8 +386,8 @@ export class StripeConnectManager {
       const link = await stripe.accounts.createLoginLink(accountId);
       return link.url;
     } catch (error) {
-      console.error('Error creating dashboard link:', error);
-      throw new Error('Failed to create dashboard access link');
+      console.error("Error creating dashboard link:", error);
+      throw new Error("Failed to create dashboard access link");
     }
   }
 
@@ -383,7 +399,7 @@ export class StripeConnectManager {
       stripe.webhooks.constructEvent(payload, signature, secret);
       return true;
     } catch (error) {
-      console.error('Webhook signature validation failed:', error);
+      console.error("Webhook signature validation failed:", error);
       return false;
     }
   }
@@ -394,23 +410,23 @@ export class StripeConnectManager {
   async handleWebhookEvent(event: Stripe.Event): Promise<void> {
     try {
       switch (event.type) {
-        case 'account.updated':
+        case "account.updated":
           await this.handleAccountUpdated(event.data.object as Stripe.Account);
           break;
-        case 'account.application.deauthorized':
+        case "account.application.deauthorized":
           await this.handleAccountDeauthorized(event.data.object as any);
           break;
-        case 'transfer.created':
+        case "transfer.created":
           await this.handleTransferCreated(event.data.object as Stripe.Transfer);
           break;
-        case 'transfer.paid':
+        case "transfer.paid":
           await this.handleTransferPaid(event.data.object as Stripe.Transfer);
           break;
         default:
           console.log(`Unhandled event type: ${event.type}`);
       }
     } catch (error) {
-      console.error('Error handling webhook event:', error);
+      console.error("Error handling webhook event:", error);
       throw error;
     }
   }
@@ -427,7 +443,9 @@ export class StripeConnectManager {
 
   private async handleTransferCreated(transfer: Stripe.Transfer): Promise<void> {
     // Log transfer creation
-    console.log(`Transfer created: ${transfer.id} for ${transfer.amount / 100} ${transfer.currency}`);
+    console.log(
+      `Transfer created: ${transfer.id} for ${transfer.amount / 100} ${transfer.currency}`
+    );
   }
 
   private async handleTransferPaid(transfer: Stripe.Transfer): Promise<void> {

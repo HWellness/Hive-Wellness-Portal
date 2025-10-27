@@ -1,9 +1,9 @@
-import { User } from '@shared/schema';
+import { User } from "@shared/schema";
 
 // Authentication types with proper role typing
-export type UserRole = 'client' | 'therapist' | 'admin' | 'institution';
+export type UserRole = "client" | "therapist" | "admin" | "institution";
 
-export interface AuthUser extends Omit<User, 'role'> {
+export interface AuthUser extends Omit<User, "role"> {
   role: UserRole;
 }
 
@@ -48,10 +48,10 @@ export const ROLE_PERMISSIONS = {
     canAccessReporting: true,
     canManageInstitutionSettings: true,
     canViewInstitutionAnalytics: true,
-  }
+  },
 } as const;
 
-export type Permission = keyof typeof ROLE_PERMISSIONS[UserRole];
+export type Permission = keyof (typeof ROLE_PERMISSIONS)[UserRole];
 
 // Helper functions for role checking
 export const hasPermission = (user: AuthUser | null, permission: Permission): boolean => {
@@ -82,15 +82,31 @@ export const hasMinimumRole = (user: AuthUser | null, minimumRole: UserRole): bo
 
 // Route access control
 export const ROLE_ROUTES = {
-  client: ['/client-dashboard', '/book-appointment', '/profile', '/settings', '/messages'],
-  therapist: ['/therapist-dashboard', '/calendar', '/clients', '/settings', '/messages', '/video-sessions'],
-  admin: ['/admin-dashboard', '/user-management', '/analytics', '/email-templates', '/settings', '/calendar-management'],
-  institution: ['/institution-dashboard', '/reporting', '/users', '/settings'],
+  client: ["/client-dashboard", "/book-appointment", "/profile", "/settings", "/messages"],
+  therapist: [
+    "/therapist-dashboard",
+    "/calendar",
+    "/clients",
+    "/settings",
+    "/messages",
+    "/video-sessions",
+  ],
+  admin: [
+    "/admin-dashboard",
+    "/user-management",
+    "/analytics",
+    "/email-templates",
+    "/settings",
+    "/calendar-management",
+  ],
+  institution: ["/institution-dashboard", "/reporting", "/users", "/settings"],
 } as const;
 
 export const canAccessRoute = (user: AuthUser | null, route: string): boolean => {
   if (!user) return false;
-  return ROLE_ROUTES[user.role]?.some(allowedRoute => 
-    route.startsWith(allowedRoute) || route === allowedRoute
-  ) ?? false;
+  return (
+    ROLE_ROUTES[user.role]?.some(
+      (allowedRoute) => route.startsWith(allowedRoute) || route === allowedRoute
+    ) ?? false
+  );
 };

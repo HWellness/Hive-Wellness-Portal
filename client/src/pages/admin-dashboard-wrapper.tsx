@@ -8,28 +8,43 @@ import { serviceRegistry } from "@/lib/serviceRegistry";
 import ServiceRouter from "@/components/services/service-router";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { 
-  Settings, Mail, Zap, Bot, MessageCircle, Users, Shield, BarChart3, 
-  Globe, UserCheck, Bell, Calendar, Video, MessageSquare, CreditCard, 
-  TrendingUp, Activity, FileText, Cloud
+import {
+  Settings,
+  Mail,
+  Zap,
+  Bot,
+  MessageCircle,
+  Users,
+  Shield,
+  BarChart3,
+  Globe,
+  UserCheck,
+  Bell,
+  Calendar,
+  Video,
+  MessageSquare,
+  CreditCard,
+  TrendingUp,
+  Activity,
+  FileText,
+  Cloud,
 } from "lucide-react";
-
 
 export default function AdminDashboardWrapper() {
   const { user, isLoading } = useAuth();
   const { toast } = useToast();
   const [selectedService, setSelectedService] = useState<string | null>(null);
-  
+
   // Fetch admin stats
   const { data: statsData = {} } = useQuery({
-    queryKey: ['/api/admin/stats'],
+    queryKey: ["/api/admin/stats"],
     staleTime: 0,
   });
-  
+
   // Check URL parameters for service routing
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const serviceParam = urlParams.get('service');
+    const serviceParam = urlParams.get("service");
     if (serviceParam) {
       setSelectedService(serviceParam);
     }
@@ -39,12 +54,12 @@ export default function AdminDashboardWrapper() {
     try {
       const response = await apiRequest("POST", "/api/auth/logout");
       const data = await response.json();
-      
+
       toast({
         title: "Logged Out",
         description: "You have been successfully logged out.",
       });
-      
+
       // Use the redirect path from backend based on user role
       if (data.success && data.redirect) {
         window.location.href = data.redirect;
@@ -79,13 +94,15 @@ export default function AdminDashboardWrapper() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin w-10 h-10 border-4 border-gray-300 border-t-hive-purple rounded-full mx-auto mb-4"></div>
-          <div className="text-hive-purple font-century text-2xl font-bold">Loading Admin Dashboard...</div>
+          <div className="text-hive-purple font-century text-2xl font-bold">
+            Loading Admin Dashboard...
+          </div>
         </div>
       </div>
     );
   }
 
-  if (!user || (user as any)?.role !== 'admin') {
+  if (!user || (user as any)?.role !== "admin") {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -111,18 +128,21 @@ export default function AdminDashboardWrapper() {
               Administration Dashboard
             </h1>
             <p className="text-hive-black/70 font-secondary">
-              Platform management and oversight - {new Date().toLocaleDateString('en-GB', { 
-                weekday: 'long', 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
+              Platform management and oversight -{" "}
+              {new Date().toLocaleDateString("en-GB", {
+                weekday: "long",
+                year: "numeric",
+                month: "long",
+                day: "numeric",
               })}
             </p>
           </div>
           <div className="flex items-center space-x-4">
             <div className="text-right">
-              <p className="text-sm text-hive-black">Admin: {(user as any).firstName || 'Admin'}</p>
-              <p className="text-xs text-hive-black/60">{(user as any).email || 'admin@hive-wellness.co.uk'}</p>
+              <p className="text-sm text-hive-black">Admin: {(user as any).firstName || "Admin"}</p>
+              <p className="text-xs text-hive-black/60">
+                {(user as any).email || "admin@hive-wellness.co.uk"}
+              </p>
             </div>
             <Button variant="outline" onClick={handleLogout}>
               <Settings className="w-4 h-4 mr-2" />
@@ -138,25 +158,29 @@ export default function AdminDashboardWrapper() {
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-secondary text-hive-black">Total Users</p>
-                  <p className="text-2xl font-primary font-bold text-hive-purple">{(statsData as any)?.totalUsers || 0}</p>
+                  <p className="text-2xl font-primary font-bold text-hive-purple">
+                    {(statsData as any)?.totalUsers || 0}
+                  </p>
                 </div>
                 <Users className="w-8 h-8 text-hive-purple" />
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-secondary text-hive-black">Active Sessions</p>
-                  <p className="text-2xl font-primary font-bold text-hive-purple">{(statsData as any)?.totalAppointments || 0}</p>
+                  <p className="text-2xl font-primary font-bold text-hive-purple">
+                    {(statsData as any)?.totalAppointments || 0}
+                  </p>
                 </div>
                 <Video className="w-8 h-8 text-hive-purple" />
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
@@ -168,13 +192,15 @@ export default function AdminDashboardWrapper() {
               </div>
             </CardContent>
           </Card>
-          
+
           <Card>
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm font-secondary text-hive-black">Revenue</p>
-                  <p className="text-2xl font-primary font-bold text-hive-purple">£{(((statsData as any)?.totalAppointments || 0) * 80).toLocaleString()}</p>
+                  <p className="text-2xl font-primary font-bold text-hive-purple">
+                    £{(((statsData as any)?.totalAppointments || 0) * 80).toLocaleString()}
+                  </p>
                 </div>
                 <TrendingUp className="w-8 h-8 text-hive-purple" />
               </div>
@@ -189,32 +215,51 @@ export default function AdminDashboardWrapper() {
               <Settings className="w-5 h-5 mr-2 text-hive-purple" />
               Administration Tools
             </CardTitle>
-            <CardDescription>
-              Complete platform management and oversight services
-            </CardDescription>
+            <CardDescription>Complete platform management and oversight services</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 auto-rows-fr">
               {adminServices.map((service) => {
-                const IconComponent = service.icon === 'Settings' ? Settings :
-                  service.icon === 'Mail' ? Mail :
-                  service.icon === 'Zap' ? Zap :
-                  service.icon === 'Bot' ? Bot :
-                  service.icon === 'MessageCircle' ? MessageCircle :
-                  service.icon === 'Users' ? Users :
-                  service.icon === 'Shield' ? Shield :
-                  service.icon === 'BarChart3' ? BarChart3 :
-                  service.icon === 'Globe' ? Globe :
-                  service.icon === 'UserCheck' ? UserCheck :
-                  service.icon === 'Bell' ? Bell :
-                  service.icon === 'Calendar' ? Calendar :
-                  service.icon === 'Video' ? Video :
-                  service.icon === 'MessageSquare' ? MessageSquare :
-                  service.icon === 'CreditCard' ? CreditCard :
-                  service.icon === 'TrendingUp' ? TrendingUp :
-                  service.icon === 'Activity' ? Activity :
-                  service.icon === 'FileText' ? FileText :
-                  service.icon === 'Cloud' ? Cloud : Settings;
+                const IconComponent =
+                  service.icon === "Settings"
+                    ? Settings
+                    : service.icon === "Mail"
+                      ? Mail
+                      : service.icon === "Zap"
+                        ? Zap
+                        : service.icon === "Bot"
+                          ? Bot
+                          : service.icon === "MessageCircle"
+                            ? MessageCircle
+                            : service.icon === "Users"
+                              ? Users
+                              : service.icon === "Shield"
+                                ? Shield
+                                : service.icon === "BarChart3"
+                                  ? BarChart3
+                                  : service.icon === "Globe"
+                                    ? Globe
+                                    : service.icon === "UserCheck"
+                                      ? UserCheck
+                                      : service.icon === "Bell"
+                                        ? Bell
+                                        : service.icon === "Calendar"
+                                          ? Calendar
+                                          : service.icon === "Video"
+                                            ? Video
+                                            : service.icon === "MessageSquare"
+                                              ? MessageSquare
+                                              : service.icon === "CreditCard"
+                                                ? CreditCard
+                                                : service.icon === "TrendingUp"
+                                                  ? TrendingUp
+                                                  : service.icon === "Activity"
+                                                    ? Activity
+                                                    : service.icon === "FileText"
+                                                      ? FileText
+                                                      : service.icon === "Cloud"
+                                                        ? Cloud
+                                                        : Settings;
 
                 return (
                   <Button
@@ -224,8 +269,12 @@ export default function AdminDashboardWrapper() {
                     onClick={() => handleServiceNavigation(service.id)}
                   >
                     <IconComponent className="w-6 h-6 text-hive-purple mb-2 flex-shrink-0" />
-                    <span className="admin-service-title font-medium text-sm text-hive-black text-center leading-tight mb-1 break-words">{service.name}</span>
-                    <span className="admin-service-description text-xs text-hive-black/60 text-center leading-tight break-words hyphens-auto overflow-hidden line-clamp-3 max-w-full">{service.description}</span>
+                    <span className="admin-service-title font-medium text-sm text-hive-black text-center leading-tight mb-1 break-words">
+                      {service.name}
+                    </span>
+                    <span className="admin-service-description text-xs text-hive-black/60 text-center leading-tight break-words hyphens-auto overflow-hidden line-clamp-3 max-w-full">
+                      {service.description}
+                    </span>
                   </Button>
                 );
               })}
@@ -246,14 +295,18 @@ export default function AdminDashboardWrapper() {
               <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
                 <div className="flex items-center">
                   <div className="w-2 h-2 bg-green-500 rounded-full mr-3"></div>
-                  <span className="text-sm text-hive-black">New therapist application received</span>
+                  <span className="text-sm text-hive-black">
+                    New therapist application received
+                  </span>
                 </div>
                 <span className="text-xs text-hive-black/60">2 minutes ago</span>
               </div>
               <div className="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
                 <div className="flex items-center">
                   <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
-                  <span className="text-sm text-hive-black">Client-therapist assignment completed</span>
+                  <span className="text-sm text-hive-black">
+                    Client-therapist assignment completed
+                  </span>
                 </div>
                 <span className="text-xs text-hive-black/60">15 minutes ago</span>
               </div>

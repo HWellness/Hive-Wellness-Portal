@@ -6,15 +6,54 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Progress } from "@/components/ui/progress";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { toast } from "@/hooks/use-toast";
 // Performance optimisation: Import only the icons we actually use
-import { Building, Users, TrendingUp, BarChart3, PoundSterling, UserCheck, AlertTriangle, Calendar, Download, Settings, Shield, CheckCircle, ChevronRight, Upload, UserPlus, Activity, PieChart, Target, Eye, LineChart, Zap, FileText, Plus, Mail, Edit, Clock } from "lucide-react";
+import {
+  Building,
+  Users,
+  TrendingUp,
+  BarChart3,
+  PoundSterling,
+  UserCheck,
+  AlertTriangle,
+  Calendar,
+  Download,
+  Settings,
+  Shield,
+  CheckCircle,
+  ChevronRight,
+  Upload,
+  UserPlus,
+  Activity,
+  PieChart,
+  Target,
+  Eye,
+  LineChart,
+  Zap,
+  FileText,
+  Plus,
+  Mail,
+  Edit,
+  Clock,
+} from "lucide-react";
 
 import type { User } from "@shared/schema";
 
@@ -26,7 +65,7 @@ interface InstitutionalDashboardProps {
 interface InstitutionData {
   id: string;
   name: string;
-  type: 'university' | 'healthcare' | 'corporate' | 'government';
+  type: "university" | "healthcare" | "corporate" | "government";
   contactPerson: string;
   email: string;
   phone: string;
@@ -38,7 +77,7 @@ interface InstitutionData {
   monthlyBudget: number;
   contractStart: string;
   contractEnd: string;
-  status: 'active' | 'pending' | 'suspended';
+  status: "active" | "pending" | "suspended";
   departments: Array<{
     id: string;
     name: string;
@@ -91,7 +130,7 @@ interface SessionAnalytics {
   mostCommonConcerns: Array<{
     concern: string;
     percentage: number;
-    trend: 'up' | 'down' | 'stable';
+    trend: "up" | "down" | "stable";
   }>;
   peakUsageHours: string[];
   sessionTrends: Array<{
@@ -131,7 +170,7 @@ interface BillingAnalytics {
     date: string;
     amount: number;
     description: string;
-    status: 'paid' | 'pending' | 'overdue';
+    status: "paid" | "pending" | "overdue";
     invoiceId: string;
   }>;
   savingsOpportunities: Array<{
@@ -149,7 +188,7 @@ interface CommunicationData {
     recipients: number;
     openRate: number;
     clickRate: number;
-    status: 'sent' | 'scheduled' | 'draft';
+    status: "sent" | "scheduled" | "draft";
   }>;
   announcements: Array<{
     id: string;
@@ -157,7 +196,7 @@ interface CommunicationData {
     content: string;
     targetAudience: string[];
     publishDate: string;
-    priority: 'low' | 'medium' | 'high';
+    priority: "low" | "medium" | "high";
   }>;
   messagingStats: {
     totalMessages: number;
@@ -173,7 +212,7 @@ interface BookingManagement {
     dateTime: string;
     participantCount: number;
     department: string;
-    status: 'confirmed' | 'pending' | 'cancelled';
+    status: "confirmed" | "pending" | "cancelled";
   }>;
   resourceUtilization: {
     therapistCapacity: number;
@@ -187,11 +226,14 @@ interface BookingManagement {
   }>;
 }
 
-export default function InstitutionalDashboard({ user, initialTab = 'overview' }: InstitutionalDashboardProps) {
+export default function InstitutionalDashboard({
+  user,
+  initialTab = "overview",
+}: InstitutionalDashboardProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedTab, setSelectedTab] = useState(initialTab);
-  const [selectedDepartment, setSelectedDepartment] = useState<string>('all');
+  const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
   const [showAddUser, setShowAddUser] = useState(false);
   const [showBulkInvite, setShowBulkInvite] = useState(false);
   const [showNewAnnouncement, setShowNewAnnouncement] = useState(false);
@@ -229,34 +271,40 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
 
   // Demo data with production-level structure
   const demoInstitution: InstitutionData = {
-    id: 'inst-manchester-001',
-    name: 'University of Manchester',
-    type: 'university',
-    contactPerson: 'Dr. Sarah Wilson',
-    email: 'sarah.wilson@manchester.ac.uk',
-    phone: '+44 161 306 6000',
-    address: 'Oxford Road, Manchester M13 9PL, UK',
-    website: 'www.manchester.ac.uk',
+    id: "inst-manchester-001",
+    name: "University of Manchester",
+    type: "university",
+    contactPerson: "Dr. Sarah Wilson",
+    email: "sarah.wilson@manchester.ac.uk",
+    phone: "+44 161 306 6000",
+    address: "Oxford Road, Manchester M13 9PL, UK",
+    website: "www.manchester.ac.uk",
     employeeCount: 0,
     activeUsers: 0,
     totalSessions: 0,
     monthlyBudget: 0,
-    contractStart: '2024-09-01',
-    contractEnd: '2025-08-31',
-    status: 'active',
+    contractStart: "2024-09-01",
+    contractEnd: "2025-08-31",
+    status: "active",
     departments: [
-      { id: 'student-services', name: 'Student Services', userCount: 0, budget: 0, utilisationRate: 0 },
-      { id: 'faculty', name: 'Faculty & Staff', userCount: 0, budget: 0, utilisationRate: 0 },
-      { id: 'research', name: 'Research Staff', userCount: 0, budget: 0, utilisationRate: 0 },
-      { id: 'admin', name: 'Administrative', userCount: 0, budget: 0, utilisationRate: 0 },
-      { id: 'medical', name: 'Medical School', userCount: 0, budget: 0, utilisationRate: 0 }
+      {
+        id: "student-services",
+        name: "Student Services",
+        userCount: 0,
+        budget: 0,
+        utilisationRate: 0,
+      },
+      { id: "faculty", name: "Faculty & Staff", userCount: 0, budget: 0, utilisationRate: 0 },
+      { id: "research", name: "Research Staff", userCount: 0, budget: 0, utilisationRate: 0 },
+      { id: "admin", name: "Administrative", userCount: 0, budget: 0, utilisationRate: 0 },
+      { id: "medical", name: "Medical School", userCount: 0, budget: 0, utilisationRate: 0 },
     ],
     complianceStatus: {
       hipaa: true,
       gdpr: true,
       ferpa: true,
-      lastAudit: '2024-11-15'
-    }
+      lastAudit: "2024-11-15",
+    },
   };
 
   const demoUserAnalytics: UserAnalytics = {
@@ -264,32 +312,32 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
     activeUsers: 0,
     newUsersThisMonth: 0,
     usersByDepartment: {
-      'Student Services': 0,
-      'Faculty & Staff': 0,
-      'Research Staff': 0,
-      'Administrative': 0,
-      'Medical School': 0
+      "Student Services": 0,
+      "Faculty & Staff": 0,
+      "Research Staff": 0,
+      Administrative: 0,
+      "Medical School": 0,
     },
     usersByRole: {
-      'Students': 0,
-      'Faculty': 0,
-      'Staff': 0
+      Students: 0,
+      Faculty: 0,
+      Staff: 0,
     },
     utilisationRate: 0,
     engagementMetrics: {
       dailyActiveUsers: 0,
       weeklyActiveUsers: 0,
       monthlyActiveUsers: 0,
-      averageSessionsPerUser: 0
+      averageSessionsPerUser: 0,
     },
     userGrowthTrend: [
-      { month: 'Aug 2024', newUsers: 0, activeUsers: 0, churnRate: 0 },
-      { month: 'Sep 2024', newUsers: 0, activeUsers: 0, churnRate: 0 },
-      { month: 'Oct 2024', newUsers: 0, activeUsers: 0, churnRate: 0 },
-      { month: 'Nov 2024', newUsers: 0, activeUsers: 0, churnRate: 0 },
-      { month: 'Dec 2024', newUsers: 0, activeUsers: 0, churnRate: 0 },
-      { month: 'Jan 2025', newUsers: 0, activeUsers: 0, churnRate: 0 }
-    ]
+      { month: "Aug 2024", newUsers: 0, activeUsers: 0, churnRate: 0 },
+      { month: "Sep 2024", newUsers: 0, activeUsers: 0, churnRate: 0 },
+      { month: "Oct 2024", newUsers: 0, activeUsers: 0, churnRate: 0 },
+      { month: "Nov 2024", newUsers: 0, activeUsers: 0, churnRate: 0 },
+      { month: "Dec 2024", newUsers: 0, activeUsers: 0, churnRate: 0 },
+      { month: "Jan 2025", newUsers: 0, activeUsers: 0, churnRate: 0 },
+    ],
   };
 
   const demoSessionAnalytics: SessionAnalytics = {
@@ -303,19 +351,19 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
       improvedWellbeing: 0,
       completedTherapyPlans: 0,
       reducedSymptoms: 0,
-      referralsMade: 0
+      referralsMade: 0,
     },
     mostCommonConcerns: [],
     peakUsageHours: [],
     sessionTrends: [
-      { month: 'Aug 2024', sessions: 0, completionRate: 0, satisfaction: 0 },
-      { month: 'Sep 2024', sessions: 0, completionRate: 0, satisfaction: 0 },
-      { month: 'Oct 2024', sessions: 0, completionRate: 0, satisfaction: 0 },
-      { month: 'Nov 2024', sessions: 0, completionRate: 0, satisfaction: 0 },
-      { month: 'Dec 2024', sessions: 0, completionRate: 0, satisfaction: 0 },
-      { month: 'Jan 2025', sessions: 0, completionRate: 0, satisfaction: 0 }
+      { month: "Aug 2024", sessions: 0, completionRate: 0, satisfaction: 0 },
+      { month: "Sep 2024", sessions: 0, completionRate: 0, satisfaction: 0 },
+      { month: "Oct 2024", sessions: 0, completionRate: 0, satisfaction: 0 },
+      { month: "Nov 2024", sessions: 0, completionRate: 0, satisfaction: 0 },
+      { month: "Dec 2024", sessions: 0, completionRate: 0, satisfaction: 0 },
+      { month: "Jan 2025", sessions: 0, completionRate: 0, satisfaction: 0 },
     ],
-    therapistPerformance: []
+    therapistPerformance: [],
   };
 
   const demoBillingAnalytics: BillingAnalytics = {
@@ -323,27 +371,27 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
       subscriptionCost: 0,
       sessionCharges: 0,
       additionalServices: 0,
-      totalCost: 0
+      totalCost: 0,
     },
     budgetTracking: {
       allocated: 0,
       spent: 0,
       remaining: 0,
-      projectedSpend: 0
+      projectedSpend: 0,
     },
     costBreakdown: {
       perUser: 0,
       perSession: 0,
       perDepartment: {
-        'Student Services': 0,
-        'Faculty & Staff': 0,
-        'Research Staff': 0,
-        'Administrative': 0,
-        'Medical School': 0
-      }
+        "Student Services": 0,
+        "Faculty & Staff": 0,
+        "Research Staff": 0,
+        Administrative: 0,
+        "Medical School": 0,
+      },
     },
     paymentHistory: [],
-    savingsOpportunities: []
+    savingsOpportunities: [],
   };
 
   const demoCommunication: CommunicationData = {
@@ -352,8 +400,8 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
     messagingStats: {
       totalMessages: 0,
       responseRate: 0,
-      averageResponseTime: '0 hours'
-    }
+      averageResponseTime: "0 hours",
+    },
   };
 
   const demoBooking: BookingManagement = {
@@ -361,9 +409,9 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
     resourceUtilization: {
       therapistCapacity: 0,
       roomUtilization: 0,
-      equipmentUsage: 0
+      equipmentUsage: 0,
     },
-    waitingLists: []
+    waitingLists: [],
   };
 
   // Use demo data if API data not available
@@ -377,7 +425,7 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
   // Mutations for institutional management
   const addUserMutation = useMutation({
     mutationFn: async (userData: any) => {
-      return await apiRequest('POST', '/api/institution/add-user', userData);
+      return await apiRequest("POST", "/api/institution/add-user", userData);
     },
     onSuccess: () => {
       toast({
@@ -398,7 +446,7 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
 
   const bulkInviteMutation = useMutation({
     mutationFn: async (inviteData: any) => {
-      return await apiRequest('POST', '/api/institution/bulk-invite', inviteData);
+      return await apiRequest("POST", "/api/institution/bulk-invite", inviteData);
     },
     onSuccess: (data: any) => {
       toast({
@@ -419,7 +467,7 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
 
   const createAnnouncementMutation = useMutation({
     mutationFn: async (announcementData: any) => {
-      return await apiRequest('POST', '/api/institution/announcements', announcementData);
+      return await apiRequest("POST", "/api/institution/announcements", announcementData);
     },
     onSuccess: () => {
       toast({
@@ -439,37 +487,50 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
   });
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: 'GBP'
+    return new Intl.NumberFormat("en-GB", {
+      style: "currency",
+      currency: "GBP",
     }).format(amount);
   };
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'university': return 'bg-blue-100 text-blue-800';
-      case 'healthcare': return 'bg-green-100 text-green-800';
-      case 'corporate': return 'bg-purple-100 text-purple-800';
-      case 'government': return 'bg-orange-100 text-orange-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "university":
+        return "bg-blue-100 text-blue-800";
+      case "healthcare":
+        return "bg-green-100 text-green-800";
+      case "corporate":
+        return "bg-purple-100 text-purple-800";
+      case "government":
+        return "bg-orange-100 text-orange-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'bg-green-100 text-green-800';
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'suspended': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "active":
+        return "bg-green-100 text-green-800";
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "suspended":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getTrendIcon = (trend: string) => {
     switch (trend) {
-      case 'up': return <TrendingUp className="h-3 w-3 text-red-500" />;
-      case 'down': return <TrendingUp className="h-3 w-3 text-green-500 rotate-180" />;
-      case 'stable': return <div className="h-3 w-3 rounded-full bg-gray-400" />;
-      default: return null;
+      case "up":
+        return <TrendingUp className="h-3 w-3 text-red-500" />;
+      case "down":
+        return <TrendingUp className="h-3 w-3 text-green-500 rotate-180" />;
+      case "stable":
+        return <div className="h-3 w-3 rounded-full bg-gray-400" />;
+      default:
+        return null;
     }
   };
 
@@ -499,7 +560,8 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
               {displayInstitution.status}
             </Badge>
             <span className="text-gray-600 font-secondary">
-              Contract: {new Date(displayInstitution.contractStart).toLocaleDateString('en-GB')} - {new Date(displayInstitution.contractEnd).toLocaleDateString('en-GB')}
+              Contract: {new Date(displayInstitution.contractStart).toLocaleDateString("en-GB")} -{" "}
+              {new Date(displayInstitution.contractEnd).toLocaleDateString("en-GB")}
             </span>
           </div>
         </div>
@@ -522,7 +584,9 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-hive-purple">Active Users</p>
-                <p className="text-2xl font-bold text-hive-black">{displayUserAnalytics.activeUsers.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-hive-black">
+                  {displayUserAnalytics.activeUsers.toLocaleString()}
+                </p>
                 <p className="text-xs text-hive-blue">
                   {displayUserAnalytics.utilisationRate}% utilisation
                 </p>
@@ -537,9 +601,16 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-hive-purple">Total Sessions</p>
-                <p className="text-2xl font-bold text-hive-black">{displaySessionAnalytics.totalSessions.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-hive-black">
+                  {displaySessionAnalytics.totalSessions.toLocaleString()}
+                </p>
                 <p className="text-xs text-hive-blue">
-                  {Math.round((displaySessionAnalytics.completedSessions / displaySessionAnalytics.totalSessions) * 100)}% completion rate
+                  {Math.round(
+                    (displaySessionAnalytics.completedSessions /
+                      displaySessionAnalytics.totalSessions) *
+                      100
+                  )}
+                  % completion rate
                 </p>
               </div>
               <Calendar className="w-8 h-8 text-hive-purple" />
@@ -552,10 +623,10 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-hive-purple">Satisfaction</p>
-                <p className="text-2xl font-bold text-hive-black">{displaySessionAnalytics.satisfactionScore}/5</p>
-                <p className="text-xs text-hive-blue">
-                  Client feedback rating
+                <p className="text-2xl font-bold text-hive-black">
+                  {displaySessionAnalytics.satisfactionScore}/5
                 </p>
+                <p className="text-xs text-hive-blue">Client feedback rating</p>
               </div>
               <TrendingUp className="w-8 h-8 text-hive-purple" />
             </div>
@@ -567,7 +638,9 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-hive-purple">Monthly Cost</p>
-                <p className="text-2xl font-bold text-hive-black">{formatCurrency(displayBillingAnalytics.currentMonth.totalCost)}</p>
+                <p className="text-2xl font-bold text-hive-black">
+                  {formatCurrency(displayBillingAnalytics.currentMonth.totalCost)}
+                </p>
                 <p className="text-xs text-hive-blue">
                   {formatCurrency(displayBillingAnalytics.budgetTracking.remaining)} remaining
                 </p>
@@ -581,37 +654,37 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
       {/* Main Content Tabs */}
       <Tabs value={selectedTab} onValueChange={setSelectedTab}>
         <TabsList className="grid w-full grid-cols-6">
-          <TabsTrigger 
+          <TabsTrigger
             value="overview"
             className="data-[state=active]:bg-hive-purple data-[state=active]:text-white"
           >
             Overview
           </TabsTrigger>
-          <TabsTrigger 
+          <TabsTrigger
             value="users"
             className="data-[state=active]:bg-hive-purple data-[state=active]:text-white"
           >
             User Management
           </TabsTrigger>
-          <TabsTrigger 
+          <TabsTrigger
             value="analytics"
             className="data-[state=active]:bg-hive-purple data-[state=active]:text-white"
           >
             Analytics
           </TabsTrigger>
-          <TabsTrigger 
+          <TabsTrigger
             value="billing"
             className="data-[state=active]:bg-hive-purple data-[state=active]:text-white"
           >
             Billing
           </TabsTrigger>
-          <TabsTrigger 
+          <TabsTrigger
             value="communications"
             className="data-[state=active]:bg-hive-purple data-[state=active]:text-white"
           >
             Communications
           </TabsTrigger>
-          <TabsTrigger 
+          <TabsTrigger
             value="bookings"
             className="data-[state=active]:bg-hive-purple data-[state=active]:text-white"
           >
@@ -665,20 +738,30 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex items-center space-x-2">
-                    <CheckCircle className={`h-4 w-4 ${displayInstitution.complianceStatus.hipaa ? 'text-green-500' : 'text-red-500'}`} />
+                    <CheckCircle
+                      className={`h-4 w-4 ${displayInstitution.complianceStatus.hipaa ? "text-green-500" : "text-red-500"}`}
+                    />
                     <span className="text-sm">HIPAA Compliant</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <CheckCircle className={`h-4 w-4 ${displayInstitution.complianceStatus.gdpr ? 'text-green-500' : 'text-red-500'}`} />
+                    <CheckCircle
+                      className={`h-4 w-4 ${displayInstitution.complianceStatus.gdpr ? "text-green-500" : "text-red-500"}`}
+                    />
                     <span className="text-sm">GDPR Compliant</span>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <CheckCircle className={`h-4 w-4 ${displayInstitution.complianceStatus.ferpa ? 'text-green-500' : 'text-red-500'}`} />
+                    <CheckCircle
+                      className={`h-4 w-4 ${displayInstitution.complianceStatus.ferpa ? "text-green-500" : "text-red-500"}`}
+                    />
                     <span className="text-sm">FERPA Compliant</span>
                   </div>
                   <div>
                     <Label className="text-sm font-medium text-gray-600">Last Audit</Label>
-                    <p className="text-sm">{new Date(displayInstitution.complianceStatus.lastAudit).toLocaleDateString('en-GB')}</p>
+                    <p className="text-sm">
+                      {new Date(displayInstitution.complianceStatus.lastAudit).toLocaleDateString(
+                        "en-GB"
+                      )}
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -696,10 +779,15 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
             <CardContent>
               <div className="space-y-4">
                 {displayInstitution.departments.map((dept) => (
-                  <div key={dept.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                  <div
+                    key={dept.id}
+                    className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                  >
                     <div className="flex-1">
                       <h4 className="font-medium">{dept.name}</h4>
-                      <p className="text-sm text-gray-600">{dept.userCount} users • {formatCurrency(dept.budget)} budget</p>
+                      <p className="text-sm text-gray-600">
+                        {dept.userCount} users • {formatCurrency(dept.budget)} budget
+                      </p>
                     </div>
                     <div className="flex items-center space-x-4">
                       <div className="text-right">
@@ -740,14 +828,16 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
                         </SelectTrigger>
                         <SelectContent>
                           {displayInstitution.departments.map((dept) => (
-                            <SelectItem key={dept.id} value={dept.id}>{dept.name}</SelectItem>
+                            <SelectItem key={dept.id} value={dept.id}>
+                              {dept.name}
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
                     </div>
                     <div>
                       <Label htmlFor="emails">Email Addresses (one per line)</Label>
-                      <Textarea 
+                      <Textarea
                         id="emails"
                         placeholder="user1@university.edu&#10;user2@university.edu&#10;user3@university.edu"
                         rows={6}
@@ -799,7 +889,9 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
                         </SelectTrigger>
                         <SelectContent>
                           {displayInstitution.departments.map((dept) => (
-                            <SelectItem key={dept.id} value={dept.id}>{dept.name}</SelectItem>
+                            <SelectItem key={dept.id} value={dept.id}>
+                              {dept.name}
+                            </SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
@@ -821,9 +913,7 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
                       <Button variant="outline" onClick={() => setShowAddUser(false)}>
                         Cancel
                       </Button>
-                      <Button onClick={() => addUserMutation.mutate({})}>
-                        Add User
-                      </Button>
+                      <Button onClick={() => addUserMutation.mutate({})}>Add User</Button>
                     </div>
                   </div>
                 </DialogContent>
@@ -863,19 +953,27 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Daily Active</span>
-                    <span className="font-medium">{displayUserAnalytics.engagementMetrics.dailyActiveUsers.toLocaleString()}</span>
+                    <span className="font-medium">
+                      {displayUserAnalytics.engagementMetrics.dailyActiveUsers.toLocaleString()}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Weekly Active</span>
-                    <span className="font-medium">{displayUserAnalytics.engagementMetrics.weeklyActiveUsers.toLocaleString()}</span>
+                    <span className="font-medium">
+                      {displayUserAnalytics.engagementMetrics.weeklyActiveUsers.toLocaleString()}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Monthly Active</span>
-                    <span className="font-medium">{displayUserAnalytics.engagementMetrics.monthlyActiveUsers.toLocaleString()}</span>
+                    <span className="font-medium">
+                      {displayUserAnalytics.engagementMetrics.monthlyActiveUsers.toLocaleString()}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Avg Sessions/User</span>
-                    <span className="font-medium">{displayUserAnalytics.engagementMetrics.averageSessionsPerUser}</span>
+                    <span className="font-medium">
+                      {displayUserAnalytics.engagementMetrics.averageSessionsPerUser}
+                    </span>
                   </div>
                 </div>
               </CardContent>
@@ -892,17 +990,26 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-sm">New Users (This Month)</span>
-                    <span className="font-medium text-green-600">+{displayUserAnalytics.newUsersThisMonth}</span>
+                    <span className="font-medium text-green-600">
+                      +{displayUserAnalytics.newUsersThisMonth}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Churn Rate</span>
                     <span className="font-medium text-orange-600">
-                      {displayUserAnalytics.userGrowthTrend[displayUserAnalytics.userGrowthTrend.length - 1]?.churnRate}%
+                      {
+                        displayUserAnalytics.userGrowthTrend[
+                          displayUserAnalytics.userGrowthTrend.length - 1
+                        ]?.churnRate
+                      }
+                      %
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Utilisation Rate</span>
-                    <span className="font-medium text-blue-600">{displayUserAnalytics.utilisationRate}%</span>
+                    <span className="font-medium text-blue-600">
+                      {displayUserAnalytics.utilisationRate}%
+                    </span>
                   </div>
                 </div>
               </CardContent>
@@ -922,7 +1029,9 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
                     <div key={dept} className="space-y-2">
                       <div className="flex items-center justify-between">
                         <span className="text-sm font-medium">{dept}</span>
-                        <span className="text-sm text-gray-600">{count.toLocaleString()} users ({percentage.toFixed(1)}%)</span>
+                        <span className="text-sm text-gray-600">
+                          {count.toLocaleString()} users ({percentage.toFixed(1)}%)
+                        </span>
                       </div>
                       <Progress value={percentage} className="h-2" />
                     </div>
@@ -946,19 +1055,27 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
               <CardContent className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div className="text-center p-3 bg-green-50 rounded-lg">
-                    <p className="text-2xl font-bold text-green-600">{displaySessionAnalytics.outcomeMetrics.improvedWellbeing}%</p>
+                    <p className="text-2xl font-bold text-green-600">
+                      {displaySessionAnalytics.outcomeMetrics.improvedWellbeing}%
+                    </p>
                     <p className="text-sm text-green-700">Improved Wellbeing</p>
                   </div>
                   <div className="text-center p-3 bg-purple-50 rounded-lg">
-                    <p className="text-2xl font-bold text-hive-purple">{displaySessionAnalytics.outcomeMetrics.completedTherapyPlans}%</p>
+                    <p className="text-2xl font-bold text-hive-purple">
+                      {displaySessionAnalytics.outcomeMetrics.completedTherapyPlans}%
+                    </p>
                     <p className="text-sm text-hive-black">Completed Plans</p>
                   </div>
                   <div className="text-center p-3 bg-purple-50 rounded-lg">
-                    <p className="text-2xl font-bold text-purple-600">{displaySessionAnalytics.outcomeMetrics.reducedSymptoms}%</p>
+                    <p className="text-2xl font-bold text-purple-600">
+                      {displaySessionAnalytics.outcomeMetrics.reducedSymptoms}%
+                    </p>
                     <p className="text-sm text-purple-700">Reduced Symptoms</p>
                   </div>
                   <div className="text-center p-3 bg-orange-50 rounded-lg">
-                    <p className="text-2xl font-bold text-orange-600">{displaySessionAnalytics.outcomeMetrics.referralsMade}</p>
+                    <p className="text-2xl font-bold text-orange-600">
+                      {displaySessionAnalytics.outcomeMetrics.referralsMade}
+                    </p>
                     <p className="text-sm text-orange-700">Referrals Made</p>
                   </div>
                 </div>
@@ -975,7 +1092,10 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
               <CardContent>
                 <div className="space-y-3">
                   {displaySessionAnalytics.mostCommonConcerns.map((concern) => (
-                    <div key={concern.concern} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                    <div
+                      key={concern.concern}
+                      className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+                    >
                       <div className="flex items-center space-x-3">
                         <span className="text-sm font-medium">{concern.concern}</span>
                         {getTrendIcon(concern.trend)}
@@ -999,10 +1119,15 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
             <CardContent>
               <div className="space-y-4">
                 {displaySessionAnalytics.therapistPerformance.map((therapist) => (
-                  <div key={therapist.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
+                  <div
+                    key={therapist.id}
+                    className="flex items-center justify-between p-4 bg-gray-50 rounded-lg"
+                  >
                     <div className="flex-1">
                       <h4 className="font-medium">{therapist.name}</h4>
-                      <p className="text-sm text-gray-600">{therapist.specialisations.join(', ')}</p>
+                      <p className="text-sm text-gray-600">
+                        {therapist.specialisations.join(", ")}
+                      </p>
                     </div>
                     <div className="flex items-center space-x-6 text-center">
                       <div>
@@ -1035,7 +1160,10 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
             <CardContent>
               <div className="space-y-4">
                 {displaySessionAnalytics.sessionTrends.map((trend, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-3 border rounded-lg"
+                  >
                     <span className="font-medium">{trend.month}</span>
                     <div className="flex items-center space-x-6 text-sm">
                       <span>{trend.sessions.toLocaleString()} sessions</span>
@@ -1063,15 +1191,21 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Subscription Cost</span>
-                    <span className="font-medium">{formatCurrency(displayBillingAnalytics.currentMonth.subscriptionCost)}</span>
+                    <span className="font-medium">
+                      {formatCurrency(displayBillingAnalytics.currentMonth.subscriptionCost)}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Session Charges</span>
-                    <span className="font-medium">{formatCurrency(displayBillingAnalytics.currentMonth.sessionCharges)}</span>
+                    <span className="font-medium">
+                      {formatCurrency(displayBillingAnalytics.currentMonth.sessionCharges)}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Additional Services</span>
-                    <span className="font-medium">{formatCurrency(displayBillingAnalytics.currentMonth.additionalServices)}</span>
+                    <span className="font-medium">
+                      {formatCurrency(displayBillingAnalytics.currentMonth.additionalServices)}
+                    </span>
                   </div>
                   <hr />
                   <div className="flex items-center justify-between font-bold">
@@ -1093,15 +1227,21 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Allocated Budget</span>
-                    <span className="font-medium">{formatCurrency(displayBillingAnalytics.budgetTracking.allocated)}</span>
+                    <span className="font-medium">
+                      {formatCurrency(displayBillingAnalytics.budgetTracking.allocated)}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Amount Spent</span>
-                    <span className="font-medium">{formatCurrency(displayBillingAnalytics.budgetTracking.spent)}</span>
+                    <span className="font-medium">
+                      {formatCurrency(displayBillingAnalytics.budgetTracking.spent)}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-sm">Remaining</span>
-                    <span className={`font-medium ${displayBillingAnalytics.budgetTracking.remaining < 0 ? 'text-red-600' : 'text-green-600'}`}>
+                    <span
+                      className={`font-medium ${displayBillingAnalytics.budgetTracking.remaining < 0 ? "text-red-600" : "text-green-600"}`}
+                    >
                       {formatCurrency(displayBillingAnalytics.budgetTracking.remaining)}
                     </span>
                   </div>
@@ -1109,12 +1249,21 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
                     <div className="flex items-center justify-between">
                       <span className="text-sm">Budget Usage</span>
                       <span className="text-sm">
-                        {Math.round((displayBillingAnalytics.budgetTracking.spent / displayBillingAnalytics.budgetTracking.allocated) * 100)}%
+                        {Math.round(
+                          (displayBillingAnalytics.budgetTracking.spent /
+                            displayBillingAnalytics.budgetTracking.allocated) *
+                            100
+                        )}
+                        %
                       </span>
                     </div>
-                    <Progress 
-                      value={(displayBillingAnalytics.budgetTracking.spent / displayBillingAnalytics.budgetTracking.allocated) * 100} 
-                      className="h-2" 
+                    <Progress
+                      value={
+                        (displayBillingAnalytics.budgetTracking.spent /
+                          displayBillingAnalytics.budgetTracking.allocated) *
+                        100
+                      }
+                      className="h-2"
                     />
                   </div>
                 </div>
@@ -1132,18 +1281,23 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {Object.entries(displayBillingAnalytics.costBreakdown.perDepartment).map(([dept, cost]) => {
-                  const percentage = (cost / displayBillingAnalytics.currentMonth.totalCost) * 100;
-                  return (
-                    <div key={dept} className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm font-medium">{dept}</span>
-                        <span className="text-sm text-gray-600">{formatCurrency(cost)} ({percentage.toFixed(1)}%)</span>
+                {Object.entries(displayBillingAnalytics.costBreakdown.perDepartment).map(
+                  ([dept, cost]) => {
+                    const percentage =
+                      (cost / displayBillingAnalytics.currentMonth.totalCost) * 100;
+                    return (
+                      <div key={dept} className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium">{dept}</span>
+                          <span className="text-sm text-gray-600">
+                            {formatCurrency(cost)} ({percentage.toFixed(1)}%)
+                          </span>
+                        </div>
+                        <Progress value={percentage} className="h-2" />
                       </div>
-                      <Progress value={percentage} className="h-2" />
-                    </div>
-                  );
-                })}
+                    );
+                  }
+                )}
               </div>
             </CardContent>
           </Card>
@@ -1162,7 +1316,9 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
                   <div key={index} className="p-4 bg-green-50 border border-green-200 rounded-lg">
                     <div className="flex items-center justify-between mb-2">
                       <h4 className="font-medium text-green-900">{opportunity.area}</h4>
-                      <span className="text-lg font-bold text-green-600">{formatCurrency(opportunity.potentialSaving)}</span>
+                      <span className="text-lg font-bold text-green-600">
+                        {formatCurrency(opportunity.potentialSaving)}
+                      </span>
                     </div>
                     <p className="text-sm text-green-800">{opportunity.recommendation}</p>
                   </div>
@@ -1182,16 +1338,25 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
             <CardContent>
               <div className="space-y-3">
                 {displayBillingAnalytics.paymentHistory.map((payment) => (
-                  <div key={payment.invoiceId} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div
+                    key={payment.invoiceId}
+                    className="flex items-center justify-between p-3 border rounded-lg"
+                  >
                     <div>
                       <p className="font-medium">{payment.description}</p>
                       <p className="text-sm text-gray-600">
-                        {new Date(payment.date).toLocaleDateString('en-GB')} • {payment.invoiceId}
+                        {new Date(payment.date).toLocaleDateString("en-GB")} • {payment.invoiceId}
                       </p>
                     </div>
                     <div className="text-right">
                       <p className="font-medium">{formatCurrency(payment.amount)}</p>
-                      <Badge className={payment.status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
+                      <Badge
+                        className={
+                          payment.status === "paid"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }
+                      >
                         {payment.status}
                       </Badge>
                     </div>
@@ -1279,11 +1444,15 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
             <CardContent>
               <div className="space-y-4">
                 {displayCommunication.emailCampaigns.map((campaign) => (
-                  <div key={campaign.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div
+                    key={campaign.id}
+                    className="flex items-center justify-between p-4 border rounded-lg"
+                  >
                     <div className="flex-1">
                       <h4 className="font-medium">{campaign.name}</h4>
                       <p className="text-sm text-gray-600">
-                        Sent to {campaign.recipients.toLocaleString()} recipients on {new Date(campaign.sentDate).toLocaleDateString('en-GB')}
+                        Sent to {campaign.recipients.toLocaleString()} recipients on{" "}
+                        {new Date(campaign.sentDate).toLocaleDateString("en-GB")}
                       </p>
                     </div>
                     <div className="flex items-center space-x-6 text-center">
@@ -1295,7 +1464,13 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
                         <p className="text-lg font-bold text-green-600">{campaign.clickRate}%</p>
                         <p className="text-xs text-gray-600">Click Rate</p>
                       </div>
-                      <Badge className={campaign.status === 'sent' ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'}>
+                      <Badge
+                        className={
+                          campaign.status === "sent"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-blue-100 text-blue-800"
+                        }
+                      >
                         {campaign.status}
                       </Badge>
                     </div>
@@ -1320,11 +1495,15 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
                     <div className="flex items-center justify-between mb-2">
                       <h4 className="font-medium">{announcement.title}</h4>
                       <div className="flex items-center space-x-2">
-                        <Badge className={
-                          announcement.priority === 'high' ? 'bg-red-100 text-red-800' :
-                          announcement.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-gray-100 text-gray-800'
-                        }>
+                        <Badge
+                          className={
+                            announcement.priority === "high"
+                              ? "bg-red-100 text-red-800"
+                              : announcement.priority === "medium"
+                                ? "bg-yellow-100 text-yellow-800"
+                                : "bg-gray-100 text-gray-800"
+                          }
+                        >
                           {announcement.priority}
                         </Badge>
                         <Button variant="outline" size="sm">
@@ -1335,8 +1514,10 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
                     </div>
                     <p className="text-sm text-gray-600 mb-2">{announcement.content}</p>
                     <div className="flex items-center justify-between text-xs text-gray-500">
-                      <span>Target: {announcement.targetAudience.join(', ')}</span>
-                      <span>Published: {new Date(announcement.publishDate).toLocaleDateString('en-GB')}</span>
+                      <span>Target: {announcement.targetAudience.join(", ")}</span>
+                      <span>
+                        Published: {new Date(announcement.publishDate).toLocaleDateString("en-GB")}
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -1355,15 +1536,21 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
             <CardContent>
               <div className="grid grid-cols-3 gap-6">
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-blue-600">{displayCommunication.messagingStats.totalMessages.toLocaleString()}</p>
+                  <p className="text-2xl font-bold text-blue-600">
+                    {displayCommunication.messagingStats.totalMessages.toLocaleString()}
+                  </p>
                   <p className="text-sm text-gray-600">Total Messages</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-green-600">{displayCommunication.messagingStats.responseRate}%</p>
+                  <p className="text-2xl font-bold text-green-600">
+                    {displayCommunication.messagingStats.responseRate}%
+                  </p>
                   <p className="text-sm text-gray-600">Response Rate</p>
                 </div>
                 <div className="text-center">
-                  <p className="text-2xl font-bold text-purple-600">{displayCommunication.messagingStats.averageResponseTime}</p>
+                  <p className="text-2xl font-bold text-purple-600">
+                    {displayCommunication.messagingStats.averageResponseTime}
+                  </p>
                   <p className="text-sm text-gray-600">Avg Response Time</p>
                 </div>
               </div>
@@ -1392,9 +1579,14 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
               </CardHeader>
               <CardContent>
                 <div className="text-center">
-                  <p className="text-3xl font-bold text-blue-600">{displayBooking.resourceUtilization.therapistCapacity}%</p>
+                  <p className="text-3xl font-bold text-blue-600">
+                    {displayBooking.resourceUtilization.therapistCapacity}%
+                  </p>
                   <p className="text-sm text-gray-600">Current utilisation</p>
-                  <Progress value={displayBooking.resourceUtilization.therapistCapacity} className="mt-2" />
+                  <Progress
+                    value={displayBooking.resourceUtilization.therapistCapacity}
+                    className="mt-2"
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -1408,9 +1600,14 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
               </CardHeader>
               <CardContent>
                 <div className="text-center">
-                  <p className="text-3xl font-bold text-green-600">{displayBooking.resourceUtilization.roomUtilization}%</p>
+                  <p className="text-3xl font-bold text-green-600">
+                    {displayBooking.resourceUtilization.roomUtilization}%
+                  </p>
                   <p className="text-sm text-gray-600">Current utilisation</p>
-                  <Progress value={displayBooking.resourceUtilization.roomUtilization} className="mt-2" />
+                  <Progress
+                    value={displayBooking.resourceUtilization.roomUtilization}
+                    className="mt-2"
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -1424,9 +1621,14 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
               </CardHeader>
               <CardContent>
                 <div className="text-center">
-                  <p className="text-3xl font-bold text-purple-600">{displayBooking.resourceUtilization.equipmentUsage}%</p>
+                  <p className="text-3xl font-bold text-purple-600">
+                    {displayBooking.resourceUtilization.equipmentUsage}%
+                  </p>
                   <p className="text-sm text-gray-600">Current utilisation</p>
-                  <Progress value={displayBooking.resourceUtilization.equipmentUsage} className="mt-2" />
+                  <Progress
+                    value={displayBooking.resourceUtilization.equipmentUsage}
+                    className="mt-2"
+                  />
                 </div>
               </CardContent>
             </Card>
@@ -1443,20 +1645,33 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
             <CardContent>
               <div className="space-y-4">
                 {displayBooking.upcomingBookings.map((booking) => (
-                  <div key={booking.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div
+                    key={booking.id}
+                    className="flex items-center justify-between p-4 border rounded-lg"
+                  >
                     <div className="flex-1">
                       <h4 className="font-medium">{booking.sessionType}</h4>
                       <p className="text-sm text-gray-600">
-                        {new Date(booking.dateTime).toLocaleDateString('en-GB')} at {new Date(booking.dateTime).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}
+                        {new Date(booking.dateTime).toLocaleDateString("en-GB")} at{" "}
+                        {new Date(booking.dateTime).toLocaleTimeString("en-GB", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
                       </p>
-                      <p className="text-sm text-gray-600">{booking.department} • {booking.participantCount} participants</p>
+                      <p className="text-sm text-gray-600">
+                        {booking.department} • {booking.participantCount} participants
+                      </p>
                     </div>
                     <div className="flex items-center space-x-4">
-                      <Badge className={
-                        booking.status === 'confirmed' ? 'bg-green-100 text-green-800' :
-                        booking.status === 'pending' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-red-100 text-red-800'
-                      }>
+                      <Badge
+                        className={
+                          booking.status === "confirmed"
+                            ? "bg-green-100 text-green-800"
+                            : booking.status === "pending"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-red-100 text-red-800"
+                        }
+                      >
                         {booking.status}
                       </Badge>
                       <Button variant="outline" size="sm">
@@ -1481,10 +1696,15 @@ export default function InstitutionalDashboard({ user, initialTab = 'overview' }
             <CardContent>
               <div className="space-y-4">
                 {displayBooking.waitingLists.map((waitingList, index) => (
-                  <div key={index} className="flex items-center justify-between p-4 bg-orange-50 border border-orange-200 rounded-lg">
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-4 bg-orange-50 border border-orange-200 rounded-lg"
+                  >
                     <div>
                       <h4 className="font-medium text-orange-900">{waitingList.department}</h4>
-                      <p className="text-sm text-orange-700">Average wait time: {waitingList.averageWaitTime}</p>
+                      <p className="text-sm text-orange-700">
+                        Average wait time: {waitingList.averageWaitTime}
+                      </p>
                     </div>
                     <div className="text-center">
                       <p className="text-2xl font-bold text-orange-600">{waitingList.count}</p>

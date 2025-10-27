@@ -1,15 +1,15 @@
-import { Pool, neonConfig } from '@neondatabase/serverless';
-import { drizzle } from 'drizzle-orm/neon-serverless';
+import { Pool, neonConfig } from "@neondatabase/serverless";
+import { drizzle } from "drizzle-orm/neon-serverless";
 import ws from "ws";
 import * as schema from "@shared/schema";
 
 // Railway-compatible WebSocket configuration
 try {
   // Only set WebSocket constructor if it's available and needed
-  if (typeof WebSocket === 'undefined' && ws) {
+  if (typeof WebSocket === "undefined" && ws) {
     neonConfig.webSocketConstructor = ws;
     console.log("✅ WebSocket constructor configured for Neon serverless");
-  } else if (typeof WebSocket !== 'undefined') {
+  } else if (typeof WebSocket !== "undefined") {
     console.log("✅ Native WebSocket available, using built-in WebSocket");
   }
 } catch (error: any) {
@@ -20,9 +20,7 @@ try {
 if (!process.env.DATABASE_URL) {
   console.error("DATABASE_URL environment variable is not set");
   console.error("Please ensure the database is provisioned and DATABASE_URL is configured");
-  throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?",
-  );
+  throw new Error("DATABASE_URL must be set. Did you forget to provision a database?");
 }
 
 console.log("🔗 Initializing database connection...");
@@ -37,14 +35,14 @@ const isRailway = process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_PROJECT
 
 if (isRailway) {
   console.log("🚂 Railway environment detected - using Railway-optimized configuration");
-  
+
   try {
     // Railway-specific Neon configuration - completely disable serverless WebSocket
     neonConfig.webSocketConstructor = undefined;
     neonConfig.poolQueryViaFetch = true; // Force HTTP-based queries instead of WebSocket
     console.log("🔄 Railway mode: WebSocket disabled, HTTP queries enabled");
-    
-    pool = new Pool({ 
+
+    pool = new Pool({
       connectionString: process.env.DATABASE_URL,
       // Railway-optimized configuration with aggressive settings
       max: 3,
@@ -56,51 +54,49 @@ if (isRailway) {
       ssl: { rejectUnauthorized: true },
       keepAlive: false,
       // Force connection pooling behavior compatible with Railway
-      allowExitOnIdle: true
+      allowExitOnIdle: true,
     });
-    
+
     db = drizzle({ client: pool, schema });
     console.log("✅ Railway database connection initialized with HTTP queries");
-    
+
     // Test query asynchronously to verify Railway compatibility (non-blocking)
     setTimeout(async () => {
       try {
-        await db.execute('SELECT 1 as test');
+        await db.execute("SELECT 1 as test");
         console.log("✅ Railway database query test successful");
       } catch (queryError) {
         console.error("⚠️ Railway database query test failed:", queryError);
         console.log("🔄 Attempting Railway compatibility mode...");
-        
+
         try {
           // Fallback: Even more aggressive Railway settings
-          pool = new Pool({ 
+          pool = new Pool({
             connectionString: process.env.DATABASE_URL,
             max: 1,
             idleTimeoutMillis: 1000,
             connectionTimeoutMillis: 1000,
             ssl: { rejectUnauthorized: true }, // Secure SSL with certificate validation
-            keepAlive: false
+            keepAlive: false,
           });
-          
+
           db = drizzle({ client: pool, schema });
-          await db.execute('SELECT 1 as test');
+          await db.execute("SELECT 1 as test");
           console.log("✅ Railway fallback configuration successful");
         } catch (fallbackError) {
           console.error("❌ Railway fallback configuration failed:", fallbackError);
         }
       }
     }, 100);
-    
   } catch (railwayError) {
     console.error("❌ Railway database configuration failed:", railwayError);
     throw new Error("Railway database connection failed - check environment configuration");
   }
-  
 } else {
   console.log("🔗 Standard environment detected - using WebSocket configuration");
-  
+
   try {
-    pool = new Pool({ 
+    pool = new Pool({
       connectionString: process.env.DATABASE_URL,
       // Standard configuration
       max: 20,
@@ -109,19 +105,18 @@ if (isRailway) {
       // Secure SSL configuration with proper certificate validation
       ssl: { rejectUnauthorized: true },
     });
-    
+
     db = drizzle({ client: pool, schema });
     console.log("✅ Database connection initialized successfully");
-    
   } catch (error) {
     console.error("❌ Database initialization failed:", error);
-    
+
     // Fallback: Try without WebSocket constructor
     try {
       console.log("🔄 Attempting fallback database connection...");
       neonConfig.webSocketConstructor = undefined;
-      
-      pool = new Pool({ 
+
+      pool = new Pool({
         connectionString: process.env.DATABASE_URL,
         max: 10,
         idleTimeoutMillis: 20000,
@@ -129,7 +124,7 @@ if (isRailway) {
         // Secure SSL configuration with proper certificate validation
         ssl: { rejectUnauthorized: true },
       });
-      
+
       db = drizzle({ client: pool, schema });
       console.log("✅ Fallback database connection successful");
     } catch (fallbackError) {

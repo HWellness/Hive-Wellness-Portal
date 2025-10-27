@@ -1,7 +1,7 @@
-import { Link } from 'wouter';
-import { ArrowLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import UnifiedTherapistEnquiryForm from '@/components/forms/unified-therapist-enquiry-form';
+import { Link } from "wouter";
+import { ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import UnifiedTherapistEnquiryForm from "@/components/forms/unified-therapist-enquiry-form";
 
 export default function TherapistEnquiryPage() {
   return (
@@ -16,10 +16,13 @@ export default function TherapistEnquiryPage() {
                 Return to Hive Wellness Website
               </Button>
             </Link>
-            
+
             <div className="flex items-center space-x-4">
               <Link href="/portal">
-                <Button variant="outline" className="border-hive-purple text-hive-purple hover:bg-hive-purple hover:text-white">
+                <Button
+                  variant="outline"
+                  className="border-hive-purple text-hive-purple hover:bg-hive-purple hover:text-white"
+                >
                   Existing User? Sign In
                 </Button>
               </Link>
@@ -38,8 +41,11 @@ export default function TherapistEnquiryPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center">
             <p className="text-sm font-secondary text-hive-black">
-              © 2025 Hive Wellness. All rights reserved. |{' '}
-              <a href="mailto:support@hive-wellness.co.uk" className="text-hive-purple hover:underline">
+              © 2025 Hive Wellness. All rights reserved. |{" "}
+              <a
+                href="mailto:support@hive-wellness.co.uk"
+                className="text-hive-purple hover:underline"
+              >
                 support@hive-wellness.co.uk
               </a>
             </p>

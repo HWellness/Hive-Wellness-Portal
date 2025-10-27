@@ -1,5 +1,5 @@
-import { MailService } from '@sendgrid/mail';
-import { GmailService } from './gmail-service.js';
+import { MailService } from "@sendgrid/mail";
+import { GmailService } from "./gmail-service.js";
 
 // Initialize SendGrid mail service as fallback
 const sgMail = new MailService();
@@ -35,15 +35,15 @@ export interface EmailResults {
 
 class BookingEmailService {
   private readonly adminRecipients = [
-    'support@hive-wellness.co.uk',
-    'admin@hive-wellness.co.uk', 
-    'robert@taxstatscloud.co.uk',
+    "support@hive-wellness.co.uk",
+    "admin@hive-wellness.co.uk",
+    "robert@taxstatscloud.co.uk",
   ];
 
   async sendBookingConfirmations(bookingData: BookingConfirmationData): Promise<EmailResults> {
     const results: EmailResults = {
       userSent: false,
-      adminSent: false
+      adminSent: false,
     };
 
     // Send confirmation email to user
@@ -52,7 +52,7 @@ class BookingEmailService {
       results.userSent = true;
       console.log(`✅ User confirmation email sent to ${bookingData.email}`);
     } catch (error) {
-      results.userError = error instanceof Error ? error.message : 'Unknown error';
+      results.userError = error instanceof Error ? error.message : "Unknown error";
       console.error(`❌ Failed to send user confirmation email:`, error);
     }
 
@@ -60,9 +60,9 @@ class BookingEmailService {
     try {
       await this.sendAdminNotificationEmail(bookingData);
       results.adminSent = true;
-      console.log(`✅ Admin notification email sent to ${this.adminRecipients.join(', ')}`);
+      console.log(`✅ Admin notification email sent to ${this.adminRecipients.join(", ")}`);
     } catch (error) {
-      results.adminError = error instanceof Error ? error.message : 'Unknown error';
+      results.adminError = error instanceof Error ? error.message : "Unknown error";
       console.error(`❌ Failed to send admin notification email:`, error);
     }
 
@@ -74,34 +74,43 @@ class BookingEmailService {
       // Try Gmail API first
       await GmailService.sendEmail(emailData);
     } catch (gmailError) {
-      console.error('Gmail error:', gmailError);
-      
+      console.error("Gmail error:", gmailError);
+
       // Fallback to SendGrid
       const sendGridData = {
         to: emailData.to,
-        from: 'Hive Wellness <support@hive-wellness.co.uk>',
+        from: "Hive Wellness <support@hive-wellness.co.uk>",
         subject: emailData.subject,
-        html: emailData.html
+        html: emailData.html,
       };
-      
+
       await sgMail.send(sendGridData);
     }
   }
 
   private async sendUserConfirmationEmail(bookingData: BookingConfirmationData): Promise<void> {
-    const { name, email, preferredDate, preferredTime, message, bookingId, googleMeetUrl, calendarUrl } = bookingData;
-    
-    const formattedDate = new Date(preferredDate).toLocaleDateString('en-GB', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+    const {
+      name,
+      email,
+      preferredDate,
+      preferredTime,
+      message,
+      bookingId,
+      googleMeetUrl,
+      calendarUrl,
+    } = bookingData;
+
+    const formattedDate = new Date(preferredDate).toLocaleDateString("en-GB", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
 
     const confirmationEmail = {
       to: email,
-      from: 'Hive Wellness <support@hive-wellness.co.uk>',
-      subject: 'Enhanced Instructions: Your Video Session with Clear Steps!',
+      from: "Hive Wellness <support@hive-wellness.co.uk>",
+      subject: "Enhanced Instructions: Your Video Session with Clear Steps!",
       html: `
         <div style="font-family: 'Open Sans', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
           <!-- Header -->
@@ -148,11 +157,13 @@ class BookingEmailService {
                 <p style="margin: 8px 0;"><strong>Date:</strong> ${formattedDate}</p>
                 <p style="margin: 8px 0;"><strong>Time:</strong> ${preferredTime}</p>
                 <p style="margin: 8px 0;"><strong>Booking Reference:</strong> ${bookingId}</p>
-                ${message ? `<p style="margin: 8px 0;"><strong>Your Message:</strong> ${message}</p>` : ''}
+                ${message ? `<p style="margin: 8px 0;"><strong>Your Message:</strong> ${message}</p>` : ""}
               </div>
             </div>
 
-            ${googleMeetUrl ? `
+            ${
+              googleMeetUrl
+                ? `
             <!-- Enhanced Video Call Section -->
             <div style="background: #F3E8FF; border: 2px solid #9306B1; border-radius: 15px; padding: 25px; margin: 25px 0; text-align: center;">
               <div style="margin-bottom: 15px;">
@@ -175,7 +186,7 @@ class BookingEmailService {
                 <div style="background: #FFFFFF; padding: 15px; border-radius: 8px; border: 1px solid #E9ECEF; margin-bottom: 15px; text-align: center;">
                   <p style="margin: 0 0 10px 0; color: #495057; font-weight: 600;">Meeting Code:</p>
                   <p style="font-family: 'Courier New', monospace; background: #F8F9FA; padding: 10px; border-radius: 5px; margin: 0; font-size: 18px; font-weight: 600; color: #9306B1; border: 2px solid #9306B1;">
-                    ${googleMeetUrl.split('/').pop()}
+                    ${googleMeetUrl.split("/").pop()}
                   </p>
                 </div>
                 
@@ -197,7 +208,9 @@ class BookingEmailService {
                 Calendar invitation sent to <strong>${email}</strong>
               </p>
             </div>
-            ` : ''}
+            `
+                : ""
+            }
 
             <!-- What Happens Next -->
             <div style="background: #F3E8FF; padding: 25px; border-radius: 10px; margin-bottom: 25px;">
@@ -234,29 +247,39 @@ class BookingEmailService {
             <p style="margin: 0;">This email was sent regarding your booking request.</p>
           </div>
         </div>
-      `
+      `,
     };
 
     await this.sendEmailWithGmailFallback({
       to: email,
       subject: confirmationEmail.subject,
-      html: confirmationEmail.html
+      html: confirmationEmail.html,
     });
   }
 
   private async sendAdminNotificationEmail(bookingData: BookingConfirmationData): Promise<void> {
-    const { name, email, phone, preferredDate, preferredTime, message, bookingId, googleMeetUrl, calendarUrl } = bookingData;
-    
-    const formattedDate = new Date(preferredDate).toLocaleDateString('en-GB', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+    const {
+      name,
+      email,
+      phone,
+      preferredDate,
+      preferredTime,
+      message,
+      bookingId,
+      googleMeetUrl,
+      calendarUrl,
+    } = bookingData;
+
+    const formattedDate = new Date(preferredDate).toLocaleDateString("en-GB", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
 
     const notificationEmail = {
       to: this.adminRecipients,
-      from: 'Hive Wellness <support@hive-wellness.co.uk>',
+      from: "Hive Wellness <support@hive-wellness.co.uk>",
       subject: `🔔 New Booking: ${name} - ${formattedDate} at ${preferredTime}`,
       html: `
         <div style="font-family: 'Open Sans', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff;">
@@ -290,12 +313,12 @@ class BookingEmailService {
               <div style="line-height: 1.8; color: #333;">
                 <p style="margin: 8px 0;"><strong>Name:</strong> ${name}</p>
                 <p style="margin: 8px 0;"><strong>Email:</strong> <a href="mailto:${email}" style="color: #9306B1;">${email}</a></p>
-                <p style="margin: 8px 0;"><strong>Phone:</strong> ${phone || 'Not provided'}</p>
+                <p style="margin: 8px 0;"><strong>Phone:</strong> ${phone || "Not provided"}</p>
                 <p style="margin: 8px 0;"><strong>Preferred Date:</strong> ${formattedDate}</p>
                 <p style="margin: 8px 0;"><strong>Preferred Time:</strong> ${preferredTime}</p>
                 <p style="margin: 8px 0;"><strong>Booking ID:</strong> ${bookingId}</p>
                 <p style="margin: 8px 0;"><strong>Source:</strong> WordPress Booking Widget</p>
-                ${message ? `<p style="margin: 8px 0;"><strong>Client Message:</strong><br><em>"${message}"</em></p>` : ''}
+                ${message ? `<p style="margin: 8px 0;"><strong>Client Message:</strong><br><em>"${message}"</em></p>` : ""}
               </div>
             </div>
 
@@ -313,7 +336,9 @@ class BookingEmailService {
               </ol>
             </div>
 
-            ${googleMeetUrl ? `
+            ${
+              googleMeetUrl
+                ? `
             <!-- Video Call Section for Admin -->
             <div style="background: #F3E8FF; border: 2px solid #9306B1; border-radius: 15px; padding: 25px; margin: 25px 0; text-align: center;">
               <div style="margin-bottom: 15px;">
@@ -336,7 +361,7 @@ class BookingEmailService {
                 <div style="background: #FFFFFF; padding: 15px; border-radius: 8px; border: 1px solid #E9ECEF; margin-bottom: 15px; text-align: center;">
                   <p style="margin: 0 0 10px 0; color: #495057; font-weight: 600;">Meeting Code (Same as Client):</p>
                   <p style="font-family: 'Courier New', monospace; background: #F8F9FA; padding: 10px; border-radius: 5px; margin: 0; font-size: 18px; font-weight: 600; color: #9306B1; border: 2px solid #9306B1;">
-                    ${googleMeetUrl.split('/').pop()}
+                    ${googleMeetUrl.split("/").pop()}
                   </p>
                 </div>
                 
@@ -352,7 +377,8 @@ class BookingEmailService {
                 </div>
               </div>
             </div>
-            ` : `
+            `
+                : `
             <!-- Manual Calendar Instructions (Fallback) -->
             <div style="background: #FFF3CD; border: 2px solid #FFC107; border-radius: 15px; padding: 25px; margin: 25px 0;">
               <div style="margin-bottom: 15px; text-align: center;">
@@ -374,7 +400,7 @@ class BookingEmailService {
                   <p style="margin: 0 0 8px 0;"><strong>Duration:</strong> 60 minutes</p>
                   <p style="margin: 0 0 8px 0;"><strong>Client Email:</strong> ${email}</p>
                   <p style="margin: 0 0 8px 0;"><strong>Meeting Type:</strong> Google Meet</p>
-                  <p style="margin: 0 0 8px 0;"><strong>Notes:</strong> Free initial consultation - ${message || 'No additional notes'}</p>
+                  <p style="margin: 0 0 8px 0;"><strong>Notes:</strong> Free initial consultation - ${message || "No additional notes"}</p>
                 </div>
               </div>
               
@@ -384,7 +410,8 @@ class BookingEmailService {
                 </p>
               </div>
             </div>
-            `}
+            `
+            }
 
             <!-- Quick Actions -->
             <div style="text-align: center; margin: 30px 0;">
@@ -403,8 +430,8 @@ class BookingEmailService {
             <!-- Booking Statistics -->
             <div style="background: #F8F9FA; padding: 20px; border-radius: 10px; text-align: center;">
               <p style="color: #666; margin: 0; font-size: 14px;">
-                <strong>Booking Time:</strong> ${new Date().toLocaleString('en-GB', { timeZone: 'Europe/London' })}<br>
-                <strong>Response Required By:</strong> ${new Date(Date.now() + 2 * 60 * 60 * 1000).toLocaleString('en-GB', { timeZone: 'Europe/London' })}
+                <strong>Booking Time:</strong> ${new Date().toLocaleString("en-GB", { timeZone: "Europe/London" })}<br>
+                <strong>Response Required By:</strong> ${new Date(Date.now() + 2 * 60 * 60 * 1000).toLocaleString("en-GB", { timeZone: "Europe/London" })}
               </p>
             </div>
           </div>
@@ -415,13 +442,13 @@ class BookingEmailService {
             <p style="margin: 0;">This is an automated booking notification - please take immediate action</p>
           </div>
         </div>
-      `
+      `,
     };
 
     await this.sendEmailWithGmailFallback({
-      to: this.adminRecipients.join(','),
+      to: this.adminRecipients.join(","),
       subject: notificationEmail.subject,
-      html: notificationEmail.html
+      html: notificationEmail.html,
     });
   }
 }

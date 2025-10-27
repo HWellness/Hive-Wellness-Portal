@@ -1,5 +1,5 @@
-import * as crypto from 'crypto';
-import sgMail from '@sendgrid/mail';
+import * as crypto from "crypto";
+import sgMail from "@sendgrid/mail";
 
 export interface EmailMFASetupResult {
   email: string;
@@ -11,7 +11,6 @@ export interface EmailMFAVerificationResult {
 }
 
 export class EmailMFAService {
-  
   constructor() {
     // Initialize SendGrid with API key
     if (process.env.SENDGRID_API_KEY) {
@@ -30,7 +29,7 @@ export class EmailMFAService {
    * Hash a verification code for secure storage
    */
   hashCode(code: string): string {
-    return crypto.createHash('sha256').update(code.toLowerCase()).digest('hex');
+    return crypto.createHash("sha256").update(code.toLowerCase()).digest("hex");
   }
 
   /**
@@ -41,25 +40,25 @@ export class EmailMFAService {
       const msg = {
         to: email,
         from: {
-          email: 'noreply@hive-wellness.co.uk',
-          name: 'Hive Wellness Security'
+          email: "noreply@hive-wellness.co.uk",
+          name: "Hive Wellness Security",
         },
-        subject: 'Your Hive Wellness Verification Code',
+        subject: "Your Hive Wellness Verification Code",
         html: this.generateEmailTemplate(code, firstName),
-        text: `Your Hive Wellness verification code is: ${code}. This code expires in 10 minutes.`
+        text: `Your Hive Wellness verification code is: ${code}. This code expires in 10 minutes.`,
       };
 
       await sgMail.send(msg);
       console.log(`📧 Email verification code sent to ${email}`);
       return true;
     } catch (error: any) {
-      console.error('Email sending error:', error);
-      
+      console.error("Email sending error:", error);
+
       // Fallback: Log code for development (remove in production)
-      if (process.env.NODE_ENV === 'development') {
+      if (process.env.NODE_ENV === "development") {
         console.log(`🔑 Development mode - Email code for ${email}: ${code}`);
       }
-      
+
       return false;
     }
   }
@@ -138,7 +137,7 @@ export class EmailMFAService {
         </div>
         
         <div class="content">
-          ${firstName ? `<p>Hello ${firstName},</p>` : '<p>Hello,</p>'}
+          ${firstName ? `<p>Hello ${firstName},</p>` : "<p>Hello,</p>"}
           
           <p>You've requested a verification code for your Hive Wellness account. Please use the code below to complete your authentication:</p>
           
@@ -177,7 +176,7 @@ export class EmailMFAService {
    * Verify email code against stored hash
    */
   verifyEmailCode(providedCode: string, storedHashedCode: string): boolean {
-    const providedHash = this.hashCode(providedCode.replace(/\s/g, ''));
+    const providedHash = this.hashCode(providedCode.replace(/\s/g, ""));
     return providedHash === storedHashedCode;
   }
 

@@ -7,7 +7,6 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, FileText, Mail, Users, Settings, Plus, Eye, User } from "lucide-react";
 import GravityForm from "@/components/forms/gravity-forms";
 
-
 export default function FormsPage() {
   const { user, isAuthenticated, isLoading } = useAuth();
   const [selectedForm, setSelectedForm] = useState<string | null>(null);
@@ -17,7 +16,8 @@ export default function FormsPage() {
     {
       id: "lead-capture",
       title: "Lead Capture (Welcome Pack)",
-      description: "The lead capture form displayed on bottom of homepage for 'Joining the Hive Network'.",
+      description:
+        "The lead capture form displayed on bottom of homepage for 'Joining the Hive Network'.",
       icon: <Mail className="w-5 h-5" />,
       type: "lead-capture" as const,
       status: "active",
@@ -47,7 +47,8 @@ export default function FormsPage() {
     {
       id: "therapist-onboarding",
       title: "Therapist Onboarding Application",
-      description: "Comprehensive 6-step onboarding form for new therapists with Stripe Connect integration",
+      description:
+        "Comprehensive 6-step onboarding form for new therapists with Stripe Connect integration",
       icon: <Users className="w-5 h-5" />,
       type: "therapist-onboarding" as const,
       status: "active",
@@ -88,31 +89,23 @@ export default function FormsPage() {
   }
 
   if (selectedForm) {
-    const form = gravityForms.find(f => f.id === selectedForm);
+    const form = gravityForms.find((f) => f.id === selectedForm);
     if (form) {
       return (
         <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
           <div className="container mx-auto px-6 py-8 max-w-4xl">
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-3">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setSelectedForm(null)}
-                >
+                <Button variant="outline" size="sm" onClick={() => setSelectedForm(null)}>
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Back to Forms
                 </Button>
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900">
-                    {form.title}
-                  </h1>
+                  <h1 className="text-2xl font-bold text-gray-900">{form.title}</h1>
                   <p className="text-gray-600">{form.description}</p>
                 </div>
               </div>
-              <Badge className="bg-green-100 text-green-800">
-                {form.status}
-              </Badge>
+              <Badge className="bg-green-100 text-green-800">{form.status}</Badge>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
@@ -188,17 +181,19 @@ export default function FormsPage() {
               <p className="text-2xl font-bold text-gray-900">{gravityForms.length}</p>
             </CardContent>
           </Card>
-          
+
           <Card className="card-modern">
             <CardContent className="p-6">
               <div className="flex items-center gap-2 mb-2">
                 <Users className="w-5 h-5 text-blue-600" />
                 <span className="text-sm text-gray-600">Total Submissions</span>
               </div>
-              <p className="text-2xl font-bold text-gray-900">{gravityForms.reduce((sum, form) => sum + form.submissions, 0)}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {gravityForms.reduce((sum, form) => sum + form.submissions, 0)}
+              </p>
             </CardContent>
           </Card>
-          
+
           <Card className="card-modern">
             <CardContent className="p-6">
               <div className="flex items-center gap-2 mb-2">
@@ -208,7 +203,7 @@ export default function FormsPage() {
               <p className="text-2xl font-bold text-gray-900">10.5%</p>
             </CardContent>
           </Card>
-          
+
           <Card className="card-modern">
             <CardContent className="p-6">
               <div className="flex items-center gap-2 mb-2">
@@ -236,9 +231,7 @@ export default function FormsPage() {
                         <p className="text-sm text-gray-600 mt-1">{form.description}</p>
                       </div>
                     </div>
-                    <Badge className="bg-green-100 text-green-800">
-                      {form.status}
-                    </Badge>
+                    <Badge className="bg-green-100 text-green-800">{form.status}</Badge>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -268,11 +261,7 @@ export default function FormsPage() {
                       <Eye className="w-4 h-4 mr-2" />
                       Preview
                     </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="flex-1"
-                    >
+                    <Button variant="outline" size="sm" className="flex-1">
                       <Settings className="w-4 h-4 mr-2" />
                       Settings
                     </Button>
@@ -292,7 +281,8 @@ export default function FormsPage() {
                 <div>
                   <h3 className="font-semibold text-orange-900">Public Access</h3>
                   <p className="text-orange-700 mt-1">
-                    You can preview and submit forms without logging in. Form submissions are saved and can be managed by administrators.
+                    You can preview and submit forms without logging in. Form submissions are saved
+                    and can be managed by administrators.
                   </p>
                 </div>
               </div>

@@ -4,58 +4,77 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Calendar, Clock, ChevronLeft, ChevronRight, Video, Loader2, RefreshCw, AlertTriangle } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  ChevronLeft,
+  ChevronRight,
+  Video,
+  Loader2,
+  RefreshCw,
+  AlertTriangle,
+} from "lucide-react";
 
 interface IntroductionCallBookingProps {
   onBookingComplete?: (videoLink: string) => void;
 }
 
-export default function IntroductionCallBooking({ onBookingComplete }: IntroductionCallBookingProps) {
+export default function IntroductionCallBooking({
+  onBookingComplete,
+}: IntroductionCallBookingProps) {
   const { toast } = useToast();
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   // Form data - persist across dialog opens/closes
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    message: '',
-    userType: 'client',
-    therapistId: 'admin' // NEW: Default to admin for general introduction calls
+    name: "",
+    email: "",
+    phone: "",
+    message: "",
+    userType: "client",
+    therapistId: "admin", // NEW: Default to admin for general introduction calls
   });
-  
+
   // Debug logging to track state issues
   useEffect(() => {
-    console.log('📝 IntroductionCallBooking: Form data state:', formData);
-    console.log('📍 IntroductionCallBooking: Current step:', step);
+    console.log("📝 IntroductionCallBooking: Form data state:", formData);
+    console.log("📍 IntroductionCallBooking: Current step:", step);
   }, [formData, step]);
 
   // Removed therapist selection - introduction calls are always with admin
-  
+
   // Calendar state
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  const [availableSlots, setAvailableSlots] = useState<Array<{
-    time: string;
-    available: boolean;
-    reason?: string;
-    datetime: string | null;
-  }>>([]);
+  const [availableSlots, setAvailableSlots] = useState<
+    Array<{
+      time: string;
+      available: boolean;
+      reason?: string;
+      datetime: string | null;
+    }>
+  >([]);
   const [loadingSlots, setLoadingSlots] = useState(false);
   const [refreshingAvailability, setRefreshingAvailability] = useState(false);
 
   // Introduction calls are always with admin - no therapist fetching needed
 
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-GB', {
-      weekday: 'long',
-      year: 'numeric', 
-      month: 'long',
-      day: 'numeric'
+    return date.toLocaleDateString("en-GB", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 
@@ -66,15 +85,19 @@ export default function IntroductionCallBooking({ onBookingComplete }: Introduct
     const lastDay = new Date(year, month + 1, 0);
     const startDate = new Date(firstDay);
     startDate.setDate(startDate.getDate() - firstDay.getDay());
-    
+
     const days = [];
     const endDate = new Date(startDate);
     endDate.setDate(endDate.getDate() + 41);
-    
-    for (let current = new Date(startDate); current <= endDate; current.setDate(current.getDate() + 1)) {
+
+    for (
+      let current = new Date(startDate);
+      current <= endDate;
+      current.setDate(current.getDate() + 1)
+    ) {
       days.push(new Date(current));
     }
-    
+
     return days;
   };
 
@@ -86,27 +109,32 @@ export default function IntroductionCallBooking({ onBookingComplete }: Introduct
       setLoadingSlots(true);
       setSelectedTime(null); // Clear selected time when date changes
     }
-    
+
     try {
       // CRITICAL FIX: Use UK-local date string instead of UTC to avoid ±1 day shifts
-      const dateString = new Intl.DateTimeFormat('en-CA', { 
-        timeZone: 'Europe/London', 
-        year: 'numeric', 
-        month: '2-digit', 
-        day: '2-digit' 
+      const dateString = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Europe/London",
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
       }).format(date);
-      
+
       // Introduction calls always use admin calendar
-      const response = await apiRequest('GET', `/api/introduction-calls/available-slots/${dateString}`);
+      const response = await apiRequest(
+        "GET",
+        `/api/introduction-calls/available-slots/${dateString}`
+      );
       const data = await response.json();
-      
+
       console.log(`🔍 Checking admin calendar availability for ${dateString}`);
       console.log(`📅 API response for ${dateString}:`, data);
-      
+
       if (data.slots) {
         setAvailableSlots(data.slots);
-        console.log(`📅 Loaded ${data.availableCount}/${data.totalSlots} available slots for ${dateString}`);
-        
+        console.log(
+          `📅 Loaded ${data.availableCount}/${data.totalSlots} available slots for ${dateString}`
+        );
+
         if (isRefresh) {
           toast({
             title: "Availability Updated",
@@ -122,7 +150,7 @@ export default function IntroductionCallBooking({ onBookingComplete }: Introduct
         });
       }
     } catch (error) {
-      console.error('Error fetching available slots:', error);
+      console.error("Error fetching available slots:", error);
       setAvailableSlots([]);
       toast({
         title: "Error loading availability",
@@ -150,9 +178,9 @@ export default function IntroductionCallBooking({ onBookingComplete }: Introduct
   }, [selectedDate]); // Only refresh when date changes - therapist is always admin
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [field]: value
+      [field]: value,
     }));
   };
 
@@ -185,26 +213,26 @@ export default function IntroductionCallBooking({ onBookingComplete }: Introduct
 
     try {
       // Send structured timezone data instead of fake UTC strings
-      const [time, period] = selectedTime.split(' ');
-      const [hours, minutes] = time.split(':').map(Number);
-      
+      const [time, period] = selectedTime.split(" ");
+      const [hours, minutes] = time.split(":").map(Number);
+
       // Convert to 24-hour format
       let hour24 = hours;
-      if (period === 'PM' && hours !== 12) {
+      if (period === "PM" && hours !== 12) {
         hour24 = hours + 12;
-      } else if (period === 'AM' && hours === 12) {
+      } else if (period === "AM" && hours === 12) {
         hour24 = 0;
       }
-      
+
       // Format date as YYYY-MM-DD (avoid timezone issues)
       const year = selectedDate.getFullYear();
-      const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
-      const day = String(selectedDate.getDate()).padStart(2, '0');
+      const month = String(selectedDate.getMonth() + 1).padStart(2, "0");
+      const day = String(selectedDate.getDate()).padStart(2, "0");
       const dateString = `${year}-${month}-${day}`;
-      
+
       // Format time as HH:mm
-      const hourStr = String(hour24).padStart(2, '0');
-      const minuteStr = String(minutes || 0).padStart(2, '0');
+      const hourStr = String(hour24).padStart(2, "0");
+      const minuteStr = String(minutes || 0).padStart(2, "0");
       const timeString = `${hourStr}:${minuteStr}`;
 
       // Use new format with explicit separate date/time/timezone fields
@@ -217,26 +245,30 @@ export default function IntroductionCallBooking({ onBookingComplete }: Introduct
         userType: formData.userType,
         date: dateString, // YYYY-MM-DD format
         time: timeString, // HH:mm format (24-hour)
-        timeZone: 'Europe/London', // Explicit timezone
-        source: 'portal_widget',
-        therapistId: formData.therapistId
+        timeZone: "Europe/London", // Explicit timezone
+        source: "portal_widget",
+        therapistId: formData.therapistId,
       };
 
-      console.log('Submitting introduction call booking:', bookingData);
-      
-      const response = await apiRequest('POST', '/api/introduction-calls/book-widget', bookingData);
-      
+      console.log("Submitting introduction call booking:", bookingData);
+
+      const response = await apiRequest("POST", "/api/introduction-calls/book-widget", bookingData);
+
       // Handle different response types
       if (!response.ok) {
         const errorResult = await response.json();
-        throw new Error(errorResult.details || errorResult.error || `Server error: ${response.status}`);
+        throw new Error(
+          errorResult.details || errorResult.error || `Server error: ${response.status}`
+        );
       }
-      
+
       const result = await response.json();
 
       if (result.success) {
-        const videoLink = result.videoLink || `/video-session/${result.videoSessionId}?type=introduction-call&role=client`;
-        
+        const videoLink =
+          result.videoLink ||
+          `/video-session/${result.videoSessionId}?type=introduction-call&role=client`;
+
         toast({
           title: "Introduction Call Booked Successfully! 🎉",
           description: `Your call is scheduled for ${formatDate(selectedDate)} at ${selectedTime}. Check your email for details.`,
@@ -247,52 +279,62 @@ export default function IntroductionCallBooking({ onBookingComplete }: Introduct
           onBookingComplete(videoLink);
         }
       } else {
-        throw new Error(result.message || 'Booking failed');
+        throw new Error(result.message || "Booking failed");
       }
     } catch (error: any) {
-      console.error('Booking error:', error);
-      
+      console.error("Booking error:", error);
+
       // Handle specific error types with clearer, more helpful messages
       let errorTitle = "Booking Failed";
       let errorMessage = "Failed to book your introduction call. Please try again.";
-      
+
       if (error.message) {
-        if (error.message.includes('already booked') || error.message.includes('Time slot')) {
+        if (error.message.includes("already booked") || error.message.includes("Time slot")) {
           errorTitle = "⏰ Time Slot No Longer Available";
-          errorMessage = "This time slot was just booked by another client. Please select a different time - we've refreshed the available slots for you.";
+          errorMessage =
+            "This time slot was just booked by another client. Please select a different time - we've refreshed the available slots for you.";
           setTimeout(() => fetchAvailableSlots(selectedDate, true), 500);
-        } else if (error.message.includes('Calendar conflict')) {
+        } else if (error.message.includes("Calendar conflict")) {
           errorTitle = "📅 Calendar Conflict";
-          errorMessage = "This time conflicts with another appointment. Please choose a different available time slot.";
+          errorMessage =
+            "This time conflicts with another appointment. Please choose a different available time slot.";
           setTimeout(() => fetchAvailableSlots(selectedDate, true), 500);
-        } else if (error.message.includes('Date is required')) {
+        } else if (error.message.includes("Date is required")) {
           errorTitle = "📅 Please Select a Date";
-          errorMessage = "A date is required for your introduction call. Please select an available date from the calendar.";
-        } else if (error.message.includes('Time is required')) {
+          errorMessage =
+            "A date is required for your introduction call. Please select an available date from the calendar.";
+        } else if (error.message.includes("Time is required")) {
           errorTitle = "⏰ Please Select a Time";
-          errorMessage = "A time slot is required for your introduction call. Please select an available time.";
-        } else if (error.message.includes('Selected time is invalid')) {
+          errorMessage =
+            "A time slot is required for your introduction call. Please select an available time.";
+        } else if (error.message.includes("Selected time is invalid")) {
           errorTitle = "⚠️ Invalid Time Selected";
           errorMessage = error.message; // Use the specific time error from backend
           setTimeout(() => fetchAvailableSlots(selectedDate, true), 500);
-        } else if (error.message.includes('Selected date is invalid')) {
+        } else if (error.message.includes("Selected date is invalid")) {
           errorTitle = "⚠️ Invalid Date Selected";
           errorMessage = error.message; // Use the specific date error from backend
-        } else if (error.message.includes('validation') || error.message.includes('Invalid')) {
+        } else if (error.message.includes("validation") || error.message.includes("Invalid")) {
           errorTitle = "📝 Please Check Your Information";
-          errorMessage = error.message.includes('Please') ? error.message : "Please check your booking information and try again.";
-        } else if (error.message.includes('network') || error.message.includes('timeout')) {
+          errorMessage = error.message.includes("Please")
+            ? error.message
+            : "Please check your booking information and try again.";
+        } else if (error.message.includes("network") || error.message.includes("timeout")) {
           errorTitle = "🌐 Connection Issue";
-          errorMessage = "Unable to process your booking due to a connection issue. Please check your internet and try again.";
-        } else if (error.message.includes('server') || error.message.includes('500')) {
+          errorMessage =
+            "Unable to process your booking due to a connection issue. Please check your internet and try again.";
+        } else if (error.message.includes("server") || error.message.includes("500")) {
           errorTitle = "🔧 Temporary System Issue";
-          errorMessage = "Our booking system is experiencing a temporary issue. Please try again in a few moments.";
+          errorMessage =
+            "Our booking system is experiencing a temporary issue. Please try again in a few moments.";
         } else {
           errorTitle = "⚠️ Booking Issue";
-          errorMessage = error.message || "An unexpected error occurred. Please try again or contact us at support@hive-wellness.co.uk";
+          errorMessage =
+            error.message ||
+            "An unexpected error occurred. Please try again or contact us at support@hive-wellness.co.uk";
         }
       }
-      
+
       toast({
         title: errorTitle,
         description: errorMessage,
@@ -329,7 +371,7 @@ export default function IntroductionCallBooking({ onBookingComplete }: Introduct
             <Input
               id="name"
               value={formData.name}
-              onChange={(e) => handleInputChange('name', e.target.value)}
+              onChange={(e) => handleInputChange("name", e.target.value)}
               placeholder="Enter your full name"
               data-testid="input-name"
             />
@@ -341,7 +383,7 @@ export default function IntroductionCallBooking({ onBookingComplete }: Introduct
               id="email"
               type="email"
               value={formData.email}
-              onChange={(e) => handleInputChange('email', e.target.value)}
+              onChange={(e) => handleInputChange("email", e.target.value)}
               placeholder="Enter your email address"
               data-testid="input-email"
             />
@@ -352,14 +394,17 @@ export default function IntroductionCallBooking({ onBookingComplete }: Introduct
             <Input
               id="phone"
               value={formData.phone}
-              onChange={(e) => handleInputChange('phone', e.target.value)}
+              onChange={(e) => handleInputChange("phone", e.target.value)}
               placeholder="Enter your phone number"
             />
           </div>
 
           <div>
             <Label htmlFor="userType">I am a... *</Label>
-            <Select value={formData.userType} onValueChange={(value) => handleInputChange('userType', value)}>
+            <Select
+              value={formData.userType}
+              onValueChange={(value) => handleInputChange("userType", value)}
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -379,11 +424,14 @@ export default function IntroductionCallBooking({ onBookingComplete }: Introduct
                 </div>
                 <div>
                   <h3 className="font-semibold text-hive-purple text-lg">Free Introduction Call</h3>
-                  <p className="text-sm text-hive-purple/80">15-minute consultation with our admin team</p>
+                  <p className="text-sm text-hive-purple/80">
+                    15-minute consultation with our admin team
+                  </p>
                 </div>
               </div>
               <p className="text-sm text-gray-700 leading-relaxed">
-                During this call, we'll discuss your needs, answer questions, and help match you with the perfect therapist for your journey.
+                During this call, we'll discuss your needs, answer questions, and help match you
+                with the perfect therapist for your journey.
               </p>
               <div className="flex items-center mt-3 text-xs text-hive-purple/70">
                 <Clock className="h-4 w-4 mr-1" />
@@ -397,15 +445,15 @@ export default function IntroductionCallBooking({ onBookingComplete }: Introduct
             <Textarea
               id="message"
               value={formData.message}
-              onChange={(e) => handleInputChange('message', e.target.value)}
+              onChange={(e) => handleInputChange("message", e.target.value)}
               placeholder="Tell us about your interest in our services or what you hope to achieve..."
               rows={4}
             />
           </div>
 
           <div className="flex justify-end pt-4">
-            <Button 
-              onClick={handleNextStep} 
+            <Button
+              onClick={handleNextStep}
               className="bg-hive-purple hover:bg-hive-purple/90"
               data-testid="button-next-step"
             >
@@ -443,8 +491,8 @@ export default function IntroductionCallBooking({ onBookingComplete }: Introduct
             <h4 className="font-semibold text-gray-900 mb-3">Select Date</h4>
             <p className="text-sm text-gray-600 mb-4">Available Monday - Friday</p>
             <div className="flex items-center justify-between mb-4">
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 size="sm"
                 onClick={() => {
                   const newDate = new Date(selectedDate);
@@ -454,11 +502,9 @@ export default function IntroductionCallBooking({ onBookingComplete }: Introduct
               >
                 <ChevronLeft className="w-4 h-4" />
               </Button>
-              <h3 className="font-semibold text-lg">
-                {formatDate(selectedDate)}
-              </h3>
-              <Button 
-                variant="outline" 
+              <h3 className="font-semibold text-lg">{formatDate(selectedDate)}</h3>
+              <Button
+                variant="outline"
                 size="sm"
                 onClick={() => {
                   const newDate = new Date(selectedDate);
@@ -470,21 +516,24 @@ export default function IntroductionCallBooking({ onBookingComplete }: Introduct
               </Button>
             </div>
             <div className="grid grid-cols-7 gap-2 text-center text-sm">
-              {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
-                <div key={day} className="font-medium text-gray-500 py-2">{day}</div>
+              {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
+                <div key={day} className="font-medium text-gray-500 py-2">
+                  {day}
+                </div>
               ))}
               {generateCalendarDays(selectedDate).map((day, i) => {
                 const isCurrentMonth = day.getMonth() === selectedDate.getMonth();
-                const isSelected = day.getDate() === selectedDate.getDate() && 
-                                 day.getMonth() === selectedDate.getMonth() && 
-                                 day.getFullYear() === selectedDate.getFullYear();
+                const isSelected =
+                  day.getDate() === selectedDate.getDate() &&
+                  day.getMonth() === selectedDate.getMonth() &&
+                  day.getFullYear() === selectedDate.getFullYear();
                 const isToday = day.toDateString() === new Date().toDateString();
                 const isWeekend = day.getDay() === 0 || day.getDay() === 6;
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
                 const isPast = day.getTime() < today.getTime();
                 const isDisabled = isWeekend || isPast || !isCurrentMonth;
-                
+
                 return (
                   <button
                     key={i}
@@ -492,14 +541,14 @@ export default function IntroductionCallBooking({ onBookingComplete }: Introduct
                     disabled={isDisabled}
                     className={`py-2 px-1 rounded-lg text-sm transition-colors ${
                       isSelected && !isDisabled
-                        ? 'bg-hive-purple text-white' 
+                        ? "bg-hive-purple text-white"
                         : isToday && !isDisabled
-                          ? 'bg-hive-purple/20 text-hive-purple font-semibold'
+                          ? "bg-hive-purple/20 text-hive-purple font-semibold"
                           : isDisabled
-                            ? 'text-gray-300 cursor-not-allowed' 
-                            : isCurrentMonth 
-                              ? 'hover:bg-hive-purple/10 text-gray-900 cursor-pointer' 
-                              : 'text-gray-300'
+                            ? "text-gray-300 cursor-not-allowed"
+                            : isCurrentMonth
+                              ? "hover:bg-hive-purple/10 text-gray-900 cursor-pointer"
+                              : "text-gray-300"
                     }`}
                   >
                     {day.getDate()}
@@ -521,14 +570,18 @@ export default function IntroductionCallBooking({ onBookingComplete }: Introduct
                 className="flex items-center gap-2"
                 data-testid="button-refresh-availability"
               >
-                <RefreshCw className={`w-4 h-4 ${refreshingAvailability ? 'animate-spin' : ''}`} />
-                {refreshingAvailability ? 'Refreshing...' : 'Refresh'}
+                <RefreshCw className={`w-4 h-4 ${refreshingAvailability ? "animate-spin" : ""}`} />
+                {refreshingAvailability ? "Refreshing..." : "Refresh"}
               </Button>
             </div>
             <p className="text-sm text-gray-600 mb-4">
-              {loadingSlots ? "Checking availability..." : refreshingAvailability ? "Updating availability..." : "Select your preferred time slot"}
+              {loadingSlots
+                ? "Checking availability..."
+                : refreshingAvailability
+                  ? "Updating availability..."
+                  : "Select your preferred time slot"}
             </p>
-            
+
             {loadingSlots ? (
               <div className="flex items-center justify-center py-8">
                 <Loader2 className="w-6 h-6 animate-spin text-hive-purple" />
@@ -544,8 +597,8 @@ export default function IntroductionCallBooking({ onBookingComplete }: Introduct
                     onClick={() => slot.available && setSelectedTime(slot.time)}
                     disabled={!slot.available}
                     className={`relative py-3 px-4 text-base font-medium transition-all duration-200 ${
-                      selectedTime === slot.time 
-                        ? "bg-hive-purple hover:bg-hive-purple/90 shadow-md transform scale-105" 
+                      selectedTime === slot.time
+                        ? "bg-hive-purple hover:bg-hive-purple/90 shadow-md transform scale-105"
                         : slot.available
                           ? "hover:bg-hive-purple/5 hover:border-hive-purple/30 hover:scale-102"
                           : "opacity-40 cursor-not-allowed bg-gray-50 text-gray-400 hover:scale-100"
@@ -558,9 +611,7 @@ export default function IntroductionCallBooking({ onBookingComplete }: Introduct
                       {selectedTime === slot.time && (
                         <span className="text-xs bg-white/20 px-2 py-1 rounded-full">Selected</span>
                       )}
-                      {!slot.available && (
-                        <span className="text-xs opacity-70">(Booked)</span>
-                      )}
+                      {!slot.available && <span className="text-xs opacity-70">(Booked)</span>}
                     </span>
                   </Button>
                 ))}
@@ -592,16 +643,12 @@ export default function IntroductionCallBooking({ onBookingComplete }: Introduct
                 <strong>Email:</strong> {formData.email}
               </div>
             </div>
-            
+
             <div className="flex gap-3">
-              <Button 
-                variant="outline"
-                onClick={() => setStep(1)}
-                className="flex-1"
-              >
+              <Button variant="outline" onClick={() => setStep(1)} className="flex-1">
                 Back to Details
               </Button>
-              <Button 
+              <Button
                 onClick={handleBooking}
                 disabled={isSubmitting}
                 className="bg-hive-purple hover:bg-hive-purple/90 flex-1"

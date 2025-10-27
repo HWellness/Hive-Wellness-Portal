@@ -11,24 +11,23 @@ export default function ClientDocuments() {
   const handleDownloadDocument = async () => {
     try {
       setIsDownloading(true);
-      
-      const documentUrl = '/documents/HW-Client-Information-Pack_1753986034497.pdf';
-      
-      const link = document.createElement('a');
+
+      const documentUrl = "/documents/HW-Client-Information-Pack_1753986034497.pdf";
+
+      const link = document.createElement("a");
       link.href = documentUrl;
-      link.download = 'Hive-Wellness-Client-Information-Pack.pdf';
+      link.download = "Hive-Wellness-Client-Information-Pack.pdf";
       document.body.appendChild(link);
       link.click();
-      
+
       document.body.removeChild(link);
-      
+
       toast({
         title: "Download Complete",
         description: "Your client information pack has been downloaded successfully.",
       });
-      
     } catch (error) {
-      console.error('Download error:', error);
+      console.error("Download error:", error);
       toast({
         title: "Download Failed",
         description: error instanceof Error ? error.message : "Failed to download document",
@@ -41,11 +40,10 @@ export default function ClientDocuments() {
 
   const handleViewDocument = async () => {
     try {
-      const documentUrl = '/documents/HW-Client-Information-Pack_1753986034497.pdf';
-      window.open(documentUrl, '_blank');
-      
+      const documentUrl = "/documents/HW-Client-Information-Pack_1753986034497.pdf";
+      window.open(documentUrl, "_blank");
     } catch (error) {
-      console.error('View error:', error);
+      console.error("View error:", error);
       toast({
         title: "View Failed",
         description: "Failed to open document",
@@ -108,7 +106,7 @@ export default function ClientDocuments() {
             </div>
 
             <div className="flex space-x-4">
-              <Button 
+              <Button
                 onClick={handleViewDocument}
                 className="flex-1 bg-hive-purple hover:bg-hive-purple/90 text-white"
                 data-testid="button-view-info-pack"
@@ -116,7 +114,7 @@ export default function ClientDocuments() {
                 <ExternalLink className="w-4 h-4 mr-2" />
                 View Document
               </Button>
-              <Button 
+              <Button
                 onClick={handleDownloadDocument}
                 disabled={isDownloading}
                 variant="outline"
@@ -124,14 +122,14 @@ export default function ClientDocuments() {
                 data-testid="button-download-info-pack"
               >
                 <Download className="w-4 h-4 mr-2" />
-                {isDownloading ? 'Downloading...' : 'Download PDF'}
+                {isDownloading ? "Downloading..." : "Download PDF"}
               </Button>
             </div>
 
             <div className="mt-6 pt-4 border-t border-hive-purple/20">
               <p className="text-sm text-hive-black/60">
-                <strong>Need help?</strong> If you have any questions about the information in this pack, 
-                please contact our support team at admin@hive-wellness.co.uk
+                <strong>Need help?</strong> If you have any questions about the information in this
+                pack, please contact our support team at admin@hive-wellness.co.uk
               </p>
             </div>
           </div>

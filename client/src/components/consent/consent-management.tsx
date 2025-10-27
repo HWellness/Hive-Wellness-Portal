@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -6,17 +6,17 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { Badge } from '@/components/ui/badge';
-import { Shield, History, Info, Check } from 'lucide-react';
-import { useToast } from '@/hooks/use-toast';
-import { apiRequest, queryClient } from '@/lib/queryClient';
-import { useQuery } from '@tanstack/react-query';
-import { format } from 'date-fns';
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { Badge } from "@/components/ui/badge";
+import { Shield, History, Info, Check } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useQuery } from "@tanstack/react-query";
+import { format } from "date-fns";
 
 interface ConsentPreferences {
   essential: boolean;
@@ -29,7 +29,7 @@ interface ConsentPreferences {
 interface ConsentHistoryEntry {
   id: string;
   consentType: string;
-  action: 'granted' | 'withdrawn' | 'updated';
+  action: "granted" | "withdrawn" | "updated";
   previousValue: boolean | null;
   newValue: boolean;
   timestamp: string;
@@ -37,32 +37,32 @@ interface ConsentHistoryEntry {
 
 const CONSENT_INFO = {
   essential: {
-    title: 'Essential Services',
-    description: 'Required for platform functionality, authentication, and security.',
+    title: "Essential Services",
+    description: "Required for platform functionality, authentication, and security.",
     icon: Shield,
     required: true,
   },
   functional: {
-    title: 'Functional Features',
-    description: 'Enhanced features, preferences, and personalised content.',
+    title: "Functional Features",
+    description: "Enhanced features, preferences, and personalised content.",
     icon: Check,
     required: false,
   },
   analytics: {
-    title: 'Analytics & Performance',
-    description: 'Anonymised data to improve services and fix issues.',
+    title: "Analytics & Performance",
+    description: "Anonymised data to improve services and fix issues.",
     icon: Info,
     required: false,
   },
   marketing: {
-    title: 'Marketing Communications',
-    description: 'Updates, resources, wellness tips, and promotional offers via email.',
+    title: "Marketing Communications",
+    description: "Updates, resources, wellness tips, and promotional offers via email.",
     icon: Info,
     required: false,
   },
   medical_data_processing: {
-    title: 'AI-Powered Therapy Tools',
-    description: 'Chatbot, therapist matching, and AI session analysis (HIPAA-compliant).',
+    title: "AI-Powered Therapy Tools",
+    description: "Chatbot, therapist matching, and AI session analysis (HIPAA-compliant).",
     icon: Shield,
     required: false,
   },
@@ -81,8 +81,11 @@ export function ConsentManagement() {
   const [showHistory, setShowHistory] = useState(false);
 
   // Fetch current consents
-  const { data: currentConsents, isLoading } = useQuery<{ success: boolean; consents: ConsentPreferences }>({
-    queryKey: ['/api/user/consent'],
+  const { data: currentConsents, isLoading } = useQuery<{
+    success: boolean;
+    consents: ConsentPreferences;
+  }>({
+    queryKey: ["/api/user/consent"],
     onSuccess: (data) => {
       if (data.consents) {
         setConsents(data.consents);
@@ -95,12 +98,12 @@ export function ConsentManagement() {
     success: boolean;
     history: ConsentHistoryEntry[];
   }>({
-    queryKey: ['/api/user/consent/history'],
+    queryKey: ["/api/user/consent/history"],
     enabled: showHistory,
   });
 
   const handleToggle = (key: keyof ConsentPreferences) => {
-    if (key === 'essential') return; // Cannot toggle essential
+    if (key === "essential") return; // Cannot toggle essential
     setConsents((prev) => ({
       ...prev,
       [key]: !prev[key],
@@ -110,28 +113,28 @@ export function ConsentManagement() {
   const handleSave = async () => {
     setIsSubmitting(true);
     try {
-      await apiRequest('/api/user/consent', {
-        method: 'POST',
+      await apiRequest("/api/user/consent", {
+        method: "POST",
         body: JSON.stringify({ consents }),
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       });
 
       // Invalidate consent query to refresh
-      queryClient.invalidateQueries({ queryKey: ['/api/user/consent'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/user/consent/history'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user/consent"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/user/consent/history"] });
 
       toast({
-        title: 'Preferences updated',
-        description: 'Your consent preferences have been saved successfully.',
+        title: "Preferences updated",
+        description: "Your consent preferences have been saved successfully.",
       });
     } catch (error) {
-      console.error('Error saving consents:', error);
+      console.error("Error saving consents:", error);
       toast({
-        title: 'Error',
-        description: 'Failed to save consent preferences. Please try again.',
-        variant: 'destructive',
+        title: "Error",
+        description: "Failed to save consent preferences. Please try again.",
+        variant: "destructive",
       });
     } finally {
       setIsSubmitting(false);
@@ -152,7 +155,8 @@ export function ConsentManagement() {
             Privacy & Consent Preferences
           </CardTitle>
           <CardDescription>
-            Manage your data processing consents and privacy preferences. Changes take effect immediately.
+            Manage your data processing consents and privacy preferences. Changes take effect
+            immediately.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -171,7 +175,10 @@ export function ConsentManagement() {
                       </div>
                       <div className="space-y-1 flex-1">
                         <div className="flex items-center gap-2">
-                          <Label htmlFor={`consent-${key}`} className="text-base font-medium cursor-pointer">
+                          <Label
+                            htmlFor={`consent-${key}`}
+                            className="text-base font-medium cursor-pointer"
+                          >
                             {info.title}
                           </Label>
                           {info.required && (
@@ -191,7 +198,7 @@ export function ConsentManagement() {
                       data-testid={`consent-toggle-${key}`}
                     />
                   </div>
-                  {key !== 'medical_data_processing' && <Separator />}
+                  {key !== "medical_data_processing" && <Separator />}
                 </div>
               );
             })
@@ -204,10 +211,14 @@ export function ConsentManagement() {
             data-testid="button-view-history"
           >
             <History className="h-4 w-4 mr-2" />
-            {showHistory ? 'Hide' : 'View'} History
+            {showHistory ? "Hide" : "View"} History
           </Button>
-          <Button onClick={handleSave} disabled={isSubmitting || !hasChanges()} data-testid="button-save-consents">
-            {isSubmitting ? 'Saving...' : 'Save Preferences'}
+          <Button
+            onClick={handleSave}
+            disabled={isSubmitting || !hasChanges()}
+            data-testid="button-save-consents"
+          >
+            {isSubmitting ? "Saving..." : "Save Preferences"}
           </Button>
         </CardFooter>
       </Card>
@@ -220,7 +231,8 @@ export function ConsentManagement() {
               Consent History
             </CardTitle>
             <CardDescription>
-              A complete audit trail of all changes to your consent preferences for transparency and compliance.
+              A complete audit trail of all changes to your consent preferences for transparency and
+              compliance.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -229,25 +241,33 @@ export function ConsentManagement() {
             ) : historyData?.history && historyData.history.length > 0 ? (
               <div className="space-y-4">
                 {historyData.history.map((entry) => (
-                  <div key={entry.id} className="flex items-start gap-4 p-4 border rounded-lg" data-testid={`history-entry-${entry.id}`}>
+                  <div
+                    key={entry.id}
+                    className="flex items-start gap-4 p-4 border rounded-lg"
+                    data-testid={`history-entry-${entry.id}`}
+                  >
                     <div className="flex-1 space-y-1">
                       <div className="flex items-center gap-2">
-                        <span className="font-medium capitalize">{entry.consentType.replace(/_/g, ' ')}</span>
-                        <Badge variant={entry.newValue ? 'default' : 'secondary'}>
-                          {entry.action === 'granted' && 'Granted'}
-                          {entry.action === 'withdrawn' && 'Withdrawn'}
-                          {entry.action === 'updated' && (entry.newValue ? 'Enabled' : 'Disabled')}
+                        <span className="font-medium capitalize">
+                          {entry.consentType.replace(/_/g, " ")}
+                        </span>
+                        <Badge variant={entry.newValue ? "default" : "secondary"}>
+                          {entry.action === "granted" && "Granted"}
+                          {entry.action === "withdrawn" && "Withdrawn"}
+                          {entry.action === "updated" && (entry.newValue ? "Enabled" : "Disabled")}
                         </Badge>
                       </div>
                       <p className="text-sm text-muted-foreground">
-                        {format(new Date(entry.timestamp), 'PPpp')}
+                        {format(new Date(entry.timestamp), "PPpp")}
                       </p>
                     </div>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-8 text-muted-foreground">No consent history available.</div>
+              <div className="text-center py-8 text-muted-foreground">
+                No consent history available.
+              </div>
             )}
           </CardContent>
         </Card>
@@ -258,9 +278,7 @@ export function ConsentManagement() {
           <CardTitle className="text-base">Your Rights</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2 text-sm text-muted-foreground">
-          <p>
-            Under GDPR and UK Data Protection Act, you have the right to:
-          </p>
+          <p>Under GDPR and UK Data Protection Act, you have the right to:</p>
           <ul className="list-disc list-inside space-y-1 ml-2">
             <li>Access your personal data (request a data export)</li>
             <li>Rectify inaccurate data (update your profile)</li>
@@ -270,7 +288,7 @@ export function ConsentManagement() {
             <li>Withdraw consent at any time</li>
           </ul>
           <p className="mt-3">
-            For any privacy concerns, contact us at{' '}
+            For any privacy concerns, contact us at{" "}
             <a href="mailto:support@hive-wellness.co.uk" className="text-primary hover:underline">
               support@hive-wellness.co.uk
             </a>

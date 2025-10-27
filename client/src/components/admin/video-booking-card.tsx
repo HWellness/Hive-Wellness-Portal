@@ -1,7 +1,7 @@
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Video, Calendar, Clock } from 'lucide-react';
-import { Link } from 'wouter';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Video, Calendar, Clock } from "lucide-react";
+import { Link } from "wouter";
 
 export function VideoBookingCard() {
   return (
@@ -30,7 +30,7 @@ export function VideoBookingCard() {
             <span>Email confirmations sent to all participants</span>
           </div>
         </div>
-        
+
         <Link href="/book-video">
           <Button className="w-full mt-4 bg-purple-600 hover:bg-purple-700">
             <Video className="w-4 h-4 mr-2" />

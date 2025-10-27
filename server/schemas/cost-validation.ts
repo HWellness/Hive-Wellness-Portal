@@ -6,15 +6,15 @@ import { z } from "zod";
  */
 
 // Supported currencies
-export const currencySchema = z.enum(['GBP', 'USD']).default('GBP');
+export const currencySchema = z.enum(["GBP", "USD"]).default("GBP");
 
 // Month format validation (YYYY-MM)
 export const monthSchema = z.string().regex(/^\d{4}-\d{2}$/, {
-  message: "Month must be in YYYY-MM format"
+  message: "Month must be in YYYY-MM format",
 });
 
 // Time range validation
-export const timeRangeSchema = z.enum(['1M', '3M', '6M', '1Y', '2Y']).default('6M');
+export const timeRangeSchema = z.enum(["1M", "3M", "6M", "1Y", "2Y"]).default("6M");
 
 // Cost query parameters schema
 export const costQuerySchema = z.object({
@@ -45,14 +45,16 @@ export const therapistCostSchema = z.object({
 export const costOptimizationSchema = z.object({
   month: monthSchema.optional(),
   currency: currencySchema.optional(),
-  optimizationType: z.enum([
-    'all',
-    'low-utilization',
-    'plan-downgrade', 
-    'storage-cleanup',
-    'api-optimization',
-    'license-consolidation'
-  ]).default('all'),
+  optimizationType: z
+    .enum([
+      "all",
+      "low-utilization",
+      "plan-downgrade",
+      "storage-cleanup",
+      "api-optimization",
+      "license-consolidation",
+    ])
+    .default("all"),
   minSavingsThreshold: z.number().min(0).default(0),
 });
 
@@ -61,7 +63,7 @@ export const costProjectionSchema = z.object({
   projectionMonths: z.number().int().min(1).max(24).default(12),
   targetTherapistCount: z.number().int().min(1),
   currency: currencySchema.optional(),
-  growthScenario: z.enum(['conservative', 'realistic', 'aggressive']).default('realistic'),
+  growthScenario: z.enum(["conservative", "realistic", "aggressive"]).default("realistic"),
 });
 
 // Budget variance request schema
@@ -77,7 +79,9 @@ export const costReportSchema = z.object({
   startMonth: monthSchema,
   endMonth: monthSchema,
   currency: currencySchema.optional(),
-  reportType: z.enum(['summary', 'detailed', 'therapist-breakdown', 'optimization']).default('summary'),
+  reportType: z
+    .enum(["summary", "detailed", "therapist-breakdown", "optimization"])
+    .default("summary"),
   includeCharts: z.boolean().default(true),
   emailReport: z.boolean().default(false),
   recipients: z.array(z.string().email()).optional(),
@@ -86,7 +90,7 @@ export const costReportSchema = z.object({
 // Workspace account cost update schema
 export const workspaceAccountCostSchema = z.object({
   workspaceAccountId: z.string().uuid(),
-  newPlanType: z.enum(['business-starter', 'business-standard', 'business-plus']),
+  newPlanType: z.enum(["business-starter", "business-standard", "business-plus"]),
   currency: currencySchema.optional(),
   effectiveDate: z.string().datetime().optional(),
   reason: z.string().min(1).max(500).optional(),
@@ -95,7 +99,7 @@ export const workspaceAccountCostSchema = z.object({
 // Cost budget creation/update schema
 export const costBudgetSchema = z.object({
   budgetName: z.string().min(1).max(100),
-  budgetType: z.enum(['monthly', 'quarterly', 'annual', 'per-therapist']),
+  budgetType: z.enum(["monthly", "quarterly", "annual", "per-therapist"]),
   budgetAmount: z.number().positive(),
   currency: currencySchema.optional(),
   budgetPeriod: z.string().min(1).max(20), // YYYY-MM or YYYY-Q1, etc.

@@ -1,29 +1,41 @@
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { useToast } from '@/hooks/use-toast';
-import { apiRequest } from '@/lib/queryClient';
-import { 
-  UserPlus, 
-  Users, 
-  CheckCircle, 
-  AlertCircle, 
-  Clock, 
-  Mail, 
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import {
+  UserPlus,
+  Users,
+  CheckCircle,
+  AlertCircle,
+  Clock,
+  Mail,
   User,
   RefreshCw,
   FileText,
-  ArrowLeft
-} from 'lucide-react';
+  ArrowLeft,
+} from "lucide-react";
 
 interface AdminAccountCreationProps {
-  user: { id: string; role: string; firstName?: string; };
+  user: { id: string; role: string; firstName?: string };
   onBack?: () => void;
 }
 
@@ -31,21 +43,25 @@ export default function AdminAccountCreation({ user, onBack }: AdminAccountCreat
   const [showManualForm, setShowManualForm] = useState(false);
   const [showPasswordModal, setShowPasswordModal] = useState(false);
   const [createdAccountInfo, setCreatedAccountInfo] = useState<any>(null);
-  const [accountType, setAccountType] = useState<'client' | 'therapist'>('client');
+  const [accountType, setAccountType] = useState<"client" | "therapist">("client");
   const [formData, setFormData] = useState({
-    email: '',
-    firstName: '',
-    lastName: '',
-    password: '',
-    role: 'client' as 'client' | 'therapist'
+    email: "",
+    firstName: "",
+    lastName: "",
+    password: "",
+    role: "client" as "client" | "therapist",
   });
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   // Fetch pending questionnaire submissions
-  const { data: pendingSubmissions, isLoading: submissionsLoading, refetch: refetchSubmissions } = useQuery({
-    queryKey: ['/api/admin/pending-account-creations'],
-    staleTime: 0
+  const {
+    data: pendingSubmissions,
+    isLoading: submissionsLoading,
+    refetch: refetchSubmissions,
+  } = useQuery({
+    queryKey: ["/api/admin/pending-account-creations"],
+    staleTime: 0,
   });
 
   // Manual account creation mutation
@@ -64,9 +80,9 @@ export default function AdminAccountCreation({ user, onBack }: AdminAccountCreat
           description: `${data.role} account created for ${data.firstName} ${data.lastName}`,
         });
       }
-      setFormData({ email: '', firstName: '', lastName: '', password: '', role: 'client' });
+      setFormData({ email: "", firstName: "", lastName: "", password: "", role: "client" });
       setShowManualForm(false);
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/pending-account-creations'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/pending-account-creations"] });
     },
     onError: (error: any) => {
       toast({
@@ -74,13 +90,15 @@ export default function AdminAccountCreation({ user, onBack }: AdminAccountCreat
         description: error.message || "Failed to create account",
         variant: "destructive",
       });
-    }
+    },
   });
 
   // Bulk account creation from submissions
   const bulkCreateMutation = useMutation({
     mutationFn: async (submissionIds: string[]) => {
-      const response = await apiRequest("POST", "/api/admin/bulk-create-accounts", { submissionIds });
+      const response = await apiRequest("POST", "/api/admin/bulk-create-accounts", {
+        submissionIds,
+      });
       return response.json();
     },
     onSuccess: (data) => {
@@ -96,13 +114,15 @@ export default function AdminAccountCreation({ user, onBack }: AdminAccountCreat
         description: error.message || "Failed to create accounts in bulk",
         variant: "destructive",
       });
-    }
+    },
   });
 
   // Create account from specific submission
   const createFromSubmissionMutation = useMutation({
     mutationFn: async (submissionId: string) => {
-      const response = await apiRequest("POST", "/api/admin/create-account-from-submission", { submissionId });
+      const response = await apiRequest("POST", "/api/admin/create-account-from-submission", {
+        submissionId,
+      });
       return response.json();
     },
     onSuccess: (data) => {
@@ -123,7 +143,7 @@ export default function AdminAccountCreation({ user, onBack }: AdminAccountCreat
         description: error.message || "Failed to create account from submission",
         variant: "destructive",
       });
-    }
+    },
   });
 
   const handleManualSubmit = (e: React.FormEvent) => {
@@ -165,7 +185,7 @@ export default function AdminAccountCreation({ user, onBack }: AdminAccountCreat
               disabled={submissionsLoading}
               variant="outline"
             >
-              <RefreshCw className={`h-4 w-4 mr-2 ${submissionsLoading ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`h-4 w-4 mr-2 ${submissionsLoading ? "animate-spin" : ""}`} />
               Refresh
             </Button>
           </div>
@@ -180,7 +200,9 @@ export default function AdminAccountCreation({ user, onBack }: AdminAccountCreat
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-slate-600">Pending Client Forms</p>
-                  <p className="text-2xl font-bold text-hive-purple">{stats.clientSubmissions || 0}</p>
+                  <p className="text-2xl font-bold text-hive-purple">
+                    {stats.clientSubmissions || 0}
+                  </p>
                 </div>
                 <User className="h-8 w-8 text-hive-purple/60" />
               </div>
@@ -192,7 +214,9 @@ export default function AdminAccountCreation({ user, onBack }: AdminAccountCreat
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-sm text-slate-600">Pending Therapist Forms</p>
-                  <p className="text-2xl font-bold text-blue-600">{stats.therapistSubmissions || 0}</p>
+                  <p className="text-2xl font-bold text-blue-600">
+                    {stats.therapistSubmissions || 0}
+                  </p>
                 </div>
                 <UserPlus className="h-8 w-8 text-blue-600/60" />
               </div>
@@ -231,14 +255,16 @@ export default function AdminAccountCreation({ user, onBack }: AdminAccountCreat
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <div>
-                    <CardTitle className="text-hive-purple">Pending Questionnaire Submissions</CardTitle>
+                    <CardTitle className="text-hive-purple">
+                      Pending Questionnaire Submissions
+                    </CardTitle>
                     <p className="text-sm text-slate-600 mt-1">
                       Create accounts automatically from completed questionnaires
                     </p>
                   </div>
                   {submissions.length > 0 && (
                     <Button
-                      onClick={() => bulkCreateMutation.mutate(submissions.map(s => s.id))}
+                      onClick={() => bulkCreateMutation.mutate(submissions.map((s) => s.id))}
                       disabled={bulkCreateMutation.isPending}
                       className="bg-green-600 hover:bg-green-700"
                     >
@@ -260,23 +286,32 @@ export default function AdminAccountCreation({ user, onBack }: AdminAccountCreat
               <CardContent>
                 {submissionsLoading ? (
                   <div className="space-y-4">
-                    {Array(3).fill(0).map((_, i) => (
-                      <div key={i} className="animate-pulse p-4 border border-slate-200 rounded-lg">
-                        <div className="flex items-center justify-between">
-                          <div className="space-y-2">
-                            <div className="h-4 bg-slate-200 rounded w-32"></div>
-                            <div className="h-3 bg-slate-200 rounded w-48"></div>
+                    {Array(3)
+                      .fill(0)
+                      .map((_, i) => (
+                        <div
+                          key={i}
+                          className="animate-pulse p-4 border border-slate-200 rounded-lg"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="space-y-2">
+                              <div className="h-4 bg-slate-200 rounded w-32"></div>
+                              <div className="h-3 bg-slate-200 rounded w-48"></div>
+                            </div>
+                            <div className="h-8 bg-slate-200 rounded w-20"></div>
                           </div>
-                          <div className="h-8 bg-slate-200 rounded w-20"></div>
                         </div>
-                      </div>
-                    ))}
+                      ))}
                   </div>
                 ) : submissions.length === 0 ? (
                   <div className="text-center py-12">
                     <FileText className="h-12 w-12 text-slate-400 mx-auto mb-4" />
-                    <h3 className="text-lg font-semibold text-slate-700 mb-2">No Pending Submissions</h3>
-                    <p className="text-slate-600">All questionnaire submissions have been processed.</p>
+                    <h3 className="text-lg font-semibold text-slate-700 mb-2">
+                      No Pending Submissions
+                    </h3>
+                    <p className="text-slate-600">
+                      All questionnaire submissions have been processed.
+                    </p>
                   </div>
                 ) : (
                   <div className="space-y-4">
@@ -288,8 +323,16 @@ export default function AdminAccountCreation({ user, onBack }: AdminAccountCreat
                               <h4 className="font-semibold text-slate-900">
                                 {submission.firstName} {submission.lastName}
                               </h4>
-                              <Badge variant={submission.formType === 'therapist-questionnaire' ? 'default' : 'secondary'}>
-                                {submission.formType === 'therapist-questionnaire' ? 'Therapist' : 'Client'}
+                              <Badge
+                                variant={
+                                  submission.formType === "therapist-questionnaire"
+                                    ? "default"
+                                    : "secondary"
+                                }
+                              >
+                                {submission.formType === "therapist-questionnaire"
+                                  ? "Therapist"
+                                  : "Client"}
                               </Badge>
                               {submission.hasExistingAccount && (
                                 <Badge variant="outline">
@@ -311,17 +354,24 @@ export default function AdminAccountCreation({ user, onBack }: AdminAccountCreat
                           </div>
                           <Button
                             onClick={() => createFromSubmissionMutation.mutate(submission.id)}
-                            disabled={createFromSubmissionMutation.isPending || submission.hasExistingAccount}
+                            disabled={
+                              createFromSubmissionMutation.isPending ||
+                              submission.hasExistingAccount
+                            }
                             size="sm"
-                            className={submission.hasExistingAccount ? '' : 'bg-hive-purple hover:bg-hive-purple/90'}
-                            variant={submission.hasExistingAccount ? 'outline' : 'default'}
+                            className={
+                              submission.hasExistingAccount
+                                ? ""
+                                : "bg-hive-purple hover:bg-hive-purple/90"
+                            }
+                            variant={submission.hasExistingAccount ? "outline" : "default"}
                           >
                             {createFromSubmissionMutation.isPending ? (
                               <RefreshCw className="h-4 w-4 animate-spin" />
                             ) : submission.hasExistingAccount ? (
-                              'Account Exists'
+                              "Account Exists"
                             ) : (
-                              'Create Account'
+                              "Create Account"
                             )}
                           </Button>
                         </div>
@@ -359,7 +409,9 @@ export default function AdminAccountCreation({ user, onBack }: AdminAccountCreat
                         <Label htmlFor="role">Account Type</Label>
                         <Select
                           value={formData.role}
-                          onValueChange={(value) => setFormData({...formData, role: value as 'client' | 'therapist'})}
+                          onValueChange={(value) =>
+                            setFormData({ ...formData, role: value as "client" | "therapist" })
+                          }
                         >
                           <SelectTrigger>
                             <SelectValue placeholder="Select account type" />
@@ -377,7 +429,9 @@ export default function AdminAccountCreation({ user, onBack }: AdminAccountCreat
                           <Input
                             id="firstName"
                             value={formData.firstName}
-                            onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+                            onChange={(e) =>
+                              setFormData({ ...formData, firstName: e.target.value })
+                            }
                             required
                           />
                         </div>
@@ -386,7 +440,7 @@ export default function AdminAccountCreation({ user, onBack }: AdminAccountCreat
                           <Input
                             id="lastName"
                             value={formData.lastName}
-                            onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+                            onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
                             required
                           />
                         </div>
@@ -398,7 +452,7 @@ export default function AdminAccountCreation({ user, onBack }: AdminAccountCreat
                           id="email"
                           type="email"
                           value={formData.email}
-                          onChange={(e) => setFormData({...formData, email: e.target.value})}
+                          onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                           required
                         />
                       </div>
@@ -409,7 +463,7 @@ export default function AdminAccountCreation({ user, onBack }: AdminAccountCreat
                           id="password"
                           type="password"
                           value={formData.password}
-                          onChange={(e) => setFormData({...formData, password: e.target.value})}
+                          onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                           placeholder="Minimum 8 characters"
                           minLength={8}
                           required
@@ -445,24 +499,26 @@ export default function AdminAccountCreation({ user, onBack }: AdminAccountCreat
                 <CardTitle className="text-hive-purple text-lg">Quick Actions</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="w-full justify-start"
-                  onClick={() => window.location.href = '/admin-therapist-applications'}
+                  onClick={() => (window.location.href = "/admin-therapist-applications")}
                 >
                   <FileText className="h-4 w-4 mr-2" />
                   View Therapist Applications
                 </Button>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="w-full justify-start"
-                  onClick={() => window.location.href = '/admin-dashboard?service=user-management'}
+                  onClick={() =>
+                    (window.location.href = "/admin-dashboard?service=user-management")
+                  }
                 >
                   <Users className="h-4 w-4 mr-2" />
                   Manage Existing Users
                 </Button>
-                <Button 
-                  variant="outline" 
+                <Button
+                  variant="outline"
                   className="w-full justify-start"
                   onClick={() => refetchSubmissions()}
                 >
@@ -493,7 +549,7 @@ export default function AdminAccountCreation({ user, onBack }: AdminAccountCreat
                     {createdAccountInfo.role}
                   </Badge>
                 </div>
-                
+
                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                   <h4 className="font-semibold text-yellow-800 mb-2">Temporary Login Details</h4>
                   <div className="space-y-2 text-sm">
@@ -501,7 +557,7 @@ export default function AdminAccountCreation({ user, onBack }: AdminAccountCreat
                       <span className="font-medium">Email:</span> {createdAccountInfo.email}
                     </div>
                     <div>
-                      <span className="font-medium">Temporary Password:</span> 
+                      <span className="font-medium">Temporary Password:</span>
                       <code className="ml-2 bg-white px-2 py-1 rounded border font-mono text-red-600">
                         {createdAccountInfo.temporaryPassword}
                       </code>
@@ -511,9 +567,9 @@ export default function AdminAccountCreation({ user, onBack }: AdminAccountCreat
                     ⚠️ <strong>Important:</strong> User must change this password on first login
                   </div>
                 </div>
-                
+
                 <div className="text-center">
-                  <Button 
+                  <Button
                     onClick={() => {
                       navigator.clipboard.writeText(createdAccountInfo.temporaryPassword);
                       toast({ title: "Password copied to clipboard" });
@@ -523,7 +579,7 @@ export default function AdminAccountCreation({ user, onBack }: AdminAccountCreat
                   >
                     Copy Password
                   </Button>
-                  <Button 
+                  <Button
                     onClick={() => setShowPasswordModal(false)}
                     className="bg-hive-purple hover:bg-hive-purple/90"
                   >

@@ -4,11 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { 
-  User, 
-  Mail, 
-  Phone, 
-  MapPin, 
+import {
+  User,
+  Mail,
+  Phone,
+  MapPin,
   Calendar,
   FileText,
   MessageSquare,
@@ -21,23 +21,27 @@ import {
   Heart,
   Clock,
   CheckCircle,
-  AlertTriangle
+  AlertTriangle,
 } from "lucide-react";
 import { Link } from "wouter";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 export default function ClientProfile() {
   const { clientId } = useParams();
-  
+
   // Query for auth user first
   const { data: authUser, isLoading: authLoading } = useQuery({
     queryKey: ["/api/auth/user"],
   });
-  
+
   const isAuthenticated = !!authUser;
-  
+
   // Query for client profile data
-  const { data: clientProfile, isLoading, error } = useQuery({
+  const {
+    data: clientProfile,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ["/api/clients", clientId],
     enabled: !!clientId && isAuthenticated,
   });
@@ -51,13 +55,9 @@ export default function ClientProfile() {
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-hive-light-blue to-hive-white">
         <Card className="w-full max-w-md">
           <CardContent className="pt-6">
-            <p className="text-center text-hive-black/70">
-              Please log in to view client profiles.
-            </p>
+            <p className="text-center text-hive-black/70">Please log in to view client profiles.</p>
             <Link href="/auth">
-              <Button className="w-full mt-4 bg-hive-purple hover:bg-hive-purple/90">
-                Login
-              </Button>
+              <Button className="w-full mt-4 bg-hive-purple hover:bg-hive-purple/90">Login</Button>
             </Link>
           </CardContent>
         </Card>
@@ -93,11 +93,12 @@ export default function ClientProfile() {
   }
 
   // Log what we're getting
-  console.log('Client profile data:', clientProfile);
-  
+  console.log("Client profile data:", clientProfile);
+
   const client = clientProfile as any;
   const userRole = (authUser as any)?.role;
-  const canViewDetails = userRole === 'admin' || userRole === 'therapist' || userRole === 'institution';
+  const canViewDetails =
+    userRole === "admin" || userRole === "therapist" || userRole === "institution";
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-hive-light-blue to-hive-white p-4">
@@ -117,31 +118,30 @@ export default function ClientProfile() {
           <CardContent className="pt-6">
             <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
               <Avatar className="w-24 h-24">
-                <AvatarImage 
-                  src={client.profileImageUrl} 
+                <AvatarImage
+                  src={client.profileImageUrl}
                   alt={`${client.firstName} ${client.lastName}`}
                 />
                 <AvatarFallback className="bg-hive-purple/20 text-hive-purple text-xl">
-                  {client.firstName?.[0]}{client.lastName?.[0]}
+                  {client.firstName?.[0]}
+                  {client.lastName?.[0]}
                 </AvatarFallback>
               </Avatar>
-              
+
               <div className="flex-1 text-center md:text-left">
                 <h1 className="text-2xl font-century font-bold text-hive-purple">
                   {client.firstName} {client.lastName}
                 </h1>
                 <p className="text-hive-black/70 mt-1">{client.email}</p>
-                
+
                 {canViewDetails && (
                   <div className="flex flex-wrap gap-2 mt-4">
-                    <Badge variant="secondary">
-                      Client ID: {client.id}
-                    </Badge>
-                    <Badge 
-                      variant={client.status === 'active' ? 'default' : 'secondary'}
-                      className={client.status === 'active' ? 'bg-green-100 text-green-800' : ''}
+                    <Badge variant="secondary">Client ID: {client.id}</Badge>
+                    <Badge
+                      variant={client.status === "active" ? "default" : "secondary"}
+                      className={client.status === "active" ? "bg-green-100 text-green-800" : ""}
                     >
-                      {client.status || 'Active'}
+                      {client.status || "Active"}
                     </Badge>
                   </div>
                 )}
@@ -203,13 +203,17 @@ export default function ClientProfile() {
                   <div className="flex items-center gap-3">
                     <Cake className="w-4 h-4 text-hive-purple" />
                     <div>
-                      <p className="text-xs text-hive-black/50 uppercase tracking-wide">Date of Birth</p>
+                      <p className="text-xs text-hive-black/50 uppercase tracking-wide">
+                        Date of Birth
+                      </p>
                       <p className="text-sm font-medium">
-                        {new Date(client.dateOfBirth).toLocaleDateString('en-GB', {
-                          day: 'numeric',
-                          month: 'long',
-                          year: 'numeric'
-                        })} (Age {new Date().getFullYear() - new Date(client.dateOfBirth).getFullYear()})
+                        {new Date(client.dateOfBirth).toLocaleDateString("en-GB", {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
+                        })}{" "}
+                        (Age {new Date().getFullYear() - new Date(client.dateOfBirth).getFullYear()}
+                        )
                       </p>
                     </div>
                   </div>
@@ -218,7 +222,9 @@ export default function ClientProfile() {
                   <div className="flex items-center gap-3">
                     <Briefcase className="w-4 h-4 text-hive-purple" />
                     <div>
-                      <p className="text-xs text-hive-black/50 uppercase tracking-wide">Occupation</p>
+                      <p className="text-xs text-hive-black/50 uppercase tracking-wide">
+                        Occupation
+                      </p>
                       <p className="text-sm font-medium">{client.occupation}</p>
                     </div>
                   </div>
@@ -227,7 +233,9 @@ export default function ClientProfile() {
                   <div className="flex items-center gap-3">
                     <Heart className="w-4 h-4 text-hive-purple" />
                     <div>
-                      <p className="text-xs text-hive-black/50 uppercase tracking-wide">Marital Status</p>
+                      <p className="text-xs text-hive-black/50 uppercase tracking-wide">
+                        Marital Status
+                      </p>
                       <p className="text-sm font-medium">{client.maritalStatus}</p>
                     </div>
                   </div>
@@ -236,11 +244,15 @@ export default function ClientProfile() {
                   <div className="flex items-center gap-3">
                     <User className="w-4 h-4 text-hive-purple" />
                     <div>
-                      <p className="text-xs text-hive-black/50 uppercase tracking-wide">Assigned Therapist</p>
+                      <p className="text-xs text-hive-black/50 uppercase tracking-wide">
+                        Assigned Therapist
+                      </p>
                       <p className="text-sm font-medium">
-                        {client.assignedTherapist === 'dr-sarah-thompson' ? 'Dr. Sarah Thompson' :
-                         client.assignedTherapist === 'demo-therapist-1' ? 'Dr. Sarah Thompson' : 
-                         client.assignedTherapist}
+                        {client.assignedTherapist === "dr-sarah-thompson"
+                          ? "Dr. Sarah Thompson"
+                          : client.assignedTherapist === "demo-therapist-1"
+                            ? "Dr. Sarah Thompson"
+                            : client.assignedTherapist}
                       </p>
                     </div>
                   </div>
@@ -249,12 +261,14 @@ export default function ClientProfile() {
                   <div className="flex items-center gap-3">
                     <Calendar className="w-4 h-4 text-hive-purple" />
                     <div>
-                      <p className="text-xs text-hive-black/50 uppercase tracking-wide">Joined Platform</p>
+                      <p className="text-xs text-hive-black/50 uppercase tracking-wide">
+                        Joined Platform
+                      </p>
                       <p className="text-sm font-medium">
-                        {new Date(client.createdAt).toLocaleDateString('en-GB', {
-                          day: 'numeric',
-                          month: 'long',
-                          year: 'numeric'
+                        {new Date(client.createdAt).toLocaleDateString("en-GB", {
+                          day: "numeric",
+                          month: "long",
+                          year: "numeric",
                         })}
                       </p>
                     </div>
@@ -277,45 +291,73 @@ export default function ClientProfile() {
                 <div className="space-y-6">
                   {client.bio && (
                     <div>
-                      <h4 className="font-semibold text-sm text-hive-purple mb-2">About {client.firstName}</h4>
-                      <p className="text-sm text-hive-black/70 leading-relaxed bg-gray-50 p-3 rounded border">{client.bio}</p>
+                      <h4 className="font-semibold text-sm text-hive-purple mb-2">
+                        About {client.firstName}
+                      </h4>
+                      <p className="text-sm text-hive-black/70 leading-relaxed bg-gray-50 p-3 rounded border">
+                        {client.bio}
+                      </p>
                     </div>
                   )}
                   {client.goals && (
                     <div>
                       <h4 className="font-semibold text-sm text-hive-purple mb-2">Therapy Goals</h4>
-                      <p className="text-sm text-hive-black/70 leading-relaxed bg-blue-50 p-3 rounded border">{client.goals}</p>
+                      <p className="text-sm text-hive-black/70 leading-relaxed bg-blue-50 p-3 rounded border">
+                        {client.goals}
+                      </p>
                     </div>
                   )}
                   <div className="grid md:grid-cols-2 gap-4">
                     {client.therapyType && (
                       <div>
-                        <h4 className="font-semibold text-sm text-hive-purple mb-2">Preferred Therapy Type</h4>
-                        <Badge variant="outline" className="text-hive-purple border-hive-purple bg-purple-50">{client.therapyType}</Badge>
+                        <h4 className="font-semibold text-sm text-hive-purple mb-2">
+                          Preferred Therapy Type
+                        </h4>
+                        <Badge
+                          variant="outline"
+                          className="text-hive-purple border-hive-purple bg-purple-50"
+                        >
+                          {client.therapyType}
+                        </Badge>
                       </div>
                     )}
                     {client.progressStatus && (
                       <div>
-                        <h4 className="font-semibold text-sm text-hive-purple mb-2">Current Progress</h4>
-                        <Badge variant="default" className="bg-green-100 text-green-800 border-green-200">{client.progressStatus}</Badge>
+                        <h4 className="font-semibold text-sm text-hive-purple mb-2">
+                          Current Progress
+                        </h4>
+                        <Badge
+                          variant="default"
+                          className="bg-green-100 text-green-800 border-green-200"
+                        >
+                          {client.progressStatus}
+                        </Badge>
                       </div>
                     )}
                   </div>
                   {client.preferences && client.preferences.length > 0 && (
                     <div>
-                      <h4 className="font-semibold text-sm text-hive-purple mb-2">Session Preferences</h4>
+                      <h4 className="font-semibold text-sm text-hive-purple mb-2">
+                        Session Preferences
+                      </h4>
                       <div className="flex flex-wrap gap-2">
                         {client.preferences.map((pref: string, idx: number) => (
-                          <Badge key={idx} variant="secondary" className="text-xs bg-blue-100 text-blue-800">
+                          <Badge
+                            key={idx}
+                            variant="secondary"
+                            className="text-xs bg-blue-100 text-blue-800"
+                          >
                             {pref}
                           </Badge>
                         ))}
                       </div>
                     </div>
                   )}
-                  {userRole === 'therapist' && client.latestNote && (
+                  {userRole === "therapist" && client.latestNote && (
                     <div>
-                      <h4 className="font-semibold text-sm text-hive-purple mb-2">Latest Progress Note</h4>
+                      <h4 className="font-semibold text-sm text-hive-purple mb-2">
+                        Latest Progress Note
+                      </h4>
                       <p className="text-sm text-gray-700 bg-green-50 p-3 rounded border italic">
                         "{client.latestNote}"
                       </p>
@@ -344,18 +386,24 @@ export default function ClientProfile() {
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-hive-black/70">Total Sessions</span>
-                      <Badge variant="default" className="bg-hive-purple">{client.sessionCount || 0}</Badge>
+                      <Badge variant="default" className="bg-hive-purple">
+                        {client.sessionCount || 0}
+                      </Badge>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-hive-black/70">Last Session</span>
                       <span className="text-sm font-medium">
-                        {client.lastSession ? new Date(client.lastSession).toLocaleDateString('en-GB') : 'No sessions yet'}
+                        {client.lastSession
+                          ? new Date(client.lastSession).toLocaleDateString("en-GB")
+                          : "No sessions yet"}
                       </span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-hive-black/70">Next Session</span>
                       <span className="text-sm font-medium">
-                        {client.nextSession ? new Date(client.nextSession).toLocaleDateString('en-GB') : 'Not scheduled'}
+                        {client.nextSession
+                          ? new Date(client.nextSession).toLocaleDateString("en-GB")
+                          : "Not scheduled"}
                       </span>
                     </div>
                   </div>
@@ -375,11 +423,13 @@ export default function ClientProfile() {
                       <div>
                         <div className="flex justify-between items-center mb-2">
                           <span className="text-sm text-hive-black/70">Wellness Score</span>
-                          <span className="text-sm font-bold text-hive-purple">{client.wellnessScore}/10</span>
+                          <span className="text-sm font-bold text-hive-purple">
+                            {client.wellnessScore}/10
+                          </span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-hive-purple h-2 rounded-full" 
+                          <div
+                            className="bg-hive-purple h-2 rounded-full"
                             style={{ width: `${(client.wellnessScore / 10) * 100}%` }}
                           ></div>
                         </div>
@@ -389,13 +439,11 @@ export default function ClientProfile() {
                       <div className="flex justify-between items-center">
                         <span className="text-sm text-hive-black/70">Progress Notes</span>
                         <Badge variant="outline" className="text-xs">
-                          {client.progressStatus || 'In Progress'}
+                          {client.progressStatus || "In Progress"}
                         </Badge>
                       </div>
                       {client.latestNote && (
-                        <p className="text-xs text-hive-black/60 italic">
-                          "{client.latestNote}"
-                        </p>
+                        <p className="text-xs text-hive-black/60 italic">"{client.latestNote}"</p>
                       )}
                     </div>
                   </div>
@@ -405,14 +453,15 @@ export default function ClientProfile() {
           )}
 
           {/* Initial Questionnaire - Therapist Only */}
-          {canViewDetails && userRole === 'therapist' && client.initialQuestionnaire && (
+          {canViewDetails && userRole === "therapist" && client.initialQuestionnaire && (
             <Card className="border-blue-200 bg-blue-50/50">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-blue-700">
                   <FileText className="w-5 h-5" />
                   Initial Assessment Questionnaire
                   <Badge variant="secondary" className="ml-auto text-xs">
-                    Submitted {new Date(client.initialQuestionnaire.submittedAt).toLocaleDateString('en-GB')}
+                    Submitted{" "}
+                    {new Date(client.initialQuestionnaire.submittedAt).toLocaleDateString("en-GB")}
                   </Badge>
                 </CardTitle>
               </CardHeader>
@@ -425,7 +474,9 @@ export default function ClientProfile() {
                     </p>
                   </div>
                   <div>
-                    <h4 className="font-semibold text-sm text-blue-700 mb-2">Symptoms Description</h4>
+                    <h4 className="font-semibold text-sm text-blue-700 mb-2">
+                      Symptoms Description
+                    </h4>
                     <p className="text-sm text-gray-700 bg-white p-3 rounded border">
                       {client.initialQuestionnaire.responses.symptomsDescription}
                     </p>
@@ -437,19 +488,25 @@ export default function ClientProfile() {
                     </p>
                   </div>
                   <div>
-                    <h4 className="font-semibold text-sm text-blue-700 mb-2">Current Coping Mechanisms</h4>
+                    <h4 className="font-semibold text-sm text-blue-700 mb-2">
+                      Current Coping Mechanisms
+                    </h4>
                     <p className="text-sm text-gray-700 bg-white p-3 rounded border">
                       {client.initialQuestionnaire.responses.copingMechanisms}
                     </p>
                   </div>
                   <div>
-                    <h4 className="font-semibold text-sm text-blue-700 mb-2">Previous Therapy Experience</h4>
+                    <h4 className="font-semibold text-sm text-blue-700 mb-2">
+                      Previous Therapy Experience
+                    </h4>
                     <p className="text-sm text-gray-700 bg-white p-3 rounded border">
                       {client.initialQuestionnaire.responses.previousTherapy}
                     </p>
                   </div>
                   <div>
-                    <h4 className="font-semibold text-sm text-blue-700 mb-2">Current Medications</h4>
+                    <h4 className="font-semibold text-sm text-blue-700 mb-2">
+                      Current Medications
+                    </h4>
                     <p className="text-sm text-gray-700 bg-white p-3 rounded border">
                       {client.initialQuestionnaire.responses.medications}
                     </p>
@@ -461,7 +518,9 @@ export default function ClientProfile() {
                     </p>
                   </div>
                   <div>
-                    <h4 className="font-semibold text-sm text-blue-700 mb-2">Therapy Expectations</h4>
+                    <h4 className="font-semibold text-sm text-blue-700 mb-2">
+                      Therapy Expectations
+                    </h4>
                     <p className="text-sm text-gray-700 bg-white p-3 rounded border">
                       {client.initialQuestionnaire.responses.expectations}
                     </p>
@@ -478,13 +537,15 @@ export default function ClientProfile() {
           )}
 
           {/* Medical History - Therapist Only */}
-          {canViewDetails && userRole === 'therapist' && client.medicalHistory && (
+          {canViewDetails && userRole === "therapist" && client.medicalHistory && (
             <Card className="border-green-200 bg-green-50/50">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-green-700">
                   <Shield className="w-5 h-5" />
                   Medical History
-                  <Badge variant="secondary" className="ml-auto text-xs">Therapist Only</Badge>
+                  <Badge variant="secondary" className="ml-auto text-xs">
+                    Therapist Only
+                  </Badge>
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -494,16 +555,24 @@ export default function ClientProfile() {
                     <p className="text-sm text-gray-700">{client.medicalHistory.generalHealth}</p>
                   </div>
                   <div>
-                    <h4 className="font-semibold text-sm text-green-700 mb-2">Mental Health History</h4>
-                    <p className="text-sm text-gray-700">{client.medicalHistory.mentalHealthHistory}</p>
+                    <h4 className="font-semibold text-sm text-green-700 mb-2">
+                      Mental Health History
+                    </h4>
+                    <p className="text-sm text-gray-700">
+                      {client.medicalHistory.mentalHealthHistory}
+                    </p>
                   </div>
                   <div>
                     <h4 className="font-semibold text-sm text-green-700 mb-2">Allergies</h4>
                     <p className="text-sm text-gray-700">{client.medicalHistory.allergies}</p>
                   </div>
                   <div>
-                    <h4 className="font-semibold text-sm text-green-700 mb-2">Current Medications</h4>
-                    <p className="text-sm text-gray-700">{client.medicalHistory.currentMedications}</p>
+                    <h4 className="font-semibold text-sm text-green-700 mb-2">
+                      Current Medications
+                    </h4>
+                    <p className="text-sm text-gray-700">
+                      {client.medicalHistory.currentMedications}
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -511,23 +580,29 @@ export default function ClientProfile() {
           )}
 
           {/* Emergency Contacts & Clinical Notes */}
-          {canViewDetails && userRole === 'therapist' && (
+          {canViewDetails && userRole === "therapist" && (
             <Card className="border-orange-200 bg-orange-50/50">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-orange-700">
                   <AlertTriangle className="w-5 h-5" />
                   Clinical Information & Emergency Contacts
-                  <Badge variant="secondary" className="ml-auto text-xs">Therapist Only</Badge>
+                  <Badge variant="secondary" className="ml-auto text-xs">
+                    Therapist Only
+                  </Badge>
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="grid md:grid-cols-2 gap-6">
                   {client.emergencyContact && (
                     <div>
-                      <h4 className="font-semibold text-sm text-orange-700 mb-2">Emergency Contact</h4>
+                      <h4 className="font-semibold text-sm text-orange-700 mb-2">
+                        Emergency Contact
+                      </h4>
                       <div className="space-y-2 bg-white p-3 rounded border">
                         <p className="text-sm font-medium">{client.emergencyContact.name}</p>
-                        <p className="text-sm text-gray-600">{client.emergencyContact.relationship}</p>
+                        <p className="text-sm text-gray-600">
+                          {client.emergencyContact.relationship}
+                        </p>
                         <p className="text-sm text-gray-600">{client.emergencyContact.phone}</p>
                         {client.emergencyContact.email && (
                           <p className="text-sm text-gray-600">{client.emergencyContact.email}</p>
@@ -539,16 +614,19 @@ export default function ClientProfile() {
                     <h4 className="font-semibold text-sm text-orange-700 mb-2">Risk Assessment</h4>
                     <div className="bg-white p-3 rounded border">
                       {client.riskAssessment && (
-                        <Badge 
-                          variant={client.riskAssessment === 'Low' ? 'default' : 'destructive'}
-                          className={client.riskAssessment === 'Low' ? 'bg-green-100 text-green-800' : ''}
+                        <Badge
+                          variant={client.riskAssessment === "Low" ? "default" : "destructive"}
+                          className={
+                            client.riskAssessment === "Low" ? "bg-green-100 text-green-800" : ""
+                          }
                         >
                           {client.riskAssessment} Risk
                         </Badge>
                       )}
                       {client.assignedDate && (
                         <p className="text-sm text-gray-600 mt-2">
-                          Assigned to therapist: {new Date(client.assignedDate).toLocaleDateString('en-GB')}
+                          Assigned to therapist:{" "}
+                          {new Date(client.assignedDate).toLocaleDateString("en-GB")}
                         </p>
                       )}
                     </div>

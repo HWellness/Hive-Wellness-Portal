@@ -1,5 +1,5 @@
-import { MailService } from '@sendgrid/mail';
-import { nanoid } from 'nanoid';
+import { MailService } from "@sendgrid/mail";
+import { nanoid } from "nanoid";
 
 // Initialize SendGrid mail service
 const sgMail = new MailService();
@@ -9,16 +9,13 @@ if (process.env.SENDGRID_API_KEY) {
 
 export function generateTherapistToken(email: string): string {
   // Generate unique token for therapist onboarding link
-  return `therapist_${nanoid(32)}_${Buffer.from(email).toString('base64')}`;
+  return `therapist_${nanoid(32)}_${Buffer.from(email).toString("base64")}`;
 }
 
 // Brand-compliant email template structure following Hive Wellness Brand Guidelines 2025
-function createBrandedEmailTemplate(params: {
-  headingText: string;
-  bodyContent: string;
-}) {
+function createBrandedEmailTemplate(params: { headingText: string; bodyContent: string }) {
   const { headingText, bodyContent } = params;
-  
+
   return `
     <!DOCTYPE html>
     <html lang="en">
@@ -83,7 +80,7 @@ function createBrandedEmailTemplate(params: {
 
 export async function sendTherapistEnquiryEmail(enquiryData: any) {
   const { firstName, lastName, email, phone, specializations, experience } = enquiryData;
-  
+
   // Admin notification email
   const adminBodyContent = `
     <p style="font-family: 'Open Sans', sans-serif; line-height: 1.6; color: #333; font-size: 16px; margin: 0 0 25px 0;">
@@ -97,7 +94,7 @@ export async function sendTherapistEnquiryEmail(enquiryData: any) {
         <strong>Email:</strong> ${email}<br>
         <strong>Phone:</strong> ${phone}<br>
         <strong>Experience Level:</strong> ${experience}<br>
-        <strong>Specialisations:</strong> ${specializations.join(', ')}
+        <strong>Specialisations:</strong> ${specializations.join(", ")}
       </p>
     </div>
     
@@ -121,16 +118,16 @@ export async function sendTherapistEnquiryEmail(enquiryData: any) {
   `;
 
   const adminEmailTemplate = createBrandedEmailTemplate({
-    headingText: 'New Therapist Application',
-    bodyContent: adminBodyContent
+    headingText: "New Therapist Application",
+    bodyContent: adminBodyContent,
   });
 
   // Send to admin team
   await sgMail.send({
-    to: 'admin@hive-wellness.co.uk',
-    from: 'noreply@hive-wellness.co.uk',
+    to: "admin@hive-wellness.co.uk",
+    from: "noreply@hive-wellness.co.uk",
     subject: `New Therapist Application - ${firstName} ${lastName}`,
-    html: adminEmailTemplate
+    html: adminEmailTemplate,
   });
 
   // Confirmation email to therapist
@@ -165,20 +162,20 @@ export async function sendTherapistEnquiryEmail(enquiryData: any) {
 
   const therapistConfirmationTemplate = createBrandedEmailTemplate({
     headingText: `Welcome to Our Professional Network, ${firstName}!`,
-    bodyContent: therapistBodyContent
+    bodyContent: therapistBodyContent,
   });
 
   await sgMail.send({
     to: email,
-    from: 'noreply@hive-wellness.co.uk',
-    subject: 'Application Received - Welcome to Hive Wellness!',
-    html: therapistConfirmationTemplate
+    from: "noreply@hive-wellness.co.uk",
+    subject: "Application Received - Welcome to Hive Wellness!",
+    html: therapistConfirmationTemplate,
   });
 }
 
 export async function sendTherapistWelcomeEmail(therapistData: any) {
   const { firstName, lastName, email } = therapistData;
-  
+
   const bodyContent = `
     <!-- Rounded Content Box -->
     <div style="background: #f8f9fa; padding: 25px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #e9ecef;">
@@ -220,14 +217,14 @@ export async function sendTherapistWelcomeEmail(therapistData: any) {
 
   const welcomeTemplate = createBrandedEmailTemplate({
     headingText: `Welcome to Hive Wellness, ${firstName}!`,
-    bodyContent
+    bodyContent,
   });
 
   await sgMail.send({
     to: email,
-    from: 'noreply@hive-wellness.co.uk',
-    subject: 'Welcome to Hive Wellness - You\'re All Set!',
-    html: welcomeTemplate
+    from: "noreply@hive-wellness.co.uk",
+    subject: "Welcome to Hive Wellness - You're All Set!",
+    html: welcomeTemplate,
   });
 }
 
@@ -238,7 +235,7 @@ export async function sendTherapistConfirmationWithBookingLink(therapistData: {
   bookingUrl: string;
 }) {
   const { firstName, lastName, email, bookingUrl } = therapistData;
-  
+
   const bodyContent = `
     <!-- Rounded Content Box -->
     <div style="background: #f8f9fa; padding: 25px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #e9ecef;">
@@ -285,14 +282,14 @@ export async function sendTherapistConfirmationWithBookingLink(therapistData: {
 
   const confirmationTemplate = createBrandedEmailTemplate({
     headingText: `Thank You for Your Application, ${firstName}!`,
-    bodyContent
+    bodyContent,
   });
 
   await sgMail.send({
     to: email,
-    from: 'noreply@hive-wellness.co.uk',
+    from: "noreply@hive-wellness.co.uk",
     subject: `${firstName}, Book Your Hive Wellness Introduction Call`,
-    html: confirmationTemplate
+    html: confirmationTemplate,
   });
 }
 
@@ -304,8 +301,9 @@ export async function sendPostCallOnboardingEmail(therapistData: {
   infoPdfUrl?: string;
   infoPdfBase64?: string;
 }) {
-  const { firstName, lastName, email, onboardingFormUrl, infoPdfUrl, infoPdfBase64 } = therapistData;
-  
+  const { firstName, lastName, email, onboardingFormUrl, infoPdfUrl, infoPdfBase64 } =
+    therapistData;
+
   const bodyContent = `
     <!-- Rounded Content Box -->
     <div style="background: #f8f9fa; padding: 25px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #e9ecef;">
@@ -352,7 +350,9 @@ export async function sendPostCallOnboardingEmail(therapistData: {
       </p>
     </div>
     
-    ${infoPdfUrl ? `
+    ${
+      infoPdfUrl
+        ? `
     <!-- Rounded Content Box -->
     <div style="background: #f8f9fa; padding: 25px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #e9ecef;">
       <h3 style="font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif; color: #9306B1; margin: 0 0 15px 0; font-size: 18px;">
@@ -374,7 +374,9 @@ export async function sendPostCallOnboardingEmail(therapistData: {
         </a>
       </div>
     </div>
-    ` : ''}
+    `
+        : ""
+    }
     
     <!-- Rounded Content Box -->
     <div style="background: #f8f9fa; padding: 25px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #e9ecef;">
@@ -398,24 +400,24 @@ export async function sendPostCallOnboardingEmail(therapistData: {
 
   const postCallTemplate = createBrandedEmailTemplate({
     headingText: `Great Speaking With You, ${firstName}!`,
-    bodyContent
+    bodyContent,
   });
 
   const emailOptions: any = {
     to: email,
-    from: 'noreply@hive-wellness.co.uk',
+    from: "noreply@hive-wellness.co.uk",
     subject: `${firstName}, Complete Your Hive Wellness Onboarding`,
-    html: postCallTemplate
+    html: postCallTemplate,
   };
 
   if (infoPdfBase64) {
     emailOptions.attachments = [
       {
-        filename: 'Hive-Wellness-Information-Pack.pdf',
-        type: 'application/pdf',
+        filename: "Hive-Wellness-Information-Pack.pdf",
+        type: "application/pdf",
         content: infoPdfBase64,
-        disposition: 'attachment'
-      }
+        disposition: "attachment",
+      },
     ];
   }
 
@@ -432,8 +434,17 @@ export async function sendContractAndLoginCredentials(therapistData: {
   contractUrl?: string;
   contractBase64?: string;
 }) {
-  const { firstName, lastName, email, workspaceEmail, tempPassword, portalUrl, contractUrl, contractBase64 } = therapistData;
-  
+  const {
+    firstName,
+    lastName,
+    email,
+    workspaceEmail,
+    tempPassword,
+    portalUrl,
+    contractUrl,
+    contractBase64,
+  } = therapistData;
+
   const bodyContent = `
     <!-- Rounded Content Box -->
     <div style="background: #f8f9fa; padding: 25px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #e9ecef;">
@@ -443,7 +454,9 @@ export async function sendContractAndLoginCredentials(therapistData: {
       </p>
     </div>
     
-    ${contractUrl ? `
+    ${
+      contractUrl
+        ? `
     <!-- Rounded Content Box -->
     <div style="background: #f8f9fa; padding: 25px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #e9ecef;">
       <h3 style="font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif; color: #9306B1; margin: 0 0 15px 0; font-size: 18px;">
@@ -464,7 +477,9 @@ export async function sendContractAndLoginCredentials(therapistData: {
         </a>
       </div>
     </div>
-    ` : ''}
+    `
+        : ""
+    }
     
     <!-- Rounded Content Box with Purple Background -->
     <div style="background: #9306B1; padding: 25px; border-radius: 12px; margin-bottom: 25px;">
@@ -531,24 +546,24 @@ export async function sendContractAndLoginCredentials(therapistData: {
 
   const credentialsTemplate = createBrandedEmailTemplate({
     headingText: `Congratulations, ${firstName}!`,
-    bodyContent
+    bodyContent,
   });
 
   const emailOptions: any = {
     to: email,
-    from: 'noreply@hive-wellness.co.uk',
+    from: "noreply@hive-wellness.co.uk",
     subject: `${firstName}, Your Hive Wellness Account Is Ready - Login Details Inside`,
-    html: credentialsTemplate
+    html: credentialsTemplate,
   };
 
   if (contractBase64) {
     emailOptions.attachments = [
       {
-        filename: 'Hive-Wellness-Therapist-Contract.pdf',
-        type: 'application/pdf',
+        filename: "Hive-Wellness-Therapist-Contract.pdf",
+        type: "application/pdf",
         content: contractBase64,
-        disposition: 'attachment'
-      }
+        disposition: "attachment",
+      },
     ];
   }
 

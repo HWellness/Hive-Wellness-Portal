@@ -1,13 +1,31 @@
-import { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useToast } from '@/hooks/use-toast';
-import { Users, Brain, Search, Settings, RefreshCw, Clock, ArrowRight, CheckCircle, AlertCircle, Star, TrendingUp, MessageCircle, Calendar, Activity, Award, MapPin, User } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Users,
+  Brain,
+  Search,
+  Settings,
+  RefreshCw,
+  Clock,
+  ArrowRight,
+  CheckCircle,
+  AlertCircle,
+  Star,
+  TrendingUp,
+  MessageCircle,
+  Calendar,
+  Activity,
+  Award,
+  MapPin,
+  User,
+} from "lucide-react";
 
 interface TherapistMatch {
   id: string;
@@ -33,7 +51,7 @@ interface ConnectingRequest {
   clientId: string;
   questionnaire: any;
   matches: TherapistMatch[];
-  status: 'pending' | 'analysing' | 'complete' | 'approved';
+  status: "pending" | "analysing" | "complete" | "approved";
   aiAnalysis: string;
   createdAt: string;
   adminNotes?: string;
@@ -43,22 +61,22 @@ export default function AITherapyMatching() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [selectedMatch, setSelectedMatch] = useState<TherapistMatch | null>(null);
-  const [activeTab, setActiveTab] = useState('questionnaire');
+  const [activeTab, setActiveTab] = useState("questionnaire");
 
   // Get user's connection request status
   const { data: connectingRequest, isLoading } = useQuery<ConnectingRequest>({
-    queryKey: ['/api/connecting/request'],
+    queryKey: ["/api/connecting/request"],
     retry: false,
   });
 
   // Start new AI connection process
   const startConnecting = useMutation({
     mutationFn: async (questionnaireData: any) => {
-      return await apiRequest('POST', '/api/connecting/start', questionnaireData);
+      return await apiRequest("POST", "/api/connecting/start", questionnaireData);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/connecting/request'] });
-      setActiveTab('results');
+      queryClient.invalidateQueries({ queryKey: ["/api/connecting/request"] });
+      setActiveTab("results");
       toast({
         title: "AI Analysis Complete",
         description: "Your personalised therapist connections are ready for review.",
@@ -76,7 +94,7 @@ export default function AITherapyMatching() {
   // Request consultation with selected therapist
   const requestConsultation = useMutation({
     mutationFn: async (therapistId: string) => {
-      return await apiRequest('POST', '/api/connecting/request-consultation', { therapistId });
+      return await apiRequest("POST", "/api/connecting/request-consultation", { therapistId });
     },
     onSuccess: () => {
       toast({
@@ -106,8 +124,8 @@ export default function AITherapyMatching() {
           <h2 className="text-2xl font-bold text-hive-black">AI-Powered Therapy Connecting</h2>
         </div>
         <p className="text-gray-600 max-w-2xl mx-auto">
-          Our advanced AI analyses your responses and preferences to connect you with the most compatible therapists
-          tailored specifically to your needs and goals.
+          Our advanced AI analyses your responses and preferences to connect you with the most
+          compatible therapists tailored specifically to your needs and goals.
         </p>
       </div>
 
@@ -130,7 +148,10 @@ export default function AITherapyMatching() {
         {/* Questionnaire Tab */}
         <TabsContent value="questionnaire" className="space-y-6">
           {!connectingRequest ? (
-            <QuestionnaireForm onSubmit={startConnecting.mutate} isLoading={startConnecting.isPending} />
+            <QuestionnaireForm
+              onSubmit={startConnecting.mutate}
+              isLoading={startConnecting.isPending}
+            />
           ) : (
             <Card>
               <CardHeader>
@@ -141,19 +162,17 @@ export default function AITherapyMatching() {
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600 mb-4">
-                  You've already completed the connecting questionnaire. Check your AI analysis and connections!
+                  You've already completed the connecting questionnaire. Check your AI analysis and
+                  connections!
                 </p>
                 <div className="flex gap-3">
-                  <Button 
-                    onClick={() => setActiveTab('analysis')}
+                  <Button
+                    onClick={() => setActiveTab("analysis")}
                     className="bg-hive-purple text-white"
                   >
                     View AI Analysis
                   </Button>
-                  <Button 
-                    onClick={() => setActiveTab('results')}
-                    variant="outline"
-                  >
+                  <Button onClick={() => setActiveTab("results")} variant="outline">
                     View Connections
                   </Button>
                 </div>
@@ -178,10 +197,10 @@ export default function AITherapyMatching() {
                     {(connectingRequest as any).aiAnalysis}
                   </p>
                 </div>
-                
+
                 <div className="pt-4">
-                  <Button 
-                    onClick={() => setActiveTab('results')}
+                  <Button
+                    onClick={() => setActiveTab("results")}
                     className="bg-hive-purple text-white"
                   >
                     View Your Connections
@@ -227,22 +246,28 @@ export default function AITherapyMatching() {
 }
 
 // Questionnaire Form Component
-function QuestionnaireForm({ onSubmit, isLoading }: { onSubmit: (data: any) => void; isLoading: boolean }) {
+function QuestionnaireForm({
+  onSubmit,
+  isLoading,
+}: {
+  onSubmit: (data: any) => void;
+  isLoading: boolean;
+}) {
   const [responses, setResponses] = useState({
-    primaryConcerns: '',
-    therapyGoals: '',
-    preferredApproach: '',
-    communicationStyle: '',
-    previousTherapy: '',
+    primaryConcerns: "",
+    therapyGoals: "",
+    preferredApproach: "",
+    communicationStyle: "",
+    previousTherapy: "",
     preferences: {
-      gender: '',
-      ageRange: '',
-      experience: '',
-      specialisations: []
+      gender: "",
+      ageRange: "",
+      experience: "",
+      specialisations: [],
     },
-    availability: '',
-    budget: '',
-    additionalNotes: ''
+    availability: "",
+    budget: "",
+    additionalNotes: "",
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -270,7 +295,9 @@ function QuestionnaireForm({ onSubmit, isLoading }: { onSubmit: (data: any) => v
                 className="w-full p-3 border rounded-lg"
                 rows={4}
                 value={responses.primaryConcerns}
-                onChange={(e) => setResponses(prev => ({ ...prev, primaryConcerns: e.target.value }))}
+                onChange={(e) =>
+                  setResponses((prev) => ({ ...prev, primaryConcerns: e.target.value }))
+                }
                 placeholder="Describe what brings you to therapy today..."
                 required
               />
@@ -284,7 +311,9 @@ function QuestionnaireForm({ onSubmit, isLoading }: { onSubmit: (data: any) => v
                 className="w-full p-3 border rounded-lg"
                 rows={3}
                 value={responses.therapyGoals}
-                onChange={(e) => setResponses(prev => ({ ...prev, therapyGoals: e.target.value }))}
+                onChange={(e) =>
+                  setResponses((prev) => ({ ...prev, therapyGoals: e.target.value }))
+                }
                 placeholder="Your goals and desired outcomes..."
                 required
               />
@@ -293,11 +322,7 @@ function QuestionnaireForm({ onSubmit, isLoading }: { onSubmit: (data: any) => v
             {/* More questionnaire fields would go here */}
           </div>
 
-          <Button 
-            type="submit" 
-            className="w-full bg-hive-purple text-white"
-            disabled={isLoading}
-          >
+          <Button type="submit" className="w-full bg-hive-purple text-white" disabled={isLoading}>
             {isLoading ? (
               <>
                 <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
@@ -317,23 +342,23 @@ function QuestionnaireForm({ onSubmit, isLoading }: { onSubmit: (data: any) => v
 }
 
 // Therapist Match Card Component
-function TherapistMatchCard({ 
-  match, 
-  rank, 
-  onSelect, 
-  onRequestConsultation, 
-  isLoading 
-}: { 
-  match: TherapistMatch; 
-  rank: number; 
+function TherapistMatchCard({
+  match,
+  rank,
+  onSelect,
+  onRequestConsultation,
+  isLoading,
+}: {
+  match: TherapistMatch;
+  rank: number;
   onSelect: () => void;
   onRequestConsultation: () => void;
   isLoading: boolean;
 }) {
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: 'GBP',
+    return new Intl.NumberFormat("en-GB", {
+      style: "currency",
+      currency: "GBP",
     }).format(amount);
   };
 
@@ -341,11 +366,15 @@ function TherapistMatchCard({
     <Card className="relative overflow-hidden hover:shadow-lg transition-shadow">
       {/* Rank Badge */}
       <div className="absolute top-4 left-4 z-10">
-        <Badge 
+        <Badge
           className={`text-white ${
-            rank === 1 ? 'bg-yellow-500' : 
-            rank === 2 ? 'bg-gray-400' : 
-            rank === 3 ? 'bg-amber-600' : 'bg-hive-purple'
+            rank === 1
+              ? "bg-yellow-500"
+              : rank === 2
+                ? "bg-gray-400"
+                : rank === 3
+                  ? "bg-amber-600"
+                  : "bg-hive-purple"
           }`}
         >
           #{rank} Match
@@ -362,18 +391,19 @@ function TherapistMatchCard({
       <CardContent className="p-6 pt-16">
         <div className="flex items-start gap-4 mb-4">
           <div className="w-16 h-16 bg-hive-purple rounded-full flex items-center justify-center text-white font-bold text-xl">
-            {match.name.split(' ').map(n => n[0]).join('')}
+            {match.name
+              .split(" ")
+              .map((n) => n[0])
+              .join("")}
           </div>
-          
+
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
               <h3 className="text-lg font-semibold text-hive-black">{match.name}</h3>
-              {match.verified && (
-                <CheckCircle className="w-4 h-4 text-green-600" />
-              )}
+              {match.verified && <CheckCircle className="w-4 h-4 text-green-600" />}
             </div>
             <p className="text-gray-600 mb-2">{match.title}</p>
-            
+
             <div className="flex items-center gap-4 text-sm text-gray-600">
               <div className="flex items-center gap-1">
                 <Star className="w-4 h-4 text-yellow-500" />
@@ -423,23 +453,17 @@ function TherapistMatchCard({
               <Clock className="w-4 h-4" />
               <span>Next: {match.nextAvailable}</span>
             </div>
-            <div className="text-sm text-gray-600">
-              {formatCurrency(match.hourlyRate)}/hour
-            </div>
+            <div className="text-sm text-gray-600">{formatCurrency(match.hourlyRate)}/hour</div>
           </div>
         </div>
 
         {/* Actions */}
         <div className="flex gap-3">
-          <Button 
-            onClick={onSelect}
-            variant="outline" 
-            className="flex-1"
-          >
+          <Button onClick={onSelect} variant="outline" className="flex-1">
             <User className="w-4 h-4 mr-2" />
             View Profile
           </Button>
-          <Button 
+          <Button
             onClick={onRequestConsultation}
             className="flex-1 bg-hive-purple text-white"
             disabled={isLoading}

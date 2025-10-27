@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from "express";
 
 // External API circuit breaker and retry logic
 export class ExternalApiManager {
@@ -18,17 +18,17 @@ export class ExternalApiManager {
   }
 
   private initializeApis() {
-    const apis = ['stripe', 'sendgrid'];
-    apis.forEach(api => {
+    const apis = ["stripe", "sendgrid"];
+    apis.forEach((api) => {
       this.apiStatus.set(api, {
         name: api,
-        status: 'healthy',
+        status: "healthy",
         failures: 0,
         lastFailure: 0,
-        circuitBreakerState: 'CLOSED',
+        circuitBreakerState: "CLOSED",
         responseTime: 0,
         successCount: 0,
-        errorCount: 0
+        errorCount: 0,
       });
     });
   }
@@ -43,7 +43,7 @@ export class ExternalApiManager {
       baseDelay = 1000,
       maxDelay = 10000,
       backoffMultiplier = 2,
-      timeoutMs = 30000
+      timeoutMs = 30000,
     } = options;
 
     const apiStatus = this.apiStatus.get(apiName);
@@ -52,9 +52,10 @@ export class ExternalApiManager {
     }
 
     // Check circuit breaker
-    if (apiStatus.circuitBreakerState === 'OPEN') {
-      if (Date.now() - apiStatus.lastFailure > 60000) { // 1 minute
-        apiStatus.circuitBreakerState = 'HALF_OPEN';
+    if (apiStatus.circuitBreakerState === "OPEN") {
+      if (Date.now() - apiStatus.lastFailure > 60000) {
+        // 1 minute
+        apiStatus.circuitBreakerState = "HALF_OPEN";
       } else {
         throw new Error(`Circuit breaker OPEN for ${apiName} - API temporarily unavailable`);
       }
@@ -68,15 +69,14 @@ export class ExternalApiManager {
         // Add timeout wrapper
         const result = await Promise.race([
           operation(),
-          new Promise<never>((_, reject) => 
-            setTimeout(() => reject(new Error('Operation timeout')), timeoutMs)
-          )
+          new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error("Operation timeout")), timeoutMs)
+          ),
         ]);
 
         const responseTime = Date.now() - startTime;
         this.recordSuccess(apiName, responseTime);
         return result;
-
       } catch (error: any) {
         lastError = error;
         this.recordFailure(apiName);
@@ -87,10 +87,7 @@ export class ExternalApiManager {
         }
 
         // Calculate delay with exponential backoff
-        const delay = Math.min(
-          baseDelay * Math.pow(backoffMultiplier, attempt - 1),
-          maxDelay
-        );
+        const delay = Math.min(baseDelay * Math.pow(backoffMultiplier, attempt - 1), maxDelay);
 
         await this.sleep(delay);
       }
@@ -106,8 +103,8 @@ export class ExternalApiManager {
     api.successCount++;
     api.responseTime = responseTime;
     api.failures = 0;
-    api.status = 'healthy';
-    api.circuitBreakerState = 'CLOSED';
+    api.status = "healthy";
+    api.circuitBreakerState = "CLOSED";
   }
 
   private recordFailure(apiName: string) {
@@ -120,35 +117,35 @@ export class ExternalApiManager {
 
     // Update status based on failure count
     if (api.failures >= 5) {
-      api.circuitBreakerState = 'OPEN';
-      api.status = 'unhealthy';
+      api.circuitBreakerState = "OPEN";
+      api.status = "unhealthy";
     } else if (api.failures >= 2) {
-      api.status = 'degraded';
+      api.status = "degraded";
     }
   }
 
   private isNonRetryableError(error: any): boolean {
     const nonRetryableStatuses = [400, 401, 403, 404, 422];
     const statusCode = error.response?.status || error.status;
-    
+
     if (nonRetryableStatuses.includes(statusCode)) {
       return true;
     }
 
     const nonRetryableMessages = [
-      'invalid_request',
-      'unauthorized',
-      'forbidden',
-      'not_found',
-      'validation_error'
+      "invalid_request",
+      "unauthorized",
+      "forbidden",
+      "not_found",
+      "validation_error",
     ];
 
-    const errorMessage = error.message?.toLowerCase() || '';
-    return nonRetryableMessages.some(msg => errorMessage.includes(msg));
+    const errorMessage = error.message?.toLowerCase() || "";
+    return nonRetryableMessages.some((msg) => errorMessage.includes(msg));
   }
 
   private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   private async startHealthChecks() {
@@ -170,14 +167,14 @@ export class ExternalApiManager {
 
   private async checkApiHealth(apiName: string): Promise<void> {
     switch (apiName) {
-      case 'stripe':
+      case "stripe":
         // Simple Stripe API health check
         if (process.env.STRIPE_SECRET_KEY) {
           // We can't easily test without making actual API calls
           // In production, you might have a dedicated health endpoint
         }
         break;
-      case 'sendgrid':
+      case "sendgrid":
         // SendGrid health check
         if (process.env.SENDGRID_API_KEY) {
           // Similar to Stripe, requires actual API validation
@@ -201,10 +198,10 @@ export class ExternalApiManager {
 
 interface ApiStatus {
   name: string;
-  status: 'healthy' | 'degraded' | 'unhealthy';
+  status: "healthy" | "degraded" | "unhealthy";
   failures: number;
   lastFailure: number;
-  circuitBreakerState: 'CLOSED' | 'OPEN' | 'HALF_OPEN';
+  circuitBreakerState: "CLOSED" | "OPEN" | "HALF_OPEN";
   responseTime: number;
   successCount: number;
   errorCount: number;
@@ -222,11 +219,11 @@ interface RetryOptions {
 export class ResilientStripeService {
   private apiManager = ExternalApiManager.getInstance();
 
-  async createPaymentIntent(amount: number, currency = 'gbp') {
-    return this.apiManager.executeWithRetry('stripe', async () => {
-      const Stripe = (await import('stripe')).default;
+  async createPaymentIntent(amount: number, currency = "gbp") {
+    return this.apiManager.executeWithRetry("stripe", async () => {
+      const Stripe = (await import("stripe")).default;
       const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-        apiVersion: '2023-10-16',
+        apiVersion: "2023-10-16",
       });
 
       return stripe.paymentIntents.create({
@@ -240,10 +237,10 @@ export class ResilientStripeService {
   }
 
   async createCustomer(email: string, name?: string) {
-    return this.apiManager.executeWithRetry('stripe', async () => {
-      const Stripe = (await import('stripe')).default;
+    return this.apiManager.executeWithRetry("stripe", async () => {
+      const Stripe = (await import("stripe")).default;
       const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-        apiVersion: '2023-10-16',
+        apiVersion: "2023-10-16",
       });
 
       return stripe.customers.create({
@@ -254,10 +251,10 @@ export class ResilientStripeService {
   }
 
   async retrievePaymentIntent(paymentIntentId: string) {
-    return this.apiManager.executeWithRetry('stripe', async () => {
-      const Stripe = (await import('stripe')).default;
+    return this.apiManager.executeWithRetry("stripe", async () => {
+      const Stripe = (await import("stripe")).default;
       const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-        apiVersion: '2023-10-16',
+        apiVersion: "2023-10-16",
       });
 
       return stripe.paymentIntents.retrieve(paymentIntentId);
@@ -270,15 +267,15 @@ export class ResilientEmailService {
   private apiManager = ExternalApiManager.getInstance();
 
   async sendEmail(to: string, subject: string, content: string, isHtml = false) {
-    return this.apiManager.executeWithRetry('sendgrid', async () => {
-      const sgMail = (await import('@sendgrid/mail')).default;
+    return this.apiManager.executeWithRetry("sendgrid", async () => {
+      const sgMail = (await import("@sendgrid/mail")).default;
       sgMail.setApiKey(process.env.SENDGRID_API_KEY!);
 
       const msg = {
         to,
-        from: process.env.FROM_EMAIL || 'noreply@hivewellness.com',
+        from: process.env.FROM_EMAIL || "noreply@hivewellness.com",
         subject,
-        ...(isHtml ? { html: content } : { text: content })
+        ...(isHtml ? { html: content } : { text: content }),
       };
 
       return sgMail.send(msg);
@@ -286,15 +283,15 @@ export class ResilientEmailService {
   }
 
   async sendTemplateEmail(to: string, templateId: string, dynamicData: any) {
-    return this.apiManager.executeWithRetry('sendgrid', async () => {
-      const sgMail = (await import('@sendgrid/mail')).default;
+    return this.apiManager.executeWithRetry("sendgrid", async () => {
+      const sgMail = (await import("@sendgrid/mail")).default;
       sgMail.setApiKey(process.env.SENDGRID_API_KEY!);
 
       const msg = {
         to,
-        from: process.env.FROM_EMAIL || 'noreply@hivewellness.com',
+        from: process.env.FROM_EMAIL || "noreply@hivewellness.com",
         templateId,
-        dynamicTemplateData: dynamicData
+        dynamicTemplateData: dynamicData,
       };
 
       return sgMail.send(msg);
@@ -307,7 +304,7 @@ export const externalApiMiddleware = (req: Request, res: Response, next: NextFun
   req.resilientServices = {
     stripe: new ResilientStripeService(),
     email: new ResilientEmailService(),
-    apiManager: ExternalApiManager.getInstance()
+    apiManager: ExternalApiManager.getInstance(),
   };
   next();
 };
@@ -316,13 +313,13 @@ export const externalApiMiddleware = (req: Request, res: Response, next: NextFun
 export const apiStatusEndpoint = (req: Request, res: Response) => {
   const apiManager = ExternalApiManager.getInstance();
   const status = apiManager.getAllApiStatus();
-  
-  const overallHealthy = Object.values(status).every(api => api.status === 'healthy');
-  
+
+  const overallHealthy = Object.values(status).every((api) => api.status === "healthy");
+
   res.status(overallHealthy ? 200 : 503).json({
-    overall: overallHealthy ? 'healthy' : 'degraded',
+    overall: overallHealthy ? "healthy" : "degraded",
     apis: status,
-    timestamp: Date.now()
+    timestamp: Date.now(),
   });
 };
 

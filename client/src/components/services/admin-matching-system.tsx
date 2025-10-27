@@ -6,11 +6,17 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { 
+import {
   Brain,
   User,
   Users,
@@ -25,7 +31,7 @@ import {
   TrendingUp,
   Filter,
   Search,
-  RefreshCw
+  RefreshCw,
 } from "lucide-react";
 import type { User as UserType } from "@shared/schema";
 import TherapistApplicationReview from "@/components/admin/therapist-application-review";
@@ -48,8 +54,8 @@ interface ConnectingStats {
 interface MatchingProfile {
   id: string;
   userId: string;
-  userType: 'client' | 'therapist';
-  status: 'pending_ai_review' | 'ai_reviewed' | 'admin_reviewing' | 'approved' | 'rejected';
+  userType: "client" | "therapist";
+  status: "pending_ai_review" | "ai_reviewed" | "admin_reviewing" | "approved" | "rejected";
   aiReviewScore: number;
   aiReviewNotes: string;
   adminNotes?: string;
@@ -70,7 +76,7 @@ interface MatchingSuggestion {
   therapistId: string;
   compatibilityScore: number;
   aiReasoning: string;
-  status: 'pending' | 'admin_approved' | 'admin_rejected' | 'client_accepted' | 'client_declined';
+  status: "pending" | "admin_approved" | "admin_rejected" | "client_accepted" | "client_declined";
   adminNotes?: string;
   createdAt: string;
   clientProfile: MatchingProfile;
@@ -80,9 +86,9 @@ interface MatchingSuggestion {
 export default function AdminMatchingSystem({ user }: AdminMatchingSystemProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [selectedTab, setSelectedTab] = useState('pending-reviews');
-  const [filterStatus, setFilterStatus] = useState<string>('all');
-  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedTab, setSelectedTab] = useState("pending-reviews");
+  const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [searchTerm, setSearchTerm] = useState("");
   const [showAIModal, setShowAIModal] = useState(false);
   const [aiAnalysisResult, setAiAnalysisResult] = useState(null);
   const [editingProfile, setEditingProfile] = useState<string | null>(null);
@@ -93,7 +99,9 @@ export default function AdminMatchingSystem({ user }: AdminMatchingSystemProps) 
     retry: false,
   });
 
-  const { data: matchingSuggestions = [], isLoading: suggestionsLoading } = useQuery<MatchingSuggestion[]>({
+  const { data: matchingSuggestions = [], isLoading: suggestionsLoading } = useQuery<
+    MatchingSuggestion[]
+  >({
     queryKey: ["/api/admin/matching/suggestions"],
     retry: false,
   });
@@ -105,7 +113,9 @@ export default function AdminMatchingSystem({ user }: AdminMatchingSystemProps) 
 
   const approveProfileMutation = useMutation({
     mutationFn: async ({ profileId, notes }: { profileId: string; notes?: string }) => {
-      return await apiRequest('POST', `/api/admin/matching/approve-profile/${profileId}`, { notes });
+      return await apiRequest("POST", `/api/admin/matching/approve-profile/${profileId}`, {
+        notes,
+      });
     },
     onSuccess: () => {
       toast({
@@ -125,7 +135,7 @@ export default function AdminMatchingSystem({ user }: AdminMatchingSystemProps) 
 
   const rejectProfileMutation = useMutation({
     mutationFn: async ({ profileId, notes }: { profileId: string; notes: string }) => {
-      return await apiRequest('POST', `/api/admin/matching/reject-profile/${profileId}`, { notes });
+      return await apiRequest("POST", `/api/admin/matching/reject-profile/${profileId}`, { notes });
     },
     onSuccess: () => {
       toast({
@@ -145,7 +155,7 @@ export default function AdminMatchingSystem({ user }: AdminMatchingSystemProps) 
 
   const approveMatchMutation = useMutation({
     mutationFn: async ({ matchId, notes }: { matchId: string; notes?: string }) => {
-      return await apiRequest('POST', `/api/admin/matching/approve-match/${matchId}`, { notes });
+      return await apiRequest("POST", `/api/admin/matching/approve-match/${matchId}`, { notes });
     },
     onSuccess: () => {
       toast({
@@ -166,10 +176,10 @@ export default function AdminMatchingSystem({ user }: AdminMatchingSystemProps) 
   const triggerAiReviewMutation = useMutation({
     mutationFn: async () => {
       // Run real AI analysis on demo client-therapist pair
-      return await apiRequest('POST', '/api/admin/matching/run-ai-analysis', {
-        clientProfileId: 'profile-1',
-        therapistProfileId: 'profile-2',
-        analysisType: 'compatibility'
+      return await apiRequest("POST", "/api/admin/matching/run-ai-analysis", {
+        clientProfileId: "profile-1",
+        therapistProfileId: "profile-2",
+        analysisType: "compatibility",
       });
     },
     onSuccess: (data: any) => {
@@ -196,7 +206,7 @@ export default function AdminMatchingSystem({ user }: AdminMatchingSystemProps) 
 
   const updateProfileMutation = useMutation({
     mutationFn: async ({ profileId, updates }: { profileId: string; updates: any }) => {
-      return await apiRequest('PATCH', `/api/admin/matching/update-profile/${profileId}`, updates);
+      return await apiRequest("PATCH", `/api/admin/matching/update-profile/${profileId}`, updates);
     },
     onSuccess: () => {
       toast({
@@ -222,40 +232,46 @@ export default function AdminMatchingSystem({ user }: AdminMatchingSystemProps) 
       firstName: profile.userData.firstName,
       lastName: profile.userData.lastName,
       email: profile.userData.email,
-      concerns: profile.profileData.concerns?.join(', ') || '',
-      sessionFormat: profile.profileData.sessionFormat || '',
-      availability: profile.profileData.availability || '',
+      concerns: profile.profileData.concerns?.join(", ") || "",
+      sessionFormat: profile.profileData.sessionFormat || "",
+      availability: profile.profileData.availability || "",
       previousTherapy: profile.profileData.previousTherapy || false,
-      specialisations: Array.isArray(profile.profileData.specialisations) 
-        ? profile.profileData.specialisations.join(', ')
-        : profile.profileData.specialisations || '',
-      credentials: profile.profileData.credentials || '',
-      sessionRate: profile.profileData.sessionRate || '',
-      experience: profile.profileData.experience || ''
+      specialisations: Array.isArray(profile.profileData.specialisations)
+        ? profile.profileData.specialisations.join(", ")
+        : profile.profileData.specialisations || "",
+      credentials: profile.profileData.credentials || "",
+      sessionRate: profile.profileData.sessionRate || "",
+      experience: profile.profileData.experience || "",
     });
   };
 
   const saveProfile = () => {
     if (!editingProfile) return;
-    
+
     const updates = {
       userData: {
         firstName: editForm.firstName,
         lastName: editForm.lastName,
-        email: editForm.email
+        email: editForm.email,
       },
       profileData: {
-        concerns: editForm.concerns.split(',').map((s: string) => s.trim()).filter(Boolean),
+        concerns: editForm.concerns
+          .split(",")
+          .map((s: string) => s.trim())
+          .filter(Boolean),
         sessionFormat: editForm.sessionFormat,
         availability: editForm.availability,
         previousTherapy: editForm.previousTherapy,
-        specialisations: editForm.specialisations.split(',').map((s: string) => s.trim()).filter(Boolean),
+        specialisations: editForm.specialisations
+          .split(",")
+          .map((s: string) => s.trim())
+          .filter(Boolean),
         credentials: editForm.credentials,
         sessionRate: editForm.sessionRate,
-        experience: editForm.experience
-      }
+        experience: editForm.experience,
+      },
     };
-    
+
     updateProfileMutation.mutate({ profileId: editingProfile, updates });
   };
 
@@ -266,108 +282,121 @@ export default function AdminMatchingSystem({ user }: AdminMatchingSystemProps) 
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending_ai_review': return 'bg-yellow-100 text-yellow-800';
-      case 'ai_reviewed': return 'bg-blue-100 text-blue-800';
-      case 'admin_reviewing': return 'bg-purple-100 text-purple-800';
-      case 'approved': return 'bg-green-100 text-green-800';
-      case 'rejected': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "pending_ai_review":
+        return "bg-yellow-100 text-yellow-800";
+      case "ai_reviewed":
+        return "bg-blue-100 text-blue-800";
+      case "admin_reviewing":
+        return "bg-purple-100 text-purple-800";
+      case "approved":
+        return "bg-green-100 text-green-800";
+      case "rejected":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-green-600';
-    if (score >= 60) return 'text-yellow-600';
-    return 'text-red-600';
+    if (score >= 80) return "text-green-600";
+    if (score >= 60) return "text-yellow-600";
+    return "text-red-600";
   };
 
-  const filteredProfiles = pendingProfiles.filter(profile => {
-    if (filterStatus !== 'all' && profile.status !== filterStatus) return false;
-    if (searchTerm && !profile.userData.firstName.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        !profile.userData.lastName.toLowerCase().includes(searchTerm.toLowerCase()) &&
-        !profile.userData.email.toLowerCase().includes(searchTerm.toLowerCase())) return false;
+  const filteredProfiles = pendingProfiles.filter((profile) => {
+    if (filterStatus !== "all" && profile.status !== filterStatus) return false;
+    if (
+      searchTerm &&
+      !profile.userData.firstName.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      !profile.userData.lastName.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      !profile.userData.email.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+      return false;
     return true;
   });
 
   // Demo data for display
   const demoProfiles: MatchingProfile[] = [
     {
-      id: 'profile-1',
-      userId: 'client-1',
-      userType: 'client',
-      status: 'ai_reviewed',
+      id: "profile-1",
+      userId: "client-1",
+      userType: "client",
+      status: "ai_reviewed",
       aiReviewScore: 85,
-      aiReviewNotes: 'Strong candidate with clear therapeutic goals. Anxiety and depression symptoms align well with available therapist specialisations.',
+      aiReviewNotes:
+        "Strong candidate with clear therapeutic goals. Anxiety and depression symptoms align well with available therapist specialisations.",
       createdAt: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
       updatedAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
       userData: {
-        firstName: 'Emma',
-        lastName: 'Johnson',
-        email: 'emma.j@email.com'
+        firstName: "Emma",
+        lastName: "Johnson",
+        email: "emma.j@email.com",
       },
       profileData: {
-        concerns: ['anxiety', 'depression'],
-        sessionFormat: 'video',
-        availability: 'evenings',
-        previousTherapy: false
-      }
+        concerns: ["anxiety", "depression"],
+        sessionFormat: "video",
+        availability: "evenings",
+        previousTherapy: false,
+      },
     },
     {
-      id: 'profile-2',
-      userId: 'therapist-1',
-      userType: 'therapist',
-      status: 'admin_reviewing',
+      id: "profile-2",
+      userId: "therapist-1",
+      userType: "therapist",
+      status: "admin_reviewing",
       aiReviewScore: 92,
-      aiReviewNotes: 'Excellent credentials and experience. Specialisations in CBT and anxiety disorders. Clear availability and professional background.',
+      aiReviewNotes:
+        "Excellent credentials and experience. Specialisations in CBT and anxiety disorders. Clear availability and professional background.",
       createdAt: new Date(Date.now() - 4 * 60 * 60 * 1000).toISOString(),
       updatedAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
       userData: {
-        firstName: 'Dr. Sarah',
-        lastName: 'Martinez',
-        email: 'sarah.martinez@therapist.com'
+        firstName: "Dr. Sarah",
+        lastName: "Martinez",
+        email: "sarah.martinez@therapist.com",
       },
       profileData: {
-        specialisations: ['CBT', 'Anxiety Disorders', 'Depression'],
+        specialisations: ["CBT", "Anxiety Disorders", "Depression"],
         experience: 8,
-        credentials: 'Licensed Clinical Psychologist',
-        sessionRate: '120.00'
-      }
+        credentials: "Licensed Clinical Psychologist",
+        sessionRate: "120.00",
+      },
     },
     {
-      id: 'profile-3',
-      userId: 'client-2',
-      userType: 'client',
-      status: 'pending_ai_review',
+      id: "profile-3",
+      userId: "client-2",
+      userType: "client",
+      status: "pending_ai_review",
       aiReviewScore: 0,
-      aiReviewNotes: '',
+      aiReviewNotes: "",
       createdAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
       updatedAt: new Date(Date.now() - 30 * 60 * 1000).toISOString(),
       userData: {
-        firstName: 'Michael',
-        lastName: 'Chen',
-        email: 'michael.chen@email.com'
+        firstName: "Michael",
+        lastName: "Chen",
+        email: "michael.chen@email.com",
       },
       profileData: {
-        concerns: ['trauma', 'PTSD'],
-        sessionFormat: 'video',
-        availability: 'flexible',
-        previousTherapy: true
-      }
-    }
+        concerns: ["trauma", "PTSD"],
+        sessionFormat: "video",
+        availability: "flexible",
+        previousTherapy: true,
+      },
+    },
   ];
 
   const demoSuggestions: MatchingSuggestion[] = [
     {
-      id: 'match-1',
-      clientId: 'client-1',
-      therapistId: 'therapist-1',
+      id: "match-1",
+      clientId: "client-1",
+      therapistId: "therapist-1",
       compatibilityScore: 88,
-      aiReasoning: 'Strong compatibility based on therapist specialisation in anxiety and depression, matching client concerns. Session format preferences align (video), and availability windows overlap.',
-      status: 'pending',
+      aiReasoning:
+        "Strong compatibility based on therapist specialisation in anxiety and depression, matching client concerns. Session format preferences align (video), and availability windows overlap.",
+      status: "pending",
       createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString(),
       clientProfile: demoProfiles[0],
-      therapistProfile: demoProfiles[1]
-    }
+      therapistProfile: demoProfiles[1],
+    },
   ];
 
   const demoStats: MatchingStats = {
@@ -377,7 +406,7 @@ export default function AdminMatchingSystem({ user }: AdminMatchingSystemProps) 
     totalMatches: 15,
     successfulMatches: 11,
     averageCompatibilityScore: 84,
-    processingTime: '2.3 minutes'
+    processingTime: "2.3 minutes",
   };
 
   const displayProfiles = filteredProfiles.length > 0 ? filteredProfiles : demoProfiles;
@@ -387,9 +416,11 @@ export default function AdminMatchingSystem({ user }: AdminMatchingSystemProps) 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-century font-bold text-hive-black">AI-Powered Matching System</h2>
+        <h2 className="text-3xl font-century font-bold text-hive-black">
+          AI-Powered Matching System
+        </h2>
         <div className="flex gap-2">
-          <Button 
+          <Button
             onClick={() => triggerAiReviewMutation.mutate()}
             disabled={triggerAiReviewMutation.isPending}
             className="bg-blue-600 hover:bg-blue-700"
@@ -397,7 +428,7 @@ export default function AdminMatchingSystem({ user }: AdminMatchingSystemProps) 
             <Brain className="w-4 h-4 mr-2" />
             Run AI Analysis
           </Button>
-          <Button 
+          <Button
             onClick={() => {
               queryClient.invalidateQueries({ queryKey: ["/api/admin/matching"] });
             }}
@@ -416,7 +447,9 @@ export default function AdminMatchingSystem({ user }: AdminMatchingSystemProps) 
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-hive-purple">Pending AI Review</p>
-                <p className="text-2xl font-bold text-hive-purple">{displayStats.pendingAiReview}</p>
+                <p className="text-2xl font-bold text-hive-purple">
+                  {displayStats.pendingAiReview}
+                </p>
               </div>
               <Brain className="w-8 h-8 text-hive-purple" />
             </div>
@@ -428,7 +461,9 @@ export default function AdminMatchingSystem({ user }: AdminMatchingSystemProps) 
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-purple-600">Admin Review</p>
-                <p className="text-2xl font-bold text-purple-900">{displayStats.pendingAdminReview}</p>
+                <p className="text-2xl font-bold text-purple-900">
+                  {displayStats.pendingAdminReview}
+                </p>
               </div>
               <User className="w-8 h-8 text-purple-600" />
             </div>
@@ -504,10 +539,11 @@ export default function AdminMatchingSystem({ user }: AdminMatchingSystemProps) 
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-4">
                       <div className="w-12 h-12 bg-hive-purple/10 rounded-full flex items-center justify-center">
-                        {profile.userType === 'therapist' ? 
-                          <User className="w-6 h-6 text-hive-purple" /> :
+                        {profile.userType === "therapist" ? (
+                          <User className="w-6 h-6 text-hive-purple" />
+                        ) : (
                           <Users className="w-6 h-6 text-hive-purple" />
-                        }
+                        )}
                       </div>
                       <div>
                         <h3 className="font-semibold text-lg">
@@ -515,15 +551,24 @@ export default function AdminMatchingSystem({ user }: AdminMatchingSystemProps) 
                         </h3>
                         <p className="text-gray-600">{profile.userData.email}</p>
                         <div className="flex items-center gap-2 mt-1">
-                          <Badge className={profile.userType === 'therapist' ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}>
-                            {profile.userType === 'therapist' ? 'Therapist' : 'Client'}
+                          <Badge
+                            className={
+                              profile.userType === "therapist"
+                                ? "bg-purple-100 text-purple-800"
+                                : "bg-blue-100 text-blue-800"
+                            }
+                          >
+                            {profile.userType === "therapist" ? "Therapist" : "Client"}
                           </Badge>
                           <Badge className={getStatusColor(profile.status)}>
-                            {profile.status.replace('_', ' ')}
+                            {profile.status.replace("_", " ")}
                           </Badge>
                           {profile.aiReviewScore > 0 && (
                             <Badge className="bg-gray-100 text-gray-800">
-                              AI Score: <span className={getScoreColor(profile.aiReviewScore)}>{profile.aiReviewScore}%</span>
+                              AI Score:{" "}
+                              <span className={getScoreColor(profile.aiReviewScore)}>
+                                {profile.aiReviewScore}%
+                              </span>
                             </Badge>
                           )}
                         </div>
@@ -560,24 +605,20 @@ export default function AdminMatchingSystem({ user }: AdminMatchingSystemProps) 
                       <h4 className="font-medium text-gray-900">Profile Information</h4>
                       {editingProfile === profile.id && (
                         <div className="flex gap-2">
-                          <Button 
-                            size="sm" 
+                          <Button
+                            size="sm"
                             onClick={saveProfile}
                             disabled={updateProfileMutation.isPending}
                           >
                             Save
                           </Button>
-                          <Button 
-                            size="sm" 
-                            variant="outline" 
-                            onClick={cancelEditing}
-                          >
+                          <Button size="sm" variant="outline" onClick={cancelEditing}>
                             Cancel
                           </Button>
                         </div>
                       )}
                     </div>
-                    
+
                     {editingProfile === profile.id ? (
                       <div className="grid grid-cols-1 gap-4">
                         <div className="grid grid-cols-2 gap-4">
@@ -585,46 +626,54 @@ export default function AdminMatchingSystem({ user }: AdminMatchingSystemProps) 
                             <Label htmlFor="firstName">First Name</Label>
                             <Input
                               id="firstName"
-                              value={editForm.firstName || ''}
-                              onChange={(e) => setEditForm({...editForm, firstName: e.target.value})}
+                              value={editForm.firstName || ""}
+                              onChange={(e) =>
+                                setEditForm({ ...editForm, firstName: e.target.value })
+                              }
                             />
                           </div>
                           <div>
                             <Label htmlFor="lastName">Last Name</Label>
                             <Input
                               id="lastName"
-                              value={editForm.lastName || ''}
-                              onChange={(e) => setEditForm({...editForm, lastName: e.target.value})}
+                              value={editForm.lastName || ""}
+                              onChange={(e) =>
+                                setEditForm({ ...editForm, lastName: e.target.value })
+                              }
                             />
                           </div>
                         </div>
-                        
+
                         <div>
                           <Label htmlFor="email">Email</Label>
                           <Input
                             id="email"
                             type="email"
-                            value={editForm.email || ''}
-                            onChange={(e) => setEditForm({...editForm, email: e.target.value})}
+                            value={editForm.email || ""}
+                            onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
                           />
                         </div>
-                        
-                        {profile.userType === 'client' ? (
+
+                        {profile.userType === "client" ? (
                           <>
                             <div>
                               <Label htmlFor="concerns">Concerns (comma-separated)</Label>
                               <Textarea
                                 id="concerns"
-                                value={editForm.concerns || ''}
-                                onChange={(e) => setEditForm({...editForm, concerns: e.target.value})}
+                                value={editForm.concerns || ""}
+                                onChange={(e) =>
+                                  setEditForm({ ...editForm, concerns: e.target.value })
+                                }
                               />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
                               <div>
                                 <Label htmlFor="sessionFormat">Session Format</Label>
-                                <Select 
-                                  value={editForm.sessionFormat || 'video'} 
-                                  onValueChange={(value) => setEditForm({...editForm, sessionFormat: value})}
+                                <Select
+                                  value={editForm.sessionFormat || "video"}
+                                  onValueChange={(value) =>
+                                    setEditForm({ ...editForm, sessionFormat: value })
+                                  }
                                 >
                                   <SelectTrigger>
                                     <SelectValue placeholder="Video therapy sessions" />
@@ -633,13 +682,17 @@ export default function AdminMatchingSystem({ user }: AdminMatchingSystemProps) 
                                     <SelectItem value="video">Video therapy sessions</SelectItem>
                                   </SelectContent>
                                 </Select>
-                                <p className="text-sm text-gray-600 mt-1">All sessions are video-based</p>
+                                <p className="text-sm text-gray-600 mt-1">
+                                  All sessions are video-based
+                                </p>
                               </div>
                               <div>
                                 <Label htmlFor="availability">Availability</Label>
-                                <Select 
-                                  value={editForm.availability || ''} 
-                                  onValueChange={(value) => setEditForm({...editForm, availability: value})}
+                                <Select
+                                  value={editForm.availability || ""}
+                                  onValueChange={(value) =>
+                                    setEditForm({ ...editForm, availability: value })
+                                  }
                                 >
                                   <SelectTrigger>
                                     <SelectValue placeholder="Select availability" />
@@ -657,11 +710,15 @@ export default function AdminMatchingSystem({ user }: AdminMatchingSystemProps) 
                         ) : (
                           <>
                             <div>
-                              <Label htmlFor="specialisations">Specialisations (comma-separated)</Label>
+                              <Label htmlFor="specialisations">
+                                Specialisations (comma-separated)
+                              </Label>
                               <Textarea
                                 id="specialisations"
-                                value={editForm.specialisations || ''}
-                                onChange={(e) => setEditForm({...editForm, specialisations: e.target.value})}
+                                value={editForm.specialisations || ""}
+                                onChange={(e) =>
+                                  setEditForm({ ...editForm, specialisations: e.target.value })
+                                }
                               />
                             </div>
                             <div className="grid grid-cols-2 gap-4">
@@ -669,16 +726,20 @@ export default function AdminMatchingSystem({ user }: AdminMatchingSystemProps) 
                                 <Label htmlFor="credentials">Credentials</Label>
                                 <Input
                                   id="credentials"
-                                  value={editForm.credentials || ''}
-                                  onChange={(e) => setEditForm({...editForm, credentials: e.target.value})}
+                                  value={editForm.credentials || ""}
+                                  onChange={(e) =>
+                                    setEditForm({ ...editForm, credentials: e.target.value })
+                                  }
                                 />
                               </div>
                               <div>
                                 <Label htmlFor="sessionRate">Session Rate</Label>
                                 <Input
                                   id="sessionRate"
-                                  value={editForm.sessionRate || ''}
-                                  onChange={(e) => setEditForm({...editForm, sessionRate: e.target.value})}
+                                  value={editForm.sessionRate || ""}
+                                  onChange={(e) =>
+                                    setEditForm({ ...editForm, sessionRate: e.target.value })
+                                  }
                                 />
                               </div>
                             </div>
@@ -687,50 +748,58 @@ export default function AdminMatchingSystem({ user }: AdminMatchingSystemProps) 
                       </div>
                     ) : (
                       <div className="grid grid-cols-2 gap-4 text-sm">
-                        {profile.userType === 'client' ? (
+                        {profile.userType === "client" ? (
                           <>
                             <div>
-                              <span className="font-medium">Concerns:</span> {profile.profileData.concerns?.join(', ')}
+                              <span className="font-medium">Concerns:</span>{" "}
+                              {profile.profileData.concerns?.join(", ")}
                             </div>
                             <div>
-                              <span className="font-medium">Session Format:</span> {profile.profileData.sessionFormat}
+                              <span className="font-medium">Session Format:</span>{" "}
+                              {profile.profileData.sessionFormat}
                             </div>
                             <div>
-                              <span className="font-medium">Availability:</span> {profile.profileData.availability}
+                              <span className="font-medium">Availability:</span>{" "}
+                              {profile.profileData.availability}
                             </div>
                             <div>
-                              <span className="font-medium">Previous Therapy:</span> {profile.profileData.previousTherapy ? 'Yes' : 'No'}
+                              <span className="font-medium">Previous Therapy:</span>{" "}
+                              {profile.profileData.previousTherapy ? "Yes" : "No"}
                             </div>
                           </>
                         ) : (
                           <>
                             <div>
-                              <span className="font-medium">Specialisations:</span> {Array.isArray(profile.profileData.specialisations) 
-                                ? profile.profileData.specialisations.join(', ')
-                                : profile.profileData.specialisations || 'Not specified'}
+                              <span className="font-medium">Specialisations:</span>{" "}
+                              {Array.isArray(profile.profileData.specialisations)
+                                ? profile.profileData.specialisations.join(", ")
+                                : profile.profileData.specialisations || "Not specified"}
                             </div>
                             <div>
-                              <span className="font-medium">Experience:</span> {profile.profileData.experience} years
+                              <span className="font-medium">Experience:</span>{" "}
+                              {profile.profileData.experience} years
                             </div>
                             <div>
-                              <span className="font-medium">Credentials:</span> {
-                                typeof profile.profileData.credentials === 'object' 
-                                  ? profile.profileData.credentials?.licenses?.join(', ') || 'Licenced Clinical Psychologist'
-                                  : profile.profileData.credentials || 'Licenced Clinical Psychologist'
-                              }
+                              <span className="font-medium">Credentials:</span>{" "}
+                              {typeof profile.profileData.credentials === "object"
+                                ? profile.profileData.credentials?.licenses?.join(", ") ||
+                                  "Licenced Clinical Psychologist"
+                                : profile.profileData.credentials ||
+                                  "Licenced Clinical Psychologist"}
                             </div>
                             <div>
-                              <span className="font-medium">Session Rate:</span> £{profile.profileData.sessionRate}
+                              <span className="font-medium">Session Rate:</span> £
+                              {profile.profileData.sessionRate}
                             </div>
-                        </>
-                      )}
-                    </div>
+                          </>
+                        )}
+                      </div>
                     )}
                   </div>
 
-                  {profile.status === 'ai_reviewed' && (
+                  {profile.status === "ai_reviewed" && (
                     <div className="flex gap-2">
-                      <Button 
+                      <Button
                         onClick={() => approveProfileMutation.mutate({ profileId: profile.id })}
                         disabled={approveProfileMutation.isPending}
                         className="bg-green-600 hover:bg-green-700"
@@ -738,9 +807,9 @@ export default function AdminMatchingSystem({ user }: AdminMatchingSystemProps) 
                         <CheckCircle className="w-4 h-4 mr-2" />
                         Approve
                       </Button>
-                      <Button 
+                      <Button
                         onClick={() => {
-                          const notes = prompt('Rejection reason:');
+                          const notes = prompt("Rejection reason:");
                           if (notes) rejectProfileMutation.mutate({ profileId: profile.id, notes });
                         }}
                         disabled={rejectProfileMutation.isPending}
@@ -772,15 +841,13 @@ export default function AdminMatchingSystem({ user }: AdminMatchingSystemProps) 
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between mb-4">
                     <div>
-                      <h3 className="font-semibold text-lg mb-2">
-                        AI Match Suggestion
-                      </h3>
+                      <h3 className="font-semibold text-lg mb-2">AI Match Suggestion</h3>
                       <div className="flex items-center gap-2">
                         <Badge className="bg-green-100 text-green-800">
                           Compatibility: {suggestion.compatibilityScore}%
                         </Badge>
                         <Badge className={getStatusColor(suggestion.status)}>
-                          {suggestion.status.replace('_', ' ')}
+                          {suggestion.status.replace("_", " ")}
                         </Badge>
                       </div>
                     </div>
@@ -793,24 +860,47 @@ export default function AdminMatchingSystem({ user }: AdminMatchingSystemProps) 
                     {/* Client Info */}
                     <div className="bg-purple-50 p-4 rounded-lg">
                       <h4 className="font-medium text-hive-purple mb-2">Client</h4>
-                      <p className="font-semibold">{suggestion.clientProfile.userData.firstName} {suggestion.clientProfile.userData.lastName}</p>
-                      <p className="text-sm text-hive-black">{suggestion.clientProfile.userData.email}</p>
+                      <p className="font-semibold">
+                        {suggestion.clientProfile.userData.firstName}{" "}
+                        {suggestion.clientProfile.userData.lastName}
+                      </p>
+                      <p className="text-sm text-hive-black">
+                        {suggestion.clientProfile.userData.email}
+                      </p>
                       <div className="mt-2 text-sm">
-                        <p><strong>Concerns:</strong> {suggestion.clientProfile.profileData.concerns?.join(', ')}</p>
-                        <p><strong>Format:</strong> {suggestion.clientProfile.profileData.sessionFormat}</p>
+                        <p>
+                          <strong>Concerns:</strong>{" "}
+                          {suggestion.clientProfile.profileData.concerns?.join(", ")}
+                        </p>
+                        <p>
+                          <strong>Format:</strong>{" "}
+                          {suggestion.clientProfile.profileData.sessionFormat}
+                        </p>
                       </div>
                     </div>
 
                     {/* Therapist Info */}
                     <div className="bg-purple-50 p-4 rounded-lg">
                       <h4 className="font-medium text-purple-900 mb-2">Therapist</h4>
-                      <p className="font-semibold">{suggestion.therapistProfile.userData.firstName} {suggestion.therapistProfile.userData.lastName}</p>
-                      <p className="text-sm text-purple-700">{suggestion.therapistProfile.userData.email}</p>
+                      <p className="font-semibold">
+                        {suggestion.therapistProfile.userData.firstName}{" "}
+                        {suggestion.therapistProfile.userData.lastName}
+                      </p>
+                      <p className="text-sm text-purple-700">
+                        {suggestion.therapistProfile.userData.email}
+                      </p>
                       <div className="mt-2 text-sm">
-                        <p><strong>Specialisations:</strong> {Array.isArray(suggestion.therapistProfile.profileData.specialisations) 
-                          ? suggestion.therapistProfile.profileData.specialisations.join(', ')
-                          : suggestion.therapistProfile.profileData.specialisations || 'Not specified'}</p>
-                        <p><strong>Experience:</strong> {suggestion.therapistProfile.profileData.experience} years</p>
+                        <p>
+                          <strong>Specialisations:</strong>{" "}
+                          {Array.isArray(suggestion.therapistProfile.profileData.specialisations)
+                            ? suggestion.therapistProfile.profileData.specialisations.join(", ")
+                            : suggestion.therapistProfile.profileData.specialisations ||
+                              "Not specified"}
+                        </p>
+                        <p>
+                          <strong>Experience:</strong>{" "}
+                          {suggestion.therapistProfile.profileData.experience} years
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -823,9 +913,9 @@ export default function AdminMatchingSystem({ user }: AdminMatchingSystemProps) 
                     <p className="text-green-800 text-sm">{suggestion.aiReasoning}</p>
                   </div>
 
-                  {suggestion.status === 'pending' && (
+                  {suggestion.status === "pending" && (
                     <div className="flex gap-2">
-                      <Button 
+                      <Button
                         onClick={() => approveMatchMutation.mutate({ matchId: suggestion.id })}
                         disabled={approveMatchMutation.isPending}
                         className="bg-green-600 hover:bg-green-700"
@@ -833,9 +923,9 @@ export default function AdminMatchingSystem({ user }: AdminMatchingSystemProps) 
                         <CheckCircle className="w-4 h-4 mr-2" />
                         Approve Match
                       </Button>
-                      <Button 
+                      <Button
                         onClick={() => {
-                          const notes = prompt('Rejection reason:');
+                          const notes = prompt("Rejection reason:");
                           if (notes) {
                             // Handle rejection
                           }
@@ -873,19 +963,17 @@ export default function AdminMatchingSystem({ user }: AdminMatchingSystemProps) 
                   <Input id="maxMatches" type="number" defaultValue="3" min="1" max="10" />
                 </div>
               </div>
-              
+
               <div>
                 <Label htmlFor="reviewPrompt">AI Review Prompt Template</Label>
-                <Textarea 
+                <Textarea
                   id="reviewPrompt"
                   defaultValue="Analyse this user profile for therapeutic matching compatibility. Consider specialisations, experience, concerns, and availability."
                   rows={4}
                 />
               </div>
 
-              <Button className="bg-hive-purple hover:bg-hive-purple/90">
-                Save Configuration
-              </Button>
+              <Button className="bg-hive-purple hover:bg-hive-purple/90">Save Configuration</Button>
             </CardContent>
           </Card>
         </TabsContent>

@@ -1,5 +1,5 @@
-import React, { Component, ReactNode } from 'react';
-import { Button } from '@/components/ui/button';
+import React, { Component, ReactNode } from "react";
+import { Button } from "@/components/ui/button";
 
 interface Props {
   children: ReactNode;
@@ -21,7 +21,7 @@ export class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('ErrorBoundary caught an error:', error, errorInfo);
+    console.error("ErrorBoundary caught an error:", error, errorInfo);
   }
 
   render() {
@@ -35,13 +35,13 @@ export class ErrorBoundary extends Component<Props, State> {
             <p className="text-hive-black/70 mb-6">
               The application encountered an unexpected error. Please refresh the page to continue.
             </p>
-            <Button 
+            <Button
               onClick={() => window.location.reload()}
               className="bg-hive-purple hover:bg-hive-purple/90"
             >
               Refresh Page
             </Button>
-            {process.env.NODE_ENV === 'development' && (
+            {process.env.NODE_ENV === "development" && (
               <details className="mt-4 text-left text-xs text-gray-600">
                 <summary className="cursor-pointer">Error Details</summary>
                 <pre className="mt-2 p-2 bg-gray-100 rounded overflow-auto">

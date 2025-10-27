@@ -5,14 +5,20 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { 
-  Shield, 
-  Lock, 
+import {
+  Shield,
+  Lock,
   Unlock,
   Eye,
   EyeOff,
@@ -31,7 +37,7 @@ import {
   Clock,
   MapPin,
   Search,
-  Filter
+  Filter,
 } from "lucide-react";
 import type { User } from "@shared/schema";
 
@@ -41,8 +47,15 @@ interface SecurityDashboardProps {
 
 interface SecurityEvent {
   id: string;
-  type: 'login' | 'logout' | 'failed_login' | 'password_change' | 'permission_change' | 'data_access' | 'api_request';
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  type:
+    | "login"
+    | "logout"
+    | "failed_login"
+    | "password_change"
+    | "permission_change"
+    | "data_access"
+    | "api_request";
+  severity: "low" | "medium" | "high" | "critical";
   userId?: string;
   userEmail?: string;
   ipAddress: string;
@@ -50,14 +63,14 @@ interface SecurityEvent {
   userAgent: string;
   description: string;
   timestamp: string;
-  status: 'resolved' | 'investigating' | 'open';
+  status: "resolved" | "investigating" | "open";
 }
 
 interface SecurityMetric {
   name: string;
   value: number;
-  trend: 'up' | 'down' | 'stable';
-  status: 'good' | 'warning' | 'critical';
+  trend: "up" | "down" | "stable";
+  status: "good" | "warning" | "critical";
 }
 
 interface AccessAttempt {
@@ -83,7 +96,7 @@ export default function SecurityDashboard({ user }: SecurityDashboardProps) {
     failedLoginLimit: 5,
     ipWhitelist: false,
     auditLogging: true,
-    realTimeAlerts: true
+    realTimeAlerts: true,
   });
 
   const { toast } = useToast();
@@ -91,23 +104,23 @@ export default function SecurityDashboard({ user }: SecurityDashboardProps) {
 
   // Fetch security events
   const { data: securityEvents = [], isLoading: eventsLoading } = useQuery({
-    queryKey: ['/api/security/events', filterSeverity, filterType],
+    queryKey: ["/api/security/events", filterSeverity, filterType],
   });
 
   // Fetch security metrics
   const { data: securityMetrics = [], isLoading: metricsLoading } = useQuery({
-    queryKey: ['/api/security/metrics'],
+    queryKey: ["/api/security/metrics"],
   });
 
   // Fetch access attempts
   const { data: accessAttempts = [], isLoading: accessLoading } = useQuery({
-    queryKey: ['/api/security/access-attempts'],
+    queryKey: ["/api/security/access-attempts"],
   });
 
   // Update security settings mutation
   const updateSecurityMutation = useMutation({
     mutationFn: async (settings: any) => {
-      return await apiRequest('PUT', '/api/security/settings', settings);
+      return await apiRequest("PUT", "/api/security/settings", settings);
     },
     onSuccess: () => {
       toast({
@@ -128,12 +141,12 @@ export default function SecurityDashboard({ user }: SecurityDashboardProps) {
   const demoSecurityEvents: SecurityEvent[] = [];
 
   const demoSecurityMetrics: SecurityMetric[] = [
-    { name: 'Failed Login Attempts', value: 0, trend: 'stable', status: 'good' },
-    { name: 'Active Sessions', value: 0, trend: 'stable', status: 'good' },
-    { name: 'API Rate Limit Hits', value: 0, trend: 'stable', status: 'good' },
-    { name: 'Suspicious Activities', value: 0, trend: 'stable', status: 'good' },
-    { name: 'Password Resets', value: 0, trend: 'stable', status: 'good' },
-    { name: 'Two-Factor Enabled', value: 0, trend: 'stable', status: 'good' }
+    { name: "Failed Login Attempts", value: 0, trend: "stable", status: "good" },
+    { name: "Active Sessions", value: 0, trend: "stable", status: "good" },
+    { name: "API Rate Limit Hits", value: 0, trend: "stable", status: "good" },
+    { name: "Suspicious Activities", value: 0, trend: "stable", status: "good" },
+    { name: "Password Resets", value: 0, trend: "stable", status: "good" },
+    { name: "Two-Factor Enabled", value: 0, trend: "stable", status: "good" },
   ];
 
   const demoAccessAttempts: AccessAttempt[] = [];
@@ -142,64 +155,90 @@ export default function SecurityDashboard({ user }: SecurityDashboardProps) {
   const displayMetrics = securityMetrics.length > 0 ? securityMetrics : demoSecurityMetrics;
   const displayAttempts = accessAttempts.length > 0 ? accessAttempts : demoAccessAttempts;
 
-  const filteredEvents = displayEvents.filter(event => {
-    const matchesSeverity = filterSeverity === 'all' || event.severity === filterSeverity;
-    const matchesType = filterType === 'all' || event.type === filterType;
-    const matchesSearch = searchQuery === '' || 
+  const filteredEvents = displayEvents.filter((event) => {
+    const matchesSeverity = filterSeverity === "all" || event.severity === filterSeverity;
+    const matchesType = filterType === "all" || event.type === filterType;
+    const matchesSearch =
+      searchQuery === "" ||
       event.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (event.userEmail && event.userEmail.toLowerCase().includes(searchQuery.toLowerCase())) ||
       event.ipAddress.includes(searchQuery);
-    
+
     return matchesSeverity && matchesType && matchesSearch;
   });
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
-      case 'critical': return 'bg-red-100 text-red-800';
-      case 'high': return 'bg-orange-100 text-orange-800';
-      case 'medium': return 'bg-yellow-100 text-yellow-800';
-      case 'low': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "critical":
+        return "bg-red-100 text-red-800";
+      case "high":
+        return "bg-orange-100 text-orange-800";
+      case "medium":
+        return "bg-yellow-100 text-yellow-800";
+      case "low":
+        return "bg-green-100 text-green-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'resolved': return 'bg-green-100 text-green-800';
-      case 'investigating': return 'bg-yellow-100 text-yellow-800';
-      case 'open': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "resolved":
+        return "bg-green-100 text-green-800";
+      case "investigating":
+        return "bg-yellow-100 text-yellow-800";
+      case "open":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getMetricStatusColor = (status: string) => {
     switch (status) {
-      case 'good': return 'text-green-600';
-      case 'warning': return 'text-yellow-600';
-      case 'critical': return 'text-red-600';
-      default: return 'text-gray-600';
+      case "good":
+        return "text-green-600";
+      case "warning":
+        return "text-yellow-600";
+      case "critical":
+        return "text-red-600";
+      default:
+        return "text-gray-600";
     }
   };
 
   const getTrendIcon = (trend: string) => {
     switch (trend) {
-      case 'up': return '↗';
-      case 'down': return '↘';
-      case 'stable': return '→';
-      default: return '→';
+      case "up":
+        return "↗";
+      case "down":
+        return "↘";
+      case "stable":
+        return "→";
+      default:
+        return "→";
     }
   };
 
   const getEventIcon = (type: string) => {
     switch (type) {
-      case 'login': return <CheckCircle className="w-4 h-4 text-green-500" />;
-      case 'logout': return <XCircle className="w-4 h-4 text-blue-500" />;
-      case 'failed_login': return <AlertTriangle className="w-4 h-4 text-red-500" />;
-      case 'password_change': return <Key className="w-4 h-4 text-blue-500" />;
-      case 'permission_change': return <Settings className="w-4 h-4 text-orange-500" />;
-      case 'data_access': return <FileText className="w-4 h-4 text-purple-500" />;
-      case 'api_request': return <Server className="w-4 h-4 text-gray-500" />;
-      default: return <Activity className="w-4 h-4 text-gray-500" />;
+      case "login":
+        return <CheckCircle className="w-4 h-4 text-green-500" />;
+      case "logout":
+        return <XCircle className="w-4 h-4 text-blue-500" />;
+      case "failed_login":
+        return <AlertTriangle className="w-4 h-4 text-red-500" />;
+      case "password_change":
+        return <Key className="w-4 h-4 text-blue-500" />;
+      case "permission_change":
+        return <Settings className="w-4 h-4 text-orange-500" />;
+      case "data_access":
+        return <FileText className="w-4 h-4 text-purple-500" />;
+      case "api_request":
+        return <Server className="w-4 h-4 text-gray-500" />;
+      default:
+        return <Activity className="w-4 h-4 text-gray-500" />;
     }
   };
 
@@ -214,9 +253,7 @@ export default function SecurityDashboard({ user }: SecurityDashboardProps) {
       {/* Header */}
       <div className="flex flex-col space-y-4 sm:flex-row sm:items-center sm:justify-between sm:space-y-0">
         <div>
-          <h1 className="text-2xl font-display font-bold text-gray-900">
-            Security Dashboard
-          </h1>
+          <h1 className="text-2xl font-display font-bold text-gray-900">Security Dashboard</h1>
           <p className="text-gray-600 mt-1">
             Monitor security events, access controls, and system protection
           </p>
@@ -269,10 +306,13 @@ export default function SecurityDashboard({ user }: SecurityDashboardProps) {
             <CardContent>
               <div className="space-y-4">
                 {displayEvents
-                  .filter(event => event.severity === 'critical' || event.severity === 'high')
+                  .filter((event) => event.severity === "critical" || event.severity === "high")
                   .slice(0, 5)
                   .map((event) => (
-                    <div key={event.id} className="flex items-center space-x-4 p-3 border rounded-lg">
+                    <div
+                      key={event.id}
+                      className="flex items-center space-x-4 p-3 border rounded-lg"
+                    >
                       {getEventIcon(event.type)}
                       <div className="flex-1">
                         <div className="flex items-center space-x-2 mb-1">
@@ -280,9 +320,7 @@ export default function SecurityDashboard({ user }: SecurityDashboardProps) {
                           <Badge className={getSeverityColor(event.severity)}>
                             {event.severity}
                           </Badge>
-                          <Badge className={getStatusColor(event.status)}>
-                            {event.status}
-                          </Badge>
+                          <Badge className={getStatusColor(event.status)}>{event.status}</Badge>
                         </div>
                         <div className="flex items-center space-x-4 text-xs text-gray-500">
                           <span className="flex items-center">
@@ -452,20 +490,19 @@ export default function SecurityDashboard({ user }: SecurityDashboardProps) {
                   </div>
                 ) : (
                   filteredEvents.map((event) => (
-                    <div key={event.id} className="border rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                    <div
+                      key={event.id}
+                      className="border rounded-lg p-4 hover:bg-gray-50 transition-colors"
+                    >
                       <div className="flex items-start space-x-4">
-                        <div className="flex-shrink-0 mt-1">
-                          {getEventIcon(event.type)}
-                        </div>
+                        <div className="flex-shrink-0 mt-1">{getEventIcon(event.type)}</div>
                         <div className="flex-1">
                           <div className="flex items-center space-x-2 mb-2">
                             <h3 className="font-medium text-gray-900">{event.description}</h3>
                             <Badge className={getSeverityColor(event.severity)}>
                               {event.severity}
                             </Badge>
-                            <Badge className={getStatusColor(event.status)}>
-                              {event.status}
-                            </Badge>
+                            <Badge className={getStatusColor(event.status)}>{event.status}</Badge>
                           </div>
                           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm text-gray-600">
                             {event.userEmail && (
@@ -480,15 +517,17 @@ export default function SecurityDashboard({ user }: SecurityDashboardProps) {
                               <span className="font-medium">Location:</span> {event.location}
                             </div>
                             <div>
-                              <span className="font-medium">Time:</span> {new Date(event.timestamp).toLocaleString()}
+                              <span className="font-medium">Time:</span>{" "}
+                              {new Date(event.timestamp).toLocaleString()}
                             </div>
                           </div>
                           <div className="mt-2 text-xs text-gray-500">
-                            <span className="font-medium">User Agent:</span> {event.userAgent.substring(0, 80)}...
+                            <span className="font-medium">User Agent:</span>{" "}
+                            {event.userAgent.substring(0, 80)}...
                           </div>
                         </div>
                         <div className="flex space-x-2">
-                          {event.status !== 'resolved' && (
+                          {event.status !== "resolved" && (
                             <Button variant="outline" size="sm">
                               Investigate
                             </Button>
@@ -515,7 +554,10 @@ export default function SecurityDashboard({ user }: SecurityDashboardProps) {
             <CardContent>
               <div className="space-y-4">
                 {displayAttempts.map((attempt) => (
-                  <div key={attempt.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div
+                    key={attempt.id}
+                    className="flex items-center justify-between p-3 border rounded-lg"
+                  >
                     <div className="flex items-center space-x-4">
                       {attempt.success ? (
                         <CheckCircle className="w-5 h-5 text-green-500" />
@@ -525,14 +567,19 @@ export default function SecurityDashboard({ user }: SecurityDashboardProps) {
                       <div>
                         <div className="font-medium">{attempt.email}</div>
                         <div className="text-sm text-gray-600">
-                          {attempt.ipAddress} • {attempt.location} • {new Date(attempt.timestamp).toLocaleString()}
+                          {attempt.ipAddress} • {attempt.location} •{" "}
+                          {new Date(attempt.timestamp).toLocaleString()}
                         </div>
                         {!attempt.success && attempt.reason && (
                           <div className="text-sm text-red-600">{attempt.reason}</div>
                         )}
                       </div>
                     </div>
-                    <Badge className={attempt.success ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}>
+                    <Badge
+                      className={
+                        attempt.success ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                      }
+                    >
                       {attempt.success ? "Success" : "Failed"}
                     </Badge>
                   </div>
@@ -559,47 +606,61 @@ export default function SecurityDashboard({ user }: SecurityDashboardProps) {
                     <Switch
                       id="two-factor"
                       checked={securitySettings.twoFactorRequired}
-                      onCheckedChange={(checked) => handleSecuritySettingChange('twoFactorRequired', checked)}
+                      onCheckedChange={(checked) =>
+                        handleSecuritySettingChange("twoFactorRequired", checked)
+                      }
                     />
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <div>
                       <Label htmlFor="audit-logging">Audit Logging</Label>
-                      <p className="text-sm text-gray-500">Log all user actions and system events</p>
+                      <p className="text-sm text-gray-500">
+                        Log all user actions and system events
+                      </p>
                     </div>
                     <Switch
                       id="audit-logging"
                       checked={securitySettings.auditLogging}
-                      onCheckedChange={(checked) => handleSecuritySettingChange('auditLogging', checked)}
+                      onCheckedChange={(checked) =>
+                        handleSecuritySettingChange("auditLogging", checked)
+                      }
                     />
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <div>
                       <Label htmlFor="real-time-alerts">Real-time Security Alerts</Label>
-                      <p className="text-sm text-gray-500">Send instant notifications for security events</p>
+                      <p className="text-sm text-gray-500">
+                        Send instant notifications for security events
+                      </p>
                     </div>
                     <Switch
                       id="real-time-alerts"
                       checked={securitySettings.realTimeAlerts}
-                      onCheckedChange={(checked) => handleSecuritySettingChange('realTimeAlerts', checked)}
+                      onCheckedChange={(checked) =>
+                        handleSecuritySettingChange("realTimeAlerts", checked)
+                      }
                     />
                   </div>
-                  
+
                   <div className="flex items-center justify-between">
                     <div>
                       <Label htmlFor="ip-whitelist">IP Address Whitelisting</Label>
-                      <p className="text-sm text-gray-500">Restrict access to approved IP addresses</p>
+                      <p className="text-sm text-gray-500">
+                        Restrict access to approved IP addresses
+                      </p>
                     </div>
                     <Switch
                       id="ip-whitelist"
                       checked={securitySettings.ipWhitelist}
-                      onCheckedChange={(checked) => handleSecuritySettingChange('ipWhitelist', checked)}
+                      onCheckedChange={(checked) =>
+                        handleSecuritySettingChange("ipWhitelist", checked)
+                      }
                     />
                   </div>
                 </div>
-                
+
                 <div className="space-y-4">
                   <div>
                     <Label htmlFor="session-timeout">Session Timeout (minutes)</Label>
@@ -607,29 +668,35 @@ export default function SecurityDashboard({ user }: SecurityDashboardProps) {
                       id="session-timeout"
                       type="number"
                       value={securitySettings.sessionTimeout}
-                      onChange={(e) => handleSecuritySettingChange('sessionTimeout', parseInt(e.target.value))}
+                      onChange={(e) =>
+                        handleSecuritySettingChange("sessionTimeout", parseInt(e.target.value))
+                      }
                       className="mt-1"
                     />
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="password-expiry">Password Expiry (days)</Label>
                     <Input
                       id="password-expiry"
                       type="number"
                       value={securitySettings.passwordExpiry}
-                      onChange={(e) => handleSecuritySettingChange('passwordExpiry', parseInt(e.target.value))}
+                      onChange={(e) =>
+                        handleSecuritySettingChange("passwordExpiry", parseInt(e.target.value))
+                      }
                       className="mt-1"
                     />
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="failed-login-limit">Failed Login Attempt Limit</Label>
                     <Input
                       id="failed-login-limit"
                       type="number"
                       value={securitySettings.failedLoginLimit}
-                      onChange={(e) => handleSecuritySettingChange('failedLoginLimit', parseInt(e.target.value))}
+                      onChange={(e) =>
+                        handleSecuritySettingChange("failedLoginLimit", parseInt(e.target.value))
+                      }
                       className="mt-1"
                     />
                   </div>

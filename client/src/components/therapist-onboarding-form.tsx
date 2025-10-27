@@ -1,14 +1,14 @@
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
-import { useToast } from '@/hooks/use-toast';
-import { apiRequest } from '@/lib/queryClient';
-import { UserPlus, Send, CheckCircle, Calendar, FileText, Heart } from 'lucide-react';
-import IntroductionCallBooking from './IntroductionCallBooking';
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
+import { UserPlus, Send, CheckCircle, Calendar, FileText, Heart } from "lucide-react";
+import IntroductionCallBooking from "./IntroductionCallBooking";
 
 interface TherapistOnboardingFormProps {
   user?: any;
@@ -16,88 +16,98 @@ interface TherapistOnboardingFormProps {
   onSubmissionSuccess?: (enquiry: any) => void;
 }
 
-export default function TherapistOnboardingForm({ user, onBackToDashboard, onSubmissionSuccess }: TherapistOnboardingFormProps) {
+export default function TherapistOnboardingForm({
+  user,
+  onBackToDashboard,
+  onSubmissionSuccess,
+}: TherapistOnboardingFormProps) {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [submittedEnquiry, setSubmittedEnquiry] = useState<any>(null);
   const [showBooking, setShowBooking] = useState(false);
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    phone: '',
-    address: '',
-    qualifications: '',
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    address: "",
+    qualifications: "",
     registrationBodies: [] as string[],
     specialisations: [] as string[],
-    experience: '',
-    currentPractice: '',
-    caseloadCapacity: '',
-    preferredClientTypes: '',
-    therapeuticApproach: '',
-    availability: '',
-    bankDetails: '',
-    emergencyContact: '',
-    professionalInsurance: '',
-    agreedToTerms: false
+    experience: "",
+    currentPractice: "",
+    caseloadCapacity: "",
+    preferredClientTypes: "",
+    therapeuticApproach: "",
+    availability: "",
+    bankDetails: "",
+    emergencyContact: "",
+    professionalInsurance: "",
+    agreedToTerms: false,
   });
 
   const specialisationOptions = [
-    'Anxiety and Depression',
-    'Trauma and PTSD',
-    'Relationship Counselling',
-    'Family Therapy',
-    'Cognitive Behavioural Therapy (CBT)',
-    'Mindfulness-Based Therapy',
-    'Child and Adolescent Therapy',
-    'Addiction Counselling',
-    'Grief and Loss',
-    'Eating Disorders',
-    'LGBTQ+ Therapy',
-    'Couples Therapy',
-    'Career Counselling',
-    'Stress Management',
-    'Other'
+    "Anxiety and Depression",
+    "Trauma and PTSD",
+    "Relationship Counselling",
+    "Family Therapy",
+    "Cognitive Behavioural Therapy (CBT)",
+    "Mindfulness-Based Therapy",
+    "Child and Adolescent Therapy",
+    "Addiction Counselling",
+    "Grief and Loss",
+    "Eating Disorders",
+    "LGBTQ+ Therapy",
+    "Couples Therapy",
+    "Career Counselling",
+    "Stress Management",
+    "Other",
   ];
 
   const registrationBodyOptions = [
-    'HCPC (Health and Care Professions Council)',
-    'BPS (British Psychological Society)',
-    'BACP (British Association for Counselling and Psychotherapy)',
-    'UKCP (United Kingdom Council for Psychotherapy)',
-    'BPC (British Psychoanalytic Council)',
-    'NCS (National Counselling Society)',
-    'Other Professional Body'
+    "HCPC (Health and Care Professions Council)",
+    "BPS (British Psychological Society)",
+    "BACP (British Association for Counselling and Psychotherapy)",
+    "UKCP (United Kingdom Council for Psychotherapy)",
+    "BPC (British Psychoanalytic Council)",
+    "NCS (National Counselling Society)",
+    "Other Professional Body",
   ];
 
   const handleSpecialisationChange = (specialisation: string, checked: boolean) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      specialisations: checked 
+      specialisations: checked
         ? [...prev.specialisations, specialisation]
-        : prev.specialisations.filter(s => s !== specialisation)
+        : prev.specialisations.filter((s) => s !== specialisation),
     }));
   };
 
   const handleRegistrationBodyChange = (body: string, checked: boolean) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      registrationBodies: checked 
+      registrationBodies: checked
         ? [...prev.registrationBodies, body]
-        : prev.registrationBodies.filter(b => b !== body)
+        : prev.registrationBodies.filter((b) => b !== body),
     }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Comprehensive validation for complete onboarding form
-    if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone || !formData.address) {
+    if (
+      !formData.firstName ||
+      !formData.lastName ||
+      !formData.email ||
+      !formData.phone ||
+      !formData.address
+    ) {
       toast({
         title: "Missing Information",
         description: "Please fill in all required personal information fields.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -106,7 +116,7 @@ export default function TherapistOnboardingForm({ user, onBackToDashboard, onSub
       toast({
         title: "Professional Information Required",
         description: "Please complete all professional qualification and experience fields.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -115,7 +125,7 @@ export default function TherapistOnboardingForm({ user, onBackToDashboard, onSub
       toast({
         title: "Specialisations Required",
         description: "Please select at least one therapy specialisation.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -124,7 +134,7 @@ export default function TherapistOnboardingForm({ user, onBackToDashboard, onSub
       toast({
         title: "Professional Registration Required",
         description: "Please select at least one professional registration body.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -133,7 +143,7 @@ export default function TherapistOnboardingForm({ user, onBackToDashboard, onSub
       toast({
         title: "Terms Agreement Required",
         description: "Please agree to the terms and conditions.",
-        variant: "destructive"
+        variant: "destructive",
       });
       return;
     }
@@ -142,15 +152,15 @@ export default function TherapistOnboardingForm({ user, onBackToDashboard, onSub
 
     try {
       const response = await apiRequest({
-        url: '/api/therapist-onboarding/enquiry',
-        method: 'POST',
+        url: "/api/therapist-onboarding/enquiry",
+        method: "POST",
         body: {
           ...formData,
-          type: 'complete_onboarding',
-          status: 'onboarding_completed'
-        }
+          type: "complete_onboarding",
+          status: "onboarding_completed",
+        },
       });
-      
+
       if (response.success) {
         setSubmittedEnquiry(response.enquiry);
         setSubmitted(true);
@@ -158,19 +168,19 @@ export default function TherapistOnboardingForm({ user, onBackToDashboard, onSub
           title: "Application Submitted!",
           description: "Thank you for your interest. You can now book your introduction call.",
         });
-        
+
         if (onSubmissionSuccess) {
           onSubmissionSuccess(response.enquiry);
         }
       } else {
-        throw new Error(response.error || 'Failed to submit application');
+        throw new Error(response.error || "Failed to submit application");
       }
     } catch (error) {
-      console.error('Error submitting therapist enquiry:', error);
+      console.error("Error submitting therapist enquiry:", error);
       toast({
         title: "Submission Failed",
         description: "There was an error submitting your application. Please try again.",
-        variant: "destructive"
+        variant: "destructive",
       });
     } finally {
       setIsSubmitting(false);
@@ -193,25 +203,28 @@ export default function TherapistOnboardingForm({ user, onBackToDashboard, onSub
                   Thank you for your interest in joining Hive Wellness.
                 </p>
               </div>
-              
+
               <div className="bg-purple-50 rounded-lg p-6 mb-6">
                 <Calendar className="w-12 h-12 text-hive-purple mx-auto mb-4" />
                 <h3 className="text-xl font-primary font-semibold text-hive-dark mb-2">
                   Ready to Book Your Introduction Call?
                 </h3>
                 <p className="text-hive-gray mb-4">
-                  Skip the email back-and-forth - book your 50-minute introduction call directly below.
+                  Skip the email back-and-forth - book your 50-minute introduction call directly
+                  below.
                 </p>
-                <Button 
+                <Button
                   onClick={() => setShowBooking(true)}
                   className="bg-hive-purple hover:bg-hive-purple/90 text-white font-semibold px-6 py-3"
                 >
                   Book Introduction Call Now
                 </Button>
               </div>
-              
+
               <div className="text-left bg-gray-50 rounded-lg p-4 mb-6">
-                <h4 className="font-semibold text-hive-dark mb-2">During your call, we'll discuss:</h4>
+                <h4 className="font-semibold text-hive-dark mb-2">
+                  During your call, we'll discuss:
+                </h4>
                 <ul className="text-sm space-y-1 text-gray-700">
                   <li>• Your therapy experience and approach</li>
                   <li>• Hive Wellness platform overview</li>
@@ -220,9 +233,16 @@ export default function TherapistOnboardingForm({ user, onBackToDashboard, onSub
                   <li>• Next steps in onboarding</li>
                 </ul>
               </div>
-              
+
               <p className="text-sm text-hive-gray">
-                Questions? Email us at <a href="mailto:support@hive-wellness.co.uk" className="text-hive-purple hover:underline">support@hive-wellness.co.uk</a> or call 020 7946 0958
+                Questions? Email us at{" "}
+                <a
+                  href="mailto:support@hive-wellness.co.uk"
+                  className="text-hive-purple hover:underline"
+                >
+                  support@hive-wellness.co.uk
+                </a>{" "}
+                or call 020 7946 0958
               </p>
             </CardContent>
           </Card>
@@ -234,15 +254,15 @@ export default function TherapistOnboardingForm({ user, onBackToDashboard, onSub
     return (
       <div className="space-y-6">
         <div className="text-center mb-4">
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             onClick={() => setShowBooking(false)}
             className="text-hive-purple border-hive-purple hover:bg-purple-50"
           >
             ← Back to Success Message
           </Button>
         </div>
-        
+
         <IntroductionCallBooking
           enquiryId={submittedEnquiry.id}
           therapistEmail={submittedEnquiry.email}
@@ -250,7 +270,8 @@ export default function TherapistOnboardingForm({ user, onBackToDashboard, onSub
           onBookingComplete={(callId) => {
             toast({
               title: "Introduction Call Booked!",
-              description: "Check your email for meeting details. We look forward to speaking with you!"
+              description:
+                "Check your email for meeting details. We look forward to speaking with you!",
             });
           }}
         />
@@ -268,7 +289,9 @@ export default function TherapistOnboardingForm({ user, onBackToDashboard, onSub
             </div>
             <div>
               <h1 className="text-2xl font-display font-bold text-hive-dark">Join Hive Wellness</h1>
-              <p className="text-hive-gray font-body">Help clients find their perfect therapeutic match</p>
+              <p className="text-hive-gray font-body">
+                Help clients find their perfect therapeutic match
+              </p>
             </div>
           </div>
         </CardTitle>
@@ -277,25 +300,31 @@ export default function TherapistOnboardingForm({ user, onBackToDashboard, onSub
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Personal Information */}
           <div className="space-y-4">
-            <h3 className="text-lg font-primary font-semibold text-hive-dark">Personal Information</h3>
+            <h3 className="text-lg font-primary font-semibold text-hive-dark">
+              Personal Information
+            </h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="firstName" className="text-hive-dark">First Name *</Label>
+                <Label htmlFor="firstName" className="text-hive-dark">
+                  First Name *
+                </Label>
                 <Input
                   id="firstName"
                   value={formData.firstName}
-                  onChange={(e) => setFormData(prev => ({ ...prev, firstName: e.target.value }))}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, firstName: e.target.value }))}
                   placeholder="Your first name"
                   className="mt-1"
                   required
                 />
               </div>
               <div>
-                <Label htmlFor="lastName" className="text-hive-dark">Last Name *</Label>
+                <Label htmlFor="lastName" className="text-hive-dark">
+                  Last Name *
+                </Label>
                 <Input
                   id="lastName"
                   value={formData.lastName}
-                  onChange={(e) => setFormData(prev => ({ ...prev, lastName: e.target.value }))}
+                  onChange={(e) => setFormData((prev) => ({ ...prev, lastName: e.target.value }))}
                   placeholder="Your last name"
                   className="mt-1"
                   required
@@ -303,24 +332,28 @@ export default function TherapistOnboardingForm({ user, onBackToDashboard, onSub
               </div>
             </div>
             <div>
-              <Label htmlFor="email" className="text-hive-dark">Email Address *</Label>
+              <Label htmlFor="email" className="text-hive-dark">
+                Email Address *
+              </Label>
               <Input
                 id="email"
                 type="email"
                 value={formData.email}
-                onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                onChange={(e) => setFormData((prev) => ({ ...prev, email: e.target.value }))}
                 placeholder="your.email@example.com"
                 className="mt-1"
                 required
               />
             </div>
             <div>
-              <Label htmlFor="phone" className="text-hive-dark">Phone Number *</Label>
+              <Label htmlFor="phone" className="text-hive-dark">
+                Phone Number *
+              </Label>
               <Input
                 id="phone"
                 type="tel"
                 value={formData.phone}
-                onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                onChange={(e) => setFormData((prev) => ({ ...prev, phone: e.target.value }))}
                 placeholder="07123 456789"
                 className="mt-1"
                 required
@@ -330,7 +363,9 @@ export default function TherapistOnboardingForm({ user, onBackToDashboard, onSub
 
           {/* Specializations */}
           <div className="space-y-4">
-            <h3 className="text-lg font-primary font-semibold text-hive-dark">Therapy Specialisations *</h3>
+            <h3 className="text-lg font-primary font-semibold text-hive-dark">
+              Therapy Specialisations *
+            </h3>
             <p className="text-sm text-hive-gray">Select all areas you specialise in:</p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {specialisationOptions.map((specialisation) => (
@@ -338,7 +373,9 @@ export default function TherapistOnboardingForm({ user, onBackToDashboard, onSub
                   <Checkbox
                     id={specialisation}
                     checked={formData.specialisations.includes(specialisation)}
-                    onCheckedChange={(checked) => handleSpecialisationChange(specialisation, checked as boolean)}
+                    onCheckedChange={(checked) =>
+                      handleSpecialisationChange(specialisation, checked as boolean)
+                    }
                   />
                   <Label htmlFor={specialisation} className="text-sm text-hive-dark cursor-pointer">
                     {specialisation}
@@ -350,7 +387,9 @@ export default function TherapistOnboardingForm({ user, onBackToDashboard, onSub
 
           {/* Experience */}
           <div className="space-y-4">
-            <h3 className="text-lg font-primary font-semibold text-hive-dark">Experience & Qualifications</h3>
+            <h3 className="text-lg font-primary font-semibold text-hive-dark">
+              Experience & Qualifications
+            </h3>
             <div>
               <Label htmlFor="experience" className="text-hive-dark">
                 Tell us about your therapy experience, qualifications, and training
@@ -358,7 +397,7 @@ export default function TherapistOnboardingForm({ user, onBackToDashboard, onSub
               <Textarea
                 id="experience"
                 value={formData.experience}
-                onChange={(e) => setFormData(prev => ({ ...prev, experience: e.target.value }))}
+                onChange={(e) => setFormData((prev) => ({ ...prev, experience: e.target.value }))}
                 placeholder="Please describe your therapy training, qualifications, years of experience, and any relevant certifications..."
                 className="mt-1 min-h-[100px]"
                 rows={4}
@@ -375,7 +414,7 @@ export default function TherapistOnboardingForm({ user, onBackToDashboard, onSub
               <Textarea
                 id="motivation"
                 value={formData.motivation}
-                onChange={(e) => setFormData(prev => ({ ...prev, motivation: e.target.value }))}
+                onChange={(e) => setFormData((prev) => ({ ...prev, motivation: e.target.value }))}
                 placeholder="Tell us what drew you to Hive Wellness and how you'd like to help our clients..."
                 className="mt-1 min-h-[100px]"
                 rows={4}
@@ -392,7 +431,7 @@ export default function TherapistOnboardingForm({ user, onBackToDashboard, onSub
               <Textarea
                 id="availability"
                 value={formData.availability}
-                onChange={(e) => setFormData(prev => ({ ...prev, availability: e.target.value }))}
+                onChange={(e) => setFormData((prev) => ({ ...prev, availability: e.target.value }))}
                 placeholder="Please describe your current availability for taking on new clients (days/times, capacity, etc.)"
                 className="mt-1 min-h-[80px]"
                 rows={3}
@@ -406,18 +445,23 @@ export default function TherapistOnboardingForm({ user, onBackToDashboard, onSub
               <Checkbox
                 id="terms"
                 checked={formData.agreedToTerms}
-                onCheckedChange={(checked) => setFormData(prev => ({ ...prev, agreedToTerms: checked as boolean }))}
+                onCheckedChange={(checked) =>
+                  setFormData((prev) => ({ ...prev, agreedToTerms: checked as boolean }))
+                }
               />
-              <Label htmlFor="terms" className="text-sm text-hive-dark cursor-pointer leading-relaxed">
-                I agree to Hive Wellness's terms and conditions, privacy policy, and professional standards. 
-                I understand that this is an initial enquiry and further verification of qualifications and 
-                registration will be required before joining the platform.
+              <Label
+                htmlFor="terms"
+                className="text-sm text-hive-dark cursor-pointer leading-relaxed"
+              >
+                I agree to Hive Wellness's terms and conditions, privacy policy, and professional
+                standards. I understand that this is an initial enquiry and further verification of
+                qualifications and registration will be required before joining the platform.
               </Label>
             </div>
           </div>
 
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             className="w-full bg-hive-purple hover:bg-hive-purple/90 text-white"
             disabled={isSubmitting}
           >

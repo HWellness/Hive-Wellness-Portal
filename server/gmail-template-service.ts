@@ -1,5 +1,5 @@
-import { google } from 'googleapis';
-import { GmailService } from './gmail-service.js';
+import { google } from "googleapis";
+import { GmailService } from "./gmail-service.js";
 
 export interface EmailTemplate {
   id: string;
@@ -27,71 +27,70 @@ export interface CustomEmailOptions {
 }
 
 export class GmailTemplateService {
-  private static gmail = google.gmail({ version: 'v1' });
+  private static gmail = google.gmail({ version: "v1" });
 
   /**
    * Send customised email using Gmail API with admin branding
    */
   static async sendCustomEmail(options: CustomEmailOptions): Promise<boolean> {
     try {
-      console.log('📧 Sending custom Gmail email:', {
+      console.log("📧 Sending custom Gmail email:", {
         to: options.to,
         subject: options.subject,
-        templateId: options.templateId
+        templateId: options.templateId,
       });
 
       // Get OAuth client
-      const auth = await GmailService['getAuthClient']();
+      const auth = await GmailService["getAuthClient"]();
       this.gmail.context._options.auth = auth;
 
       // Prepare recipients
-      const recipients = Array.isArray(options.to) ? options.to.join(', ') : options.to;
+      const recipients = Array.isArray(options.to) ? options.to.join(", ") : options.to;
 
       // Build email message with Hive Wellness branding
       const brandedHtmlContent = this.addHiveWellnessBranding(options.htmlContent);
-      
+
       // Create email message
       const emailMessage = [
         `To: ${recipients}`,
         `From: Hive Wellness <support@hive-wellness.co.uk>`,
         `Reply-To: support@hive-wellness.co.uk`,
         `Subject: ${options.subject}`,
-        'MIME-Version: 1.0',
+        "MIME-Version: 1.0",
         'Content-Type: multipart/alternative; boundary="boundary123"',
-        '',
-        '--boundary123',
-        'Content-Type: text/plain; charset=UTF-8',
-        '',
+        "",
+        "--boundary123",
+        "Content-Type: text/plain; charset=UTF-8",
+        "",
         options.textContent || this.htmlToText(brandedHtmlContent),
-        '',
-        '--boundary123',
-        'Content-Type: text/html; charset=UTF-8',
-        '',
+        "",
+        "--boundary123",
+        "Content-Type: text/html; charset=UTF-8",
+        "",
         brandedHtmlContent,
-        '',
-        '--boundary123--'
-      ].join('\n');
+        "",
+        "--boundary123--",
+      ].join("\n");
 
       // Encode message in base64
       const encodedMessage = Buffer.from(emailMessage)
-        .toString('base64')
-        .replace(/\+/g, '-')
-        .replace(/\//g, '_')
-        .replace(/=+$/, '');
+        .toString("base64")
+        .replace(/\+/g, "-")
+        .replace(/\//g, "_")
+        .replace(/=+$/, "");
 
       // Send email
       const response = await this.gmail.users.messages.send({
-        userId: 'me',
+        userId: "me",
         requestBody: {
-          raw: encodedMessage
-        }
+          raw: encodedMessage,
+        },
       });
 
-      console.log('✅ Custom Gmail email sent successfully:', response.data.id);
+      console.log("✅ Custom Gmail email sent successfully:", response.data.id);
       return true;
-
     } catch (error) {
-      console.error('❌ Failed to send custom Gmail email:', error);
+      console.error("❌ Failed to send custom Gmail email:", error);
       return false;
     }
   }
@@ -99,44 +98,45 @@ export class GmailTemplateService {
   /**
    * Create and save email template in Gmail drafts
    */
-  static async saveEmailTemplate(template: Omit<EmailTemplate, 'id' | 'createdAt' | 'updatedAt'>): Promise<string | null> {
+  static async saveEmailTemplate(
+    template: Omit<EmailTemplate, "id" | "createdAt" | "updatedAt">
+  ): Promise<string | null> {
     try {
-      const auth = await GmailService['getAuthClient']();
+      const auth = await GmailService["getAuthClient"]();
       this.gmail.context._options.auth = auth;
 
       const brandedContent = this.addHiveWellnessBranding(template.htmlContent);
-      
+
       // Create draft with template content
       const draftMessage = [
         `Subject: [TEMPLATE] ${template.name} - ${template.subject}`,
-        'MIME-Version: 1.0',
-        'Content-Type: text/html; charset=UTF-8',
-        '',
+        "MIME-Version: 1.0",
+        "Content-Type: text/html; charset=UTF-8",
+        "",
         `<!-- Template: ${template.name} -->`,
-        `<!-- Tags: ${template.tags.join(', ')} -->`,
-        brandedContent
-      ].join('\n');
+        `<!-- Tags: ${template.tags.join(", ")} -->`,
+        brandedContent,
+      ].join("\n");
 
       const encodedMessage = Buffer.from(draftMessage)
-        .toString('base64')
-        .replace(/\+/g, '-')
-        .replace(/\//g, '_')
-        .replace(/=+$/, '');
+        .toString("base64")
+        .replace(/\+/g, "-")
+        .replace(/\//g, "_")
+        .replace(/=+$/, "");
 
       const response = await this.gmail.users.drafts.create({
-        userId: 'me',
+        userId: "me",
         requestBody: {
           message: {
-            raw: encodedMessage
-          }
-        }
+            raw: encodedMessage,
+          },
+        },
       });
 
-      console.log('✅ Email template saved as Gmail draft:', response.data.id);
+      console.log("✅ Email template saved as Gmail draft:", response.data.id);
       return response.data.id || null;
-
     } catch (error) {
-      console.error('❌ Failed to save email template:', error);
+      console.error("❌ Failed to save email template:", error);
       return null;
     }
   }
@@ -146,13 +146,13 @@ export class GmailTemplateService {
    */
   static async getEmailTemplates(): Promise<EmailTemplate[]> {
     try {
-      const auth = await GmailService['getAuthClient']();
+      const auth = await GmailService["getAuthClient"]();
       this.gmail.context._options.auth = auth;
 
       // Get drafts that are templates
       const response = await this.gmail.users.drafts.list({
-        userId: 'me',
-        q: 'subject:[TEMPLATE]'
+        userId: "me",
+        q: "subject:[TEMPLATE]",
       });
 
       if (!response.data.drafts) {
@@ -166,45 +166,44 @@ export class GmailTemplateService {
 
         try {
           const draftData = await this.gmail.users.drafts.get({
-            userId: 'me',
+            userId: "me",
             id: draft.id,
-            format: 'full'
+            format: "full",
           });
 
           const message = draftData.data.message;
           if (!message?.payload) continue;
 
-          const subject = this.getHeaderValue(message.payload.headers, 'subject');
+          const subject = this.getHeaderValue(message.payload.headers, "subject");
           const templateMatch = subject?.match(/\[TEMPLATE\] (.+?) - (.+)/);
-          
+
           if (templateMatch) {
             const [, templateName, templateSubject] = templateMatch;
             const htmlContent = this.extractHtmlContent(message.payload);
-            
+
             // Extract tags from HTML comments
             const tagsMatch = htmlContent?.match(/<!-- Tags: (.+?) -->/);
-            const tags = tagsMatch ? tagsMatch[1].split(', ').filter(Boolean) : [];
+            const tags = tagsMatch ? tagsMatch[1].split(", ").filter(Boolean) : [];
 
             templates.push({
               id: draft.id,
               name: templateName,
               subject: templateSubject,
-              htmlContent: htmlContent || '',
+              htmlContent: htmlContent || "",
               tags,
               isActive: true,
-              createdAt: new Date(parseInt(message.internalDate || '0')),
-              updatedAt: new Date(parseInt(message.internalDate || '0'))
+              createdAt: new Date(parseInt(message.internalDate || "0")),
+              updatedAt: new Date(parseInt(message.internalDate || "0")),
             });
           }
         } catch (error) {
-          console.error('Error processing draft template:', error);
+          console.error("Error processing draft template:", error);
         }
       }
 
       return templates;
-
     } catch (error) {
-      console.error('❌ Failed to get email templates:', error);
+      console.error("❌ Failed to get email templates:", error);
       return [];
     }
   }
@@ -212,11 +211,14 @@ export class GmailTemplateService {
   /**
    * Update email template in Gmail
    */
-  static async updateEmailTemplate(templateId: string, updates: Partial<EmailTemplate>): Promise<boolean> {
+  static async updateEmailTemplate(
+    templateId: string,
+    updates: Partial<EmailTemplate>
+  ): Promise<boolean> {
     try {
       // Delete old draft and create new one
       await this.deleteEmailTemplate(templateId);
-      
+
       if (updates.name && updates.subject && updates.htmlContent) {
         const newTemplateId = await this.saveEmailTemplate({
           name: updates.name,
@@ -224,16 +226,15 @@ export class GmailTemplateService {
           htmlContent: updates.htmlContent,
           textContent: updates.textContent,
           tags: updates.tags || [],
-          isActive: updates.isActive !== false
+          isActive: updates.isActive !== false,
         });
-        
+
         return !!newTemplateId;
       }
-      
-      return false;
 
+      return false;
     } catch (error) {
-      console.error('❌ Failed to update email template:', error);
+      console.error("❌ Failed to update email template:", error);
       return false;
     }
   }
@@ -243,19 +244,18 @@ export class GmailTemplateService {
    */
   static async deleteEmailTemplate(templateId: string): Promise<boolean> {
     try {
-      const auth = await GmailService['getAuthClient']();
+      const auth = await GmailService["getAuthClient"]();
       this.gmail.context._options.auth = auth;
 
       await this.gmail.users.drafts.delete({
-        userId: 'me',
-        id: templateId
+        userId: "me",
+        id: templateId,
       });
 
-      console.log('✅ Email template deleted:', templateId);
+      console.log("✅ Email template deleted:", templateId);
       return true;
-
     } catch (error) {
-      console.error('❌ Failed to delete email template:', error);
+      console.error("❌ Failed to delete email template:", error);
       return false;
     }
   }
@@ -263,26 +263,29 @@ export class GmailTemplateService {
   /**
    * Send email using saved template
    */
-  static async sendFromTemplate(templateId: string, options: {
-    to: string | string[];
-    variables?: Record<string, string>;
-  }): Promise<boolean> {
+  static async sendFromTemplate(
+    templateId: string,
+    options: {
+      to: string | string[];
+      variables?: Record<string, string>;
+    }
+  ): Promise<boolean> {
     try {
       const templates = await this.getEmailTemplates();
-      const template = templates.find(t => t.id === templateId);
-      
+      const template = templates.find((t) => t.id === templateId);
+
       if (!template) {
-        console.error('Template not found:', templateId);
+        console.error("Template not found:", templateId);
         return false;
       }
 
       // Replace variables in template
       let subject = template.subject;
       let htmlContent = template.htmlContent;
-      
+
       if (options.variables) {
         for (const [key, value] of Object.entries(options.variables)) {
-          const regex = new RegExp(`{{${key}}}`, 'g');
+          const regex = new RegExp(`{{${key}}}`, "g");
           subject = subject.replace(regex, value);
           htmlContent = htmlContent.replace(regex, value);
         }
@@ -292,11 +295,10 @@ export class GmailTemplateService {
         to: options.to,
         subject,
         htmlContent,
-        templateId
+        templateId,
       });
-
     } catch (error) {
-      console.error('❌ Failed to send from template:', error);
+      console.error("❌ Failed to send from template:", error);
       return false;
     }
   }
@@ -461,12 +463,12 @@ export class GmailTemplateService {
    */
   private static htmlToText(html: string): string {
     return html
-      .replace(/<[^>]*>/g, '')
-      .replace(/&nbsp;/g, ' ')
-      .replace(/&amp;/g, '&')
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/\s+/g, ' ')
+      .replace(/<[^>]*>/g, "")
+      .replace(/&nbsp;/g, " ")
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/\s+/g, " ")
       .trim();
   }
 
@@ -475,7 +477,7 @@ export class GmailTemplateService {
    */
   private static getHeaderValue(headers: any[] | undefined, name: string): string | undefined {
     if (!headers) return undefined;
-    const header = headers?.find(h => h.name?.toLowerCase() === name.toLowerCase());
+    const header = headers?.find((h) => h.name?.toLowerCase() === name.toLowerCase());
     return header?.value;
   }
 
@@ -483,18 +485,18 @@ export class GmailTemplateService {
    * Extract HTML content from Gmail message payload
    */
   private static extractHtmlContent(payload: any): string | null {
-    if (payload.mimeType === 'text/html' && payload.body?.data) {
-      return Buffer.from(payload.body.data, 'base64').toString();
+    if (payload.mimeType === "text/html" && payload.body?.data) {
+      return Buffer.from(payload.body.data, "base64").toString();
     }
-    
+
     if (payload.parts) {
       for (const part of payload.parts) {
-        if (part.mimeType === 'text/html' && part.body?.data) {
-          return Buffer.from(part.body.data, 'base64').toString();
+        if (part.mimeType === "text/html" && part.body?.data) {
+          return Buffer.from(part.body.data, "base64").toString();
         }
       }
     }
-    
+
     return null;
   }
 }

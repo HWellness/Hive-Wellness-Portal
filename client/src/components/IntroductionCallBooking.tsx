@@ -1,14 +1,20 @@
-import { useState } from 'react';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useState } from "react";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Calendar, Clock, User, Mail, Phone, MessageCircle } from 'lucide-react';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Calendar, Clock, User, Mail, Phone, MessageCircle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from '@/lib/queryClient';
+import { apiRequest } from "@/lib/queryClient";
 
 interface BookingFormData {
   therapistEnquiryId: string;
@@ -31,19 +37,19 @@ export default function IntroductionCallBooking({
   enquiryId,
   therapistEmail,
   therapistName,
-  onBookingComplete
+  onBookingComplete,
 }: IntroductionCallBookingProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
+
   const [formData, setFormData] = useState<BookingFormData>({
     therapistEnquiryId: enquiryId,
     therapistEmail,
     therapistName,
-    preferredDate: '',
-    preferredTime: '',
-    timezone: 'Europe/London',
-    notes: ''
+    preferredDate: "",
+    preferredTime: "",
+    timezone: "Europe/London",
+    notes: "",
   });
 
   // Check if therapist already has calls booked
@@ -53,19 +59,21 @@ export default function IntroductionCallBooking({
 
   const bookCallMutation = useMutation({
     mutationFn: async (data: BookingFormData) => {
-      const response = await apiRequest('POST', '/api/introduction-calls/book', data);
+      const response = await apiRequest("POST", "/api/introduction-calls/book", data);
       return await response.json();
     },
     onSuccess: (responseData) => {
       toast({
         title: "Introduction Call Booked Successfully!",
-        description: `Your call is scheduled for ${formData.preferredDate} at ${formData.preferredTime}. Check your email for meeting details.`
+        description: `Your call is scheduled for ${formData.preferredDate} at ${formData.preferredTime}. Check your email for meeting details.`,
       });
-      
+
       // Invalidate queries to refresh data
-      queryClient.invalidateQueries({ queryKey: ['/api/introduction-calls'] });
-      queryClient.invalidateQueries({ queryKey: [`/api/introduction-calls/therapist/${therapistEmail}`] });
-      
+      queryClient.invalidateQueries({ queryKey: ["/api/introduction-calls"] });
+      queryClient.invalidateQueries({
+        queryKey: [`/api/introduction-calls/therapist/${therapistEmail}`],
+      });
+
       if (onBookingComplete && responseData?.callId) {
         onBookingComplete(responseData.callId);
       }
@@ -74,19 +82,19 @@ export default function IntroductionCallBooking({
       toast({
         variant: "destructive",
         title: "Booking Failed",
-        description: error.message || "Failed to book introduction call. Please try again."
+        description: error.message || "Failed to book introduction call. Please try again.",
       });
-    }
+    },
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.preferredDate || !formData.preferredTime) {
       toast({
         variant: "destructive",
         title: "Missing Information",
-        description: "Please select both a date and time for your introduction call."
+        description: "Please select both a date and time for your introduction call.",
       });
       return;
     }
@@ -95,26 +103,45 @@ export default function IntroductionCallBooking({
   };
 
   const handleInputChange = (field: keyof BookingFormData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   // Generate time slots (9 AM to 8 PM, 30-minute intervals)
   const timeSlots = [
-    '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
-    '12:00', '12:30', '13:00', '13:30', '14:00', '14:30',
-    '15:00', '15:30', '16:00', '16:30', '17:00', '17:30',
-    '18:00', '18:30', '19:00', '19:30', '20:00'
+    "09:00",
+    "09:30",
+    "10:00",
+    "10:30",
+    "11:00",
+    "11:30",
+    "12:00",
+    "12:30",
+    "13:00",
+    "13:30",
+    "14:00",
+    "14:30",
+    "15:00",
+    "15:30",
+    "16:00",
+    "16:30",
+    "17:00",
+    "17:30",
+    "18:00",
+    "18:30",
+    "19:00",
+    "19:30",
+    "20:00",
   ];
 
   // Get minimum date (tomorrow)
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
-  const minDate = tomorrow.toISOString().split('T')[0];
+  const minDate = tomorrow.toISOString().split("T")[0];
 
   // Get maximum date (4 weeks from now)
   const maxDate = new Date();
   maxDate.setDate(maxDate.getDate() + 28);
-  const maxDateStr = maxDate.toISOString().split('T')[0];
+  const maxDateStr = maxDate.toISOString().split("T")[0];
 
   return (
     <div className="max-w-2xl mx-auto p-6">
@@ -135,12 +162,11 @@ export default function IntroductionCallBooking({
           {/* Show existing calls if any */}
           {existingCalls && Array.isArray(existingCalls) && (existingCalls as any[]).length > 0 && (
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <h3 className="font-semibold text-blue-800 mb-2">
-                Your Existing Calls
-              </h3>
+              <h3 className="font-semibold text-blue-800 mb-2">Your Existing Calls</h3>
               {(existingCalls as any[]).map((call: any, index: number) => (
                 <div key={call.id || index} className="text-sm text-blue-700">
-                  {new Date(call.preferredDate).toLocaleDateString('en-GB')} at {call.preferredTime} - {call.status}
+                  {new Date(call.preferredDate).toLocaleDateString("en-GB")} at {call.preferredTime}{" "}
+                  - {call.status}
                 </div>
               ))}
             </div>
@@ -157,7 +183,9 @@ export default function IntroductionCallBooking({
                 <div>
                   <Label className="text-sm font-medium">Name</Label>
                   <div className="text-sm bg-white p-3 rounded border min-h-[40px] flex items-center">
-                    {therapistName && therapistName !== 'undefined undefined' ? therapistName : therapistEmail.split('@')[0]}
+                    {therapistName && therapistName !== "undefined undefined"
+                      ? therapistName
+                      : therapistEmail.split("@")[0]}
                   </div>
                 </div>
                 <div>
@@ -175,7 +203,7 @@ export default function IntroductionCallBooking({
                 <Clock className="w-5 h-5" />
                 Select Date & Time
               </h3>
-              
+
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="preferredDate" className="text-sm font-medium">
@@ -187,7 +215,7 @@ export default function IntroductionCallBooking({
                     min={minDate}
                     max={maxDateStr}
                     value={formData.preferredDate}
-                    onChange={(e) => handleInputChange('preferredDate', e.target.value)}
+                    onChange={(e) => handleInputChange("preferredDate", e.target.value)}
                     className="mt-1"
                     required
                   />
@@ -197,15 +225,15 @@ export default function IntroductionCallBooking({
                   <Label htmlFor="preferredTime" className="text-sm font-medium">
                     Preferred Time
                   </Label>
-                  <Select 
-                    value={formData.preferredTime} 
-                    onValueChange={(value) => handleInputChange('preferredTime', value)}
+                  <Select
+                    value={formData.preferredTime}
+                    onValueChange={(value) => handleInputChange("preferredTime", value)}
                   >
                     <SelectTrigger className="mt-1">
                       <SelectValue placeholder="Select time" />
                     </SelectTrigger>
                     <SelectContent>
-                      {timeSlots.map(time => (
+                      {timeSlots.map((time) => (
                         <SelectItem key={time} value={time}>
                           {time}
                         </SelectItem>
@@ -219,9 +247,9 @@ export default function IntroductionCallBooking({
                 <Label htmlFor="timezone" className="text-sm font-medium">
                   Time Zone
                 </Label>
-                <Select 
-                  value={formData.timezone} 
-                  onValueChange={(value) => handleInputChange('timezone', value)}
+                <Select
+                  value={formData.timezone}
+                  onValueChange={(value) => handleInputChange("timezone", value)}
                 >
                   <SelectTrigger className="mt-1">
                     <SelectValue />
@@ -247,7 +275,7 @@ export default function IntroductionCallBooking({
                 id="notes"
                 placeholder="Any specific topics you'd like to discuss or questions you have..."
                 value={formData.notes}
-                onChange={(e) => handleInputChange('notes', e.target.value)}
+                onChange={(e) => handleInputChange("notes", e.target.value)}
                 className="mt-1"
                 rows={3}
               />
@@ -279,7 +307,7 @@ export default function IntroductionCallBooking({
                   Booking Your Call...
                 </div>
               ) : (
-                'Book Introduction Call'
+                "Book Introduction Call"
               )}
             </Button>
           </form>

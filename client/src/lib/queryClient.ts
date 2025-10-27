@@ -10,7 +10,7 @@ async function throwIfResNotOk(res: Response) {
 export async function apiRequest(
   method: string,
   url: string,
-  data?: unknown | undefined,
+  data?: unknown | undefined
 ): Promise<Response> {
   const headers: Record<string, string> = {};
   let body: string | FormData | undefined;
@@ -36,23 +36,21 @@ export async function apiRequest(
 }
 
 type UnauthorizedBehavior = "returnNull" | "throw";
-export const getQueryFn: <T>(options: {
-  on401: UnauthorizedBehavior;
-}) => QueryFunction<T> =
+export const getQueryFn: <T>(options: { on401: UnauthorizedBehavior }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
     let url = queryKey[0] as string;
-    
+
     // Handle path parameters and query strings
     if (queryKey.length > 1) {
       const params = queryKey[1];
-      
+
       // If second element is a string, treat as path parameter
-      if (typeof params === 'string') {
+      if (typeof params === "string") {
         url = url.replace(/\/:[^\/]+$/, `/${params}`);
-      } 
-      // If it's an object, treat as query parameters  
-      else if (params && typeof params === 'object') {
+      }
+      // If it's an object, treat as query parameters
+      else if (params && typeof params === "object") {
         const queryParams = new URLSearchParams();
         Object.entries(params).forEach(([key, value]) => {
           if (value !== undefined && value !== null) {
@@ -61,7 +59,7 @@ export const getQueryFn: <T>(options: {
         });
         const queryString = queryParams.toString();
         if (queryString) {
-          url += (url.includes('?') ? '&' : '?') + queryString;
+          url += (url.includes("?") ? "&" : "?") + queryString;
         }
       }
     }
@@ -87,7 +85,7 @@ export const queryClient = new QueryClient({
       staleTime: 1000 * 60 * 5, // 5 minutes
       gcTime: 1000 * 60 * 10, // 10 minutes cache time
       retry: false,
-      networkMode: 'online',
+      networkMode: "online",
     },
     mutations: {
       retry: false,

@@ -1,22 +1,55 @@
-import { useState } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '@/hooks/useAuth';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Progress } from '@/components/ui/progress';
-import { useToast } from '@/hooks/use-toast';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { FileText, Building, Shield, Settings, Plus, Download, Edit, Eye, Calendar, Star, Clock, TrendingUp } from 'lucide-react';
-import { apiRequest } from '@/lib/queryClient';
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Progress } from "@/components/ui/progress";
+import { useToast } from "@/hooks/use-toast";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import {
+  FileText,
+  Building,
+  Shield,
+  Settings,
+  Plus,
+  Download,
+  Edit,
+  Eye,
+  Calendar,
+  Star,
+  Clock,
+  TrendingUp,
+} from "lucide-react";
+import { apiRequest } from "@/lib/queryClient";
 
 const organizationDocumentSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -102,8 +135,8 @@ export default function OrganisationDocumentTracking() {
   const [filterCompliance, setFilterCompliance] = useState("all");
 
   // Admin/Institution access control
-  const hasAccess = user?.role === 'admin' || user?.role === 'institution';
-  
+  const hasAccess = user?.role === "admin" || user?.role === "institution";
+
   if (!hasAccess) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -113,10 +146,12 @@ export default function OrganisationDocumentTracking() {
           </CardHeader>
           <CardContent>
             <p className="text-gray-600 mb-4">
-              Organisation document tracking is available to administrators and institutional users only.
+              Organisation document tracking is available to administrators and institutional users
+              only.
             </p>
             <p className="text-sm text-gray-500">
-              This system provides comprehensive document management and session tracking for institutional compliance.
+              This system provides comprehensive document management and session tracking for
+              institutional compliance.
             </p>
           </CardContent>
         </Card>
@@ -178,10 +213,12 @@ export default function OrganisationDocumentTracking() {
   // Mutations
   const createDocumentMutation = useMutation({
     mutationFn: async (data: z.infer<typeof organizationDocumentSchema>) => {
-      return apiRequest('POST', `/api/organization/${user?.organization?.id}/documents`, data);
+      return apiRequest("POST", `/api/organization/${user?.organization?.id}/documents`, data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/organization/${user?.organization?.id}/documents`] });
+      queryClient.invalidateQueries({
+        queryKey: [`/api/organization/${user?.organization?.id}/documents`],
+      });
       setShowNewDocument(false);
       documentForm.reset();
       toast({
@@ -200,10 +237,12 @@ export default function OrganisationDocumentTracking() {
 
   const createSessionMutation = useMutation({
     mutationFn: async (data: z.infer<typeof sessionTrackingSchema>) => {
-      return apiRequest('POST', `/api/organization/${user?.organization?.id}/sessions`, data);
+      return apiRequest("POST", `/api/organization/${user?.organization?.id}/sessions`, data);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [`/api/organization/${user?.organization?.id}/sessions`] });
+      queryClient.invalidateQueries({
+        queryKey: [`/api/organization/${user?.organization?.id}/sessions`],
+      });
       setShowNewSession(false);
       sessionForm.reset();
       toast({
@@ -223,91 +262,101 @@ export default function OrganisationDocumentTracking() {
   // Demo data for organizations
   const demoDocuments: OrganizationDocument[] = [
     {
-      id: '1',
-      organizationId: user?.organization?.id || '',
-      title: 'Mental Health Services Policy',
-      type: 'policy',
-      description: 'Comprehensive policy for mental health service delivery',
-      departmentId: 'dept-1',
-      departmentName: 'Mental Health',
-      confidentialityLevel: 'internal',
-      complianceCategory: 'hipaa',
-      fileUrl: '/documents/policy-mental-health.pdf',
+      id: "1",
+      organizationId: user?.organization?.id || "",
+      title: "Mental Health Services Policy",
+      type: "policy",
+      description: "Comprehensive policy for mental health service delivery",
+      departmentId: "dept-1",
+      departmentName: "Mental Health",
+      confidentialityLevel: "internal",
+      complianceCategory: "hipaa",
+      fileUrl: "/documents/policy-mental-health.pdf",
       fileSize: 2048576,
       version: 2,
       retentionPeriod: 2555,
-      retentionUntil: '2032-07-01',
-      tags: ['policy', 'mental-health', 'hipaa'],
+      retentionUntil: "2032-07-01",
+      tags: ["policy", "mental-health", "hipaa"],
       isArchived: false,
-      lastAccessedAt: '2025-07-08T14:30:00Z',
-      lastAccessedBy: 'Dr. Sarah Johnson',
-      createdAt: '2024-01-15T10:00:00Z',
-      updatedAt: '2025-07-01T09:00:00Z',
+      lastAccessedAt: "2025-07-08T14:30:00Z",
+      lastAccessedBy: "Dr. Sarah Johnson",
+      createdAt: "2024-01-15T10:00:00Z",
+      updatedAt: "2025-07-01T09:00:00Z",
     },
     {
-      id: '2',
-      organizationId: user?.organization?.id || '',
-      title: 'Student Support Framework',
-      type: 'framework',
-      description: 'Framework for supporting students with mental health challenges',
-      departmentId: 'dept-2',
-      departmentName: 'Student Services',
-      confidentialityLevel: 'confidential',
-      complianceCategory: 'ferpa',
-      fileUrl: '/documents/student-support-framework.pdf',
+      id: "2",
+      organizationId: user?.organization?.id || "",
+      title: "Student Support Framework",
+      type: "framework",
+      description: "Framework for supporting students with mental health challenges",
+      departmentId: "dept-2",
+      departmentName: "Student Services",
+      confidentialityLevel: "confidential",
+      complianceCategory: "ferpa",
+      fileUrl: "/documents/student-support-framework.pdf",
       fileSize: 1536000,
       version: 1,
       retentionPeriod: 1825,
-      retentionUntil: '2030-07-01',
-      tags: ['framework', 'student-support', 'ferpa'],
+      retentionUntil: "2030-07-01",
+      tags: ["framework", "student-support", "ferpa"],
       isArchived: false,
-      lastAccessedAt: '2025-07-07T11:15:00Z',
-      lastAccessedBy: 'Prof. Michael Chen',
-      createdAt: '2024-06-01T14:00:00Z',
-      updatedAt: '2025-06-15T16:00:00Z',
+      lastAccessedAt: "2025-07-07T11:15:00Z",
+      lastAccessedBy: "Prof. Michael Chen",
+      createdAt: "2024-06-01T14:00:00Z",
+      updatedAt: "2025-06-15T16:00:00Z",
     },
   ];
 
   const demoSessions: SessionTracking[] = [
     {
-      id: '1',
-      sessionId: 'session-001',
-      organizationId: user?.organization?.id || '',
-      departmentId: 'dept-1',
-      departmentName: 'Mental Health',
-      sessionType: 'individual',
+      id: "1",
+      sessionId: "session-001",
+      organizationId: user?.organization?.id || "",
+      departmentId: "dept-1",
+      departmentName: "Mental Health",
+      sessionType: "individual",
       duration: 60,
-      attendees: ['student-001', 'therapist-001'],
-      outcomes: 'Positive progress in anxiety management techniques',
+      attendees: ["student-001", "therapist-001"],
+      outcomes: "Positive progress in anxiety management techniques",
       followUpRequired: true,
-      nextSessionDate: '2025-07-16T14:00:00Z',
-      status: 'completed',
+      nextSessionDate: "2025-07-16T14:00:00Z",
+      status: "completed",
       sessionRating: 8,
       resources: [
-        { id: '1', name: 'Anxiety Workbook', type: 'pdf', url: '/resources/anxiety-workbook.pdf' },
-        { id: '2', name: 'Breathing Exercises', type: 'video', url: '/resources/breathing-exercises.mp4' },
+        { id: "1", name: "Anxiety Workbook", type: "pdf", url: "/resources/anxiety-workbook.pdf" },
+        {
+          id: "2",
+          name: "Breathing Exercises",
+          type: "video",
+          url: "/resources/breathing-exercises.mp4",
+        },
       ],
-      createdAt: '2025-07-09T14:00:00Z',
-      updatedAt: '2025-07-09T15:00:00Z',
+      createdAt: "2025-07-09T14:00:00Z",
+      updatedAt: "2025-07-09T15:00:00Z",
     },
     {
-      id: '2',
-      sessionId: 'session-002',
-      organizationId: user?.organization?.id || '',
-      departmentId: 'dept-2',
-      departmentName: 'Student Services',
-      sessionType: 'consultation',
+      id: "2",
+      sessionId: "session-002",
+      organizationId: user?.organization?.id || "",
+      departmentId: "dept-2",
+      departmentName: "Student Services",
+      sessionType: "consultation",
       duration: 60,
-      attendees: ['student-002', 'counselor-001'],
-      outcomes: 'Successful initial consultation for therapy assessment',
+      attendees: ["student-002", "counselor-001"],
+      outcomes: "Successful initial consultation for therapy assessment",
       followUpRequired: true,
-      status: 'completed',
+      status: "completed",
       sessionRating: 8,
       resources: [
-        { id: '3', name: 'Assessment Guidelines', type: 'pdf', url: '/resources/assessment-guidelines.pdf' },
+        {
+          id: "3",
+          name: "Assessment Guidelines",
+          type: "pdf",
+          url: "/resources/assessment-guidelines.pdf",
+        },
       ],
-      createdAt: '2025-07-08T10:00:00Z',
-      updatedAt: '2025-07-08T11:30:00Z',
+      createdAt: "2025-07-08T10:00:00Z",
+      updatedAt: "2025-07-08T11:30:00Z",
     },
   ];
 
@@ -315,19 +364,23 @@ export default function OrganisationDocumentTracking() {
   const displaySessions = sessions.length > 0 ? sessions : demoSessions;
 
   // Filter documents and sessions
-  const filteredDocuments = displayDocuments.filter(doc => {
-    const matchesSearch = doc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         doc.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         doc.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-    const matchesDepartment = filterDepartment === 'all' || doc.departmentId === filterDepartment;
-    const matchesCompliance = filterCompliance === 'all' || doc.complianceCategory === filterCompliance;
+  const filteredDocuments = displayDocuments.filter((doc) => {
+    const matchesSearch =
+      doc.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      doc.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      doc.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+    const matchesDepartment = filterDepartment === "all" || doc.departmentId === filterDepartment;
+    const matchesCompliance =
+      filterCompliance === "all" || doc.complianceCategory === filterCompliance;
     return matchesSearch && matchesDepartment && matchesCompliance;
   });
 
-  const filteredSessions = displaySessions.filter(session => {
-    const matchesSearch = session.sessionId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         session.outcomes.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesDepartment = filterDepartment === 'all' || session.departmentId === filterDepartment;
+  const filteredSessions = displaySessions.filter((session) => {
+    const matchesSearch =
+      session.sessionId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      session.outcomes.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesDepartment =
+      filterDepartment === "all" || session.departmentId === filterDepartment;
     return matchesSearch && matchesDepartment;
   });
 
@@ -336,11 +389,18 @@ export default function OrganisationDocumentTracking() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Organisation Document & Session Tracking</h1>
-          <p className="text-gray-600">Comprehensive document management and session tracking for institutional compliance</p>
+          <h1 className="text-2xl font-bold text-gray-900">
+            Organisation Document & Session Tracking
+          </h1>
+          <p className="text-gray-600">
+            Comprehensive document management and session tracking for institutional compliance
+          </p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={() => setShowNewDocument(true)} className="bg-purple-600 hover:bg-purple-700">
+          <Button
+            onClick={() => setShowNewDocument(true)}
+            className="bg-purple-600 hover:bg-purple-700"
+          >
             <Plus className="w-4 h-4 mr-2" />
             Add Document
           </Button>
@@ -420,9 +480,14 @@ export default function OrganisationDocumentTracking() {
                         <FileText className="w-5 h-5 text-purple-600" />
                         <h3 className="font-semibold text-gray-900">{doc.title}</h3>
                         <Badge variant="outline">{doc.type}</Badge>
-                        <Badge 
-                          variant={doc.confidentialityLevel === 'public' ? 'default' : 
-                                  doc.confidentialityLevel === 'internal' ? 'secondary' : 'destructive'}
+                        <Badge
+                          variant={
+                            doc.confidentialityLevel === "public"
+                              ? "default"
+                              : doc.confidentialityLevel === "internal"
+                                ? "secondary"
+                                : "destructive"
+                          }
                         >
                           {doc.confidentialityLevel}
                         </Badge>
@@ -435,7 +500,7 @@ export default function OrganisationDocumentTracking() {
                         <span>Retention: {new Date(doc.retentionUntil).toLocaleDateString()}</span>
                       </div>
                       <div className="flex gap-1 mt-2">
-                        {doc.tags.map(tag => (
+                        {doc.tags.map((tag) => (
                           <Badge key={tag} variant="secondary" className="text-xs">
                             {tag}
                           </Badge>
@@ -471,9 +536,14 @@ export default function OrganisationDocumentTracking() {
                         <Calendar className="w-5 h-5 text-purple-600" />
                         <h3 className="font-semibold text-gray-900">Session {session.sessionId}</h3>
                         <Badge variant="outline">{session.sessionType}</Badge>
-                        <Badge 
-                          variant={session.status === 'completed' ? 'default' : 
-                                  session.status === 'in_progress' ? 'secondary' : 'destructive'}
+                        <Badge
+                          variant={
+                            session.status === "completed"
+                              ? "default"
+                              : session.status === "in_progress"
+                                ? "secondary"
+                                : "destructive"
+                          }
                         >
                           {session.status}
                         </Badge>
@@ -571,7 +641,9 @@ export default function OrganisationDocumentTracking() {
           <Card>
             <CardHeader>
               <CardTitle>Compliance Dashboard</CardTitle>
-              <CardDescription>Monitor compliance across all organisational documents and sessions</CardDescription>
+              <CardDescription>
+                Monitor compliance across all organisational documents and sessions
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
@@ -617,7 +689,10 @@ export default function OrganisationDocumentTracking() {
             </DialogDescription>
           </DialogHeader>
           <Form {...documentForm}>
-            <form onSubmit={documentForm.handleSubmit((data) => createDocumentMutation.mutate(data))} className="space-y-4">
+            <form
+              onSubmit={documentForm.handleSubmit((data) => createDocumentMutation.mutate(data))}
+              className="space-y-4"
+            >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={documentForm.control}
@@ -749,7 +824,12 @@ export default function OrganisationDocumentTracking() {
                   <FormItem>
                     <FormLabel>Retention Period (days)</FormLabel>
                     <FormControl>
-                      <Input type="number" placeholder="365" {...field} onChange={(e) => field.onChange(parseInt(e.target.value))} />
+                      <Input
+                        type="number"
+                        placeholder="365"
+                        {...field}
+                        onChange={(e) => field.onChange(parseInt(e.target.value))}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -778,7 +858,10 @@ export default function OrganisationDocumentTracking() {
             </DialogDescription>
           </DialogHeader>
           <Form {...sessionForm}>
-            <form onSubmit={sessionForm.handleSubmit((data) => createSessionMutation.mutate(data))} className="space-y-4">
+            <form
+              onSubmit={sessionForm.handleSubmit((data) => createSessionMutation.mutate(data))}
+              className="space-y-4"
+            >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={sessionForm.control}
@@ -846,7 +929,12 @@ export default function OrganisationDocumentTracking() {
                     <FormItem>
                       <FormLabel>Duration (minutes)</FormLabel>
                       <FormControl>
-                        <Input type="number" placeholder="60" {...field} onChange={(e) => field.onChange(parseInt(e.target.value))} />
+                        <Input
+                          type="number"
+                          placeholder="60"
+                          {...field}
+                          onChange={(e) => field.onChange(parseInt(e.target.value))}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>

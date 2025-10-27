@@ -1,31 +1,41 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { useToast } from '@/hooks/use-toast';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { apiRequest, queryClient } from '@/lib/queryClient';
-import { 
-  Users, 
-  Mail, 
-  Calendar, 
-  CheckCircle, 
-  XCircle, 
-  AlertTriangle, 
-  Clock, 
-  Plus, 
-  RefreshCw, 
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import {
+  Users,
+  Mail,
+  Calendar,
+  CheckCircle,
+  XCircle,
+  AlertTriangle,
+  Clock,
+  Plus,
+  RefreshCw,
   Trash2,
   Settings,
   Search,
   Eye,
-  Activity
-} from 'lucide-react';
+  Activity,
+} from "lucide-react";
 
 interface WorkspaceAccount {
   therapistId: string;
@@ -33,7 +43,7 @@ interface WorkspaceAccount {
   therapistEmail: string;
   workspaceEmail: string;
   calendarId: string;
-  accountStatus: 'active' | 'suspended' | 'pending' | 'deleted';
+  accountStatus: "active" | "suspended" | "pending" | "deleted";
   createdAt: string;
   lastLogin?: string;
   permissionsConfigured: boolean;
@@ -48,29 +58,33 @@ interface WorkspaceStats {
 }
 
 const WorkspaceAccountManager: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState<string>('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState<string>("all");
   const [selectedTherapists, setSelectedTherapists] = useState<string[]>([]);
   const { toast } = useToast();
 
   // Fetch workspace accounts overview
-  const { data: workspaceData, isLoading: workspaceLoading, refetch: refetchWorkspace } = useQuery({
-    queryKey: ['/api/admin/workspace-accounts'],
-    refetchInterval: 30000 // Refresh every 30 seconds
+  const {
+    data: workspaceData,
+    isLoading: workspaceLoading,
+    refetch: refetchWorkspace,
+  } = useQuery({
+    queryKey: ["/api/admin/workspace-accounts"],
+    refetchInterval: 30000, // Refresh every 30 seconds
   });
 
   // Fetch service health status
   const { data: serviceHealth } = useQuery({
-    queryKey: ['/api/admin/workspace-service-health'],
-    refetchInterval: 60000 // Refresh every minute
+    queryKey: ["/api/admin/workspace-service-health"],
+    refetchInterval: 60000, // Refresh every minute
   });
 
   // Manual provision workspace mutation
   const provisionWorkspaceMutation = useMutation({
     mutationFn: async (therapistId: string) => {
       return apiRequest(`/api/therapists/${therapistId}/provision-workspace`, {
-        method: 'POST',
-        body: JSON.stringify({ forceRecreate: false })
+        method: "POST",
+        body: JSON.stringify({ forceRecreate: false }),
       });
     },
     onSuccess: (data, therapistId) => {
@@ -78,7 +92,7 @@ const WorkspaceAccountManager: React.FC = () => {
         title: "Workspace Provisioned",
         description: `Successfully created workspace account for therapist.`,
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/workspace-accounts'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/workspace-accounts"] });
     },
     onError: (error: any) => {
       toast({
@@ -92,9 +106,9 @@ const WorkspaceAccountManager: React.FC = () => {
   // Bulk provision mutation
   const bulkProvisionMutation = useMutation({
     mutationFn: async (therapistIds: string[]) => {
-      return apiRequest('/api/admin/bulk-provision-workspace', {
-        method: 'POST',
-        body: JSON.stringify({ therapistIds })
+      return apiRequest("/api/admin/bulk-provision-workspace", {
+        method: "POST",
+        body: JSON.stringify({ therapistIds }),
       });
     },
     onSuccess: (data) => {
@@ -102,7 +116,7 @@ const WorkspaceAccountManager: React.FC = () => {
         title: "Bulk Provisioning Complete",
         description: `${data.stats?.successful || 0} accounts created successfully.`,
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/workspace-accounts'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/workspace-accounts"] });
       setSelectedTherapists([]);
     },
     onError: (error: any) => {
@@ -116,14 +130,18 @@ const WorkspaceAccountManager: React.FC = () => {
 
   // Update workspace account mutation
   const updateAccountMutation = useMutation({
-    mutationFn: async ({ therapistId, accountStatus, notes }: { 
-      therapistId: string; 
-      accountStatus: string; 
-      notes: string 
+    mutationFn: async ({
+      therapistId,
+      accountStatus,
+      notes,
+    }: {
+      therapistId: string;
+      accountStatus: string;
+      notes: string;
     }) => {
       return apiRequest(`/api/therapists/${therapistId}/workspace-account`, {
-        method: 'PUT',
-        body: JSON.stringify({ accountStatus, notes })
+        method: "PUT",
+        body: JSON.stringify({ accountStatus, notes }),
       });
     },
     onSuccess: () => {
@@ -131,7 +149,7 @@ const WorkspaceAccountManager: React.FC = () => {
         title: "Account Updated",
         description: "Workspace account settings updated successfully.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/workspace-accounts'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/workspace-accounts"] });
     },
     onError: (error: any) => {
       toast({
@@ -146,8 +164,8 @@ const WorkspaceAccountManager: React.FC = () => {
   const deactivateAccountMutation = useMutation({
     mutationFn: async ({ therapistId, reason }: { therapistId: string; reason: string }) => {
       return apiRequest(`/api/therapists/${therapistId}/workspace-account`, {
-        method: 'DELETE',
-        body: JSON.stringify({ reason })
+        method: "DELETE",
+        body: JSON.stringify({ reason }),
       });
     },
     onSuccess: () => {
@@ -155,7 +173,7 @@ const WorkspaceAccountManager: React.FC = () => {
         title: "Account Deactivated",
         description: "Workspace account has been deactivated successfully.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/workspace-accounts'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/workspace-accounts"] });
     },
     onError: (error: any) => {
       toast({
@@ -167,31 +185,53 @@ const WorkspaceAccountManager: React.FC = () => {
   });
 
   const workspaceAccounts: WorkspaceAccount[] = workspaceData?.workspaceAccounts || [];
-  const stats: WorkspaceStats = workspaceData?.stats || { total: 0, active: 0, suspended: 0, pending: 0 };
+  const stats: WorkspaceStats = workspaceData?.stats || {
+    total: 0,
+    active: 0,
+    suspended: 0,
+    pending: 0,
+  };
 
   // Filter accounts based on search and status
-  const filteredAccounts = workspaceAccounts.filter(account => {
-    const matchesSearch = !searchTerm || 
+  const filteredAccounts = workspaceAccounts.filter((account) => {
+    const matchesSearch =
+      !searchTerm ||
       account.therapistName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       account.therapistEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
       account.workspaceEmail?.toLowerCase().includes(searchTerm.toLowerCase());
-    
-    const matchesStatus = selectedStatus === 'all' || account.accountStatus === selectedStatus;
-    
+
+    const matchesStatus = selectedStatus === "all" || account.accountStatus === selectedStatus;
+
     return matchesSearch && matchesStatus;
   });
 
   const getStatusBadge = (status: string) => {
     const variants: Record<string, any> = {
-      active: { variant: "default", className: "bg-green-100 text-green-800 border-green-200", icon: CheckCircle },
-      suspended: { variant: "secondary", className: "bg-yellow-100 text-yellow-800 border-yellow-200", icon: AlertTriangle },
-      pending: { variant: "outline", className: "bg-blue-100 text-blue-800 border-blue-200", icon: Clock },
-      deleted: { variant: "destructive", className: "bg-red-100 text-red-800 border-red-200", icon: XCircle }
+      active: {
+        variant: "default",
+        className: "bg-green-100 text-green-800 border-green-200",
+        icon: CheckCircle,
+      },
+      suspended: {
+        variant: "secondary",
+        className: "bg-yellow-100 text-yellow-800 border-yellow-200",
+        icon: AlertTriangle,
+      },
+      pending: {
+        variant: "outline",
+        className: "bg-blue-100 text-blue-800 border-blue-200",
+        icon: Clock,
+      },
+      deleted: {
+        variant: "destructive",
+        className: "bg-red-100 text-red-800 border-red-200",
+        icon: XCircle,
+      },
     };
-    
+
     const config = variants[status] || variants.pending;
     const Icon = config.icon;
-    
+
     return (
       <Badge className={config.className}>
         <Icon className="w-3 h-3 mr-1" />
@@ -210,7 +250,7 @@ const WorkspaceAccountManager: React.FC = () => {
       return;
     }
 
-    if (action === 'provision') {
+    if (action === "provision") {
       bulkProvisionMutation.mutate(selectedTherapists);
     }
   };
@@ -219,12 +259,12 @@ const WorkspaceAccountManager: React.FC = () => {
     if (checked) {
       setSelectedTherapists([...selectedTherapists, therapistId]);
     } else {
-      setSelectedTherapists(selectedTherapists.filter(id => id !== therapistId));
+      setSelectedTherapists(selectedTherapists.filter((id) => id !== therapistId));
     }
   };
 
   const selectAll = () => {
-    setSelectedTherapists(filteredAccounts.map(account => account.therapistId));
+    setSelectedTherapists(filteredAccounts.map((account) => account.therapistId));
   };
 
   const clearSelection = () => {
@@ -245,11 +285,13 @@ const WorkspaceAccountManager: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Google Workspace Manager</h1>
-          <p className="text-gray-600 mt-2">Manage therapist Google Workspace accounts and calendars</p>
+          <p className="text-gray-600 mt-2">
+            Manage therapist Google Workspace accounts and calendars
+          </p>
         </div>
         <div className="flex items-center gap-3">
-          <Button 
-            onClick={() => refetchWorkspace()} 
+          <Button
+            onClick={() => refetchWorkspace()}
             variant="outline"
             data-testid="button-refresh-workspace"
           >
@@ -276,12 +318,16 @@ const WorkspaceAccountManager: React.FC = () => {
               </div>
               <div className="flex items-center">
                 <div className="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
-                <span className="text-sm">Domain: {serviceHealth?.serviceHealth?.domain || 'hive-wellness.co.uk'}</span>
+                <span className="text-sm">
+                  Domain: {serviceHealth?.serviceHealth?.domain || "hive-wellness.co.uk"}
+                </span>
               </div>
             </div>
             <div className="text-sm text-gray-500">
-              Last checked: {serviceHealth?.serviceHealth?.lastChecked ? 
-                new Date(serviceHealth.serviceHealth.lastChecked).toLocaleString() : 'Unknown'}
+              Last checked:{" "}
+              {serviceHealth?.serviceHealth?.lastChecked
+                ? new Date(serviceHealth.serviceHealth.lastChecked).toLocaleString()
+                : "Unknown"}
             </div>
           </div>
         </CardContent>
@@ -361,7 +407,7 @@ const WorkspaceAccountManager: React.FC = () => {
                   data-testid="input-search-therapists"
                 />
               </div>
-              
+
               <select
                 value={selectedStatus}
                 onChange={(e) => setSelectedStatus(e.target.value)}
@@ -379,9 +425,9 @@ const WorkspaceAccountManager: React.FC = () => {
             <div className="flex gap-2">
               {selectedTherapists.length > 0 && (
                 <>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={clearSelection}
                     data-testid="button-clear-selection"
                   >
@@ -389,7 +435,7 @@ const WorkspaceAccountManager: React.FC = () => {
                   </Button>
                   <Button
                     size="sm"
-                    onClick={() => handleBulkAction('provision')}
+                    onClick={() => handleBulkAction("provision")}
                     disabled={bulkProvisionMutation.isPending}
                     data-testid="button-bulk-provision"
                   >
@@ -402,7 +448,12 @@ const WorkspaceAccountManager: React.FC = () => {
                   </Button>
                 </>
               )}
-              <Button variant="outline" size="sm" onClick={selectAll} data-testid="button-select-all">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={selectAll}
+                data-testid="button-select-all"
+              >
                 Select All
               </Button>
             </div>
@@ -426,16 +477,25 @@ const WorkspaceAccountManager: React.FC = () => {
                   <th className="px-4 py-3 text-left">
                     <input
                       type="checkbox"
-                      checked={selectedTherapists.length === filteredAccounts.length && filteredAccounts.length > 0}
-                      onChange={(e) => e.target.checked ? selectAll() : clearSelection()}
+                      checked={
+                        selectedTherapists.length === filteredAccounts.length &&
+                        filteredAccounts.length > 0
+                      }
+                      onChange={(e) => (e.target.checked ? selectAll() : clearSelection())}
                       className="rounded border-gray-300"
                     />
                   </th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">Therapist</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">Workspace Email</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">
+                    Therapist
+                  </th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">
+                    Workspace Email
+                  </th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">Status</th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">Created</th>
-                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">Last Login</th>
+                  <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">
+                    Last Login
+                  </th>
                   <th className="px-4 py-3 text-left text-sm font-medium text-gray-900">Actions</th>
                 </tr>
               </thead>
@@ -446,13 +506,17 @@ const WorkspaceAccountManager: React.FC = () => {
                       <input
                         type="checkbox"
                         checked={selectedTherapists.includes(account.therapistId)}
-                        onChange={(e) => handleSelectionChange(account.therapistId, e.target.checked)}
+                        onChange={(e) =>
+                          handleSelectionChange(account.therapistId, e.target.checked)
+                        }
                         className="rounded border-gray-300"
                       />
                     </td>
                     <td className="px-4 py-4">
                       <div>
-                        <div className="text-sm font-medium text-gray-900">{account.therapistName}</div>
+                        <div className="text-sm font-medium text-gray-900">
+                          {account.therapistName}
+                        </div>
                         <div className="text-sm text-gray-500">{account.therapistEmail}</div>
                       </div>
                     </td>
@@ -460,18 +524,18 @@ const WorkspaceAccountManager: React.FC = () => {
                       <div className="flex items-center">
                         <Mail className="w-4 h-4 mr-2 text-purple-600" />
                         <span className="text-sm font-mono text-gray-900">
-                          {account.workspaceEmail || 'Not configured'}
+                          {account.workspaceEmail || "Not configured"}
                         </span>
                       </div>
                     </td>
-                    <td className="px-4 py-4">
-                      {getStatusBadge(account.accountStatus)}
+                    <td className="px-4 py-4">{getStatusBadge(account.accountStatus)}</td>
+                    <td className="px-4 py-4 text-sm text-gray-500">
+                      {account.createdAt ? new Date(account.createdAt).toLocaleDateString() : "N/A"}
                     </td>
                     <td className="px-4 py-4 text-sm text-gray-500">
-                      {account.createdAt ? new Date(account.createdAt).toLocaleDateString() : 'N/A'}
-                    </td>
-                    <td className="px-4 py-4 text-sm text-gray-500">
-                      {account.lastLogin ? new Date(account.lastLogin).toLocaleDateString() : 'Never'}
+                      {account.lastLogin
+                        ? new Date(account.lastLogin).toLocaleDateString()
+                        : "Never"}
                     </td>
                     <td className="px-4 py-4">
                       <div className="flex items-center space-x-2">
@@ -488,7 +552,7 @@ const WorkspaceAccountManager: React.FC = () => {
                             <Plus className="w-4 h-4" />
                           )}
                         </Button>
-                        
+
                         <AlertDialog>
                           <AlertDialogTrigger asChild>
                             <Button
@@ -503,17 +567,19 @@ const WorkspaceAccountManager: React.FC = () => {
                             <AlertDialogHeader>
                               <AlertDialogTitle>Deactivate Workspace Account</AlertDialogTitle>
                               <AlertDialogDescription>
-                                This will deactivate the workspace account for {account.therapistName}. 
-                                This action cannot be undone. Are you sure?
+                                This will deactivate the workspace account for{" "}
+                                {account.therapistName}. This action cannot be undone. Are you sure?
                               </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                               <AlertDialogCancel>Cancel</AlertDialogCancel>
                               <AlertDialogAction
-                                onClick={() => deactivateAccountMutation.mutate({
-                                  therapistId: account.therapistId,
-                                  reason: 'Admin deactivation'
-                                })}
+                                onClick={() =>
+                                  deactivateAccountMutation.mutate({
+                                    therapistId: account.therapistId,
+                                    reason: "Admin deactivation",
+                                  })
+                                }
                                 className="bg-red-600 hover:bg-red-700"
                               >
                                 Deactivate Account
@@ -531,12 +597,13 @@ const WorkspaceAccountManager: React.FC = () => {
             {filteredAccounts.length === 0 && (
               <div className="text-center py-12">
                 <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No workspace accounts found</h3>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">
+                  No workspace accounts found
+                </h3>
                 <p className="text-gray-500">
-                  {searchTerm || selectedStatus !== 'all' 
-                    ? 'Try adjusting your search or filter criteria.'
-                    : 'Workspace accounts will appear here once therapists are approved.'
-                  }
+                  {searchTerm || selectedStatus !== "all"
+                    ? "Try adjusting your search or filter criteria."
+                    : "Workspace accounts will appear here once therapists are approved."}
                 </p>
               </div>
             )}

@@ -1,14 +1,14 @@
-import { google } from 'googleapis';
-import { nanoid } from 'nanoid';
+import { google } from "googleapis";
+import { nanoid } from "nanoid";
 
 // Import the refactored Google Calendar Service for multi-therapist architecture
-import { googleCalendarService } from './google-calendar-service';
+import { googleCalendarService } from "./google-calendar-service";
 
 // Import storage to access therapist workspace accounts
-import { storage } from './storage';
+import { storage } from "./storage";
 
 // Calendar ID for Hive Wellness - use environment variable or fallback
-const HIVE_WELLNESS_CALENDAR_ID = process.env.HIVE_WELLNESS_CALENDAR_ID || 'primary';
+const HIVE_WELLNESS_CALENDAR_ID = process.env.HIVE_WELLNESS_CALENDAR_ID || "primary";
 
 export interface GoogleMeetLink {
   meetingUrl: string;
@@ -44,26 +44,30 @@ export class GoogleMeetService {
             email: serviceAccountKey.client_email,
             key: serviceAccountKey.private_key,
             scopes: [
-              'https://www.googleapis.com/auth/calendar',
-              'https://www.googleapis.com/auth/calendar.events',
-              'https://www.googleapis.com/auth/gmail.send'
+              "https://www.googleapis.com/auth/calendar",
+              "https://www.googleapis.com/auth/calendar.events",
+              "https://www.googleapis.com/auth/gmail.send",
             ],
             // Enable domain-wide delegation to act as support@hive-wellness.co.uk
-            subject: 'support@hive-wellness.co.uk'
+            subject: "support@hive-wellness.co.uk",
           });
-          console.log('Using service account authentication with domain-wide delegation');
+          console.log("Using service account authentication with domain-wide delegation");
           return this.auth;
         } catch (error) {
-          console.log('Service account setup issue:', error instanceof Error ? error.message : 'Unknown error');
-          console.log('Falling back to OAuth authentication');
+          console.log(
+            "Service account setup issue:",
+            error instanceof Error ? error.message : "Unknown error"
+          );
+          console.log("Falling back to OAuth authentication");
         }
       }
 
       // Fallback to OAuth with enhanced error handling
-      const redirectUri = process.env.NODE_ENV === 'development' 
-        ? `${process.env.REPL_URL || 'http://localhost:5000'}/api/admin/google-auth-callback`
-        : 'https://api.hive-wellness.co.uk/api/admin/google-auth-callback';
-        
+      const redirectUri =
+        process.env.NODE_ENV === "development"
+          ? `${process.env.REPL_URL || "http://localhost:5000"}/api/admin/google-auth-callback`
+          : "https://api.hive-wellness.co.uk/api/admin/google-auth-callback";
+
       this.auth = new google.auth.OAuth2(
         process.env.GOOGLE_CLIENT_ID,
         process.env.GOOGLE_CLIENT_SECRET,
@@ -77,26 +81,26 @@ export class GoogleMeetService {
         });
 
         // Set up automatic token refresh
-        this.auth.on('tokens', (tokens: any) => {
+        this.auth.on("tokens", (tokens: any) => {
           if (tokens.refresh_token) {
-            console.log('New refresh token received, should be updated in environment variables');
+            console.log("New refresh token received, should be updated in environment variables");
           }
           if (tokens.access_token) {
-            console.log('Access token refreshed successfully');
+            console.log("Access token refreshed successfully");
           }
         });
       }
     }
-    
+
     // Try to get access token with better error handling
     try {
       await this.auth.getAccessToken();
       return this.auth;
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : 'Unknown error';
-      console.warn('Google OAuth authentication issue:', errorMsg);
-      console.log('Calendar integration will use fallback meeting generation');
-      throw new Error('Google authentication temporarily unavailable - using fallback');
+      const errorMsg = error instanceof Error ? error.message : "Unknown error";
+      console.warn("Google OAuth authentication issue:", errorMsg);
+      console.log("Calendar integration will use fallback meeting generation");
+      throw new Error("Google authentication temporarily unavailable - using fallback");
     }
   }
 
@@ -122,12 +126,12 @@ export class GoogleMeetService {
       const sessionDuration = 60; // 50 min session + 10 min buffer
       const sessionEndTime = new Date(startTimeUTC.getTime() + sessionDuration * 60 * 1000);
       const isPastDate = nowUTC > sessionEndTime;
-      
+
       if (isPastDate) {
-        console.log('🔙 SERVICE GUARD: Skipping Google Calendar/Meet creation for past date', {
+        console.log("🔙 SERVICE GUARD: Skipping Google Calendar/Meet creation for past date", {
           scheduledAt: options.startTime.toISOString(),
           isPastDate,
-          title: options.title
+          title: options.title,
         });
         return this.createPastDateMockEvent(options);
       }
@@ -141,10 +145,10 @@ export class GoogleMeetService {
             workspaceEmail = therapist.google_workspace_email;
             console.log(`✅ Found therapist workspace account: ${workspaceEmail}`);
           } else {
-            console.log('ℹ️ Therapist has no workspace account, using admin calendar');
+            console.log("ℹ️ Therapist has no workspace account, using admin calendar");
           }
         } catch (error) {
-          console.error('Error checking therapist workspace account:', error);
+          console.error("Error checking therapist workspace account:", error);
         }
       }
 
@@ -154,19 +158,23 @@ export class GoogleMeetService {
         try {
           return await this.createWorkspaceBasedMeeting({
             ...options,
-            workspaceEmail
+            workspaceEmail,
           });
         } catch (error) {
           // Check for specific Google authentication errors that indicate workspace impersonation failure
-          const isWorkspaceAuthError = error instanceof Error && 
-            (error.message.includes('invalid_grant') || 
-             error.message.includes('Invalid email or User ID') ||
-             error.message.includes('workspace calendar event'));
-          
+          const isWorkspaceAuthError =
+            error instanceof Error &&
+            (error.message.includes("invalid_grant") ||
+              error.message.includes("Invalid email or User ID") ||
+              error.message.includes("workspace calendar event"));
+
           if (isWorkspaceAuthError) {
-            console.warn(`⚠️ Workspace authentication failed for ${workspaceEmail}, falling back to admin calendar:`, error.message);
-            console.log('📅 Falling back to admin calendar for session creation...');
-            
+            console.warn(
+              `⚠️ Workspace authentication failed for ${workspaceEmail}, falling back to admin calendar:`,
+              error.message
+            );
+            console.log("📅 Falling back to admin calendar for session creation...");
+
             // Fallback to admin calendar
             return await this.createAdminCalendarEvent(options);
           } else {
@@ -177,10 +185,10 @@ export class GoogleMeetService {
       }
 
       // Use refactored GoogleCalendarService for multi-therapist architecture
-      console.log('📅 Creating session event via GoogleCalendarService...', {
+      console.log("📅 Creating session event via GoogleCalendarService...", {
         therapistId: options.therapistId,
         useAdminCalendar: options.useAdminCalendar,
-        title: options.title
+        title: options.title,
       });
 
       const eventResult = await googleCalendarService.createSessionEvent({
@@ -188,44 +196,48 @@ export class GoogleMeetService {
         description: options.description,
         startTime: options.startTime,
         endTime: options.endTime,
-        attendees: options.attendees.map(email => ({ 
-          name: email.split('@')[0], 
+        attendees: options.attendees.map((email) => ({
+          name: email.split("@")[0],
           email,
-          role: 'client' as const
+          role: "client" as const,
         })),
         therapistId: options.therapistId,
-        useAdminCalendar: options.useAdminCalendar
+        useAdminCalendar: options.useAdminCalendar,
       });
 
       if (!eventResult) {
-        console.error('❌ CRITICAL: No event result returned from GoogleCalendarService');
-        console.error('Cannot create video session without real Google Calendar event');
-        throw new Error('Failed to create Google Calendar event. Real calendar integration required for video sessions.');
+        console.error("❌ CRITICAL: No event result returned from GoogleCalendarService");
+        console.error("Cannot create video session without real Google Calendar event");
+        throw new Error(
+          "Failed to create Google Calendar event. Real calendar integration required for video sessions."
+        );
       }
 
       // Extract eventId string from the result object
-      const eventId = typeof eventResult === 'string' ? eventResult : eventResult.eventId;
+      const eventId = typeof eventResult === "string" ? eventResult : eventResult.eventId;
 
       // Get the event details to extract meeting URL
       const eventInfo = await googleCalendarService.getSessionEvent(eventId);
-      
+
       // Extract real Google Meet URL from conference data - no fallbacks allowed
       let meetingUrl: string;
       if (eventInfo.meetingUrl) {
         meetingUrl = eventInfo.meetingUrl;
-        console.log('✅ Using real Google Meet URL from conference data:', meetingUrl);
+        console.log("✅ Using real Google Meet URL from conference data:", meetingUrl);
       } else {
-        console.error('❌ CRITICAL: No conference data found in calendar event');
-        console.error('Calendar event was created but Google Meet integration failed');
-        throw new Error('Calendar event created but Google Meet conference data is missing. Cannot provide video session access.');
+        console.error("❌ CRITICAL: No conference data found in calendar event");
+        console.error("Calendar event was created but Google Meet integration failed");
+        throw new Error(
+          "Calendar event created but Google Meet conference data is missing. Cannot provide video session access."
+        );
       }
-      
+
       const calendarUrl = `https://calendar.google.com/calendar/event?eid=${eventId}`;
-      
-      console.log('✅ Session event created successfully:', {
+
+      console.log("✅ Session event created successfully:", {
         eventId,
         meetingUrl,
-        eventExists: eventInfo.exists
+        eventExists: eventInfo.exists,
       });
 
       return {
@@ -239,18 +251,26 @@ export class GoogleMeetService {
       };
     } catch (error) {
       // No more fallbacks - system must create real calendar events
-      console.error('❌ CRITICAL: Failed to create Google Calendar event with Meet integration:', {
-        error: error instanceof Error ? error.message : 'Unknown error',
+      console.error("❌ CRITICAL: Failed to create Google Calendar event with Meet integration:", {
+        error: error instanceof Error ? error.message : "Unknown error",
         therapistId: options.therapistId,
-        useAdminCalendar: options.useAdminCalendar
+        useAdminCalendar: options.useAdminCalendar,
       });
-      
-      if (error instanceof Error && error.message.includes('authentication')) {
-        console.error('🔒 Google authentication failed - check domain-wide delegation configuration');
-        throw new Error('Google authentication failed. Cannot create video session without proper calendar access.');
+
+      if (error instanceof Error && error.message.includes("authentication")) {
+        console.error(
+          "🔒 Google authentication failed - check domain-wide delegation configuration"
+        );
+        throw new Error(
+          "Google authentication failed. Cannot create video session without proper calendar access."
+        );
       } else {
-        console.error('📅 Google Calendar service error - check service configuration and permissions');
-        throw new Error('Google Calendar integration failed. Cannot create video session without real calendar event.');
+        console.error(
+          "📅 Google Calendar service error - check service configuration and permissions"
+        );
+        throw new Error(
+          "Google Calendar integration failed. Cannot create video session without real calendar event."
+        );
       }
     }
   }
@@ -269,20 +289,24 @@ export class GoogleMeetService {
   }): Promise<CalendarEvent> {
     try {
       console.log(`🏢 Creating meeting using workspace account: ${options.workspaceEmail}`);
-      
+
       // Create auth client for the specific workspace user
       const workspaceAuth = new google.auth.JWT({
-        email: process.env.GOOGLE_SERVICE_ACCOUNT_KEY ? JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_KEY).client_email : undefined,
-        key: process.env.GOOGLE_SERVICE_ACCOUNT_KEY ? JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_KEY).private_key : undefined,
+        email: process.env.GOOGLE_SERVICE_ACCOUNT_KEY
+          ? JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_KEY).client_email
+          : undefined,
+        key: process.env.GOOGLE_SERVICE_ACCOUNT_KEY
+          ? JSON.parse(process.env.GOOGLE_SERVICE_ACCOUNT_KEY).private_key
+          : undefined,
         scopes: [
-          'https://www.googleapis.com/auth/calendar',
-          'https://www.googleapis.com/auth/calendar.events'
+          "https://www.googleapis.com/auth/calendar",
+          "https://www.googleapis.com/auth/calendar.events",
         ],
         // Impersonate the therapist's workspace account
-        subject: options.workspaceEmail
+        subject: options.workspaceEmail,
       });
 
-      const calendar = google.calendar({ version: 'v3', auth: workspaceAuth });
+      const calendar = google.calendar({ version: "v3", auth: workspaceAuth });
 
       // Create calendar event with Google Meet integration
       const event = {
@@ -290,44 +314,44 @@ export class GoogleMeetService {
         description: options.description,
         start: {
           dateTime: options.startTime.toISOString(),
-          timeZone: options.timeZone || 'Europe/London',
+          timeZone: options.timeZone || "Europe/London",
         },
         end: {
           dateTime: options.endTime.toISOString(),
-          timeZone: options.timeZone || 'Europe/London',
+          timeZone: options.timeZone || "Europe/London",
         },
-        attendees: options.attendees.map(email => ({ email })),
+        attendees: options.attendees.map((email) => ({ email })),
         conferenceData: {
           createRequest: {
             requestId: nanoid(),
             conferenceSolutionKey: {
-              type: 'hangoutsMeet'
-            }
-          }
+              type: "hangoutsMeet",
+            },
+          },
         },
         reminders: {
           useDefault: false,
           overrides: [
-            { method: 'email', minutes: 24 * 60 },
-            { method: 'popup', minutes: 10 },
+            { method: "email", minutes: 24 * 60 },
+            { method: "popup", minutes: 10 },
           ],
         },
       };
 
       const response = await calendar.events.insert({
-        calendarId: 'primary',
+        calendarId: "primary",
         resource: event,
         conferenceDataVersion: 1,
-        sendUpdates: 'all'
+        sendUpdates: "all",
       });
 
       const meetingUrl = response.data.conferenceData?.entryPoints?.find(
-        ep => ep.entryPointType === 'video'
+        (ep) => ep.entryPointType === "video"
       )?.uri;
-      
+
       if (!meetingUrl) {
-        console.error('❌ CRITICAL: Workspace calendar event created but no Google Meet URL found');
-        throw new Error('Calendar event created but Google Meet conference data is missing.');
+        console.error("❌ CRITICAL: Workspace calendar event created but no Google Meet URL found");
+        throw new Error("Calendar event created but Google Meet conference data is missing.");
       }
 
       console.log(`✅ Workspace-based meeting created successfully: ${meetingUrl}`);
@@ -335,17 +359,18 @@ export class GoogleMeetService {
       return {
         eventId: response.data.id || nanoid(),
         meetingUrl,
-        calendarUrl: response.data.htmlLink || '',
+        calendarUrl: response.data.htmlLink || "",
         startTime: options.startTime,
         endTime: options.endTime,
         title: options.title,
         description: options.description,
       };
-
     } catch (error) {
-      console.error('❌ CRITICAL: Error creating workspace-based meeting:', error);
-      console.error('Cannot create video session without proper workspace calendar integration');
-      throw new Error(`Failed to create workspace calendar event for ${options.workspaceEmail}. Real calendar integration required.`);
+      console.error("❌ CRITICAL: Error creating workspace-based meeting:", error);
+      console.error("Cannot create video session without proper workspace calendar integration");
+      throw new Error(
+        `Failed to create workspace calendar event for ${options.workspaceEmail}. Real calendar integration required.`
+      );
     }
   }
 
@@ -361,8 +386,8 @@ export class GoogleMeetService {
     timeZone?: string;
     therapistId?: string;
   }): Promise<CalendarEvent> {
-    console.log('📅 Creating admin calendar event as fallback...');
-    
+    console.log("📅 Creating admin calendar event as fallback...");
+
     try {
       // Use GoogleCalendarService with explicit admin calendar flag
       const eventResult = await googleCalendarService.createSessionEvent({
@@ -370,34 +395,34 @@ export class GoogleMeetService {
         description: options.description,
         startTime: options.startTime,
         endTime: options.endTime,
-        attendees: options.attendees.map(email => ({ 
-          name: email.split('@')[0], 
+        attendees: options.attendees.map((email) => ({
+          name: email.split("@")[0],
           email,
-          role: 'client' as const
+          role: "client" as const,
         })),
         therapistId: options.therapistId,
-        useAdminCalendar: true // Force admin calendar usage
+        useAdminCalendar: true, // Force admin calendar usage
       });
 
       if (!eventResult) {
-        throw new Error('Failed to create admin calendar event');
+        throw new Error("Failed to create admin calendar event");
       }
 
       // Extract eventId string from the result object
-      const eventId = typeof eventResult === 'string' ? eventResult : eventResult.eventId;
+      const eventId = typeof eventResult === "string" ? eventResult : eventResult.eventId;
 
       // Get the event details to extract meeting URL
       const eventInfo = await googleCalendarService.getSessionEvent(eventId);
-      
+
       // Extract real Google Meet URL from conference data
       if (!eventInfo.meetingUrl) {
-        throw new Error('Admin calendar event created but Google Meet URL is missing');
+        throw new Error("Admin calendar event created but Google Meet URL is missing");
       }
 
       console.log(`✅ Admin calendar fallback successful: ${eventInfo.meetingUrl}`);
-      
+
       const calendarUrl = `https://calendar.google.com/calendar/event?eid=${eventId}`;
-      
+
       return {
         eventId,
         meetingUrl: eventInfo.meetingUrl,
@@ -407,10 +432,11 @@ export class GoogleMeetService {
         title: options.title,
         description: options.description,
       };
-      
     } catch (error) {
-      console.error('❌ CRITICAL: Admin calendar fallback failed:', error);
-      throw new Error(`Admin calendar fallback failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error("❌ CRITICAL: Admin calendar fallback failed:", error);
+      throw new Error(
+        `Admin calendar fallback failed: ${error instanceof Error ? error.message : "Unknown error"}`
+      );
     }
   }
 
@@ -426,10 +452,16 @@ export class GoogleMeetService {
     attendees: string[];
     timeZone?: string;
   }): CalendarEvent {
-    console.error('❌ CRITICAL: Attempted to create fake Google Meet URL - this functionality has been removed');
-    console.error('Real Google Calendar events with proper conferenceData are required for video sessions');
-    
-    throw new Error('Failed to create real Google Calendar event with Meet integration. Cannot generate fake meeting URLs.');
+    console.error(
+      "❌ CRITICAL: Attempted to create fake Google Meet URL - this functionality has been removed"
+    );
+    console.error(
+      "Real Google Calendar events with proper conferenceData are required for video sessions"
+    );
+
+    throw new Error(
+      "Failed to create real Google Calendar event with Meet integration. Cannot generate fake meeting URLs."
+    );
   }
 
   /**
@@ -443,7 +475,7 @@ export class GoogleMeetService {
     const timestamp = Date.now().toString(36).slice(-4); // Last 4 chars of timestamp in base36
     const random = Math.random().toString(36).substring(2, 6); // 4 random chars
     const suffix = Math.random().toString(36).substring(2, 5); // 3 random chars
-    
+
     // Format: xxxx-xxxx-xxx (using timestamp + random for uniqueness)
     return `${timestamp}-${random}-${suffix}`;
   }
@@ -468,10 +500,10 @@ export class GoogleMeetService {
     therapistId?: string;
     useAdminCalendar?: boolean;
   }): CalendarEvent {
-    console.log('🔙 Creating mock event for past date (no actual calendar/Meet creation)');
-    
+    console.log("🔙 Creating mock event for past date (no actual calendar/Meet creation)");
+
     return {
-      eventId: 'past-date-mock-' + Date.now(),
+      eventId: "past-date-mock-" + Date.now(),
       meetingUrl: null, // No Meet link for past dates
       calendarUrl: null, // No calendar event for past dates
       startTime: options.startTime,
@@ -491,10 +523,12 @@ export class GoogleMeetService {
     startTime: Date;
     endTime: Date;
   }): CalendarEvent {
-    console.error('❌ CRITICAL: Google Calendar API is not available and fake URLs are disabled');
-    console.error('Cannot create video session without proper Google Calendar integration');
-    
-    throw new Error('Google Calendar API unavailable. Cannot create video session without real calendar event and Meet integration.');
+    console.error("❌ CRITICAL: Google Calendar API is not available and fake URLs are disabled");
+    console.error("Cannot create video session without proper Google Calendar integration");
+
+    throw new Error(
+      "Google Calendar API unavailable. Cannot create video session without real calendar event and Meet integration."
+    );
   }
 
   /**
@@ -505,12 +539,18 @@ export class GoogleMeetService {
     title: string;
     description?: string;
     clientName: string;
-    sessionType: 'introduction' | 'therapy';
+    sessionType: "introduction" | "therapy";
   }): GoogleMeetLink {
-    console.error('❌ DEPRECATED: generateMeetLink() called - this method no longer generates fake URLs');
-    console.error('Use createCalendarEvent() or createIntroductionCallMeeting() for real calendar events');
-    
-    throw new Error(`Cannot generate fake Meet URL for ${options.sessionType} session. Use proper calendar event creation instead.`);
+    console.error(
+      "❌ DEPRECATED: generateMeetLink() called - this method no longer generates fake URLs"
+    );
+    console.error(
+      "Use createCalendarEvent() or createIntroductionCallMeeting() for real calendar events"
+    );
+
+    throw new Error(
+      `Cannot generate fake Meet URL for ${options.sessionType} session. Use proper calendar event creation instead.`
+    );
   }
 
   /**
@@ -525,23 +565,25 @@ export class GoogleMeetService {
     attendees?: string[];
   }): string {
     const { title, description, startTime, endTime, meetingUrl, attendees = [] } = options;
-    
+
     const formatDateTime = (date: Date) => {
-      return date.toISOString().replace(/[:-]/g, '').replace(/\.\d{3}/, '');
+      return date
+        .toISOString()
+        .replace(/[:-]/g, "")
+        .replace(/\.\d{3}/, "");
     };
 
     const params = new URLSearchParams({
-      action: 'TEMPLATE',
+      action: "TEMPLATE",
       text: title,
       dates: `${formatDateTime(startTime)}/${formatDateTime(endTime)}`,
       details: `${description}\n\nJoin video call: ${meetingUrl}`,
       location: meetingUrl,
-      ...(attendees.length > 0 && { add: attendees.join(',') }),
+      ...(attendees.length > 0 && { add: attendees.join(",") }),
     });
 
     return `https://calendar.google.com/calendar/render?${params.toString()}`;
   }
-
 
   /**
    * Create session meeting with flexible options for all appointment types
@@ -570,10 +612,10 @@ export class GoogleMeetService {
     calendarUrl?: string;
   }> {
     try {
-      const endTime = new Date(options.scheduledDateTime.getTime() + (options.duration * 60 * 1000));
-      const title = `${options.sessionType.replace('_', ' ')} - ${options.clientName}`;
-      const description = `Session with ${options.clientName}\n${options.notes || ''}`;
-      
+      const endTime = new Date(options.scheduledDateTime.getTime() + options.duration * 60 * 1000);
+      const title = `${options.sessionType.replace("_", " ")} - ${options.clientName}`;
+      const description = `Session with ${options.clientName}\n${options.notes || ""}`;
+
       const attendees = [options.clientEmail];
       if (options.therapistEmail) {
         attendees.push(options.therapistEmail);
@@ -585,9 +627,9 @@ export class GoogleMeetService {
         startTime: options.scheduledDateTime,
         endTime,
         attendees,
-        timeZone: 'Europe/London',
+        timeZone: "Europe/London",
         therapistId: options.therapistId, // Route to therapist calendar
-        useAdminCalendar: options.useAdminCalendar // Allow admin calendar override
+        useAdminCalendar: options.useAdminCalendar, // Allow admin calendar override
       });
 
       return {
@@ -595,15 +637,15 @@ export class GoogleMeetService {
           id: calendarEvent.eventId,
           hangoutLink: calendarEvent.meetingUrl,
           conferenceData: {
-            entryPoints: [{ uri: calendarEvent.meetingUrl }]
-          }
+            entryPoints: [{ uri: calendarEvent.meetingUrl }],
+          },
         },
         eventId: calendarEvent.eventId,
         meetingUrl: calendarEvent.meetingUrl,
-        calendarUrl: calendarEvent.calendarUrl
+        calendarUrl: calendarEvent.calendarUrl,
       };
     } catch (error) {
-      console.error('Error creating session meeting:', error);
+      console.error("Error creating session meeting:", error);
       throw error;
     }
   }
@@ -626,11 +668,11 @@ export class GoogleMeetService {
     calendarUrl?: string;
   }> {
     try {
-      console.log('📅 Creating Google Calendar event for introduction call:', {
+      console.log("📅 Creating Google Calendar event for introduction call:", {
         title: options.title,
         startTime: options.startTime.toISOString(),
         endTime: options.endTime.toISOString(),
-        clientEmail: options.clientEmail
+        clientEmail: options.clientEmail,
       });
 
       // Add timeout wrapper for Google Calendar API calls
@@ -639,41 +681,40 @@ export class GoogleMeetService {
         description: options.description,
         startTime: options.startTime,
         endTime: options.endTime,
-        attendees: [options.clientEmail, 'support@hive-wellness.co.uk'],
-        timeZone: 'Europe/London',
+        attendees: [options.clientEmail, "support@hive-wellness.co.uk"],
+        timeZone: "Europe/London",
         therapistId: options.therapistId, // Route to therapist calendar if specified
-        useAdminCalendar: options.useAdminCalendar || true // Default to admin for introduction calls unless specified
+        useAdminCalendar: options.useAdminCalendar || true, // Default to admin for introduction calls unless specified
       });
 
       // Implement 15-second timeout for Google Calendar API
       const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Google Calendar API timeout')), 15000);
+        setTimeout(() => reject(new Error("Google Calendar API timeout")), 15000);
       });
 
-      const calendarEvent = await Promise.race([calendarEventPromise, timeoutPromise]) as any;
+      const calendarEvent = (await Promise.race([calendarEventPromise, timeoutPromise])) as any;
 
-      console.log('✅ Google Calendar event created successfully:', {
+      console.log("✅ Google Calendar event created successfully:", {
         eventId: calendarEvent.eventId,
         meetingUrl: calendarEvent.meetingUrl,
-        calendarUrl: calendarEvent.calendarUrl
+        calendarUrl: calendarEvent.calendarUrl,
       });
 
       return {
         eventId: calendarEvent.eventId,
         meetingUrl: calendarEvent.meetingUrl,
-        calendarUrl: calendarEvent.calendarUrl
+        calendarUrl: calendarEvent.calendarUrl,
       };
-
     } catch (error) {
-      console.error('❌ Failed to create Google Calendar event:', error);
-      
+      console.error("❌ Failed to create Google Calendar event:", error);
+
       // Provide working fallback when Google Calendar API is unavailable
       const fallbackEventId = `intro-fallback-${nanoid()}`;
       const fallbackMeetUrl = `https://meet.google.com/lookup/${nanoid(10)}`; // Generate a placeholder meeting URL format
-      
-      console.log('⚠️ Using fallback meeting details (Calendar API unavailable):', {
+
+      console.log("⚠️ Using fallback meeting details (Calendar API unavailable):", {
         eventId: fallbackEventId,
-        meetingUrl: fallbackMeetUrl
+        meetingUrl: fallbackMeetUrl,
       });
 
       return {
@@ -685,8 +726,8 @@ export class GoogleMeetService {
           startTime: options.startTime,
           endTime: options.endTime,
           meetingUrl: fallbackMeetUrl,
-          attendees: [options.clientEmail]
-        })
+          attendees: [options.clientEmail],
+        }),
       };
     }
   }
@@ -698,7 +739,7 @@ export class GoogleMeetService {
     clientName: string;
     clientEmail: string;
     scheduledDateTime: Date;
-    userType: 'client' | 'therapist';
+    userType: "client" | "therapist";
   }): {
     meetingDetails: {
       meetingUrl: string;
@@ -709,9 +750,9 @@ export class GoogleMeetService {
     calendarUrl: string;
   } {
     const { clientName, clientEmail, scheduledDateTime, userType } = options;
-    
+
     const endTime = new Date(scheduledDateTime.getTime() + 50 * 60000); // 50 minutes
-    const title = `${userType === 'therapist' ? 'Therapist Onboarding' : 'Introduction Call'} - ${clientName}`;
+    const title = `${userType === "therapist" ? "Therapist Onboarding" : "Introduction Call"} - ${clientName}`;
     const description = `Your free introduction call with Hive Wellness.
 
 What to expect:
@@ -727,7 +768,7 @@ Please ensure you have a stable internet connection and test your camera/microph
       title,
       description,
       clientName,
-      sessionType: userType === 'therapist' ? 'therapy' : 'introduction'
+      sessionType: userType === "therapist" ? "therapy" : "introduction",
     });
 
     const calendarUrl = this.generateAddToCalendarLink({
@@ -735,7 +776,7 @@ Please ensure you have a stable internet connection and test your camera/microph
       description,
       startTime: scheduledDateTime,
       endTime: endTime,
-      attendees: [clientEmail, 'support@hive-wellness.co.uk']
+      attendees: [clientEmail, "support@hive-wellness.co.uk"],
     });
 
     const joinInstructions = `
@@ -748,10 +789,10 @@ To join your video call:
 
 Backup support: If you experience any technical difficulties, email support@hive-wellness.co.uk or call our office.
 
-Meeting starts at: ${scheduledDateTime.toLocaleString('en-GB', { 
-      dateStyle: 'full', 
-      timeStyle: 'short',
-      timeZone: 'Europe/London'
+Meeting starts at: ${scheduledDateTime.toLocaleString("en-GB", {
+      dateStyle: "full",
+      timeStyle: "short",
+      timeZone: "Europe/London",
     })}
 `.trim();
 
@@ -759,10 +800,10 @@ Meeting starts at: ${scheduledDateTime.toLocaleString('en-GB', {
       meetingDetails: {
         meetingUrl: meetingLink.meetingUrl,
         meetingId: meetingLink.meetingId,
-        calendarUrl
+        calendarUrl,
       },
       joinInstructions,
-      calendarUrl
+      calendarUrl,
     };
   }
 
@@ -777,20 +818,20 @@ Meeting starts at: ${scheduledDateTime.toLocaleString('en-GB', {
     attendees: string[];
   }): string {
     const { title, description, startTime, endTime, attendees } = options;
-    
+
     const formatDate = (date: Date) => {
-      return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+      return date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
     };
-    
+
     const params = new URLSearchParams({
-      action: 'TEMPLATE',
+      action: "TEMPLATE",
       text: title,
       dates: `${formatDate(startTime)}/${formatDate(endTime)}`,
       details: description,
-      add: attendees.join(','),
-      ctz: 'Europe/London'
+      add: attendees.join(","),
+      ctz: "Europe/London",
     });
-    
+
     return `https://calendar.google.com/calendar/render?${params.toString()}`;
   }
 
@@ -800,12 +841,12 @@ Meeting starts at: ${scheduledDateTime.toLocaleString('en-GB', {
   static async generateAuthUrl(): Promise<string> {
     const auth = await this.getAuthClient();
     return auth.generateAuthUrl({
-      access_type: 'offline',
+      access_type: "offline",
       scope: [
-        'https://www.googleapis.com/auth/calendar',
-        'https://www.googleapis.com/auth/calendar.events',
-        'https://www.googleapis.com/auth/gmail.send',
-        'https://www.googleapis.com/auth/gmail.compose'
+        "https://www.googleapis.com/auth/calendar",
+        "https://www.googleapis.com/auth/calendar.events",
+        "https://www.googleapis.com/auth/gmail.send",
+        "https://www.googleapis.com/auth/gmail.compose",
       ],
     });
   }
@@ -827,11 +868,11 @@ Meeting starts at: ${scheduledDateTime.toLocaleString('en-GB', {
     try {
       const auth = await this.getAuthClient();
       auth.setCredentials({
-        refresh_token: process.env.GOOGLE_REFRESH_TOKEN
+        refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
       });
 
-      const calendar = google.calendar({ version: 'v3', auth });
-      
+      const calendar = google.calendar({ version: "v3", auth });
+
       // Set time range for the entire day
       const startOfDay = new Date(`${date}T00:00:00.000Z`);
       const endOfDay = new Date(`${date}T23:59:59.000Z`);
@@ -841,26 +882,30 @@ Meeting starts at: ${scheduledDateTime.toLocaleString('en-GB', {
         requestBody: {
           timeMin: startOfDay.toISOString(),
           timeMax: endOfDay.toISOString(),
-          items: [{ id: HIVE_WELLNESS_CALENDAR_ID }] // Check Hive Wellness calendar
-        }
+          items: [{ id: HIVE_WELLNESS_CALENDAR_ID }], // Check Hive Wellness calendar
+        },
       });
 
       const busySlots: string[] = [];
       const calendars = response.data.calendars;
-      
-      if (calendars && calendars[HIVE_WELLNESS_CALENDAR_ID] && calendars[HIVE_WELLNESS_CALENDAR_ID].busy) {
+
+      if (
+        calendars &&
+        calendars[HIVE_WELLNESS_CALENDAR_ID] &&
+        calendars[HIVE_WELLNESS_CALENDAR_ID].busy
+      ) {
         for (const busyPeriod of calendars[HIVE_WELLNESS_CALENDAR_ID].busy) {
           if (busyPeriod.start && busyPeriod.end) {
             const startTime = new Date(busyPeriod.start);
             const endTime = new Date(busyPeriod.end);
-            
+
             // Generate all 30-minute slots that are busy
             let currentTime = new Date(startTime);
             while (currentTime < endTime) {
-              const timeSlot = currentTime.toLocaleTimeString('en-GB', { 
-                hour: '2-digit', 
-                minute: '2-digit',
-                hour12: false 
+              const timeSlot = currentTime.toLocaleTimeString("en-GB", {
+                hour: "2-digit",
+                minute: "2-digit",
+                hour12: false,
               });
               busySlots.push(timeSlot);
               currentTime.setMinutes(currentTime.getMinutes() + 30);
@@ -871,7 +916,7 @@ Meeting starts at: ${scheduledDateTime.toLocaleString('en-GB', {
 
       return busySlots;
     } catch (error) {
-      console.error('Error checking Google Calendar availability:', error);
+      console.error("Error checking Google Calendar availability:", error);
       return []; // Return empty array if check fails
     }
   }
@@ -883,19 +928,19 @@ Meeting starts at: ${scheduledDateTime.toLocaleString('en-GB', {
     try {
       const auth = await this.getAuthClient();
       auth.setCredentials({
-        refresh_token: process.env.GOOGLE_REFRESH_TOKEN
+        refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
       });
 
-      const calendar = google.calendar({ version: 'v3', auth });
-      
+      const calendar = google.calendar({ version: "v3", auth });
+
       await calendar.events.delete({
         calendarId: HIVE_WELLNESS_CALENDAR_ID,
-        eventId: eventId
+        eventId: eventId,
       });
 
-      console.log('✅ Google Calendar event deleted:', eventId);
+      console.log("✅ Google Calendar event deleted:", eventId);
     } catch (error) {
-      console.error('Error deleting Google Calendar event:', error);
+      console.error("Error deleting Google Calendar event:", error);
       throw error;
     }
   }
@@ -908,39 +953,39 @@ Meeting starts at: ${scheduledDateTime.toLocaleString('en-GB', {
       services: {
         calendar: false,
         gmail: false,
-        meet: false
+        meet: false,
       },
-      error: null as string | null
+      error: null as string | null,
     };
 
     try {
       // Test if we can initialize the OAuth client with refresh token
       const auth = await this.getAuthClient();
-      
+
       if (!process.env.GOOGLE_REFRESH_TOKEN) {
-        throw new Error('No refresh token available');
+        throw new Error("No refresh token available");
       }
 
       auth.setCredentials({
-        refresh_token: process.env.GOOGLE_REFRESH_TOKEN
+        refresh_token: process.env.GOOGLE_REFRESH_TOKEN,
       });
 
       // Test Calendar API access
       try {
-        const calendar = google.calendar({ version: 'v3', auth });
+        const calendar = google.calendar({ version: "v3", auth });
         await calendar.calendarList.list({ maxResults: 1 });
         results.services.calendar = true;
       } catch (error) {
-        console.error('Calendar API test failed:', error);
+        console.error("Calendar API test failed:", error);
       }
 
       // Test Gmail API access
       try {
-        const gmail = google.gmail({ version: 'v1', auth });
-        await gmail.users.getProfile({ userId: 'me' });
+        const gmail = google.gmail({ version: "v1", auth });
+        await gmail.users.getProfile({ userId: "me" });
         results.services.gmail = true;
       } catch (error) {
-        console.error('Gmail API test failed:', error);
+        console.error("Gmail API test failed:", error);
       }
 
       // Meet integration is through calendar events, so if calendar works, meet works
@@ -952,5 +997,4 @@ Meeting starts at: ${scheduledDateTime.toLocaleString('en-GB', {
       return results;
     }
   }
-
 }

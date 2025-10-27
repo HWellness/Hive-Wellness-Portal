@@ -1,7 +1,7 @@
-import { Router } from 'express';
-import { refundService } from '../refund-service';
-import { getRefundPolicyText, getRefundPolicySummary } from '../refund-policy';
-import { storage } from '../storage';
+import { Router } from "express";
+import { refundService } from "../refund-service";
+import { getRefundPolicyText, getRefundPolicySummary } from "../refund-policy";
+import { storage } from "../storage";
 
 export const refundRouter = Router();
 
@@ -9,21 +9,21 @@ export const refundRouter = Router();
  * GET /api/refunds/policy
  * Get the refund policy text for display to users
  */
-refundRouter.get('/policy', (req, res) => {
+refundRouter.get("/policy", (req, res) => {
   try {
     const policy = getRefundPolicyText();
     const summary = getRefundPolicySummary();
-    
+
     res.json({
       success: true,
       policy,
-      summary
+      summary,
     });
   } catch (error) {
-    console.error('Error getting refund policy:', error);
+    console.error("Error getting refund policy:", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to get refund policy'
+      error: "Failed to get refund policy",
     });
   }
 });
@@ -32,14 +32,14 @@ refundRouter.get('/policy', (req, res) => {
  * POST /api/refunds/calculate
  * Calculate potential refund without processing (for preview)
  */
-refundRouter.post('/calculate', async (req, res) => {
+refundRouter.post("/calculate", async (req, res) => {
   try {
     const { appointmentId, paymentId, cancelledBy } = req.body;
 
     if (!appointmentId || !paymentId || !cancelledBy) {
       return res.status(400).json({
         success: false,
-        error: 'Missing required fields: appointmentId, paymentId, cancelledBy'
+        error: "Missing required fields: appointmentId, paymentId, cancelledBy",
       });
     }
 
@@ -51,13 +51,13 @@ refundRouter.post('/calculate', async (req, res) => {
 
     res.json({
       success: true,
-      calculation
+      calculation,
     });
   } catch (error) {
-    console.error('Error calculating refund:', error);
+    console.error("Error calculating refund:", error);
     res.status(500).json({
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to calculate refund'
+      error: error instanceof Error ? error.message : "Failed to calculate refund",
     });
   }
 });
@@ -66,7 +66,7 @@ refundRouter.post('/calculate', async (req, res) => {
  * POST /api/refunds/process
  * Process a cancellation and refund
  */
-refundRouter.post('/process', async (req, res) => {
+refundRouter.post("/process", async (req, res) => {
   try {
     const { appointmentId, paymentId, cancelledBy, cancellationReason, notes } = req.body;
     const processedBy = (req.user as any)?.id; // Admin ID if authenticated
@@ -74,7 +74,7 @@ refundRouter.post('/process', async (req, res) => {
     if (!appointmentId || !paymentId || !cancelledBy) {
       return res.status(400).json({
         success: false,
-        error: 'Missing required fields: appointmentId, paymentId, cancelledBy'
+        error: "Missing required fields: appointmentId, paymentId, cancelledBy",
       });
     }
 
@@ -84,15 +84,15 @@ refundRouter.post('/process', async (req, res) => {
       cancelledBy,
       cancellationReason,
       processedBy,
-      notes
+      notes,
     });
 
     res.json(result);
   } catch (error) {
-    console.error('Error processing refund:', error);
+    console.error("Error processing refund:", error);
     res.status(500).json({
       success: false,
-      error: error instanceof Error ? error.message : 'Failed to process refund'
+      error: error instanceof Error ? error.message : "Failed to process refund",
     });
   }
 });
@@ -101,20 +101,20 @@ refundRouter.post('/process', async (req, res) => {
  * GET /api/refunds/client/:clientId
  * Get all refunds for a specific client
  */
-refundRouter.get('/client/:clientId', async (req, res) => {
+refundRouter.get("/client/:clientId", async (req, res) => {
   try {
     const { clientId } = req.params;
     const refunds = await refundService.getClientRefunds(clientId);
 
     res.json({
       success: true,
-      refunds
+      refunds,
     });
   } catch (error) {
-    console.error('Error getting client refunds:', error);
+    console.error("Error getting client refunds:", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to get client refunds'
+      error: "Failed to get client refunds",
     });
   }
 });
@@ -123,20 +123,20 @@ refundRouter.get('/client/:clientId', async (req, res) => {
  * GET /api/refunds/therapist/:therapistId
  * Get all refunds for a specific therapist
  */
-refundRouter.get('/therapist/:therapistId', async (req, res) => {
+refundRouter.get("/therapist/:therapistId", async (req, res) => {
   try {
     const { therapistId } = req.params;
     const refunds = await refundService.getTherapistRefunds(therapistId);
 
     res.json({
       success: true,
-      refunds
+      refunds,
     });
   } catch (error) {
-    console.error('Error getting therapist refunds:', error);
+    console.error("Error getting therapist refunds:", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to get therapist refunds'
+      error: "Failed to get therapist refunds",
     });
   }
 });
@@ -145,13 +145,13 @@ refundRouter.get('/therapist/:therapistId', async (req, res) => {
  * GET /api/refunds/pending
  * Get all pending refunds (admin only)
  */
-refundRouter.get('/pending', async (req, res) => {
+refundRouter.get("/pending", async (req, res) => {
   try {
     // Check if user is admin
-    if ((req.user as any)?.role !== 'admin') {
+    if ((req.user as any)?.role !== "admin") {
       return res.status(403).json({
         success: false,
-        error: 'Admin access required'
+        error: "Admin access required",
       });
     }
 
@@ -159,13 +159,13 @@ refundRouter.get('/pending', async (req, res) => {
 
     res.json({
       success: true,
-      refunds
+      refunds,
     });
   } catch (error) {
-    console.error('Error getting pending refunds:', error);
+    console.error("Error getting pending refunds:", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to get pending refunds'
+      error: "Failed to get pending refunds",
     });
   }
 });
@@ -174,7 +174,7 @@ refundRouter.get('/pending', async (req, res) => {
  * GET /api/refunds/:refundId
  * Get specific refund details
  */
-refundRouter.get('/:refundId', async (req, res) => {
+refundRouter.get("/:refundId", async (req, res) => {
   try {
     const { refundId } = req.params;
     const refund = await refundService.getRefundDetails(refundId);
@@ -182,19 +182,19 @@ refundRouter.get('/:refundId', async (req, res) => {
     if (!refund) {
       return res.status(404).json({
         success: false,
-        error: 'Refund not found'
+        error: "Refund not found",
       });
     }
 
     res.json({
       success: true,
-      refund
+      refund,
     });
   } catch (error) {
-    console.error('Error getting refund details:', error);
+    console.error("Error getting refund details:", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to get refund details'
+      error: "Failed to get refund details",
     });
   }
 });
@@ -203,13 +203,13 @@ refundRouter.get('/:refundId', async (req, res) => {
  * PUT /api/refunds/:refundId/status
  * Update refund status (admin only)
  */
-refundRouter.put('/:refundId/status', async (req, res) => {
+refundRouter.put("/:refundId/status", async (req, res) => {
   try {
     // Check if user is admin
-    if ((req.user as any)?.role !== 'admin') {
+    if ((req.user as any)?.role !== "admin") {
       return res.status(403).json({
         success: false,
-        error: 'Admin access required'
+        error: "Admin access required",
       });
     }
 
@@ -219,7 +219,7 @@ refundRouter.put('/:refundId/status', async (req, res) => {
     if (!status) {
       return res.status(400).json({
         success: false,
-        error: 'Status is required'
+        error: "Status is required",
       });
     }
 
@@ -228,19 +228,19 @@ refundRouter.put('/:refundId/status', async (req, res) => {
     if (!updated) {
       return res.status(404).json({
         success: false,
-        error: 'Refund not found or update failed'
+        error: "Refund not found or update failed",
       });
     }
 
     res.json({
       success: true,
-      message: 'Refund status updated successfully'
+      message: "Refund status updated successfully",
     });
   } catch (error) {
-    console.error('Error updating refund status:', error);
+    console.error("Error updating refund status:", error);
     res.status(500).json({
       success: false,
-      error: 'Failed to update refund status'
+      error: "Failed to update refund status",
     });
   }
 });

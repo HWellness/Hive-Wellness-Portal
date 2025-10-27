@@ -14,7 +14,7 @@ export default function BookSessionPage() {
     const queryParams = new URLSearchParams({
       bookSession: tier,
       price: price.toString(),
-      ...(categoryId && { categoryId })
+      ...(categoryId && { categoryId }),
     });
     setLocation(`/client-dashboard?${queryParams.toString()}`);
   };
@@ -26,14 +26,8 @@ export default function BookSessionPage() {
         <div className="container mx-auto flex items-center justify-between">
           <Link to="/">
             <div className="flex items-center space-x-3 cursor-pointer">
-              <img 
-                src={hiveWellnessLogo} 
-                alt="Hive Wellness" 
-                className="h-10 w-auto"
-              />
-              <span className="text-xl font-display font-bold text-hive-dark">
-                Hive Wellness
-              </span>
+              <img src={hiveWellnessLogo} alt="Hive Wellness" className="h-10 w-auto" />
+              <span className="text-xl font-display font-bold text-hive-dark">Hive Wellness</span>
             </div>
           </Link>
           <div className="flex items-center space-x-4">
@@ -65,7 +59,8 @@ export default function BookSessionPage() {
               Book a Therapy Session
             </h1>
             <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Choose the therapy approach that best suits your needs. All sessions are delivered by qualified, experienced therapists through our secure platform.
+              Choose the therapy approach that best suits your needs. All sessions are delivered by
+              qualified, experienced therapists through our secure platform.
             </p>
           </div>
 
@@ -76,7 +71,7 @@ export default function BookSessionPage() {
               <p className="mt-4 text-gray-600">Loading...</p>
             </div>
           ) : (
-            <TherapyPricingDisplay 
+            <TherapyPricingDisplay
               onSelectTherapy={handleSelectTherapy}
               showBookingButtons={true}
               isAuthenticated={isAuthenticated}
@@ -90,11 +85,12 @@ export default function BookSessionPage() {
                 Not sure which therapy is right for you?
               </h2>
               <p className="text-gray-600 mb-6 max-w-2xl mx-auto">
-                Book a free introduction call with our team. We'll discuss your needs and help match you with the perfect therapist for your journey.
+                Book a free introduction call with our team. We'll discuss your needs and help match
+                you with the perfect therapist for your journey.
               </p>
               <Link to="/book-admin-call-widget">
-                <Button 
-                  size="lg" 
+                <Button
+                  size="lg"
                   className="bg-hive-purple hover:bg-hive-purple/90"
                   data-testid="button-book-intro-call-bottom"
                 >
@@ -111,7 +107,9 @@ export default function BookSessionPage() {
         <div className="container mx-auto px-4 py-8">
           <div className="text-center text-gray-600 text-sm">
             <p>© 2025 Hive Wellness. All rights reserved.</p>
-            <p className="mt-2">GDPR & UK Data Protection Act compliant • Secure video sessions • Professional care</p>
+            <p className="mt-2">
+              GDPR & UK Data Protection Act compliant • Secure video sessions • Professional care
+            </p>
           </div>
         </div>
       </div>

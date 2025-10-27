@@ -3,7 +3,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { CreditCard, Plus, PoundSterling, Calendar, CheckCircle, Download, FileText } from "lucide-react";
+import {
+  CreditCard,
+  Plus,
+  PoundSterling,
+  Calendar,
+  CheckCircle,
+  Download,
+  FileText,
+} from "lucide-react";
 import type { User } from "@shared/schema";
 
 interface PaymentsProps {
@@ -12,47 +20,53 @@ interface PaymentsProps {
 
 export default function Payments({ user }: PaymentsProps) {
   const { toast } = useToast();
-  
+
   const { data: payments, isLoading } = useQuery({
     queryKey: ["/api/payments"],
     retry: false,
   });
 
   // Calculate stats from real payment data
-  const paymentStats = payments ? {
-    currentBalance: 0,
-    monthlyTotal: payments
-      .filter((p: any) => {
-        const paymentDate = new Date(p.createdAt);
-        const now = new Date();
-        return paymentDate.getMonth() === now.getMonth() && 
-               paymentDate.getFullYear() === now.getFullYear();
-      })
-      .reduce((sum: number, p: any) => sum + (parseFloat(p.amount) / 100), 0),
-    nextPayment: 0,
-    nextPaymentDate: "None scheduled"
-  } : {
-    currentBalance: 0,
-    monthlyTotal: 0,
-    nextPayment: 0,
-    nextPaymentDate: "Loading..."
-  };
+  const paymentStats = payments
+    ? {
+        currentBalance: 0,
+        monthlyTotal: payments
+          .filter((p: any) => {
+            const paymentDate = new Date(p.createdAt);
+            const now = new Date();
+            return (
+              paymentDate.getMonth() === now.getMonth() &&
+              paymentDate.getFullYear() === now.getFullYear()
+            );
+          })
+          .reduce((sum: number, p: any) => sum + parseFloat(p.amount) / 100, 0),
+        nextPayment: 0,
+        nextPaymentDate: "None scheduled",
+      }
+    : {
+        currentBalance: 0,
+        monthlyTotal: 0,
+        nextPayment: 0,
+        nextPaymentDate: "Loading...",
+      };
 
   // Transform real payment data for display
-  const recentTransactions = payments ? payments.map((payment: any) => ({
-    id: payment.id,
-    description: `Therapy Session${payment.appointmentId ? ` - Session ${payment.appointmentId.slice(0, 8)}` : ''}`,
-    amount: (parseFloat(payment.amount) / 100).toFixed(2),
-    status: payment.status === 'succeeded' ? 'paid' : payment.status,
-    date: new Date(payment.createdAt).toLocaleDateString('en-GB', { 
-      day: 'numeric', 
-      month: 'long', 
-      year: 'numeric' 
-    }),
-    paymentMethod: payment.stripePaymentIntentId ? 
-      `Credit Card ****${payment.stripePaymentIntentId.slice(-4)}` : 
-      'Payment Method'
-  })) : [];
+  const recentTransactions = payments
+    ? payments.map((payment: any) => ({
+        id: payment.id,
+        description: `Therapy Session${payment.appointmentId ? ` - Session ${payment.appointmentId.slice(0, 8)}` : ""}`,
+        amount: (parseFloat(payment.amount) / 100).toFixed(2),
+        status: payment.status === "succeeded" ? "paid" : payment.status,
+        date: new Date(payment.createdAt).toLocaleDateString("en-GB", {
+          day: "numeric",
+          month: "long",
+          year: "numeric",
+        }),
+        paymentMethod: payment.stripePaymentIntentId
+          ? `Credit Card ****${payment.stripePaymentIntentId.slice(-4)}`
+          : "Payment Method",
+      }))
+    : [];
 
   const generateReceiptPDF = (transaction: any) => {
     // Create beautiful HTML receipt content
@@ -193,7 +207,7 @@ export default function Payments({ user }: PaymentsProps) {
                 </div>
                 <div class="detail-row">
                     <span class="label">Client:</span>
-                    <span class="value">${user.firstName || 'Demo'} ${user.lastName || 'Client'}</span>
+                    <span class="value">${user.firstName || "Demo"} ${user.lastName || "Client"}</span>
                 </div>
             </div>
 
@@ -221,7 +235,7 @@ export default function Payments({ user }: PaymentsProps) {
                 <div class="section-title">Client Information</div>
                 <div class="detail-row">
                     <span class="label">Client:</span>
-                    <span class="value">${user.firstName || 'Demo'} ${user.lastName || 'Client'}</span>
+                    <span class="value">${user.firstName || "Demo"} ${user.lastName || "Client"}</span>
                 </div>
                 <div class="detail-row">
                     <span class="label">Email:</span>
@@ -267,7 +281,7 @@ export default function Payments({ user }: PaymentsProps) {
             <p>Thank you for choosing Hive Wellness for your therapy needs.</p>
             <p>All sessions are confidential and GDPR compliant.</p>
             <p>This receipt is for your records. Please retain for insurance claims and tax purposes.</p>
-            <p>Generated on: ${new Date().toLocaleString('en-GB')}</p>
+            <p>Generated on: ${new Date().toLocaleString("en-GB")}</p>
         </div>
     </div>
 
@@ -291,14 +305,15 @@ export default function Payments({ user }: PaymentsProps) {
     `;
 
     // Open receipt in new tab instead of downloading
-    const newWindow = window.open('', '_blank');
+    const newWindow = window.open("", "_blank");
     if (newWindow) {
       newWindow.document.write(receiptHTML);
       newWindow.document.close();
-      
+
       toast({
         title: "Receipt Opened",
-        description: "Your receipt has been opened in a new tab. You can print or save it from there.",
+        description:
+          "Your receipt has been opened in a new tab. You can print or save it from there.",
       });
     } else {
       toast({
@@ -324,10 +339,8 @@ export default function Payments({ user }: PaymentsProps) {
       {/* Payment Overview */}
       <Card className="bg-hive-white">
         <CardContent className="p-6">
-          <h3 className="font-century font-bold text-hive-black text-xl mb-6">
-            Payment Overview
-          </h3>
-          
+          <h3 className="font-century font-bold text-hive-black text-xl mb-6">Payment Overview</h3>
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             <div className="p-4 bg-hive-light-blue rounded-lg">
               <div className="text-sm text-gray-600 mb-2">Current Balance</div>
@@ -335,25 +348,23 @@ export default function Payments({ user }: PaymentsProps) {
                 £{paymentStats.currentBalance.toFixed(2)}
               </div>
             </div>
-            
+
             <div className="p-4 bg-hive-light-blue rounded-lg">
               <div className="text-sm text-gray-600 mb-2">This Month</div>
               <div className="text-2xl font-bold text-hive-purple">
                 £{paymentStats.monthlyTotal.toFixed(2)}
               </div>
             </div>
-            
+
             <div className="p-4 bg-hive-light-blue rounded-lg">
               <div className="text-sm text-gray-600 mb-2">Next Payment</div>
               <div className="text-2xl font-bold text-hive-purple">
                 £{paymentStats.nextPayment.toFixed(2)}
               </div>
-              <div className="text-xs text-gray-600">
-                Due: {paymentStats.nextPaymentDate}
-              </div>
+              <div className="text-xs text-gray-600">Due: {paymentStats.nextPaymentDate}</div>
             </div>
           </div>
-          
+
           {/* Payment Methods */}
           <div className="border-t border-hive-light-blue pt-6">
             <h4 className="font-semibold text-hive-black mb-4">Payment Methods</h4>
@@ -370,9 +381,9 @@ export default function Payments({ user }: PaymentsProps) {
                   DEFAULT
                 </Badge>
               </div>
-              
-              <Button 
-                variant="outline" 
+
+              <Button
+                variant="outline"
                 className="w-full p-4 border-2 border-dashed border-hive-light-blue text-hive-purple hover:bg-hive-light-blue"
               >
                 <Plus className="w-4 h-4 mr-2" />
@@ -382,21 +393,24 @@ export default function Payments({ user }: PaymentsProps) {
           </div>
         </CardContent>
       </Card>
-      
+
       {/* Recent Transactions */}
       <Card className="bg-hive-white">
         <CardHeader>
-          <CardTitle className="text-xl font-semibold text-hive-black">Recent Transactions</CardTitle>
+          <CardTitle className="text-xl font-semibold text-hive-black">
+            Recent Transactions
+          </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
           <div className="space-y-4">
             {recentTransactions.map((transaction) => (
-              <div key={transaction.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+              <div
+                key={transaction.id}
+                className="flex items-center justify-between p-4 border border-gray-200 rounded-lg"
+              >
                 <div className="flex-1">
                   <div className="flex items-center justify-between mb-2">
-                    <div className="font-semibold text-hive-black">
-                      {transaction.description}
-                    </div>
+                    <div className="font-semibold text-hive-black">{transaction.description}</div>
                     <div className="text-right">
                       <div className="font-bold text-hive-black text-lg">
                         {transaction.amount === "Free" ? "Free" : `£${transaction.amount}`}
@@ -406,13 +420,13 @@ export default function Payments({ user }: PaymentsProps) {
                       </Badge>
                     </div>
                   </div>
-                  
+
                   <div className="flex items-center justify-between text-sm text-gray-600">
                     <div>{transaction.paymentMethod}</div>
                     <div>{transaction.date}</div>
                   </div>
                 </div>
-                
+
                 <div className="ml-4">
                   <Button
                     variant="outline"
@@ -427,7 +441,7 @@ export default function Payments({ user }: PaymentsProps) {
               </div>
             ))}
           </div>
-          
+
           {/* Payment Actions */}
           <div className="mt-6 pt-6 border-t border-hive-light-blue">
             <div className="flex space-x-3">

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;500;600;700&display=swap");
 
 @tailwind base;
 @tailwind components;
@@ -6,42 +6,42 @@
 
 :root {
   /* Hive Wellness Brand Colors - Official Brand Guidelines */
-  --hive-purple: hsl(296, 94%, 37%);       /* #9306B1 - Primary Hive Purple */
-  --hive-blue: hsl(231, 44%, 71%);         /* #97A5D0 - Hive Blue */
-  --hive-light-blue: hsl(239, 54%, 93%);   /* #E5E7F5 - Hive Light Blue */
-  --hive-black: hsl(225, 43%, 16%);        /* #161D38 - Hive Black */
-  --hive-white: hsl(0, 0%, 100%);          /* #FFFFFF - Hive White */
-  
+  --hive-purple: hsl(296, 94%, 37%); /* #9306B1 - Primary Hive Purple */
+  --hive-blue: hsl(231, 44%, 71%); /* #97A5D0 - Hive Blue */
+  --hive-light-blue: hsl(239, 54%, 93%); /* #E5E7F5 - Hive Light Blue */
+  --hive-black: hsl(225, 43%, 16%); /* #161D38 - Hive Black */
+  --hive-white: hsl(0, 0%, 100%); /* #FFFFFF - Hive White */
+
   /* Secondary brand colors */
-  --hive-background: hsl(241, 35%, 97%);   /* #F2F3FB - Light background */
+  --hive-background: hsl(241, 35%, 97%); /* #F2F3FB - Light background */
   --hive-gray: hsl(231, 20%, 65%);
   --hive-light-gray: hsl(239, 54%, 98%);
-  
+
   /* 8px Spacing System */
-  --space-1: 0.125rem;  /* 2px */
-  --space-2: 0.25rem;   /* 4px */
-  --space-3: 0.5rem;    /* 8px */
-  --space-4: 0.75rem;   /* 12px */
-  --space-5: 1rem;      /* 16px */
-  --space-6: 1.25rem;   /* 20px */
-  --space-7: 1.5rem;    /* 24px */
-  --space-8: 2rem;      /* 32px */
-  --space-9: 2.5rem;    /* 40px */
-  --space-10: 3rem;     /* 48px */
-  --space-11: 4rem;     /* 64px */
-  --space-12: 5rem;     /* 80px */
-  
+  --space-1: 0.125rem; /* 2px */
+  --space-2: 0.25rem; /* 4px */
+  --space-3: 0.5rem; /* 8px */
+  --space-4: 0.75rem; /* 12px */
+  --space-5: 1rem; /* 16px */
+  --space-6: 1.25rem; /* 20px */
+  --space-7: 1.5rem; /* 24px */
+  --space-8: 2rem; /* 32px */
+  --space-9: 2.5rem; /* 40px */
+  --space-10: 3rem; /* 48px */
+  --space-11: 4rem; /* 64px */
+  --space-12: 5rem; /* 80px */
+
   /* Secondary Colors from Brand Guidelines */
   --accent-light: hsl(239, 54%, 93%);
-  --hive-red: hsl(0, 98%, 45%);        /* #E50201 - Error states, alerts */
-  --hive-yellow: hsl(48, 100%, 50%);   /* #FFC400 - Warning states, highlights */
-  --hive-green: hsl(120, 100%, 39%);   /* #00C73D - Success states, confirmations */
+  --hive-red: hsl(0, 98%, 45%); /* #E50201 - Error states, alerts */
+  --hive-yellow: hsl(48, 100%, 50%); /* #FFC400 - Warning states, highlights */
+  --hive-green: hsl(120, 100%, 39%); /* #00C73D - Success states, confirmations */
   --hive-light-gray: hsl(240, 37%, 96%); /* #F2F3FB - Light gray backgrounds */
-  --hive-success: hsl(120, 100%, 39%);  /* #00C73D - Success states */
-  --hive-warning: hsl(48, 100%, 50%);   /* #FFC400 - Warning states */
-  --hive-error: hsl(0, 98%, 45%);       /* #E50201 - Error states */
-  --hive-neutral: hsl(240, 37%, 96%);   /* #F2F3FB - Neutral backgrounds */
-  
+  --hive-success: hsl(120, 100%, 39%); /* #00C73D - Success states */
+  --hive-warning: hsl(48, 100%, 50%); /* #FFC400 - Warning states */
+  --hive-error: hsl(0, 98%, 45%); /* #E50201 - Error states */
+  --hive-neutral: hsl(240, 37%, 96%); /* #F2F3FB - Neutral backgrounds */
+
   /* Base theme colors - Using HSL for consistency */
   --background: hsl(0, 0%, 100%);
   --foreground: var(--hive-black);
@@ -95,46 +95,80 @@
   /* Default body uses Open Sans as per brand guidelines */
   body {
     @apply antialiased bg-background text-foreground;
-    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family:
+      "Open Sans",
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      sans-serif;
     letter-spacing: -0.011em;
   }
 
   /* All headings use Palatino Linotype (serif) as heading font - matches email templates */
-  h1, h2, h3, h4, h5, h6 {
-    font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
     letter-spacing: -0.025em;
     font-weight: 600;
   }
 
   /* Ensure all paragraphs and text elements use Open Sans */
-  p, span, div, label, button {
-    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  p,
+  span,
+  div,
+  label,
+  button {
+    font-family:
+      "Open Sans",
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      sans-serif;
   }
-  
+
   /* Brand Typography Classes - Hive Wellness Brand Guidelines */
   .font-century {
-    font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+    font-family: "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
   }
-  
+
   .font-primary {
-    font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+    font-family: "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
   }
-  
+
   .font-secondary {
-    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family:
+      "Open Sans",
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      sans-serif;
   }
-  
+
   .font-open-sans {
-    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family:
+      "Open Sans",
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      sans-serif;
   }
 
   /* Override any default serif or sans classes to match brand guidelines */
   .font-sans {
-    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family:
+      "Open Sans",
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      sans-serif;
   }
 
   .font-serif {
-    font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+    font-family: "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
   }
 
   /* Fix calendar overlay/positioning issues */
@@ -143,34 +177,34 @@
     display: block !important;
     z-index: 1 !important;
   }
-  
+
   .rdp-month {
     position: static !important;
     display: block !important;
   }
-  
+
   .rdp-table {
     position: static !important;
     display: table !important;
     width: 100% !important;
   }
-  
+
   /* Ensure calendar doesn't float or overlay */
   .rdp-head {
     position: static !important;
   }
-  
+
   .rdp-body {
     position: static !important;
   }
-  
+
   /* Force calendar component to respect container bounds */
   [data-radix-calendar] {
     position: static !important;
     isolation: isolate !important;
     contain: layout !important;
   }
-  
+
   /* Calendar fixed layout class */
   .calendar-fixed {
     position: static !important;
@@ -178,11 +212,11 @@
     width: auto !important;
     max-width: none !important;
   }
-  
+
   .calendar-fixed * {
     position: static !important;
   }
-  
+
   .calendar-fixed .rdp {
     position: static !important;
     transform: none !important;
@@ -193,55 +227,55 @@
 @layer components {
   /* Typography Scale - Professional Hierarchy */
   .text-h1 {
-    font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+    font-family: "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
     font-size: 2.5rem; /* 40px */
     font-weight: 700;
     line-height: 1.2;
     letter-spacing: -0.025em;
   }
-  
+
   .text-h2 {
-    font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+    font-family: "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
     font-size: 2rem; /* 32px */
     font-weight: 600;
     line-height: 1.25;
     letter-spacing: -0.02em;
   }
-  
+
   .text-h3 {
-    font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+    font-family: "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
     font-size: 1.5rem; /* 24px */
     font-weight: 600;
     line-height: 1.3;
     letter-spacing: -0.015em;
   }
-  
+
   .text-h4 {
-    font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+    font-family: "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
     font-size: 1.25rem; /* 20px */
     font-weight: 600;
     line-height: 1.4;
     letter-spacing: -0.01em;
   }
-  
+
   .text-body {
-    font-family: 'Open Sans', sans-serif;
+    font-family: "Open Sans", sans-serif;
     font-size: 1rem; /* 16px */
     font-weight: 400;
     line-height: 1.6;
     letter-spacing: -0.01em;
   }
-  
+
   .text-body-lg {
-    font-family: 'Open Sans', sans-serif;
+    font-family: "Open Sans", sans-serif;
     font-size: 1.125rem; /* 18px */
     font-weight: 400;
     line-height: 1.6;
     letter-spacing: -0.01em;
   }
-  
+
   .text-caption {
-    font-family: 'Open Sans', sans-serif;
+    font-family: "Open Sans", sans-serif;
     font-size: 0.875rem; /* 14px */
     font-weight: 400;
     line-height: 1.5;
@@ -253,75 +287,94 @@
   .space-y-system > * + * {
     margin-top: var(--space-5); /* 16px default */
   }
-  
+
   .space-y-tight > * + * {
     margin-top: var(--space-3); /* 8px */
   }
-  
+
   .space-y-loose > * + * {
     margin-top: var(--space-7); /* 24px */
   }
-  
+
   .p-card {
     padding: var(--space-6) var(--space-7); /* 20px 24px */
   }
-  
+
   .p-card-lg {
     padding: var(--space-7) var(--space-8); /* 24px 32px */
   }
-  
+
   .gap-system {
     gap: var(--space-5); /* 16px */
   }
 
   /* Brand Typography Components - Hive Wellness Brand Guidelines */
   .font-display {
-    font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+    font-family: "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
     letter-spacing: -0.025em;
     font-weight: 600;
   }
-  
+
   .font-body {
-    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family:
+      "Open Sans",
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      sans-serif;
     letter-spacing: -0.011em;
   }
 
   /* Comprehensive brand font enforcement */
   .brand-header {
-    font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+    font-family: "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
     letter-spacing: -0.025em;
     font-weight: 600;
   }
 
   .brand-body {
-    font-family: 'Open Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-family:
+      "Open Sans",
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      sans-serif;
     letter-spacing: -0.011em;
   }
-  
+
   /* Enhanced Hive Wellness Visual Elements */
   .hive-gradient-bg {
-    background: linear-gradient(135deg, var(--hive-purple) 0%, var(--hive-blue) 50%, var(--hive-light-blue) 100%);
+    background: linear-gradient(
+      135deg,
+      var(--hive-purple) 0%,
+      var(--hive-blue) 50%,
+      var(--hive-light-blue) 100%
+    );
   }
-  
+
   .hive-card-shadow {
-    box-shadow: 0 20px 25px -5px rgba(147, 6, 177, 0.1), 0 10px 10px -5px rgba(147, 6, 177, 0.04);
+    box-shadow:
+      0 20px 25px -5px rgba(147, 6, 177, 0.1),
+      0 10px 10px -5px rgba(147, 6, 177, 0.04);
   }
-  
+
   .hive-card-hover {
     transition: all 0.3s ease;
   }
-  
+
   .hive-card-hover:hover {
     transform: translateY(-2px);
-    box-shadow: 0 25px 30px -5px rgba(147, 6, 177, 0.15), 0 15px 15px -5px rgba(147, 6, 177, 0.08);
+    box-shadow:
+      0 25px 30px -5px rgba(147, 6, 177, 0.15),
+      0 15px 15px -5px rgba(147, 6, 177, 0.08);
   }
-  
+
   .hexagon-accent {
     position: relative;
   }
-  
+
   .hexagon-accent::before {
-    content: '';
+    content: "";
     position: absolute;
     top: -2px;
     right: -2px;
@@ -331,7 +384,7 @@
     opacity: 0.1;
     clip-path: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
   }
-  
+
   .card-modern {
     background: rgba(255, 255, 255, 0.9);
     backdrop-filter: blur(10px);
@@ -340,19 +393,19 @@
     box-shadow: 0 8px 32px rgba(147, 6, 177, 0.06);
     transition: all 0.3s ease;
   }
-  
+
   .card-modern:hover {
     transform: translateY(-4px);
     box-shadow: 0 16px 48px rgba(147, 6, 177, 0.12);
   }
-  
+
   .hive-gradient-text {
     background: linear-gradient(135deg, var(--hive-purple), var(--hive-blue));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
-  
+
   .button-secondary {
     background: rgba(147, 6, 177, 0.1);
     color: var(--hive-purple);
@@ -362,7 +415,7 @@
     font-weight: 500;
     transition: all 0.2s ease;
   }
-  
+
   .button-secondary:hover {
     background: rgba(147, 6, 177, 0.15);
     border-color: var(--hive-purple);
@@ -374,7 +427,7 @@
     box-shadow: 0 8px 32px rgba(147, 6, 177, 0.1);
     border: 1px solid rgba(147, 6, 177, 0.08);
   }
-  
+
   .hive-card-hover {
     transition: all 0.3s ease;
     transform: translateY(0);
@@ -382,34 +435,34 @@
 
   /* Enhanced Typography Classes */
   .heading-primary {
-    font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+    font-family: "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
     font-weight: 700;
     letter-spacing: -0.025em;
   }
 
   .heading-secondary {
-    font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+    font-family: "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
     font-weight: 600;
     letter-spacing: -0.02em;
   }
 
   .text-body {
-    font-family: 'Open Sans', sans-serif;
+    font-family: "Open Sans", sans-serif;
     font-weight: 400;
     letter-spacing: -0.011em;
   }
 
   .text-body-bold {
-    font-family: 'Open Sans', sans-serif;
+    font-family: "Open Sans", sans-serif;
     font-weight: 600;
     letter-spacing: -0.008em;
   }
 
   /* Enhanced Button Styles */
   .button-primary {
-    font-family: 'Open Sans', sans-serif;
+    font-family: "Open Sans", sans-serif;
     font-weight: 600;
-    background: linear-gradient(135deg, #9306B1 0%, #7A059A 100%);
+    background: linear-gradient(135deg, #9306b1 0%, #7a059a 100%);
     color: white;
     border: none;
     padding: 12px 24px;
@@ -426,7 +479,7 @@
   }
 
   .button-secondary {
-    font-family: 'Open Sans', sans-serif;
+    font-family: "Open Sans", sans-serif;
     font-weight: 500;
     background: var(--hive-light-blue);
     color: var(--hive-purple);
@@ -458,7 +511,7 @@
     box-shadow: 0 12px 48px rgba(147, 6, 177, 0.15);
     transform: translateY(-2px);
   }
-  
+
   .hive-card-hover:hover {
     transform: translateY(-4px);
     box-shadow: 0 12px 48px rgba(147, 6, 177, 0.15);
@@ -519,249 +572,249 @@
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  
+
   /* Hexagonal design elements */
   .hexagon-accent {
     position: relative;
   }
-  
+
   .hexagon-accent::before {
-    content: '';
+    content: "";
     position: absolute;
     top: -2px;
     left: -2px;
     right: -2px;
     bottom: -2px;
-    background: linear-gradient(135deg, #9306B1, #97A5D0);
+    background: linear-gradient(135deg, #9306b1, #97a5d0);
     border-radius: 8px;
     z-index: -1;
     opacity: 0.1;
   }
-  
+
   .hexagon-pattern {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background-image: 
+    background-image:
       radial-gradient(circle at 20% 20%, rgba(147, 6, 177, 0.03) 0%, transparent 50%),
       radial-gradient(circle at 80% 80%, rgba(151, 165, 208, 0.03) 0%, transparent 50%);
     pointer-events: none;
     z-index: -1;
   }
-  
+
   /* Professional service cards */
   .service-card {
-    background: linear-gradient(135deg, #FFFFFF 0%, #F2F3FB 100%);
+    background: linear-gradient(135deg, #ffffff 0%, #f2f3fb 100%);
     border: 1px solid rgba(147, 6, 177, 0.08);
     border-radius: 12px;
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
   }
-  
+
   .service-card::before {
-    content: '';
+    content: "";
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     height: 3px;
-    background: linear-gradient(90deg, #9306B1, #97A5D0);
+    background: linear-gradient(90deg, #9306b1, #97a5d0);
     opacity: 0;
     transition: opacity 0.3s ease;
   }
-  
+
   .service-card:hover::before {
     opacity: 1;
   }
-  
+
   .service-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 12px 40px rgba(147, 6, 177, 0.12);
     border-color: rgba(147, 6, 177, 0.15);
   }
-  
+
   /* Enhanced typography */
   .heading-primary {
-    font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+    font-family: "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
     font-weight: 600;
     letter-spacing: -0.025em;
     line-height: 1.2;
   }
-  
+
   .heading-secondary {
-    font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+    font-family: "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
     font-weight: 500;
     letter-spacing: -0.015em;
     line-height: 1.3;
   }
-  
+
   .text-body {
-    font-family: 'Open Sans', sans-serif;
+    font-family: "Open Sans", sans-serif;
     font-weight: 400;
     letter-spacing: -0.01em;
     line-height: 1.6;
   }
-  
+
   .text-small {
-    font-family: 'Open Sans', sans-serif;
+    font-family: "Open Sans", sans-serif;
     font-weight: 400;
     font-size: 0.875rem;
     letter-spacing: -0.005em;
     line-height: 1.5;
   }
-  
+
   /* Modern Silicon Valley components */
   .card-modern {
     @apply bg-white rounded-2xl border border-hive-background shadow-sm hover:shadow-lg transition-all duration-300 hover:border-hive-light-purple;
   }
-  
+
   .button-primary {
     @apply bg-gradient-to-r from-hive-purple to-hive-light-purple hover:from-hive-dark hover:to-hive-purple text-white font-medium rounded-xl px-6 py-3 transition-all duration-200 shadow-sm hover:shadow-md;
   }
-  
+
   .button-secondary {
     @apply bg-hive-background hover:bg-hive-light-blue text-hive-dark font-medium rounded-xl px-6 py-3 transition-all duration-200 border border-hive-light-purple hover:border-hive-purple;
   }
-  
+
   .input-modern {
     @apply bg-hive-background border-hive-light-purple rounded-xl px-4 py-3 text-hive-dark placeholder-hive-gray focus:bg-white focus:border-hive-purple focus:ring-2 focus:ring-purple-100 transition-all duration-200;
   }
-  
+
   .text-hive-purple {
     color: var(--hive-purple);
   }
-  
+
   .text-hive-blue {
     color: var(--hive-blue);
   }
-  
+
   .text-hive-light-blue {
     color: var(--hive-light-blue);
   }
-  
+
   .text-hive-black {
     color: var(--hive-black);
   }
-  
+
   .text-hive-white {
     color: var(--hive-white);
   }
-  
+
   .bg-hive-purple {
     background-color: var(--hive-purple);
   }
-  
+
   .bg-hive-blue {
     background-color: var(--hive-blue);
   }
-  
+
   .bg-hive-light-blue {
     background-color: var(--hive-light-blue);
   }
-  
+
   .bg-hive-black {
     background-color: var(--hive-black);
   }
-  
+
   .bg-hive-white {
     background-color: var(--hive-white);
   }
-  
+
   .bg-accent-light {
     background-color: var(--accent-light);
   }
-  
+
   .bg-accent-red {
     background-color: var(--accent-red);
   }
-  
+
   .bg-accent-yellow {
     background-color: var(--accent-yellow);
   }
-  
+
   .bg-accent-green {
     background-color: var(--accent-green);
   }
-  
+
   .text-accent-red {
     color: var(--accent-red);
   }
-  
+
   .text-accent-yellow {
     color: var(--accent-yellow);
   }
-  
+
   .text-accent-green {
     color: var(--accent-green);
   }
-  
+
   .border-hive-purple {
     border-color: var(--hive-purple);
   }
-  
+
   .border-hive-light-blue {
     border-color: var(--hive-light-blue);
   }
-  
+
   .hover\:bg-hive-blue:hover {
     background-color: var(--hive-blue);
   }
-  
+
   .hover\:text-hive-purple:hover {
     color: var(--hive-purple);
   }
-  
+
   /* Secondary brand colors */
   .bg-hive-success {
     background-color: var(--hive-success);
   }
-  
+
   .bg-hive-warning {
     background-color: var(--hive-warning);
   }
-  
+
   .bg-hive-error {
     background-color: var(--hive-error);
   }
-  
+
   .bg-hive-neutral {
     background-color: var(--hive-neutral);
   }
-  
+
   .text-hive-success {
     color: var(--hive-success);
   }
-  
+
   .text-hive-warning {
     color: var(--hive-warning);
   }
-  
+
   .text-hive-error {
     color: var(--hive-error);
   }
-  
+
   .border-hive-success {
     border-color: var(--hive-success);
   }
-  
+
   .border-hive-warning {
     border-color: var(--hive-warning);
   }
-  
+
   .border-hive-error {
     border-color: var(--hive-error);
   }
-  
+
   /* Hive Wellness Form Styles - Matching Website Design */
   .hive-form-container {
     background: linear-gradient(135deg, rgba(151, 165, 208, 0.1) 0%, rgba(229, 231, 245, 0.3) 100%);
     min-height: 100vh;
     padding: 2rem 1rem;
   }
-  
+
   .hive-form-card {
     background: white;
     border-radius: 1.5rem;
@@ -770,16 +823,16 @@
     margin: 0 auto;
     overflow: hidden;
   }
-  
+
   .hive-form-header {
     text-align: center;
     padding: 2rem;
     border-bottom: 1px solid rgba(229, 231, 245, 0.5);
   }
-  
+
   .hive-form-title {
-    color: #9306B1;
-    font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+    color: #9306b1;
+    font-family: "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
     font-size: 2rem;
     font-weight: 600;
     margin-bottom: 0.5rem;
@@ -797,8 +850,12 @@
   }
 
   @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+      transform: rotate(0deg);
+    }
+    100% {
+      transform: rotate(360deg);
+    }
   }
 
   .hexagon-large {
@@ -812,7 +869,7 @@
 
   .hexagon-large::before,
   .hexagon-large::after {
-    content: '';
+    content: "";
     position: absolute;
     width: 0;
     height: 0;
@@ -841,7 +898,7 @@
 
   .hexagon-small::before,
   .hexagon-small::after {
-    content: '';
+    content: "";
     position: absolute;
     width: 0;
     height: 0;
@@ -860,7 +917,7 @@
   }
 
   .hexagon-pattern {
-    background-image: 
+    background-image:
       radial-gradient(circle at 25px 25px, var(--hive-purple) 2px, transparent 2px),
       radial-gradient(circle at 75px 75px, var(--hive-light-purple) 1px, transparent 1px);
     background-size: 50px 50px;
@@ -878,25 +935,25 @@
     mask: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
     -webkit-mask: polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%);
   }
-  
+
   .hive-progress-bar {
     width: 100%;
     height: 8px;
-    background: #E5E7F5;
+    background: #e5e7f5;
     border-radius: 8px;
     overflow: hidden;
     margin: 1rem 0;
   }
-  
+
   .hive-progress-fill {
     height: 100%;
-    background: #9306B1;
+    background: #9306b1;
     border-radius: 8px;
     transition: width 0.3s ease;
   }
-  
+
   .hive-button {
-    background: #97A5D0;
+    background: #97a5d0;
     color: white;
     border: none;
     border-radius: 2rem;
@@ -908,54 +965,54 @@
     width: 100%;
     margin: 0.5rem 0;
   }
-  
+
   .hive-button:hover {
-    background: #8394C4;
+    background: #8394c4;
     transform: translateY(-1px);
   }
-  
+
   .hive-button-primary {
-    background: #9306B1;
+    background: #9306b1;
   }
-  
+
   .hive-button-primary:hover {
-    background: #7A0591;
+    background: #7a0591;
   }
-  
+
   .hive-input {
     width: 100%;
     padding: 1rem;
-    border: 2px solid #E5E7F5;
+    border: 2px solid #e5e7f5;
     border-radius: 0.5rem;
     font-size: 1rem;
     transition: border-color 0.2s ease;
   }
-  
+
   .hive-input:focus {
     outline: none;
-    border-color: #9306B1;
+    border-color: #9306b1;
     box-shadow: 0 0 0 3px rgba(147, 6, 177, 0.1);
   }
-  
+
   .hive-form-step {
     padding: 2rem;
   }
-  
+
   .hive-question-title {
-    color: #9306B1;
-    font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif;
+    color: #9306b1;
+    font-family: "Palatino Linotype", "Book Antiqua", Palatino, Georgia, serif;
     font-size: 1.5rem;
     font-weight: 600;
     text-align: center;
     margin-bottom: 1rem;
   }
-  
+
   .hive-question-subtitle {
     color: #666;
     text-align: center;
     margin-bottom: 2rem;
   }
-  
+
   .hive-navigation {
     display: flex;
     justify-content: space-between;
@@ -963,10 +1020,10 @@
     padding: 1rem 2rem;
     border-top: 1px solid rgba(229, 231, 245, 0.5);
   }
-  
+
   .hive-nav-button {
     background: transparent;
-    color: #97A5D0;
+    color: #97a5d0;
     border: none;
     padding: 0.75rem 1.5rem;
     font-size: 1rem;
@@ -974,29 +1031,30 @@
     cursor: pointer;
     transition: color 0.2s ease;
   }
-  
+
   .hive-nav-button:hover {
-    color: #9306B1;
+    color: #9306b1;
   }
-  
+
   .hive-nav-button:disabled {
     opacity: 0.5;
     cursor: not-allowed;
   }
-  
+
   .hive-error-text {
-    color: #E50201;
+    color: #e50201;
     font-size: 0.875rem;
     text-align: center;
     margin-top: 0.5rem;
   }
-  
+
   .focus\:ring-hive-purple:focus {
     --tw-ring-opacity: 1;
     --tw-ring-color: var(--hive-purple);
-    box-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+    box-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width))
+      var(--tw-ring-color);
   }
-  
+
   .hexagon {
     width: 60px;
     height: 34.64px;
@@ -1004,7 +1062,7 @@
     position: relative;
     margin: 17.32px 0;
   }
-  
+
   .hexagon:before,
   .hexagon:after {
     content: "";
@@ -1013,58 +1071,58 @@
     border-left: 30px solid transparent;
     border-right: 30px solid transparent;
   }
-  
+
   .hexagon:before {
     bottom: 100%;
     border-bottom: 17.32px solid var(--hive-purple);
   }
-  
+
   .hexagon:after {
     top: 100%;
     border-top: 17.32px solid var(--hive-blue);
   }
-  
+
   .service-card {
     transition: all 0.3s ease;
     border: 2px solid transparent;
   }
-  
+
   .service-card:hover {
     border-color: var(--hive-purple);
     box-shadow: 0 8px 25px rgba(147, 6, 177, 0.15);
   }
-  
+
   .demo-badge {
     background: linear-gradient(135deg, var(--accent-yellow), var(--accent-green));
     color: var(--hive-black);
     font-weight: 600;
   }
-  
+
   .btn-primary {
     @apply bg-hive-purple hover:bg-hive-blue text-white font-semibold py-2 px-4 rounded-lg transition-colors;
   }
-  
+
   .btn-secondary {
     @apply bg-hive-light-blue hover:bg-hive-blue hover:text-white text-hive-black font-semibold py-2 px-4 rounded-lg transition-colors;
   }
-  
+
   .input-hive {
     @apply w-full px-4 py-3 border border-hive-light-blue rounded-lg focus:outline-none focus:ring-2 focus:border-transparent;
     --tw-ring-color: var(--hive-purple);
   }
-  
+
   .card-hive {
     @apply bg-hive-white rounded-xl shadow-lg p-6;
   }
-  
+
   .nav-item {
     @apply w-full text-left px-4 py-3 rounded-lg transition-colors hover:bg-hive-light-blue hover:text-hive-purple;
   }
-  
+
   .nav-item.active {
     @apply bg-hive-light-blue text-hive-purple;
   }
-  
+
   /* Fix for admin card text overflow */
   .admin-service-card {
     word-wrap: break-word;

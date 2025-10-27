@@ -1,7 +1,7 @@
-import { 
-  users, 
-  therapistProfiles, 
-  appointments, 
+import {
+  users,
+  therapistProfiles,
+  appointments,
   payments,
   therapistMatchingQuestionnaires,
   therapistOnboardingApplications,
@@ -11,7 +11,7 @@ import {
   type Appointment,
   type Payment,
   type TherapistMatchingQuestionnaire,
-  type TherapistOnboardingApplication
+  type TherapistOnboardingApplication,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, gte, lte, count, sum, sql } from "drizzle-orm";
@@ -19,36 +19,35 @@ import { storage } from "./storage";
 
 // Production-ready service to replace all placeholder/demo data with real database queries
 export class ProductionDataService {
-  
   // Real AI Matching System Data
   async getRealPendingProfiles() {
     // Get real pending questionnaires from database
     const pendingQuestionnaires = await db
       .select()
       .from(therapistMatchingQuestionnaires)
-      .where(eq(therapistMatchingQuestionnaires.status, 'pending'))
+      .where(eq(therapistMatchingQuestionnaires.status, "pending"))
       .orderBy(desc(therapistMatchingQuestionnaires.createdAt));
 
-    return pendingQuestionnaires.map(q => ({
+    return pendingQuestionnaires.map((q) => ({
       id: q.id,
       userId: q.userId,
-      userType: 'client' as const,
-      status: 'pending_ai_review' as const,
+      userType: "client" as const,
+      status: "pending_ai_review" as const,
       aiReviewScore: 0,
-      aiReviewNotes: '',
+      aiReviewNotes: "",
       createdAt: q.createdAt?.toISOString() || new Date().toISOString(),
       updatedAt: q.updatedAt?.toISOString() || new Date().toISOString(),
       userData: {
-        firstName: q.step2FirstName || 'Unknown',
-        lastName: q.step2LastName || 'Client',
-        email: q.step2Email || 'unknown@email.com'
+        firstName: q.step2FirstName || "Unknown",
+        lastName: q.step2LastName || "Client",
+        email: q.step2Email || "unknown@email.com",
       },
       profileData: {
         concerns: Array.isArray(q.step7MentalHealthSymptoms) ? q.step7MentalHealthSymptoms : [],
-        sessionFormat: 'online',
-        availability: 'weekly',
-        previousTherapy: q.step10PreviousTherapy === 'yes'
-      }
+        sessionFormat: "online",
+        availability: "weekly",
+        previousTherapy: q.step10PreviousTherapy === "yes",
+      },
     }));
   }
 
@@ -59,23 +58,23 @@ export class ProductionDataService {
       .from(therapistOnboardingApplications)
       .orderBy(desc(therapistOnboardingApplications.createdAt));
 
-    return applications.map(app => ({
+    return applications.map((app) => ({
       id: app.id,
-      firstName: app.firstName || 'Unknown',
-      lastName: app.lastName || 'Therapist',
-      email: app.email || 'unknown@therapist.com',
-      phoneNumber: app.phoneNumber || '+44 0000 000000',
-      dateOfBirth: app.dateOfBirth || '1980-01-01',
-      streetAddress: app.streetAddress || 'Unknown Address',
-      postCode: app.postCode || 'UNK NOW',
-      jobTitle: app.jobTitle || 'Therapist',
+      firstName: app.firstName || "Unknown",
+      lastName: app.lastName || "Therapist",
+      email: app.email || "unknown@therapist.com",
+      phoneNumber: app.phoneNumber || "+44 0000 000000",
+      dateOfBirth: app.dateOfBirth || "1980-01-01",
+      streetAddress: app.streetAddress || "Unknown Address",
+      postCode: app.postCode || "UNK NOW",
+      jobTitle: app.jobTitle || "Therapist",
       qualifications: app.qualifications || [],
       yearsOfExperience: app.yearsOfExperience || 0,
-      registrationNumber: app.registrationNumber || 'UNKNOWN',
+      registrationNumber: app.registrationNumber || "UNKNOWN",
       availability: app.availability || {},
-      status: app.status || 'pending',
+      status: app.status || "pending",
       createdAt: app.createdAt?.toISOString() || new Date().toISOString(),
-      updatedAt: app.updatedAt?.toISOString() || new Date().toISOString()
+      updatedAt: app.updatedAt?.toISOString() || new Date().toISOString(),
     }));
   }
 
@@ -107,8 +106,11 @@ export class ProductionDataService {
       );
 
     const totalSessions = appointmentsQuery.length;
-    const completedSessions = appointmentsQuery.filter(a => a.status === 'completed').length;
-    const totalEarnings = paymentsQuery.reduce((sum, p) => sum + parseFloat(p.payments.amount) * 0.85, 0);
+    const completedSessions = appointmentsQuery.filter((a) => a.status === "completed").length;
+    const totalEarnings = paymentsQuery.reduce(
+      (sum, p) => sum + parseFloat(p.payments.amount) * 0.85,
+      0
+    );
 
     return {
       totalSessions,
@@ -117,7 +119,7 @@ export class ProductionDataService {
       totalEarnings: totalEarnings,
       averageSessionValue: completedSessions > 0 ? totalEarnings / completedSessions : 0,
       clientRetentionRate: 85, // Calculate from actual data if needed
-      satisfactionScore: 4.8    // Calculate from actual feedback if needed
+      satisfactionScore: 4.8, // Calculate from actual feedback if needed
     };
   }
 
@@ -129,37 +131,36 @@ export class ProductionDataService {
       .where(eq(appointments.clientId, clientId))
       .orderBy(desc(appointments.scheduledAt));
 
-    const completedSessions = clientAppointments.filter(a => a.status === 'completed').length;
+    const completedSessions = clientAppointments.filter((a) => a.status === "completed").length;
     const totalSessions = clientAppointments.length;
     const attendanceRate = totalSessions > 0 ? (completedSessions / totalSessions) * 100 : 0;
 
     return {
       clientId,
-      clientName: 'Client', // Get from user table if needed
+      clientName: "Client", // Get from user table if needed
       overallProgress: Math.min(attendanceRate + 20, 100), // Simple calculation
-      trendDirection: attendanceRate > 75 ? 'improving' : attendanceRate > 50 ? 'stable' : 'declining',
+      trendDirection:
+        attendanceRate > 75 ? "improving" : attendanceRate > 50 ? "stable" : "declining",
       keyMetrics: {
         sessionAttendance: attendanceRate,
         homeworkCompletion: 80, // Calculate from session notes if available
-        goalAchievement: 70,    // Calculate from session notes if available
-        symptomReduction: 65    // Calculate from assessments if available
+        goalAchievement: 70, // Calculate from session notes if available
+        symptomReduction: 65, // Calculate from assessments if available
       },
       aiAnalysis: {
-        strengths: ['Regular attendance', 'Engaged in sessions'],
-        challenges: ['Goal setting', 'Between-session practice'],
-        nextSteps: ['Focus on homework completion', 'Set specific goals'],
-        riskFactors: ['Irregular attendance', 'External stressors']
+        strengths: ["Regular attendance", "Engaged in sessions"],
+        challenges: ["Goal setting", "Between-session practice"],
+        nextSteps: ["Focus on homework completion", "Set specific goals"],
+        riskFactors: ["Irregular attendance", "External stressors"],
       },
-      lastAssessment: clientAppointments[0]?.scheduledAt?.toISOString() || new Date().toISOString()
+      lastAssessment: clientAppointments[0]?.scheduledAt?.toISOString() || new Date().toISOString(),
     };
   }
 
   // Real Reporting Data
   async getRealSystemMetrics(startDate: Date, endDate: Date) {
     // Total users
-    const totalUsers = await db
-      .select({ count: count() })
-      .from(users);
+    const totalUsers = await db.select({ count: count() }).from(users);
 
     // Active sessions
     const activeSessions = await db
@@ -169,14 +170,14 @@ export class ProductionDataService {
         and(
           gte(appointments.scheduledAt, startDate),
           lte(appointments.scheduledAt, endDate),
-          eq(appointments.status, 'completed')
+          eq(appointments.status, "completed")
         )
       );
 
     // Revenue
     const revenue = await db
-      .select({ 
-        total: sql<number>`COALESCE(SUM(CAST(${payments.amount} AS DECIMAL)), 0)` 
+      .select({
+        total: sql<number>`COALESCE(SUM(CAST(${payments.amount} AS DECIMAL)), 0)`,
       })
       .from(payments)
       .innerJoin(appointments, eq(payments.appointmentId, appointments.id))
@@ -184,7 +185,7 @@ export class ProductionDataService {
         and(
           gte(appointments.scheduledAt, startDate),
           lte(appointments.scheduledAt, endDate),
-          eq(payments.status, 'succeeded')
+          eq(payments.status, "succeeded")
         )
       );
 
@@ -193,7 +194,7 @@ export class ProductionDataService {
       activeSessions: activeSessions[0]?.count || 0,
       totalRevenue: revenue[0]?.total || 0,
       platformHealth: 95, // Calculate based on system metrics
-      userSatisfaction: 4.7 // Calculate from feedback if available
+      userSatisfaction: 4.7, // Calculate from feedback if available
     };
   }
 
@@ -204,19 +205,17 @@ export class ProductionDataService {
 
   // Real Matching Statistics
   async getRealMatchingStats() {
-    const totalProfiles = await db
-      .select({ count: count() })
-      .from(therapistMatchingQuestionnaires);
+    const totalProfiles = await db.select({ count: count() }).from(therapistMatchingQuestionnaires);
 
     const pendingReview = await db
       .select({ count: count() })
       .from(therapistMatchingQuestionnaires)
-      .where(eq(therapistMatchingQuestionnaires.status, 'pending'));
+      .where(eq(therapistMatchingQuestionnaires.status, "pending"));
 
     const approved = await db
       .select({ count: count() })
       .from(therapistMatchingQuestionnaires)
-      .where(eq(therapistMatchingQuestionnaires.status, 'matched'));
+      .where(eq(therapistMatchingQuestionnaires.status, "matched"));
 
     return {
       pendingAiReview: pendingReview[0]?.count || 0,
@@ -225,52 +224,50 @@ export class ProductionDataService {
       successfulMatches: approved[0]?.count || 0,
       totalMatches: totalProfiles[0]?.count || 0,
       averageCompatibilityScore: 87,
-      processingTime: '2.3 minutes'
+      processingTime: "2.3 minutes",
     };
   }
 
   // Real Email Statistics for Email Management System
   async getRealEmailStats() {
     try {
-      const emailCount = await db
-        .select({ count: count() })
-        .from(emailQueue);
+      const emailCount = await db.select({ count: count() }).from(emailQueue);
 
       // Use SQL aggregation for better performance
       const queuedCount = await db
         .select({ count: count() })
         .from(emailQueue)
-        .where(eq(emailQueue.status, 'queued'));
+        .where(eq(emailQueue.status, "queued"));
 
       const processingCount = await db
         .select({ count: count() })
         .from(emailQueue)
-        .where(eq(emailQueue.status, 'processing'));
+        .where(eq(emailQueue.status, "processing"));
 
       const sentCount = await db
         .select({ count: count() })
         .from(emailQueue)
-        .where(eq(emailQueue.status, 'sent'));
+        .where(eq(emailQueue.status, "sent"));
 
       const failedCount = await db
         .select({ count: count() })
         .from(emailQueue)
-        .where(eq(emailQueue.status, 'failed'));
+        .where(eq(emailQueue.status, "failed"));
 
       const highPriorityCount = await db
         .select({ count: count() })
         .from(emailQueue)
-        .where(eq(emailQueue.priority, 'high'));
+        .where(eq(emailQueue.priority, "high"));
 
       const normalPriorityCount = await db
         .select({ count: count() })
         .from(emailQueue)
-        .where(eq(emailQueue.priority, 'normal'));
+        .where(eq(emailQueue.priority, "normal"));
 
       const lowPriorityCount = await db
         .select({ count: count() })
         .from(emailQueue)
-        .where(eq(emailQueue.priority, 'low'));
+        .where(eq(emailQueue.priority, "low"));
 
       return {
         total: emailCount[0]?.count || 0,
@@ -281,18 +278,18 @@ export class ProductionDataService {
         byPriority: {
           high: highPriorityCount[0]?.count || 0,
           normal: normalPriorityCount[0]?.count || 0,
-          low: lowPriorityCount[0]?.count || 0
-        }
+          low: lowPriorityCount[0]?.count || 0,
+        },
       };
     } catch (error) {
-      console.error('Error fetching email stats:', error);
+      console.error("Error fetching email stats:", error);
       return {
         total: 0,
         queued: 0,
         processing: 0,
         sent: 0,
         failed: 0,
-        byPriority: { high: 0, normal: 0, low: 0 }
+        byPriority: { high: 0, normal: 0, low: 0 },
       };
     }
   }
@@ -306,21 +303,21 @@ export class ProductionDataService {
         .orderBy(desc(emailQueue.createdAt))
         .limit(limit);
 
-      return emails.map(email => ({
+      return emails.map((email) => ({
         id: email.id,
-        type: email.type || 'general',
+        type: email.type || "general",
         to: email.to,
         subject: email.subject,
-        status: email.status as 'queued' | 'processing' | 'sent' | 'failed',
-        priority: email.priority as 'high' | 'normal' | 'low',
+        status: email.status as "queued" | "processing" | "sent" | "failed",
+        priority: email.priority as "high" | "normal" | "low",
         attempts: email.attempts || 0,
         error: email.error,
         scheduledFor: email.scheduledFor?.toISOString() || new Date().toISOString(),
         createdAt: email.createdAt?.toISOString() || new Date().toISOString(),
-        sentAt: email.sentAt?.toISOString()
+        sentAt: email.sentAt?.toISOString(),
       }));
     } catch (error) {
-      console.error('Error fetching email queue:', error);
+      console.error("Error fetching email queue:", error);
       return [];
     }
   }
@@ -332,7 +329,7 @@ export class ProductionDataService {
         .select()
         .from(users)
         .where(sql`${users.role} = ${role}`);
-      
+
       return roleUsers;
     } catch (error) {
       console.error(`Error fetching users by role ${role}:`, error);
@@ -344,15 +341,15 @@ export class ProductionDataService {
   async getUsersByIds(userIds: string[]): Promise<User[]> {
     try {
       if (userIds.length === 0) return [];
-      
+
       const targetUsers = await db
         .select()
         .from(users)
-        .where(sql`${users.id} IN (${userIds.map(id => `'${id}'`).join(',')})`);
-      
+        .where(sql`${users.id} IN (${userIds.map((id) => `'${id}'`).join(",")})`);
+
       return targetUsers;
     } catch (error) {
-      console.error('Error fetching users by IDs:', error);
+      console.error("Error fetching users by IDs:", error);
       return [];
     }
   }

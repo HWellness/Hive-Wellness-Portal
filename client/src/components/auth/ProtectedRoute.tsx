@@ -15,7 +15,7 @@ export function ProtectedRoute({ children, fallbackPath = "/login" }: ProtectedR
   useEffect(() => {
     // Only redirect after loading is complete and user is not authenticated
     if (!isLoading && !isAuthenticated) {
-      console.log('ProtectedRoute: Redirecting unauthenticated user to', fallbackPath);
+      console.log("ProtectedRoute: Redirecting unauthenticated user to", fallbackPath);
       setLocation(fallbackPath);
     }
   }, [isAuthenticated, isLoading, setLocation, fallbackPath]);

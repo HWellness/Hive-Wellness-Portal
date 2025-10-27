@@ -1,11 +1,11 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from "express";
 
 // External API status tracking
 export interface ApiStatus {
   name: string;
-  status: 'healthy' | 'degraded' | 'unhealthy';
+  status: "healthy" | "degraded" | "unhealthy";
   failures: number;
-  circuitBreakerState: 'CLOSED' | 'OPEN' | 'HALF_OPEN';
+  circuitBreakerState: "CLOSED" | "OPEN" | "HALF_OPEN";
   lastFailure: number;
   responseTime: number;
   successCount: number;
@@ -16,19 +16,19 @@ export interface ApiStatus {
 class CircuitBreaker {
   private failures = 0;
   private lastFailureTime = 0;
-  private state: 'CLOSED' | 'OPEN' | 'HALF_OPEN' = 'CLOSED';
-  
+  private state: "CLOSED" | "OPEN" | "HALF_OPEN" = "CLOSED";
+
   constructor(
     private readonly threshold: number = 5,
     private readonly timeout: number = 60000 // 1 minute
   ) {}
 
   async execute<T>(operation: () => Promise<T>): Promise<T> {
-    if (this.state === 'OPEN') {
+    if (this.state === "OPEN") {
       if (Date.now() - this.lastFailureTime > this.timeout) {
-        this.state = 'HALF_OPEN';
+        this.state = "HALF_OPEN";
       } else {
-        throw new Error('Circuit breaker is OPEN');
+        throw new Error("Circuit breaker is OPEN");
       }
     }
 
@@ -44,15 +44,15 @@ class CircuitBreaker {
 
   private onSuccess() {
     this.failures = 0;
-    this.state = 'CLOSED';
+    this.state = "CLOSED";
   }
 
   private onFailure() {
     this.failures++;
     this.lastFailureTime = Date.now();
-    
+
     if (this.failures >= this.threshold) {
-      this.state = 'OPEN';
+      this.state = "OPEN";
     }
   }
 
@@ -83,20 +83,20 @@ export class ExternalApiManager {
   }
 
   private initializeApis() {
-    const apiNames = ['stripe', 'sendgrid'];
-    
-    apiNames.forEach(name => {
+    const apiNames = ["stripe", "sendgrid"];
+
+    apiNames.forEach((name) => {
       this.apis.set(name, {
         name,
-        status: 'healthy',
+        status: "healthy",
         failures: 0,
-        circuitBreakerState: 'CLOSED',
+        circuitBreakerState: "CLOSED",
         lastFailure: 0,
         responseTime: 0,
         successCount: 0,
-        errorCount: 0
+        errorCount: 0,
       });
-      
+
       this.circuitBreakers.set(name, new CircuitBreaker());
     });
   }
@@ -110,11 +110,7 @@ export class ExternalApiManager {
       timeoutMs?: number;
     } = {}
   ): Promise<T> {
-    const {
-      maxRetries = 3,
-      baseDelay = 1000,
-      timeoutMs = 30000
-    } = options;
+    const { maxRetries = 3, baseDelay = 1000, timeoutMs = 30000 } = options;
 
     const circuitBreaker = this.circuitBreakers.get(apiName);
     if (!circuitBreaker) {
@@ -127,20 +123,17 @@ export class ExternalApiManager {
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
       try {
         const timeoutPromise = new Promise<never>((_, reject) => {
-          setTimeout(() => reject(new Error('Operation timeout')), timeoutMs);
+          setTimeout(() => reject(new Error("Operation timeout")), timeoutMs);
         });
 
-        const result = await Promise.race([
-          circuitBreaker.execute(operation),
-          timeoutPromise
-        ]);
+        const result = await Promise.race([circuitBreaker.execute(operation), timeoutPromise]);
 
         // Record success
         this.recordSuccess(apiName, Date.now() - startTime);
         return result;
       } catch (error) {
         lastError = error as Error;
-        
+
         // Don't retry on certain errors
         if (this.isNonRetryableError(error)) {
           this.recordFailure(apiName, Date.now() - startTime);
@@ -150,7 +143,7 @@ export class ExternalApiManager {
         // If not last attempt, wait before retry
         if (attempt < maxRetries) {
           const delay = baseDelay * Math.pow(2, attempt);
-          await new Promise(resolve => setTimeout(resolve, delay));
+          await new Promise((resolve) => setTimeout(resolve, delay));
         }
       }
     }
@@ -161,13 +154,13 @@ export class ExternalApiManager {
   }
 
   private isNonRetryableError(error: any): boolean {
-    const message = error.message?.toLowerCase() || '';
+    const message = error.message?.toLowerCase() || "";
     return (
-      message.includes('unauthorized') ||
-      message.includes('forbidden') ||
-      message.includes('not found') ||
-      message.includes('bad request') ||
-      message.includes('validation')
+      message.includes("unauthorized") ||
+      message.includes("forbidden") ||
+      message.includes("not found") ||
+      message.includes("bad request") ||
+      message.includes("validation")
     );
   }
 
@@ -176,8 +169,8 @@ export class ExternalApiManager {
     if (api) {
       api.successCount++;
       api.responseTime = responseTime;
-      api.status = 'healthy';
-      api.circuitBreakerState = this.circuitBreakers.get(apiName)?.getState() || 'CLOSED';
+      api.status = "healthy";
+      api.circuitBreakerState = this.circuitBreakers.get(apiName)?.getState() || "CLOSED";
     }
   }
 
@@ -188,13 +181,13 @@ export class ExternalApiManager {
       api.failures++;
       api.lastFailure = Date.now();
       api.responseTime = responseTime;
-      api.circuitBreakerState = this.circuitBreakers.get(apiName)?.getState() || 'CLOSED';
-      
+      api.circuitBreakerState = this.circuitBreakers.get(apiName)?.getState() || "CLOSED";
+
       // Update status based on circuit breaker state
-      if (api.circuitBreakerState === 'OPEN') {
-        api.status = 'unhealthy';
+      if (api.circuitBreakerState === "OPEN") {
+        api.status = "unhealthy";
       } else if (api.failures > 2) {
-        api.status = 'degraded';
+        api.status = "degraded";
       }
     }
   }
@@ -216,12 +209,12 @@ export class ExternalApiManager {
 export class ResilientStripeService {
   private apiManager = ExternalApiManager.getInstance();
 
-  async createPaymentIntent(amount: number, currency = 'gbp') {
-    return this.apiManager.executeWithRetry('stripe', async () => {
-      const { createSecureStripeInstance } = await import('../stripe-config');
+  async createPaymentIntent(amount: number, currency = "gbp") {
+    return this.apiManager.executeWithRetry("stripe", async () => {
+      const { createSecureStripeInstance } = await import("../stripe-config");
       // SECURITY: Use secure Stripe configuration
       const stripe = createSecureStripeInstance({
-        apiVersion: '2024-12-18.acacia',
+        apiVersion: "2024-12-18.acacia",
       });
 
       return stripe.paymentIntents.create({
@@ -235,11 +228,11 @@ export class ResilientStripeService {
   }
 
   async createCustomer(email: string, name?: string) {
-    return this.apiManager.executeWithRetry('stripe', async () => {
-      const { createSecureStripeInstance } = await import('../stripe-config');
+    return this.apiManager.executeWithRetry("stripe", async () => {
+      const { createSecureStripeInstance } = await import("../stripe-config");
       // SECURITY: Use secure Stripe configuration
       const stripe = createSecureStripeInstance({
-        apiVersion: '2024-12-18.acacia',
+        apiVersion: "2024-12-18.acacia",
       });
 
       return stripe.customers.create({
@@ -254,13 +247,13 @@ export class ResilientSendGridService {
   private apiManager = ExternalApiManager.getInstance();
 
   async sendEmail(to: string, subject: string, content: string) {
-    return this.apiManager.executeWithRetry('sendgrid', async () => {
-      const sgMail = (await import('@sendgrid/mail')).default;
+    return this.apiManager.executeWithRetry("sendgrid", async () => {
+      const sgMail = (await import("@sendgrid/mail")).default;
       sgMail.setApiKey(process.env.SENDGRID_API_KEY!);
 
       return sgMail.send({
         to,
-        from: 'noreply@hivewellness.com',
+        from: "noreply@hivewellness.com",
         subject,
         html: content,
       });
@@ -281,6 +274,6 @@ export const externalApiMiddleware = (req: Request, res: Response, next: NextFun
 export const apiStatusEndpoint = (req: Request, res: Response) => {
   const apiManager = ExternalApiManager.getInstance();
   const apis = apiManager.getApiStatus();
-  
+
   res.json({ apis });
 };

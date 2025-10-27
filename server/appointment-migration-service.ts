@@ -1,8 +1,8 @@
-import { db } from './db';
-import { appointments, users, therapistProfiles } from '@shared/schema';
-import { eq, and, isNotNull, lt, gte, ne, or, isNull } from 'drizzle-orm';
-import { googleCalendarService } from './google-calendar-service';
-import { nanoid } from 'nanoid';
+import { db } from "./db";
+import { appointments, users, therapistProfiles } from "@shared/schema";
+import { eq, and, isNotNull, lt, gte, ne, or, isNull } from "drizzle-orm";
+import { googleCalendarService } from "./google-calendar-service";
+import { nanoid } from "nanoid";
 
 // Migration plan for individual appointments
 export interface MigrationPlan {
@@ -11,14 +11,14 @@ export interface MigrationPlan {
   clientId: string | null;
   originalEventId: string | null;
   newEventId?: string;
-  migrationStatus: 'pending' | 'migrated' | 'failed' | 'skipped' | 'rollback_needed';
+  migrationStatus: "pending" | "migrated" | "failed" | "skipped" | "rollback_needed";
   migrationDate: Date;
   preservedData: {
     title: string;
     description: string;
     startTime: Date;
     endTime: Date;
-    attendees: Array<{ email: string; name: string; role: 'client' | 'therapist' }>;
+    attendees: Array<{ email: string; name: string; role: "client" | "therapist" }>;
     googleMeetUrl: string;
     sessionType: string;
     therapyCategory?: string;
@@ -28,7 +28,7 @@ export interface MigrationPlan {
     hasTherapistCalendar: boolean;
     hasConflicts: boolean;
     isUpcoming: boolean;
-    riskLevel: 'low' | 'medium' | 'high';
+    riskLevel: "low" | "medium" | "high";
     warnings: string[];
   };
   backup?: {
@@ -81,12 +81,12 @@ export class AppointmentMigrationService {
     dryRun: false,
     enableNotifications: false,
     skipConflicts: true,
-    onlyFutureAppointments: true
+    onlyFutureAppointments: true,
   };
 
   private migrationStats = {
     apiCalls: 0,
-    startTime: Date.now()
+    startTime: Date.now(),
   };
 
   constructor(private config: Partial<MigrationConfig> = {}) {
@@ -105,14 +105,14 @@ export class AppointmentMigrationService {
    */
   async assessMigrationNeeds(therapistId?: string): Promise<MigrationPlan[]> {
     try {
-      console.log('🔍 Assessing migration needs for appointments...');
-      
+      console.log("🔍 Assessing migration needs for appointments...");
+
       const plans: MigrationPlan[] = [];
       const now = new Date();
-      
+
       // Build query conditions
       const whereConditions = [
-        ne(appointments.status, 'cancelled'),
+        ne(appointments.status, "cancelled"),
         isNotNull(appointments.primaryTherapistId), // Must have therapist assigned
       ];
 
@@ -146,7 +146,7 @@ export class AppointmentMigrationService {
           calendarEventId: appointments.calendarEventId,
           googleEventId: appointments.googleEventId,
           status: appointments.status,
-          createdAt: appointments.createdAt
+          createdAt: appointments.createdAt,
         })
         .from(appointments)
         .where(and(...whereConditions));
@@ -169,9 +169,8 @@ export class AppointmentMigrationService {
       this.logMigrationAssessment(plans);
 
       return plans;
-
     } catch (error: any) {
-      console.error('❌ Error assessing migration needs:', error);
+      console.error("❌ Error assessing migration needs:", error);
       throw new Error(`Migration assessment failed: ${error.message}`);
     }
   }
@@ -187,8 +186,10 @@ export class AppointmentMigrationService {
       }
 
       // Get therapist calendar info
-      const therapistCalendarInfo = await googleCalendarService.getTherapistCalendarInfo(appointment.primaryTherapistId);
-      
+      const therapistCalendarInfo = await googleCalendarService.getTherapistCalendarInfo(
+        appointment.primaryTherapistId
+      );
+
       // Check if appointment needs migration
       const needsMigration = await this.needsMigration(appointment, therapistCalendarInfo);
       if (!needsMigration) {
@@ -198,7 +199,7 @@ export class AppointmentMigrationService {
       // Get client and therapist details
       const [clientDetails, therapistDetails] = await Promise.all([
         appointment.clientId ? this.getUserDetails(appointment.clientId) : null,
-        this.getUserDetails(appointment.primaryTherapistId)
+        this.getUserDetails(appointment.primaryTherapistId),
       ]);
 
       if (!therapistDetails) {
@@ -206,21 +207,21 @@ export class AppointmentMigrationService {
       }
 
       // Prepare attendees
-      const attendees: Array<{ email: string; name: string; role: 'client' | 'therapist' }> = [];
-      
+      const attendees: Array<{ email: string; name: string; role: "client" | "therapist" }> = [];
+
       if (clientDetails && clientDetails.email) {
         attendees.push({
           email: clientDetails.email,
-          name: `${clientDetails.firstName || 'Client'} ${clientDetails.lastName || ''}`.trim(),
-          role: 'client'
+          name: `${clientDetails.firstName || "Client"} ${clientDetails.lastName || ""}`.trim(),
+          role: "client",
         });
       }
 
       if (therapistDetails.email) {
         attendees.push({
           email: therapistDetails.email,
-          name: `${therapistDetails.firstName || 'Therapist'} ${therapistDetails.lastName || ''}`.trim(),
-          role: 'therapist'
+          name: `${therapistDetails.firstName || "Therapist"} ${therapistDetails.lastName || ""}`.trim(),
+          role: "therapist",
         });
       }
 
@@ -228,33 +229,35 @@ export class AppointmentMigrationService {
       const riskAssessment = await this.assessMigrationRisk(appointment, therapistCalendarInfo);
 
       // Generate session title
-      const sessionTitle = `${appointment.sessionType === 'consultation' ? 'Consultation' : 'Therapy Session'}${appointment.therapyCategory ? ` - ${appointment.therapyCategory}` : ''}`;
+      const sessionTitle = `${appointment.sessionType === "consultation" ? "Consultation" : "Therapy Session"}${appointment.therapyCategory ? ` - ${appointment.therapyCategory}` : ""}`;
 
       const plan: MigrationPlan = {
         appointmentId: appointment.id,
         therapistId: appointment.primaryTherapistId,
         clientId: appointment.clientId,
         originalEventId: appointment.calendarEventId || appointment.googleEventId,
-        migrationStatus: 'pending',
+        migrationStatus: "pending",
         migrationDate: new Date(),
         preservedData: {
           title: sessionTitle,
-          description: `Therapy session migrated to therapist calendar.\n\nOriginal Notes: ${appointment.notes || 'No additional notes'}`,
+          description: `Therapy session migrated to therapist calendar.\n\nOriginal Notes: ${appointment.notes || "No additional notes"}`,
           startTime: appointment.scheduledAt,
           endTime: appointment.endTime,
           attendees: attendees,
-          googleMeetUrl: appointment.googleMeetLink || '', // Will be properly generated via Calendar API
+          googleMeetUrl: appointment.googleMeetLink || "", // Will be properly generated via Calendar API
           sessionType: appointment.sessionType,
           therapyCategory: appointment.therapyCategory,
-          notes: appointment.notes
+          notes: appointment.notes,
         },
-        riskAssessment
+        riskAssessment,
       };
 
       return plan;
-
     } catch (error: any) {
-      console.error(`❌ Error creating migration plan for appointment ${appointment.id}:`, error.message);
+      console.error(
+        `❌ Error creating migration plan for appointment ${appointment.id}:`,
+        error.message
+      );
       return null;
     }
   }
@@ -266,21 +269,25 @@ export class AppointmentMigrationService {
     // CRITICAL FIX: Handle appointments with missing event IDs - they may need recreation
     if (!appointment.calendarEventId && !appointment.googleEventId) {
       console.log(`⚠️ Appointment ${appointment.id} has no event ID - may need recreation`);
-      
+
       // If appointment has therapist assigned and is in the past cutoff, it likely needs recreation
-      if (appointment.primaryTherapistId && 
-          this.config.migrationCutoffDate &&
-          appointment.createdAt < this.config.migrationCutoffDate) {
-        console.log(`📋 Appointment ${appointment.id} needs recreation - created before migration cutoff`);
+      if (
+        appointment.primaryTherapistId &&
+        this.config.migrationCutoffDate &&
+        appointment.createdAt < this.config.migrationCutoffDate
+      ) {
+        console.log(
+          `📋 Appointment ${appointment.id} needs recreation - created before migration cutoff`
+        );
         return true;
       }
-      
+
       // Also include future appointments without event IDs for assessment
       if (appointment.scheduledAt > new Date()) {
         console.log(`📋 Future appointment ${appointment.id} without event ID - may need creation`);
         return true;
       }
-      
+
       return false;
     }
 
@@ -291,14 +298,18 @@ export class AppointmentMigrationService {
 
     // Check if event is currently on admin calendar
     const eventId = appointment.calendarEventId || appointment.googleEventId;
-    
+
     try {
       // Try to find event on admin calendar
-      const adminCalendarId = 'support@hive-wellness.co.uk';
+      const adminCalendarId = "support@hive-wellness.co.uk";
       this.migrationStats.apiCalls++;
-      
-      const adminEvent = await googleCalendarService.getSessionEvent(eventId, appointment.primaryTherapistId, true);
-      
+
+      const adminEvent = await googleCalendarService.getSessionEvent(
+        eventId,
+        appointment.primaryTherapistId,
+        true
+      );
+
       if (adminEvent) {
         // Event exists on admin calendar - needs migration
         return true;
@@ -306,8 +317,12 @@ export class AppointmentMigrationService {
 
       // Check if already on therapist calendar
       this.migrationStats.apiCalls++;
-      const therapistEvent = await googleCalendarService.getSessionEvent(eventId, appointment.primaryTherapistId, false);
-      
+      const therapistEvent = await googleCalendarService.getSessionEvent(
+        eventId,
+        appointment.primaryTherapistId,
+        false
+      );
+
       if (therapistEvent) {
         // Already on therapist calendar - no migration needed
         return false;
@@ -315,9 +330,11 @@ export class AppointmentMigrationService {
 
       // Event not found on either calendar - may need recreation
       return true;
-
     } catch (error: any) {
-      console.warn(`⚠️ Could not verify calendar location for appointment ${appointment.id}:`, error.message);
+      console.warn(
+        `⚠️ Could not verify calendar location for appointment ${appointment.id}:`,
+        error.message
+      );
       // Assume needs migration if we can't verify location
       return true;
     }
@@ -326,37 +343,42 @@ export class AppointmentMigrationService {
   /**
    * Assess migration risk for an appointment
    */
-  private async assessMigrationRisk(appointment: any, therapistCalendarInfo: any): Promise<MigrationPlan['riskAssessment']> {
+  private async assessMigrationRisk(
+    appointment: any,
+    therapistCalendarInfo: any
+  ): Promise<MigrationPlan["riskAssessment"]> {
     const warnings: string[] = [];
-    let riskLevel: 'low' | 'medium' | 'high' = 'low';
+    let riskLevel: "low" | "medium" | "high" = "low";
 
     // Check if therapist has calendar configured
     const hasTherapistCalendar = therapistCalendarInfo.isConfigured;
     if (!hasTherapistCalendar) {
-      warnings.push('Therapist calendar not properly configured');
-      riskLevel = 'high';
+      warnings.push("Therapist calendar not properly configured");
+      riskLevel = "high";
     }
 
     // Check for scheduling conflicts on therapist calendar - CRITICAL FIX
     let hasConflicts = false;
     if (hasTherapistCalendar) {
       try {
-        console.log(`🔍 Checking conflicts for appointment ${appointment.id} on therapist calendar`);
+        console.log(
+          `🔍 Checking conflicts for appointment ${appointment.id} on therapist calendar`
+        );
         const busyTimes = await googleCalendarService.getTherapistBusyTimes(
           appointment.primaryTherapistId,
           {
             startTime: new Date(appointment.scheduledAt.getTime() - 15 * 60 * 1000), // 15 min buffer
-            endTime: new Date(appointment.endTime.getTime() + 15 * 60 * 1000) // 15 min buffer
+            endTime: new Date(appointment.endTime.getTime() + 15 * 60 * 1000), // 15 min buffer
           }
         );
 
         // Check for actual conflicts
-        hasConflicts = busyTimes.some(busyTime => {
+        hasConflicts = busyTimes.some((busyTime) => {
           const appointmentStart = appointment.scheduledAt.getTime();
           const appointmentEnd = appointment.endTime.getTime();
           const busyStart = busyTime.start.getTime();
           const busyEnd = busyTime.end.getTime();
-          
+
           return (
             (appointmentStart >= busyStart && appointmentStart < busyEnd) ||
             (appointmentEnd > busyStart && appointmentEnd <= busyEnd) ||
@@ -365,15 +387,15 @@ export class AppointmentMigrationService {
         });
 
         if (hasConflicts) {
-          warnings.push('Calendar conflict detected on therapist calendar');
-          riskLevel = 'high';
+          warnings.push("Calendar conflict detected on therapist calendar");
+          riskLevel = "high";
           console.log(`⚠️ Conflict detected for appointment ${appointment.id}:`, busyTimes);
         } else {
           console.log(`✅ No conflicts found for appointment ${appointment.id}`);
         }
       } catch (error: any) {
         warnings.push(`Could not check for scheduling conflicts: ${error.message}`);
-        riskLevel = riskLevel === 'high' ? 'high' : 'medium';
+        riskLevel = riskLevel === "high" ? "high" : "medium";
         console.error(`❌ Conflict check failed for appointment ${appointment.id}:`, error.message);
       }
     }
@@ -381,16 +403,16 @@ export class AppointmentMigrationService {
     // Check if appointment is soon (less than 24 hours)
     const now = new Date();
     const appointmentTime = new Date(appointment.scheduledAt);
-    const isUpcoming = (appointmentTime.getTime() - now.getTime()) < (24 * 60 * 60 * 1000);
-    
+    const isUpcoming = appointmentTime.getTime() - now.getTime() < 24 * 60 * 60 * 1000;
+
     if (isUpcoming) {
-      warnings.push('Appointment is within 24 hours');
-      riskLevel = riskLevel === 'high' ? 'high' : 'medium';
+      warnings.push("Appointment is within 24 hours");
+      riskLevel = riskLevel === "high" ? "high" : "medium";
     }
 
     // Check if appointment has Google Meet link
     if (!appointment.googleMeetLink) {
-      warnings.push('No Google Meet link - will generate new one');
+      warnings.push("No Google Meet link - will generate new one");
     }
 
     return {
@@ -398,7 +420,7 @@ export class AppointmentMigrationService {
       hasConflicts,
       isUpcoming,
       riskLevel,
-      warnings
+      warnings,
     };
   }
 
@@ -408,7 +430,7 @@ export class AppointmentMigrationService {
   async migrateAppointment(plan: MigrationPlan, retryCount = 0): Promise<MigrationResult> {
     const startTime = Date.now();
     const warnings: string[] = [];
-    
+
     try {
       console.log(`🔄 Migrating appointment ${plan.appointmentId} (attempt ${retryCount + 1})`);
 
@@ -418,21 +440,21 @@ export class AppointmentMigrationService {
         return {
           appointmentId: plan.appointmentId,
           success: true,
-          warnings: ['Dry run - no actual migration performed'],
-          timeElapsed: Date.now() - startTime
+          warnings: ["Dry run - no actual migration performed"],
+          timeElapsed: Date.now() - startTime,
         };
       }
 
       // Skip high-risk migrations if configured
-      if (plan.riskAssessment.riskLevel === 'high' && this.config.skipConflicts) {
+      if (plan.riskAssessment.riskLevel === "high" && this.config.skipConflicts) {
         console.log(`⚠️ Skipping high-risk migration for appointment ${plan.appointmentId}`);
-        plan.migrationStatus = 'skipped';
+        plan.migrationStatus = "skipped";
         return {
           appointmentId: plan.appointmentId,
           success: false,
-          error: 'Skipped due to high risk level',
+          error: "Skipped due to high risk level",
           warnings: plan.riskAssessment.warnings,
-          timeElapsed: Date.now() - startTime
+          timeElapsed: Date.now() - startTime,
         };
       }
 
@@ -449,11 +471,11 @@ export class AppointmentMigrationService {
         attendees: plan.preservedData.attendees,
         appointmentId: plan.appointmentId,
         therapistId: plan.therapistId,
-        useAdminCalendar: false // Force therapist calendar usage
+        useAdminCalendar: false, // Force therapist calendar usage
       });
 
-      if (!newEventResult || typeof newEventResult !== 'object') {
-        throw new Error('Failed to create event on therapist calendar - invalid response');
+      if (!newEventResult || typeof newEventResult !== "object") {
+        throw new Error("Failed to create event on therapist calendar - invalid response");
       }
 
       // Extract event details - Calendar API returns proper Google Meet URL
@@ -462,11 +484,11 @@ export class AppointmentMigrationService {
       const meetingId = newEventResult.meetingId;
 
       if (!newEventId) {
-        throw new Error('Failed to create event - no event ID returned');
+        throw new Error("Failed to create event - no event ID returned");
       }
 
-      if (!meetingUrl || !meetingUrl.includes('meet.google.com')) {
-        warnings.push('Google Meet URL not properly generated');
+      if (!meetingUrl || !meetingUrl.includes("meet.google.com")) {
+        warnings.push("Google Meet URL not properly generated");
       }
 
       plan.newEventId = newEventId;
@@ -478,7 +500,7 @@ export class AppointmentMigrationService {
           calendarEventId: newEventId,
           googleEventId: newEventId,
           googleMeetLink: meetingUrl || plan.preservedData.googleMeetUrl, // Use Calendar API generated URL
-          updatedAt: new Date()
+          updatedAt: new Date(),
         })
         .where(eq(appointments.id, plan.appointmentId));
 
@@ -502,30 +524,34 @@ export class AppointmentMigrationService {
         }
       }
 
-      plan.migrationStatus = 'migrated';
-      
-      console.log(`✅ Successfully migrated appointment ${plan.appointmentId} to event ${newEventId}`);
+      plan.migrationStatus = "migrated";
+
+      console.log(
+        `✅ Successfully migrated appointment ${plan.appointmentId} to event ${newEventId}`
+      );
 
       return {
         appointmentId: plan.appointmentId,
         success: true,
         newEventId,
         warnings,
-        timeElapsed: Date.now() - startTime
+        timeElapsed: Date.now() - startTime,
       };
-
     } catch (error: any) {
       console.error(`❌ Migration failed for appointment ${plan.appointmentId}:`, error.message);
-      
-      plan.migrationStatus = 'failed';
+
+      plan.migrationStatus = "failed";
 
       // Attempt rollback if we created an event
       if (plan.newEventId) {
         try {
           await this.rollbackMigration(plan.appointmentId, plan.newEventId);
-          plan.migrationStatus = 'rollback_needed';
+          plan.migrationStatus = "rollback_needed";
         } catch (rollbackError: any) {
-          console.error(`❌ Rollback failed for appointment ${plan.appointmentId}:`, rollbackError.message);
+          console.error(
+            `❌ Rollback failed for appointment ${plan.appointmentId}:`,
+            rollbackError.message
+          );
         }
       }
 
@@ -541,7 +567,7 @@ export class AppointmentMigrationService {
         success: false,
         error: error.message,
         warnings,
-        timeElapsed: Date.now() - startTime
+        timeElapsed: Date.now() - startTime,
       };
     }
   }
@@ -560,11 +586,11 @@ export class AppointmentMigrationService {
       warnings: [],
       timeElapsed: 0,
       apiCallsUsed: 0,
-      successRate: 0
+      successRate: 0,
     };
 
     if (plans.length === 0) {
-      console.log('ℹ️ No appointments to migrate');
+      console.log("ℹ️ No appointments to migrate");
       return summary;
     }
 
@@ -573,40 +599,44 @@ export class AppointmentMigrationService {
     this.migrationStats.apiCalls = 0;
 
     console.log(`🚀 Starting batch migration of ${plans.length} appointments...`);
-    console.log(`📋 Configuration: batchSize=${this.config.batchSize}, dryRun=${this.config.dryRun}`);
+    console.log(
+      `📋 Configuration: batchSize=${this.config.batchSize}, dryRun=${this.config.dryRun}`
+    );
 
     // Process appointments in batches
     const batches = this.chunk(plans, this.config.batchSize || 5);
-    
+
     for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
       const batch = batches[batchIndex];
-      console.log(`📦 Processing batch ${batchIndex + 1}/${batches.length} (${batch.length} appointments)`);
+      console.log(
+        `📦 Processing batch ${batchIndex + 1}/${batches.length} (${batch.length} appointments)`
+      );
 
       // Process batch concurrently
-      const batchPromises = batch.map(plan => this.migrateAppointment(plan));
+      const batchPromises = batch.map((plan) => this.migrateAppointment(plan));
       const batchResults = await Promise.allSettled(batchPromises);
 
       // Process results
       for (let i = 0; i < batchResults.length; i++) {
         const result = batchResults[i];
         const plan = batch[i];
-        
+
         summary.processed++;
 
-        if (result.status === 'fulfilled') {
+        if (result.status === "fulfilled") {
           const migrationResult = result.value;
-          
+
           if (migrationResult.success) {
             summary.successful++;
           } else {
-            if (migrationResult.error?.includes('Skipped')) {
+            if (migrationResult.error?.includes("Skipped")) {
               summary.skipped++;
             } else {
               summary.failed++;
               summary.errors.push({
                 appointmentId: plan.appointmentId,
-                error: migrationResult.error || 'Unknown error',
-                type: 'migration'
+                error: migrationResult.error || "Unknown error",
+                type: "migration",
               });
             }
           }
@@ -616,8 +646,8 @@ export class AppointmentMigrationService {
           summary.failed++;
           summary.errors.push({
             appointmentId: plan.appointmentId,
-            error: result.reason?.message || 'Promise rejected',
-            type: 'promise'
+            error: result.reason?.message || "Promise rejected",
+            type: "promise",
           });
         }
       }
@@ -631,9 +661,10 @@ export class AppointmentMigrationService {
 
     summary.timeElapsed = Date.now() - startTime;
     summary.apiCallsUsed = this.migrationStats.apiCalls;
-    summary.successRate = summary.processed > 0 ? (summary.successful / summary.processed) * 100 : 0;
+    summary.successRate =
+      summary.processed > 0 ? (summary.successful / summary.processed) * 100 : 0;
 
-    console.log('🎯 Migration batch completed:');
+    console.log("🎯 Migration batch completed:");
     console.log(`  📊 Total: ${summary.totalAppointments}`);
     console.log(`  ✅ Successful: ${summary.successful}`);
     console.log(`  ❌ Failed: ${summary.failed}`);
@@ -648,9 +679,14 @@ export class AppointmentMigrationService {
   /**
    * ENHANCED: Verify that a migration was successful with comprehensive checks
    */
-  async verifyMigration(appointmentId: string, newEventId: string): Promise<{ success: boolean; error?: string; details?: any }> {
+  async verifyMigration(
+    appointmentId: string,
+    newEventId: string
+  ): Promise<{ success: boolean; error?: string; details?: any }> {
     try {
-      console.log(`🔍 Verifying migration for appointment ${appointmentId} with event ${newEventId}`);
+      console.log(
+        `🔍 Verifying migration for appointment ${appointmentId} with event ${newEventId}`
+      );
 
       // Check database record
       const appointment = await db
@@ -660,33 +696,37 @@ export class AppointmentMigrationService {
         .limit(1);
 
       if (appointment.length === 0) {
-        return { success: false, error: 'Appointment not found in database' };
+        return { success: false, error: "Appointment not found in database" };
       }
 
       const appt = appointment[0];
 
       // Verify event ID was updated
       if (appt.calendarEventId !== newEventId && appt.googleEventId !== newEventId) {
-        return { success: false, error: 'Database record not updated with new event ID' };
+        return { success: false, error: "Database record not updated with new event ID" };
       }
 
       // Verify therapist is assigned
       if (!appt.primaryTherapistId) {
-        return { success: false, error: 'No therapist assigned to appointment' };
+        return { success: false, error: "No therapist assigned to appointment" };
       }
 
       // Verify event exists on therapist calendar
       this.migrationStats.apiCalls++;
-      const event = await googleCalendarService.getSessionEvent(newEventId, appt.primaryTherapistId, false);
-      
+      const event = await googleCalendarService.getSessionEvent(
+        newEventId,
+        appt.primaryTherapistId,
+        false
+      );
+
       if (!event) {
-        return { success: false, error: 'Event not found on therapist calendar' };
+        return { success: false, error: "Event not found on therapist calendar" };
       }
 
       // CRITICAL: Verify Google Meet URL is valid
       const meetUrl = appt.googleMeetLink;
-      if (!meetUrl || !meetUrl.includes('meet.google.com')) {
-        return { success: false, error: 'Invalid or missing Google Meet URL in database' };
+      if (!meetUrl || !meetUrl.includes("meet.google.com")) {
+        return { success: false, error: "Invalid or missing Google Meet URL in database" };
       }
 
       // Get client details for attendee verification
@@ -699,18 +739,20 @@ export class AppointmentMigrationService {
       }
 
       console.log(`✅ Migration verification successful for appointment ${appointmentId}`);
-      return { 
+      return {
         success: true,
         details: {
           eventId: newEventId,
           meetingUrl: meetUrl,
           therapistId: appt.primaryTherapistId,
-          scheduledAt: appt.scheduledAt
-        }
+          scheduledAt: appt.scheduledAt,
+        },
       };
-
     } catch (error: any) {
-      console.error(`❌ Migration verification failed for appointment ${appointmentId}:`, error.message);
+      console.error(
+        `❌ Migration verification failed for appointment ${appointmentId}:`,
+        error.message
+      );
       return { success: false, error: error.message };
     }
   }
@@ -733,7 +775,11 @@ export class AppointmentMigrationService {
 
           if (appointment.length > 0 && appointment[0].primaryTherapistId) {
             this.migrationStats.apiCalls++;
-            await googleCalendarService.deleteEvent(newEventId, appointment[0].primaryTherapistId, false);
+            await googleCalendarService.deleteEvent(
+              newEventId,
+              appointment[0].primaryTherapistId,
+              false
+            );
             console.log(`🗑️ Deleted failed event ${newEventId}`);
           }
         } catch (deleteError) {
@@ -745,7 +791,6 @@ export class AppointmentMigrationService {
       // This would need to be implemented based on backup strategy
 
       console.log(`✅ Rollback completed for appointment ${appointmentId}`);
-
     } catch (error: any) {
       console.error(`❌ Rollback failed for appointment ${appointmentId}:`, error.message);
       throw error;
@@ -767,7 +812,7 @@ export class AppointmentMigrationService {
       if (appointment.length > 0) {
         plan.backup = {
           originalDbRecord: appointment[0],
-          originalEventData: null
+          originalEventData: null,
         };
 
         // Try to get original calendar event data
@@ -775,7 +820,7 @@ export class AppointmentMigrationService {
           try {
             this.migrationStats.apiCalls++;
             const originalEvent = await googleCalendarService.getSessionEvent(
-              plan.originalEventId, 
+              plan.originalEventId,
               undefined,
               true
             );
@@ -788,7 +833,10 @@ export class AppointmentMigrationService {
         }
       }
     } catch (error: any) {
-      console.warn(`⚠️ Could not backup original data for appointment ${plan.appointmentId}:`, error.message);
+      console.warn(
+        `⚠️ Could not backup original data for appointment ${plan.appointmentId}:`,
+        error.message
+      );
     }
   }
 
@@ -801,7 +849,7 @@ export class AppointmentMigrationService {
         id: users.id,
         email: users.email,
         firstName: users.firstName,
-        lastName: users.lastName
+        lastName: users.lastName,
       })
       .from(users)
       .where(eq(users.id, userId))
@@ -815,19 +863,19 @@ export class AppointmentMigrationService {
    */
   private logMigrationAssessment(plans: MigrationPlan[]): void {
     const riskCounts = {
-      low: plans.filter(p => p.riskAssessment.riskLevel === 'low').length,
-      medium: plans.filter(p => p.riskAssessment.riskLevel === 'medium').length,
-      high: plans.filter(p => p.riskAssessment.riskLevel === 'high').length
+      low: plans.filter((p) => p.riskAssessment.riskLevel === "low").length,
+      medium: plans.filter((p) => p.riskAssessment.riskLevel === "medium").length,
+      high: plans.filter((p) => p.riskAssessment.riskLevel === "high").length,
     };
 
-    console.log('📊 Migration Assessment Summary:');
+    console.log("📊 Migration Assessment Summary:");
     console.log(`  📋 Total plans: ${plans.length}`);
     console.log(`  🟢 Low risk: ${riskCounts.low}`);
     console.log(`  🟡 Medium risk: ${riskCounts.medium}`);
     console.log(`  🔴 High risk: ${riskCounts.high}`);
 
     if (riskCounts.high > 0) {
-      console.log('⚠️ High-risk appointments detected - review before proceeding');
+      console.log("⚠️ High-risk appointments detected - review before proceeding");
     }
   }
 
@@ -846,7 +894,7 @@ export class AppointmentMigrationService {
    * Utility: Delay execution
    */
   private delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   /**
@@ -855,7 +903,7 @@ export class AppointmentMigrationService {
   getMigrationStats(): { apiCalls: number; timeElapsed: number } {
     return {
       apiCalls: this.migrationStats.apiCalls,
-      timeElapsed: Date.now() - this.migrationStats.startTime
+      timeElapsed: Date.now() - this.migrationStats.startTime,
     };
   }
 }
@@ -864,7 +912,7 @@ export class AppointmentMigrationService {
 export const appointmentMigrationService = new AppointmentMigrationService();
 
 // Named exports for different configurations
-export const createMigrationService = (config: Partial<MigrationConfig>) => 
+export const createMigrationService = (config: Partial<MigrationConfig>) =>
   new AppointmentMigrationService(config);
 
 export const dryRunMigrationService = new AppointmentMigrationService({ dryRun: true });

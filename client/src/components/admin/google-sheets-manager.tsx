@@ -1,22 +1,44 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { useToast } from '@/hooks/use-toast';
-import { Sheet, Plus, ExternalLink, RefreshCw, CheckCircle, Clock, Archive, AlertTriangle } from 'lucide-react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Sheet,
+  Plus,
+  ExternalLink,
+  RefreshCw,
+  CheckCircle,
+  Clock,
+  Archive,
+  AlertTriangle,
+} from "lucide-react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 
 interface FormResponse {
   id: string;
   timestamp: string;
   formType: string;
   data: Record<string, any>;
-  status: 'pending' | 'processed' | 'archived';
+  status: "pending" | "processed" | "archived";
 }
 
 interface SheetConfig {
@@ -30,29 +52,29 @@ interface SheetConfig {
 export function GoogleSheetsManager() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  
-  const [selectedFormType, setSelectedFormType] = useState('introduction-call');
-  const [spreadsheetId, setSpreadsheetId] = useState('');
-  const [newSpreadsheetTitle, setNewSpreadsheetTitle] = useState('Hive Wellness Form Responses');
+
+  const [selectedFormType, setSelectedFormType] = useState("introduction-call");
+  const [spreadsheetId, setSpreadsheetId] = useState("");
+  const [newSpreadsheetTitle, setNewSpreadsheetTitle] = useState("Hive Wellness Form Responses");
 
   // Get sheet configurations
   const { data: sheetConfigs = [], isLoading: configsLoading } = useQuery<SheetConfig[]>({
-    queryKey: ['/api/admin/google-sheets/configs'],
+    queryKey: ["/api/admin/google-sheets/configs"],
     refetchInterval: 300000, // Refresh every 5 minutes
-    staleTime: 180000 // Keep data fresh for 3 minutes
+    staleTime: 180000, // Keep data fresh for 3 minutes
   });
 
   // Get form responses for selected type
   const { data: formResponses = [], isLoading: responsesLoading } = useQuery<FormResponse[]>({
-    queryKey: ['/api/admin/google-sheets/responses', selectedFormType],
+    queryKey: ["/api/admin/google-sheets/responses", selectedFormType],
     refetchInterval: 180000, // Refresh every 3 minutes
     staleTime: 120000, // Keep data fresh for 2 minutes
-    enabled: !!selectedFormType
+    enabled: !!selectedFormType,
   });
 
   // Get current spreadsheet ID
   const { data: currentSpreadsheetId } = useQuery<string>({
-    queryKey: ['/api/admin/google-sheets/current-id']
+    queryKey: ["/api/admin/google-sheets/current-id"],
   });
 
   useEffect(() => {
@@ -64,81 +86,98 @@ export function GoogleSheetsManager() {
   // Create new spreadsheet mutation
   const createSpreadsheetMutation = useMutation({
     mutationFn: async (title: string) => {
-      const response = await fetch('/api/admin/google-sheets/create', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title })
+      const response = await fetch("/api/admin/google-sheets/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title }),
       });
-      
-      if (!response.ok) throw new Error('Failed to create spreadsheet');
+
+      if (!response.ok) throw new Error("Failed to create spreadsheet");
       return response.json();
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/google-sheets'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/google-sheets"] });
       setSpreadsheetId(data.spreadsheetId);
-      toast({ 
-        title: 'Spreadsheet created successfully', 
-        description: `New spreadsheet created: ${newSpreadsheetTitle}` 
+      toast({
+        title: "Spreadsheet created successfully",
+        description: `New spreadsheet created: ${newSpreadsheetTitle}`,
       });
     },
     onError: () => {
-      toast({ title: 'Failed to create spreadsheet', variant: 'destructive' });
-    }
+      toast({ title: "Failed to create spreadsheet", variant: "destructive" });
+    },
   });
 
   // Initialize sheet for form type mutation
   const initializeSheetMutation = useMutation({
-    mutationFn: async ({ formType, spreadsheetId }: { formType: string; spreadsheetId: string }) => {
-      const response = await fetch('/api/admin/google-sheets/initialize', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ formType, spreadsheetId })
+    mutationFn: async ({
+      formType,
+      spreadsheetId,
+    }: {
+      formType: string;
+      spreadsheetId: string;
+    }) => {
+      const response = await fetch("/api/admin/google-sheets/initialize", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ formType, spreadsheetId }),
       });
-      
+
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-        throw new Error(errorData.message || errorData.error || 'Failed to initialize sheet');
+        const errorData = await response.json().catch(() => ({ error: "Unknown error" }));
+        throw new Error(errorData.message || errorData.error || "Failed to initialize sheet");
       }
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/google-sheets'] });
-      toast({ title: 'Sheet initialized successfully' });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/google-sheets"] });
+      toast({ title: "Sheet initialized successfully" });
     },
     onError: (error: Error) => {
-      const isAuthError = error.message.includes('OAuth') || error.message.includes('authentication');
-      toast({ 
-        title: 'Failed to initialize sheet', 
-        description: isAuthError ? 'Google authentication required. Please re-authenticate.' : error.message,
-        variant: 'destructive' 
+      const isAuthError =
+        error.message.includes("OAuth") || error.message.includes("authentication");
+      toast({
+        title: "Failed to initialize sheet",
+        description: isAuthError
+          ? "Google authentication required. Please re-authenticate."
+          : error.message,
+        variant: "destructive",
       });
-    }
+    },
   });
 
   // Update response status mutation
   const updateStatusMutation = useMutation({
-    mutationFn: async ({ formType, identifier, status }: { formType: string; identifier: string; status: string }) => {
-      const response = await fetch('/api/admin/google-sheets/update-status', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ formType, identifier, status })
+    mutationFn: async ({
+      formType,
+      identifier,
+      status,
+    }: {
+      formType: string;
+      identifier: string;
+      status: string;
+    }) => {
+      const response = await fetch("/api/admin/google-sheets/update-status", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ formType, identifier, status }),
       });
-      
-      if (!response.ok) throw new Error('Failed to update status');
+
+      if (!response.ok) throw new Error("Failed to update status");
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/google-sheets/responses'] });
-      toast({ title: 'Status updated successfully' });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/google-sheets/responses"] });
+      toast({ title: "Status updated successfully" });
     },
     onError: () => {
-      toast({ title: 'Failed to update status', variant: 'destructive' });
-    }
+      toast({ title: "Failed to update status", variant: "destructive" });
+    },
   });
 
   const handleCreateSpreadsheet = () => {
     if (!newSpreadsheetTitle.trim()) {
-      toast({ title: 'Please enter a spreadsheet title' });
+      toast({ title: "Please enter a spreadsheet title" });
       return;
     }
     createSpreadsheetMutation.mutate(newSpreadsheetTitle);
@@ -146,7 +185,7 @@ export function GoogleSheetsManager() {
 
   const handleInitializeSheet = (formType: string) => {
     if (!spreadsheetId) {
-      toast({ title: 'Please set a spreadsheet ID first' });
+      toast({ title: "Please set a spreadsheet ID first" });
       return;
     }
     initializeSheetMutation.mutate({ formType, spreadsheetId });
@@ -154,19 +193,27 @@ export function GoogleSheetsManager() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'pending': return 'default';
-      case 'processed': return 'secondary';
-      case 'archived': return 'outline';
-      default: return 'default';
+      case "pending":
+        return "default";
+      case "processed":
+        return "secondary";
+      case "archived":
+        return "outline";
+      default:
+        return "default";
     }
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'pending': return <Clock className="h-4 w-4" />;
-      case 'processed': return <CheckCircle className="h-4 w-4" />;
-      case 'archived': return <Archive className="h-4 w-4" />;
-      default: return <Clock className="h-4 w-4" />;
+      case "pending":
+        return <Clock className="h-4 w-4" />;
+      case "processed":
+        return <CheckCircle className="h-4 w-4" />;
+      case "archived":
+        return <Archive className="h-4 w-4" />;
+      default:
+        return <Clock className="h-4 w-4" />;
     }
   };
 
@@ -185,7 +232,9 @@ export function GoogleSheetsManager() {
         {spreadsheetId && (
           <Button
             variant="outline"
-            onClick={() => window.open(`https://docs.google.com/spreadsheets/d/${spreadsheetId}/edit`, '_blank')}
+            onClick={() =>
+              window.open(`https://docs.google.com/spreadsheets/d/${spreadsheetId}/edit`, "_blank")
+            }
           >
             <ExternalLink className="h-4 w-4 mr-2" />
             Open Spreadsheet
@@ -199,7 +248,7 @@ export function GoogleSheetsManager() {
           <TabsTrigger value="responses">Form Responses</TabsTrigger>
           <TabsTrigger value="analytics">Analytics</TabsTrigger>
         </TabsList>
-        
+
         <TabsContent value="setup" className="space-y-6">
           {/* Google Authentication Status */}
           <Card className="border-amber-200 bg-amber-50/50">
@@ -215,7 +264,9 @@ export function GoogleSheetsManager() {
             <CardContent className="space-y-3">
               <div className="flex items-center gap-2">
                 <div className="h-2 w-2 rounded-full bg-red-500"></div>
-                <span className="text-sm">Authentication Required - Google OAuth token expired</span>
+                <span className="text-sm">
+                  Authentication Required - Google OAuth token expired
+                </span>
               </div>
               <div className="text-sm text-muted-foreground space-y-2">
                 <p>To enable Google Sheets integration:</p>
@@ -226,7 +277,8 @@ export function GoogleSheetsManager() {
                   <li>Restart the application</li>
                 </ol>
                 <p className="text-xs text-amber-700 mt-2">
-                  📝 Note: Until authentication is restored, Google Sheets features will show fallback responses
+                  📝 Note: Until authentication is restored, Google Sheets features will show
+                  fallback responses
                 </p>
               </div>
             </CardContent>
@@ -260,7 +312,7 @@ export function GoogleSheetsManager() {
                       onChange={(e) => setNewSpreadsheetTitle(e.target.value)}
                       placeholder="Spreadsheet title"
                     />
-                    <Button 
+                    <Button
                       onClick={handleCreateSpreadsheet}
                       disabled={createSpreadsheetMutation.isPending}
                     >
@@ -277,9 +329,7 @@ export function GoogleSheetsManager() {
           <Card>
             <CardHeader>
               <CardTitle>Worksheet Configuration</CardTitle>
-              <CardDescription>
-                Initialize worksheets for different form types
-              </CardDescription>
+              <CardDescription>Initialize worksheets for different form types</CardDescription>
             </CardHeader>
             <CardContent>
               {configsLoading ? (
@@ -287,14 +337,17 @@ export function GoogleSheetsManager() {
               ) : (
                 <div className="grid gap-4">
                   {sheetConfigs.map((config) => (
-                    <div key={config.formType} className="flex items-center justify-between p-4 border rounded-lg">
+                    <div
+                      key={config.formType}
+                      className="flex items-center justify-between p-4 border rounded-lg"
+                    >
                       <div>
                         <h4 className="font-medium">{config.worksheetName}</h4>
                         <p className="text-sm text-muted-foreground">
                           {config.headers.length} columns • {config.responseCount} responses
                         </p>
                         <div className="flex gap-1 mt-2">
-                          {config.headers.slice(0, 3).map(header => (
+                          {config.headers.slice(0, 3).map((header) => (
                             <Badge key={header} variant="outline" className="text-xs">
                               {header}
                             </Badge>
@@ -324,7 +377,7 @@ export function GoogleSheetsManager() {
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="responses" className="space-y-6">
           <Card>
             <CardHeader>
@@ -377,26 +430,33 @@ export function GoogleSheetsManager() {
                               {new Date(response.timestamp).toLocaleDateString()}
                             </TableCell>
                             <TableCell>
-                              {response.data['Full Name'] || response.data['First Name'] + ' ' + response.data['Last Name'] || 'N/A'}
+                              {response.data["Full Name"] ||
+                                response.data["First Name"] + " " + response.data["Last Name"] ||
+                                "N/A"}
                             </TableCell>
-                            <TableCell>{response.data['Email'] || 'N/A'}</TableCell>
+                            <TableCell>{response.data["Email"] || "N/A"}</TableCell>
                             <TableCell>
-                              <Badge variant={getStatusColor(response.status)} className="flex items-center gap-1 w-fit">
+                              <Badge
+                                variant={getStatusColor(response.status)}
+                                className="flex items-center gap-1 w-fit"
+                              >
                                 {getStatusIcon(response.status)}
                                 {response.status}
                               </Badge>
                             </TableCell>
                             <TableCell>
                               <div className="flex gap-2">
-                                {response.status === 'pending' && (
+                                {response.status === "pending" && (
                                   <Button
                                     size="sm"
                                     variant="outline"
-                                    onClick={() => updateStatusMutation.mutate({
-                                      formType: selectedFormType,
-                                      identifier: response.data['Email'] || response.id,
-                                      status: 'processed'
-                                    })}
+                                    onClick={() =>
+                                      updateStatusMutation.mutate({
+                                        formType: selectedFormType,
+                                        identifier: response.data["Email"] || response.id,
+                                        status: "processed",
+                                      })
+                                    }
                                   >
                                     Mark Processed
                                   </Button>
@@ -413,7 +473,7 @@ export function GoogleSheetsManager() {
             </CardContent>
           </Card>
         </TabsContent>
-        
+
         <TabsContent value="analytics" className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <Card>
@@ -427,41 +487,42 @@ export function GoogleSheetsManager() {
                 <p className="text-sm text-muted-foreground">Across all forms</p>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader>
                 <CardTitle>Most Active Form</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-lg font-semibold">
-                  {sheetConfigs.length > 0 
-                    ? sheetConfigs.reduce((max, config) => 
+                  {sheetConfigs.length > 0
+                    ? sheetConfigs.reduce((max, config) =>
                         config.responseCount > max.responseCount ? config : max
                       ).worksheetName
-                    : 'N/A'
-                  }
+                    : "N/A"}
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  {sheetConfigs.length > 0 
-                    ? `${sheetConfigs.reduce((max, config) => 
-                        config.responseCount > max.responseCount ? config : max
-                      ).responseCount} responses`
-                    : 'No data'
-                  }
+                  {sheetConfigs.length > 0
+                    ? `${
+                        sheetConfigs.reduce((max, config) =>
+                          config.responseCount > max.responseCount ? config : max
+                        ).responseCount
+                      } responses`
+                    : "No data"}
                 </p>
               </CardContent>
             </Card>
-            
+
             <Card>
               <CardHeader>
                 <CardTitle>Last Updated</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="text-lg font-semibold">
-                  {sheetConfigs.length > 0 
-                    ? new Date(Math.max(...sheetConfigs.map(c => new Date(c.lastUpdated).getTime()))).toLocaleDateString()
-                    : 'N/A'
-                  }
+                  {sheetConfigs.length > 0
+                    ? new Date(
+                        Math.max(...sheetConfigs.map((c) => new Date(c.lastUpdated).getTime()))
+                      ).toLocaleDateString()
+                    : "N/A"}
                 </div>
                 <p className="text-sm text-muted-foreground">Most recent activity</p>
               </CardContent>

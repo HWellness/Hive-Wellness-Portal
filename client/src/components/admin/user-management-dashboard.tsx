@@ -1,12 +1,18 @@
-import { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { apiRequest } from '@/lib/queryClient';
-import { Eye, Search, Download, Filter, Users, Mail, UserCheck, Shield } from 'lucide-react';
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { apiRequest } from "@/lib/queryClient";
+import { Eye, Search, Download, Filter, Users, Mail, UserCheck, Shield } from "lucide-react";
 
 interface User {
   id: string;
@@ -20,43 +26,48 @@ interface User {
 }
 
 export default function UserManagementDashboard() {
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedRole, setSelectedRole] = useState('all');
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedRole, setSelectedRole] = useState("all");
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-  const { data: users = [], isLoading, refetch } = useQuery<User[]>({
-    queryKey: ['/api/admin/users'],
+  const {
+    data: users = [],
+    isLoading,
+    refetch,
+  } = useQuery<User[]>({
+    queryKey: ["/api/admin/users"],
     queryFn: async () => {
-      const response = await apiRequest('GET', '/api/admin/users');
+      const response = await apiRequest("GET", "/api/admin/users");
       return response.json();
-    }
+    },
   });
 
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = searchTerm === '' || 
+  const filteredUsers = users.filter((user) => {
+    const matchesSearch =
+      searchTerm === "" ||
       user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
       (user.firstName && user.firstName.toLowerCase().includes(searchTerm.toLowerCase())) ||
       (user.lastName && user.lastName.toLowerCase().includes(searchTerm.toLowerCase()));
-    
-    const matchesRole = selectedRole === 'all' || user.role === selectedRole;
-    
+
+    const matchesRole = selectedRole === "all" || user.role === selectedRole;
+
     return matchesSearch && matchesRole;
   });
 
-  const roles = [...new Set(users.map(u => u.role))];
+  const roles = [...new Set(users.map((u) => u.role))];
 
   const getRoleColor = (role: string) => {
     const colors = {
-      'admin': 'bg-red-100 text-red-800',
-      'therapist': 'bg-purple-100 text-purple-800',
-      'client': 'bg-blue-100 text-blue-800',
-      'institution': 'bg-green-100 text-green-800',
+      admin: "bg-red-100 text-red-800",
+      therapist: "bg-purple-100 text-purple-800",
+      client: "bg-blue-100 text-blue-800",
+      institution: "bg-green-100 text-green-800",
     };
-    return colors[role as keyof typeof colors] || 'bg-gray-100 text-gray-800';
+    return colors[role as keyof typeof colors] || "bg-gray-100 text-gray-800";
   };
 
   const getStatusColor = (isActive: boolean) => {
-    return isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+    return isActive ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800";
   };
 
   if (isLoading) {
@@ -76,7 +87,9 @@ export default function UserManagementDashboard() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-primary font-bold text-hive-purple">User Management</h2>
-          <p className="text-hive-black/70 font-secondary">Manage all platform users and their access</p>
+          <p className="text-hive-black/70 font-secondary">
+            Manage all platform users and their access
+          </p>
         </div>
         <Button onClick={() => refetch()} variant="outline">
           <Download className="w-4 h-4 mr-2" />
@@ -97,42 +110,42 @@ export default function UserManagementDashboard() {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-secondary text-hive-black">Clients</p>
                 <p className="text-2xl font-primary font-bold text-hive-purple">
-                  {users.filter(u => u.role === 'client').length}
+                  {users.filter((u) => u.role === "client").length}
                 </p>
               </div>
               <UserCheck className="w-8 h-8 text-blue-600" />
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-secondary text-hive-black">Therapists</p>
                 <p className="text-2xl font-primary font-bold text-hive-purple">
-                  {users.filter(u => u.role === 'therapist').length}
+                  {users.filter((u) => u.role === "therapist").length}
                 </p>
               </div>
               <Shield className="w-8 h-8 text-purple-600" />
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-secondary text-hive-black">Active Users</p>
                 <p className="text-2xl font-primary font-bold text-hive-purple">
-                  {users.filter(u => u.isActive).length}
+                  {users.filter((u) => u.isActive).length}
                 </p>
               </div>
               <Users className="w-8 h-8 text-green-600" />
@@ -169,7 +182,7 @@ export default function UserManagementDashboard() {
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-hive-purple"
               >
                 <option value="all">All Roles</option>
-                {roles.map(role => (
+                {roles.map((role) => (
                   <option key={role} value={role}>
                     {role.charAt(0).toUpperCase() + role.slice(1)}
                   </option>
@@ -219,10 +232,9 @@ export default function UserManagementDashboard() {
                       <div className="flex items-center">
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">
-                            {user.firstName && user.lastName ? 
-                              `${user.firstName} ${user.lastName}` : 
-                              user.email.split('@')[0]
-                            }
+                            {user.firstName && user.lastName
+                              ? `${user.firstName} ${user.lastName}`
+                              : user.email.split("@")[0]}
                           </div>
                           <div className="text-sm text-gray-500">{user.email}</div>
                         </div>
@@ -235,20 +247,16 @@ export default function UserManagementDashboard() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <Badge className={getStatusColor(user.isActive)}>
-                        {user.isActive ? 'Active' : 'Inactive'}
+                        {user.isActive ? "Active" : "Inactive"}
                       </Badge>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(user.createdAt).toLocaleDateString('en-GB')}
+                      {new Date(user.createdAt).toLocaleDateString("en-GB")}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <Dialog>
                         <DialogTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setSelectedUser(user)}
-                          >
+                          <Button variant="outline" size="sm" onClick={() => setSelectedUser(user)}>
                             <Eye className="w-4 h-4 mr-1" />
                             View
                           </Button>
@@ -262,10 +270,9 @@ export default function UserManagementDashboard() {
                               <div>
                                 <label className="text-sm font-medium text-gray-500">Name</label>
                                 <p className="text-sm text-gray-900">
-                                  {selectedUser.firstName && selectedUser.lastName ? 
-                                    `${selectedUser.firstName} ${selectedUser.lastName}` : 
-                                    'Not provided'
-                                  }
+                                  {selectedUser.firstName && selectedUser.lastName
+                                    ? `${selectedUser.firstName} ${selectedUser.lastName}`
+                                    : "Not provided"}
                                 </p>
                               </div>
                               <div>
@@ -279,20 +286,22 @@ export default function UserManagementDashboard() {
                               <div>
                                 <label className="text-sm font-medium text-gray-500">Status</label>
                                 <p className="text-sm text-gray-900">
-                                  {selectedUser.isActive ? 'Active' : 'Inactive'}
+                                  {selectedUser.isActive ? "Active" : "Inactive"}
                                 </p>
                               </div>
                               <div>
                                 <label className="text-sm font-medium text-gray-500">Created</label>
                                 <p className="text-sm text-gray-900">
-                                  {new Date(selectedUser.createdAt).toLocaleDateString('en-GB')}
+                                  {new Date(selectedUser.createdAt).toLocaleDateString("en-GB")}
                                 </p>
                               </div>
                               {selectedUser.lastLogin && (
                                 <div>
-                                  <label className="text-sm font-medium text-gray-500">Last Login</label>
+                                  <label className="text-sm font-medium text-gray-500">
+                                    Last Login
+                                  </label>
                                   <p className="text-sm text-gray-900">
-                                    {new Date(selectedUser.lastLogin).toLocaleDateString('en-GB')}
+                                    {new Date(selectedUser.lastLogin).toLocaleDateString("en-GB")}
                                   </p>
                                 </div>
                               )}

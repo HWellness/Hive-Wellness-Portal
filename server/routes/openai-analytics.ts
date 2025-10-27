@@ -1,31 +1,31 @@
-import { Router, Request, Response } from 'express';
-import { nanoid } from 'nanoid';
-import { db } from '../db';
+import { Router, Request, Response } from "express";
+import { nanoid } from "nanoid";
+import { db } from "../db";
 import {
   openaiUsageLogs,
   openaiUsageAlerts,
   openaiUsageThresholds,
-  type InsertOpenAIUsageThreshold
-} from '@shared/schema';
-import { eq, and, gte, lte, desc, sql } from 'drizzle-orm';
-import { logger } from '../lib/logger';
-import { openaiTracking } from '../openai-tracking-service';
-import { z } from 'zod';
+  type InsertOpenAIUsageThreshold,
+} from "@shared/schema";
+import { eq, and, gte, lte, desc, sql } from "drizzle-orm";
+import { logger } from "../lib/logger";
+import { openaiTracking } from "../openai-tracking-service";
+import { z } from "zod";
 
 const router = Router();
 
 // Helper to require admin role
 function requireAdmin(req: Request, res: Response, next: Function) {
-  if (!req.session.user || req.session.user.role !== 'admin') {
-    return res.status(403).json({ message: 'Admin access required' });
+  if (!req.session.user || req.session.user.role !== "admin") {
+    return res.status(403).json({ message: "Admin access required" });
   }
   next();
 }
 
 // GET /api/admin/openai/analytics - Get usage analytics
-router.get('/analytics', requireAdmin, async (req: Request, res: Response) => {
+router.get("/analytics", requireAdmin, async (req: Request, res: Response) => {
   try {
-    const { startDate, endDate, days = '30' } = req.query;
+    const { startDate, endDate, days = "30" } = req.query;
 
     let start: Date, end: Date;
 
@@ -43,37 +43,37 @@ router.get('/analytics', requireAdmin, async (req: Request, res: Response) => {
     res.json({
       period: {
         start: start.toISOString(),
-        end: end.toISOString()
+        end: end.toISOString(),
       },
-      ...analytics
+      ...analytics,
     });
   } catch (error) {
-    logger.error('Failed to fetch OpenAI analytics', { error });
-    res.status(500).json({ message: 'Failed to fetch analytics' });
+    logger.error("Failed to fetch OpenAI analytics", { error });
+    res.status(500).json({ message: "Failed to fetch analytics" });
   }
 });
 
 // GET /api/admin/openai/daily-trend - Get daily usage trend
-router.get('/daily-trend', requireAdmin, async (req: Request, res: Response) => {
+router.get("/daily-trend", requireAdmin, async (req: Request, res: Response) => {
   try {
-    const { days = '30' } = req.query;
+    const { days = "30" } = req.query;
     const trend = await openaiTracking.getDailyUsageTrend(parseInt(days as string, 10));
 
     res.json({ trend });
   } catch (error) {
-    logger.error('Failed to fetch daily trend', { error });
-    res.status(500).json({ message: 'Failed to fetch daily trend' });
+    logger.error("Failed to fetch daily trend", { error });
+    res.status(500).json({ message: "Failed to fetch daily trend" });
   }
 });
 
 // GET /api/admin/openai/alerts - Get usage alerts
-router.get('/alerts', requireAdmin, async (req: Request, res: Response) => {
+router.get("/alerts", requireAdmin, async (req: Request, res: Response) => {
   try {
-    const { resolved = 'false', limit = '50' } = req.query;
+    const { resolved = "false", limit = "50" } = req.query;
 
     let query = db.select().from(openaiUsageAlerts);
 
-    if (resolved === 'false') {
+    if (resolved === "false") {
       query = query.where(eq(openaiUsageAlerts.resolvedAt, null as any));
     }
 
@@ -83,13 +83,13 @@ router.get('/alerts', requireAdmin, async (req: Request, res: Response) => {
 
     res.json({ alerts });
   } catch (error) {
-    logger.error('Failed to fetch alerts', { error });
-    res.status(500).json({ message: 'Failed to fetch alerts' });
+    logger.error("Failed to fetch alerts", { error });
+    res.status(500).json({ message: "Failed to fetch alerts" });
   }
 });
 
 // POST /api/admin/openai/alerts/:alertId/resolve - Resolve an alert
-router.post('/alerts/:alertId/resolve', requireAdmin, async (req: Request, res: Response) => {
+router.post("/alerts/:alertId/resolve", requireAdmin, async (req: Request, res: Response) => {
   try {
     const { alertId } = req.params;
     const { resolutionNotes } = req.body;
@@ -99,19 +99,19 @@ router.post('/alerts/:alertId/resolve', requireAdmin, async (req: Request, res: 
       .set({
         resolvedAt: new Date(),
         resolvedBy: req.session.user!.id,
-        resolutionNotes: resolutionNotes || null
+        resolutionNotes: resolutionNotes || null,
       })
       .where(eq(openaiUsageAlerts.id, alertId));
 
-    res.json({ success: true, message: 'Alert resolved' });
+    res.json({ success: true, message: "Alert resolved" });
   } catch (error) {
-    logger.error('Failed to resolve alert', { error });
-    res.status(500).json({ message: 'Failed to resolve alert' });
+    logger.error("Failed to resolve alert", { error });
+    res.status(500).json({ message: "Failed to resolve alert" });
   }
 });
 
 // GET /api/admin/openai/thresholds - Get configured thresholds
-router.get('/thresholds', requireAdmin, async (req: Request, res: Response) => {
+router.get("/thresholds", requireAdmin, async (req: Request, res: Response) => {
   try {
     const thresholds = await db
       .select()
@@ -120,13 +120,13 @@ router.get('/thresholds', requireAdmin, async (req: Request, res: Response) => {
 
     res.json({ thresholds });
   } catch (error) {
-    logger.error('Failed to fetch thresholds', { error });
-    res.status(500).json({ message: 'Failed to fetch thresholds' });
+    logger.error("Failed to fetch thresholds", { error });
+    res.status(500).json({ message: "Failed to fetch thresholds" });
   }
 });
 
 // PUT /api/admin/openai/thresholds/:thresholdId - Update threshold
-router.put('/thresholds/:thresholdId', requireAdmin, async (req: Request, res: Response) => {
+router.put("/thresholds/:thresholdId", requireAdmin, async (req: Request, res: Response) => {
   try {
     const { thresholdId } = req.params;
     const schema = z.object({
@@ -135,7 +135,7 @@ router.put('/thresholds/:thresholdId', requireAdmin, async (req: Request, res: R
       isActive: z.boolean().optional(),
       notifyEmails: z.array(z.string().email()).optional(),
       notifySms: z.array(z.string()).optional(),
-      description: z.string().optional()
+      description: z.string().optional(),
     });
 
     const validatedData = schema.parse(req.body);
@@ -146,24 +146,24 @@ router.put('/thresholds/:thresholdId', requireAdmin, async (req: Request, res: R
         ...validatedData,
         limitValue: validatedData.limitValue?.toString(),
         warningValue: validatedData.warningValue?.toString(),
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .where(eq(openaiUsageThresholds.id, thresholdId));
 
-    res.json({ success: true, message: 'Threshold updated' });
+    res.json({ success: true, message: "Threshold updated" });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return res.status(400).json({ message: 'Validation error', errors: error.errors });
+      return res.status(400).json({ message: "Validation error", errors: error.errors });
     }
-    logger.error('Failed to update threshold', { error });
-    res.status(500).json({ message: 'Failed to update threshold' });
+    logger.error("Failed to update threshold", { error });
+    res.status(500).json({ message: "Failed to update threshold" });
   }
 });
 
 // GET /api/admin/openai/recent-logs - Get recent usage logs
-router.get('/recent-logs', requireAdmin, async (req: Request, res: Response) => {
+router.get("/recent-logs", requireAdmin, async (req: Request, res: Response) => {
   try {
-    const { limit = '100', featureType, userId } = req.query;
+    const { limit = "100", featureType, userId } = req.query;
 
     let query = db.select().from(openaiUsageLogs);
 
@@ -185,13 +185,13 @@ router.get('/recent-logs', requireAdmin, async (req: Request, res: Response) => 
 
     res.json({ logs });
   } catch (error) {
-    logger.error('Failed to fetch recent logs', { error });
-    res.status(500).json({ message: 'Failed to fetch recent logs' });
+    logger.error("Failed to fetch recent logs", { error });
+    res.status(500).json({ message: "Failed to fetch recent logs" });
   }
 });
 
 // GET /api/admin/openai/stats/summary - Get quick summary stats
-router.get('/stats/summary', requireAdmin, async (req: Request, res: Response) => {
+router.get("/stats/summary", requireAdmin, async (req: Request, res: Response) => {
   try {
     const now = new Date();
     const today = new Date(now);
@@ -204,7 +204,7 @@ router.get('/stats/summary', requireAdmin, async (req: Request, res: Response) =
         requests: sql<number>`COUNT(*)::int`,
         tokens: sql<number>`SUM(${openaiUsageLogs.totalTokens})::int`,
         cost: sql<number>`SUM(${openaiUsageLogs.estimatedCost})::numeric`,
-        errors: sql<number>`SUM(CASE WHEN ${openaiUsageLogs.success} = false THEN 1 ELSE 0 END)::int`
+        errors: sql<number>`SUM(CASE WHEN ${openaiUsageLogs.success} = false THEN 1 ELSE 0 END)::int`,
       })
       .from(openaiUsageLogs)
       .where(gte(openaiUsageLogs.createdAt, today));
@@ -214,7 +214,7 @@ router.get('/stats/summary', requireAdmin, async (req: Request, res: Response) =
       .select({
         requests: sql<number>`COUNT(*)::int`,
         tokens: sql<number>`SUM(${openaiUsageLogs.totalTokens})::int`,
-        cost: sql<number>`SUM(${openaiUsageLogs.estimatedCost})::numeric`
+        cost: sql<number>`SUM(${openaiUsageLogs.estimatedCost})::numeric`,
       })
       .from(openaiUsageLogs)
       .where(gte(openaiUsageLogs.createdAt, thisMonth));
@@ -231,20 +231,21 @@ router.get('/stats/summary', requireAdmin, async (req: Request, res: Response) =
         tokens: todayStats[0]?.tokens || 0,
         cost: Number(todayStats[0]?.cost || 0),
         errors: todayStats[0]?.errors || 0,
-        errorRate: todayStats[0]?.requests > 0 
-          ? ((todayStats[0]?.errors || 0) / todayStats[0].requests) * 100 
-          : 0
+        errorRate:
+          todayStats[0]?.requests > 0
+            ? ((todayStats[0]?.errors || 0) / todayStats[0].requests) * 100
+            : 0,
       },
       thisMonth: {
         requests: monthStats[0]?.requests || 0,
         tokens: monthStats[0]?.tokens || 0,
-        cost: Number(monthStats[0]?.cost || 0)
+        cost: Number(monthStats[0]?.cost || 0),
       },
-      unresolvedAlerts: unresolvedAlerts[0]?.count || 0
+      unresolvedAlerts: unresolvedAlerts[0]?.count || 0,
     });
   } catch (error) {
-    logger.error('Failed to fetch summary stats', { error });
-    res.status(500).json({ message: 'Failed to fetch summary stats' });
+    logger.error("Failed to fetch summary stats", { error });
+    res.status(500).json({ message: "Failed to fetch summary stats" });
   }
 });
 

@@ -22,12 +22,12 @@ export default function ResetPassword() {
 
   // Extract token and uid from URL on component mount
   const [uid, setUid] = useState("");
-  
+
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
-    const tokenFromUrl = urlParams.get('token');
-    const uidFromUrl = urlParams.get('uid');
-    
+    const tokenFromUrl = urlParams.get("token");
+    const uidFromUrl = urlParams.get("uid");
+
     if (tokenFromUrl) {
       setToken(tokenFromUrl);
       if (uidFromUrl) {
@@ -79,20 +79,20 @@ export default function ResetPassword() {
       const response = await apiRequest("POST", "/api/auth/confirm-password-reset", {
         token,
         newPassword,
-        uid // uid is now required for security
+        uid, // uid is now required for security
       });
 
       const data = await response.json();
-      
+
       if (response.ok) {
         toast({
           title: "Password Reset Successful",
           description: data.message || "Your password has been updated successfully.",
         });
-        
+
         // Redirect to client login page after successful reset
         setTimeout(() => {
-          setLocation('/login');
+          setLocation("/login");
         }, 2000);
       } else {
         toast({
@@ -126,33 +126,36 @@ export default function ResetPassword() {
       <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-indigo-50 flex items-center justify-center p-4">
         <div className="w-full max-w-md">
           <div className="text-center mb-12">
-            <div 
+            <div
               className="h-28 w-auto mx-auto mb-6 bg-no-repeat bg-center bg-contain opacity-70"
-              style={{ 
+              style={{
                 backgroundImage: `url(${hiveWellnessLogo})`,
-                filter: 'brightness(1.3) saturate(0.7) hue-rotate(5deg)',
-                mixBlendMode: 'multiply',
-                width: '280px',
-                height: '112px'
+                filter: "brightness(1.3) saturate(0.7) hue-rotate(5deg)",
+                mixBlendMode: "multiply",
+                width: "280px",
+                height: "112px",
               }}
               role="img"
               aria-label="Hive Wellness Logo"
             />
-            <h1 className="text-4xl font-bold text-gray-900 mb-3" style={{ fontFamily: 'Century Old Style Std, serif' }}>
+            <h1
+              className="text-4xl font-bold text-gray-900 mb-3"
+              style={{ fontFamily: "Century Old Style Std, serif" }}
+            >
               Invalid Reset Link
             </h1>
             <p className="text-gray-600 text-lg leading-relaxed">
               This password reset link is not valid or has expired.
             </p>
           </div>
-          
+
           <Card className="shadow-2xl border-0 bg-white/90 backdrop-blur-sm">
             <CardContent className="p-8 text-center">
               <p className="text-gray-600 mb-6">
                 Please request a new password reset link from the login page.
               </p>
-              <Button 
-                onClick={() => setLocation('/login')}
+              <Button
+                onClick={() => setLocation("/login")}
                 className="w-full bg-[#9306B1] hover:bg-[#7A0590] text-white"
               >
                 Back to Login
@@ -169,26 +172,27 @@ export default function ResetPassword() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-12">
-          <div 
+          <div
             className="h-28 w-auto mx-auto mb-6 bg-no-repeat bg-center bg-contain opacity-70"
-            style={{ 
+            style={{
               backgroundImage: `url(${hiveWellnessLogo})`,
-              filter: 'brightness(1.3) saturate(0.7) hue-rotate(5deg)',
-              mixBlendMode: 'multiply',
-              width: '280px',
-              height: '112px'
+              filter: "brightness(1.3) saturate(0.7) hue-rotate(5deg)",
+              mixBlendMode: "multiply",
+              width: "280px",
+              height: "112px",
             }}
             role="img"
             aria-label="Hive Wellness Logo"
           />
-          <h1 className="text-4xl font-bold text-gray-900 mb-3" style={{ fontFamily: 'Century Old Style Std, serif' }}>
+          <h1
+            className="text-4xl font-bold text-gray-900 mb-3"
+            style={{ fontFamily: "Century Old Style Std, serif" }}
+          >
             Reset Your Password
           </h1>
-          <p className="text-gray-600 text-lg leading-relaxed">
-            Enter your new password below
-          </p>
+          <p className="text-gray-600 text-lg leading-relaxed">Enter your new password below</p>
         </div>
-        
+
         <Card className="shadow-2xl border-0 bg-white/90 backdrop-blur-sm">
           <CardHeader className="pb-4">
             <CardTitle className="text-2xl font-semibold text-center text-gray-900">
@@ -216,11 +220,7 @@ export default function ResetPassword() {
                     className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                     onClick={() => setShowPassword(!showPassword)}
                   >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </Button>
                 </div>
               </div>
@@ -253,8 +253,8 @@ export default function ResetPassword() {
                 </div>
               </div>
 
-              <Button 
-                type="submit" 
+              <Button
+                type="submit"
                 className="w-full bg-[#9306B1] hover:bg-[#7A0590] text-white"
                 disabled={isResetting}
               >
@@ -275,7 +275,7 @@ export default function ResetPassword() {
             <div className="mt-6 text-center">
               <Button
                 variant="link"
-                onClick={() => setLocation('/login')}
+                onClick={() => setLocation("/login")}
                 className="text-[#9306B1] hover:text-[#7A0590]"
               >
                 Back to Login

@@ -1,14 +1,14 @@
-import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Progress } from '@/components/ui/progress';
-import { 
-  Activity, 
-  Database, 
-  Mail, 
-  MessageSquare, 
+import React, { useState, useEffect } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Progress } from "@/components/ui/progress";
+import {
+  Activity,
+  Database,
+  Mail,
+  MessageSquare,
   CreditCard,
   Globe,
   Shield,
@@ -19,17 +19,17 @@ import {
   Download,
   Server,
   Wifi,
-  Clock
-} from 'lucide-react';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient';
-import { useToast } from '@/hooks/use-toast';
+  Clock,
+} from "lucide-react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 interface HealthCheck {
   id: string;
   name: string;
-  category: 'core' | 'database' | 'integrations' | 'security' | 'performance';
-  status: 'healthy' | 'warning' | 'critical' | 'checking';
+  category: "core" | "database" | "integrations" | "security" | "performance";
+  status: "healthy" | "warning" | "critical" | "checking";
   responseTime?: number;
   message: string;
   lastChecked: string;
@@ -49,16 +49,20 @@ const SystemHealthChecker: React.FC<SystemHealthCheckerProps> = ({ user }) => {
   const { toast } = useToast();
 
   // Fetch current health status
-  const { data: currentStatus, isLoading, refetch } = useQuery<any>({
-    queryKey: ['/api/admin/system-health'],
+  const {
+    data: currentStatus,
+    isLoading,
+    refetch,
+  } = useQuery<any>({
+    queryKey: ["/api/admin/system-health"],
     refetchInterval: 300000, // Refresh every 5 minutes
-    staleTime: 240000 // Keep data fresh for 4 minutes
+    staleTime: 240000, // Keep data fresh for 4 minutes
   });
 
   // Run comprehensive health check
   const runHealthCheckMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest('/api/admin/system-health/full-check', 'POST');
+      return apiRequest("/api/admin/system-health/full-check", "POST");
     },
     onSuccess: (data: any) => {
       setHealthChecks(data.checks || []);
@@ -74,138 +78,138 @@ const SystemHealthChecker: React.FC<SystemHealthCheckerProps> = ({ user }) => {
         title: "Health check failed",
         description: "Unable to complete system health check",
       });
-    }
+    },
   });
 
   // Default health checks
   const defaultChecks: HealthCheck[] = [
     // Core System
     {
-      id: 'api-server',
-      name: 'API Server',
-      category: 'core',
-      status: 'healthy',
+      id: "api-server",
+      name: "API Server",
+      category: "core",
+      status: "healthy",
       responseTime: 45,
-      message: 'Server responding normally',
-      lastChecked: new Date().toISOString()
+      message: "Server responding normally",
+      lastChecked: new Date().toISOString(),
     },
     {
-      id: 'websocket',
-      name: 'WebSocket Server',
-      category: 'core',
-      status: 'healthy',
+      id: "websocket",
+      name: "WebSocket Server",
+      category: "core",
+      status: "healthy",
       responseTime: 12,
-      message: 'Video session WebSocket operational',
-      lastChecked: new Date().toISOString()
+      message: "Video session WebSocket operational",
+      lastChecked: new Date().toISOString(),
     },
-    
+
     // Database
     {
-      id: 'postgresql',
-      name: 'PostgreSQL Database',
-      category: 'database',
-      status: 'healthy',
+      id: "postgresql",
+      name: "PostgreSQL Database",
+      category: "database",
+      status: "healthy",
       responseTime: 23,
-      message: 'Database connections healthy',
+      message: "Database connections healthy",
       lastChecked: new Date().toISOString(),
       details: {
         activeConnections: 8,
         maxConnections: 100,
-        dbSize: '127 MB'
-      }
+        dbSize: "127 MB",
+      },
     },
-    
+
     // Integrations
     {
-      id: 'sendgrid',
-      name: 'SendGrid Email',
-      category: 'integrations',
-      status: 'healthy',
+      id: "sendgrid",
+      name: "SendGrid Email",
+      category: "integrations",
+      status: "healthy",
       responseTime: 156,
-      message: 'Email service operational',
-      lastChecked: new Date().toISOString()
+      message: "Email service operational",
+      lastChecked: new Date().toISOString(),
     },
     {
-      id: 'stripe',
-      name: 'Stripe Payments',
-      category: 'integrations',
-      status: 'healthy',
+      id: "stripe",
+      name: "Stripe Payments",
+      category: "integrations",
+      status: "healthy",
       responseTime: 89,
-      message: 'Payment processing active',
-      lastChecked: new Date().toISOString()
+      message: "Payment processing active",
+      lastChecked: new Date().toISOString(),
     },
     {
-      id: 'twilio',
-      name: 'Twilio SMS/WhatsApp',
-      category: 'integrations',
-      status: 'warning',
+      id: "twilio",
+      name: "Twilio SMS/WhatsApp",
+      category: "integrations",
+      status: "warning",
       responseTime: 0,
-      message: 'Credentials not configured',
-      lastChecked: new Date().toISOString()
+      message: "Credentials not configured",
+      lastChecked: new Date().toISOString(),
     },
     {
-      id: 'hubspot',
-      name: 'HubSpot CRM',
-      category: 'integrations',
-      status: 'healthy',
+      id: "hubspot",
+      name: "HubSpot CRM",
+      category: "integrations",
+      status: "healthy",
       responseTime: 234,
-      message: 'CRM integration active',
-      lastChecked: new Date().toISOString()
+      message: "CRM integration active",
+      lastChecked: new Date().toISOString(),
     },
     {
-      id: 'replit-auth',
-      name: 'Replit Authentication',
-      category: 'integrations',
-      status: 'healthy',
+      id: "replit-auth",
+      name: "Replit Authentication",
+      category: "integrations",
+      status: "healthy",
       responseTime: 85,
-      message: 'Authentication system operational',
-      lastChecked: new Date().toISOString()
+      message: "Authentication system operational",
+      lastChecked: new Date().toISOString(),
     },
-    
+
     // Security
     {
-      id: 'ssl-certificate',
-      name: 'SSL Certificate',
-      category: 'security',
-      status: 'healthy',
+      id: "ssl-certificate",
+      name: "SSL Certificate",
+      category: "security",
+      status: "healthy",
       responseTime: 0,
-      message: 'Valid until 2025-12-15',
-      lastChecked: new Date().toISOString()
+      message: "Valid until 2025-12-15",
+      lastChecked: new Date().toISOString(),
     },
     {
-      id: 'rate-limiting',
-      name: 'Rate Limiting',
-      category: 'security',
-      status: 'healthy',
+      id: "rate-limiting",
+      name: "Rate Limiting",
+      category: "security",
+      status: "healthy",
       responseTime: 0,
-      message: 'Security middleware active',
-      lastChecked: new Date().toISOString()
+      message: "Security middleware active",
+      lastChecked: new Date().toISOString(),
     },
-    
+
     // Performance
     {
-      id: 'memory-usage',
-      name: 'Memory Usage',
-      category: 'performance',
-      status: 'healthy',
+      id: "memory-usage",
+      name: "Memory Usage",
+      category: "performance",
+      status: "healthy",
       responseTime: 0,
-      message: '132 MB / 512 MB (26%)',
+      message: "132 MB / 512 MB (26%)",
       lastChecked: new Date().toISOString(),
       details: {
         heapUsed: 132,
         heapTotal: 512,
-        percentage: 26
-      }
+        percentage: 26,
+      },
     },
     {
-      id: 'response-time',
-      name: 'Average Response Time',
-      category: 'performance',
-      status: 'healthy',
+      id: "response-time",
+      name: "Average Response Time",
+      category: "performance",
+      status: "healthy",
       responseTime: 0,
-      message: '45ms average across endpoints',
-      lastChecked: new Date().toISOString()
-    }
+      message: "45ms average across endpoints",
+      lastChecked: new Date().toISOString(),
+    },
   ];
 
   useEffect(() => {
@@ -219,13 +223,13 @@ const SystemHealthChecker: React.FC<SystemHealthCheckerProps> = ({ user }) => {
   const runFullHealthCheck = async () => {
     setIsRunning(true);
     setProgress(0);
-    
+
     // Simulate comprehensive health checking
     for (let i = 0; i < healthChecks.length; i++) {
       setProgress(((i + 1) / healthChecks.length) * 100);
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
     }
-    
+
     await runHealthCheckMutation.mutateAsync();
     setIsRunning(false);
   };
@@ -236,55 +240,66 @@ const SystemHealthChecker: React.FC<SystemHealthCheckerProps> = ({ user }) => {
       summary: getHealthSummary(),
       checks: healthChecks,
       systemInfo: {
-        platform: 'Hive Wellness Portal',
-        version: '1.0.0',
-        environment: 'production',
-        domain: 'api.hive-wellness.co.uk'
-      }
+        platform: "Hive Wellness Portal",
+        version: "1.0.0",
+        environment: "production",
+        domain: "api.hive-wellness.co.uk",
+      },
     };
 
-    const blob = new Blob([JSON.stringify(report, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(report, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = `hive-wellness-health-report-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `hive-wellness-health-report-${new Date().toISOString().split("T")[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
   };
 
   const getHealthSummary = () => {
     const total = healthChecks.length;
-    const healthy = healthChecks.filter(check => check.status === 'healthy').length;
-    const warnings = healthChecks.filter(check => check.status === 'warning').length;
-    const critical = healthChecks.filter(check => check.status === 'critical').length;
+    const healthy = healthChecks.filter((check) => check.status === "healthy").length;
+    const warnings = healthChecks.filter((check) => check.status === "warning").length;
+    const critical = healthChecks.filter((check) => check.status === "critical").length;
 
     return {
       total,
       healthy,
       warnings,
       critical,
-      healthPercentage: Math.round((healthy / total) * 100)
+      healthPercentage: Math.round((healthy / total) * 100),
     };
   };
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'healthy': return <CheckCircle className="w-5 h-5 text-green-600" />;
-      case 'warning': return <AlertTriangle className="w-5 h-5 text-yellow-600" />;
-      case 'critical': return <XCircle className="w-5 h-5 text-red-600" />;
-      case 'checking': return <RefreshCw className="w-5 h-5 text-blue-600 animate-spin" />;
-      default: return <div className="w-5 h-5 rounded-full bg-gray-300" />;
+      case "healthy":
+        return <CheckCircle className="w-5 h-5 text-green-600" />;
+      case "warning":
+        return <AlertTriangle className="w-5 h-5 text-yellow-600" />;
+      case "critical":
+        return <XCircle className="w-5 h-5 text-red-600" />;
+      case "checking":
+        return <RefreshCw className="w-5 h-5 text-blue-600 animate-spin" />;
+      default:
+        return <div className="w-5 h-5 rounded-full bg-gray-300" />;
     }
   };
 
   const getCategoryIcon = (category: string) => {
     switch (category) {
-      case 'core': return <Server className="w-5 h-5" />;
-      case 'database': return <Database className="w-5 h-5" />;
-      case 'integrations': return <Wifi className="w-5 h-5" />;
-      case 'security': return <Shield className="w-5 h-5" />;
-      case 'performance': return <Activity className="w-5 h-5" />;
-      default: return <Server className="w-5 h-5" />;
+      case "core":
+        return <Server className="w-5 h-5" />;
+      case "database":
+        return <Database className="w-5 h-5" />;
+      case "integrations":
+        return <Wifi className="w-5 h-5" />;
+      case "security":
+        return <Shield className="w-5 h-5" />;
+      case "performance":
+        return <Activity className="w-5 h-5" />;
+      default:
+        return <Server className="w-5 h-5" />;
     }
   };
 
@@ -296,9 +311,11 @@ const SystemHealthChecker: React.FC<SystemHealthCheckerProps> = ({ user }) => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-display font-bold text-gray-900">System Health Dashboard</h1>
-          <p className="text-gray-600 mt-1">Monitor Hive Wellness platform health and performance</p>
+          <p className="text-gray-600 mt-1">
+            Monitor Hive Wellness platform health and performance
+          </p>
         </div>
-        
+
         <div className="flex gap-3">
           <Button
             onClick={runFullHealthCheck}
@@ -317,7 +334,7 @@ const SystemHealthChecker: React.FC<SystemHealthCheckerProps> = ({ user }) => {
               </>
             )}
           </Button>
-          
+
           <Button
             onClick={exportHealthReport}
             variant="outline"
@@ -337,24 +354,29 @@ const SystemHealthChecker: React.FC<SystemHealthCheckerProps> = ({ user }) => {
               <h2 className="text-2xl font-bold text-gray-900">System Status</h2>
               <p className="text-gray-600">Overall platform health</p>
             </div>
-            
+
             <div className="text-right">
               <div className="text-4xl font-bold text-hive-purple">{summary.healthPercentage}%</div>
-              <Badge 
+              <Badge
                 className={
-                  summary.healthPercentage >= 90 ? 'bg-green-100 text-green-800 border-green-200' :
-                  summary.healthPercentage >= 70 ? 'bg-yellow-100 text-yellow-800 border-yellow-200' :
-                  'bg-red-100 text-red-800 border-red-200'
+                  summary.healthPercentage >= 90
+                    ? "bg-green-100 text-green-800 border-green-200"
+                    : summary.healthPercentage >= 70
+                      ? "bg-yellow-100 text-yellow-800 border-yellow-200"
+                      : "bg-red-100 text-red-800 border-red-200"
                 }
               >
-                {summary.healthPercentage >= 90 ? 'Excellent' :
-                 summary.healthPercentage >= 70 ? 'Good' : 'Needs Attention'}
+                {summary.healthPercentage >= 90
+                  ? "Excellent"
+                  : summary.healthPercentage >= 70
+                    ? "Good"
+                    : "Needs Attention"}
               </Badge>
             </div>
           </div>
 
           <Progress value={summary.healthPercentage} className="h-3" />
-          
+
           <div className="grid grid-cols-4 gap-4 mt-4">
             <div className="text-center">
               <p className="text-2xl font-bold text-green-600">{summary.healthy}</p>
@@ -392,8 +414,8 @@ const SystemHealthChecker: React.FC<SystemHealthCheckerProps> = ({ user }) => {
       )}
 
       {/* Health Checks by Category */}
-      {['core', 'database', 'integrations', 'security', 'performance'].map(category => {
-        const categoryChecks = healthChecks.filter(check => check.category === category);
+      {["core", "database", "integrations", "security", "performance"].map((category) => {
+        const categoryChecks = healthChecks.filter((check) => check.category === category);
         if (categoryChecks.length === 0) return null;
 
         return (
@@ -403,15 +425,19 @@ const SystemHealthChecker: React.FC<SystemHealthCheckerProps> = ({ user }) => {
                 {getCategoryIcon(category)}
                 {category} Systems
                 <Badge variant="outline">
-                  {categoryChecks.filter(c => c.status === 'healthy').length}/{categoryChecks.length} Healthy
+                  {categoryChecks.filter((c) => c.status === "healthy").length}/
+                  {categoryChecks.length} Healthy
                 </Badge>
               </CardTitle>
             </CardHeader>
-            
+
             <CardContent>
               <div className="grid gap-4">
-                {categoryChecks.map(check => (
-                  <div key={check.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
+                {categoryChecks.map((check) => (
+                  <div
+                    key={check.id}
+                    className="flex items-center justify-between p-4 border border-gray-200 rounded-lg"
+                  >
                     <div className="flex items-center gap-4">
                       {getStatusIcon(check.status)}
                       <div>
@@ -428,7 +454,7 @@ const SystemHealthChecker: React.FC<SystemHealthCheckerProps> = ({ user }) => {
                         )}
                       </div>
                     </div>
-                    
+
                     <div className="text-right">
                       {check.responseTime !== undefined && check.responseTime > 0 && (
                         <div className="flex items-center gap-1 text-sm text-gray-600">
@@ -453,7 +479,7 @@ const SystemHealthChecker: React.FC<SystemHealthCheckerProps> = ({ user }) => {
         <CardHeader>
           <CardTitle>System Information</CardTitle>
         </CardHeader>
-        
+
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
@@ -477,7 +503,7 @@ const SystemHealthChecker: React.FC<SystemHealthCheckerProps> = ({ user }) => {
                 </div>
               </div>
             </div>
-            
+
             <div>
               <h4 className="font-medium text-gray-900 mb-3">Quick Actions</h4>
               <div className="space-y-2">
@@ -504,8 +530,10 @@ const SystemHealthChecker: React.FC<SystemHealthCheckerProps> = ({ user }) => {
         <Alert variant="destructive">
           <XCircle className="h-4 w-4" />
           <AlertDescription>
-            <strong>Critical Issues Detected:</strong> {summary.critical} system{summary.critical > 1 ? 's' : ''} 
-            {summary.critical === 1 ? ' requires' : ' require'} immediate attention. Please review and resolve these issues promptly.
+            <strong>Critical Issues Detected:</strong> {summary.critical} system
+            {summary.critical > 1 ? "s" : ""}
+            {summary.critical === 1 ? " requires" : " require"} immediate attention. Please review
+            and resolve these issues promptly.
           </AlertDescription>
         </Alert>
       )}

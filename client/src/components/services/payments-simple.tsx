@@ -4,18 +4,26 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { CreditCard, Download, Plus, Calendar, Receipt } from "lucide-react";
-import { Elements, useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
-import { loadStripe } from '@stripe/stripe-js';
+import { Elements, useStripe, useElements, CardElement } from "@stripe/react-stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
 
 // Initialize Stripe
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_TEST_PUBLIC_KEY || import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+const stripePromise = loadStripe(
+  import.meta.env.VITE_STRIPE_TEST_PUBLIC_KEY || import.meta.env.VITE_STRIPE_PUBLIC_KEY
+);
 
 interface PaymentsProps {
   user: any;
 }
 
 // Stripe Payment Method Modal Component
-function StripePaymentMethodForm({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
+function StripePaymentMethodForm({
+  onClose,
+  onSuccess,
+}: {
+  onClose: () => void;
+  onSuccess: () => void;
+}) {
   const stripe = useStripe();
   const elements = useElements();
   const { toast } = useToast();
@@ -39,7 +47,7 @@ function StripePaymentMethodForm({ onClose, onSuccess }: { onClose: () => void; 
 
     try {
       const { error, paymentMethod } = await stripe.createPaymentMethod({
-        type: 'card',
+        type: "card",
         card: cardElement,
       });
 
@@ -51,17 +59,17 @@ function StripePaymentMethodForm({ onClose, onSuccess }: { onClose: () => void; 
         });
       } else {
         // Save payment method to backend
-        const response = await fetch('/api/payment-methods', {
-          method: 'POST',
+        const response = await fetch("/api/payment-methods", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
-          credentials: 'include',
+          credentials: "include",
           body: JSON.stringify({
             paymentMethodId: paymentMethod.id,
           }),
         });
-        
+
         // Handle authentication errors gracefully
         if (response.status === 401) {
           toast({
@@ -104,22 +112,20 @@ function StripePaymentMethodForm({ onClose, onSuccess }: { onClose: () => void; 
         <h3 className="font-display font-semibold text-lg mb-4">Add Payment Method</h3>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Card Details
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Card Details</label>
             <div className="p-3 border border-gray-300 rounded-lg focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500">
               <CardElement
                 options={{
                   style: {
                     base: {
-                      fontSize: '16px',
-                      color: '#424770',
-                      '::placeholder': {
-                        color: '#aab7c4',
+                      fontSize: "16px",
+                      color: "#424770",
+                      "::placeholder": {
+                        color: "#aab7c4",
                       },
                     },
                     invalid: {
-                      color: '#9e2146',
+                      color: "#9e2146",
                     },
                   },
                 }}
@@ -136,11 +142,7 @@ function StripePaymentMethodForm({ onClose, onSuccess }: { onClose: () => void; 
             >
               Cancel
             </Button>
-            <Button
-              type="submit"
-              className="flex-1"
-              disabled={!stripe || isProcessing}
-            >
+            <Button type="submit" className="flex-1" disabled={!stripe || isProcessing}>
               {isProcessing ? "Processing..." : "Add Method"}
             </Button>
           </div>
@@ -150,7 +152,13 @@ function StripePaymentMethodForm({ onClose, onSuccess }: { onClose: () => void; 
   );
 }
 
-function StripePaymentMethodModal({ onClose, onSuccess }: { onClose: () => void; onSuccess: () => void }) {
+function StripePaymentMethodModal({
+  onClose,
+  onSuccess,
+}: {
+  onClose: () => void;
+  onSuccess: () => void;
+}) {
   return (
     <Elements stripe={stripePromise}>
       <StripePaymentMethodForm onClose={onClose} onSuccess={onSuccess} />
@@ -169,24 +177,24 @@ export default function PaymentsService({ user }: PaymentsProps) {
       description: "Therapy Session - Emma Thompson",
       amount: 102, // 85% of £120
       status: "paid",
-      clientName: "Emma Thompson"
+      clientName: "Emma Thompson",
     },
     {
       id: "2",
-      date: "2025-06-24", 
+      date: "2025-06-24",
       description: "Therapy Session - Michael Johnson",
       amount: 102, // 85% of £120
       status: "paid",
-      clientName: "Michael Johnson"
+      clientName: "Michael Johnson",
     },
     {
       id: "3",
       date: "2025-06-17",
-      description: "Initial Consultation - Sarah Williams", 
+      description: "Initial Consultation - Sarah Williams",
       amount: 85, // 85% of £100
       status: "paid",
-      clientName: "Sarah Williams"
-    }
+      clientName: "Sarah Williams",
+    },
   ];
 
   const clientPayments = [
@@ -196,28 +204,28 @@ export default function PaymentsService({ user }: PaymentsProps) {
       description: "Therapy Session - Dr. Sarah Johnson",
       amount: 120,
       status: "paid",
-      method: "Credit Card ****1234"
+      method: "Credit Card ****1234",
     },
     {
       id: "2",
-      date: "2025-06-24", 
+      date: "2025-06-24",
       description: "Therapy Session - Dr. Sarah Johnson",
       amount: 120,
       status: "paid",
-      method: "Credit Card ****1234"
+      method: "Credit Card ****1234",
     },
     {
       id: "3",
       date: "2025-06-17",
-      description: "Initial Consultation - Dr. Sarah Johnson", 
+      description: "Initial Consultation - Dr. Sarah Johnson",
       amount: 0,
       status: "paid",
-      method: "Complimentary"
-    }
+      method: "Complimentary",
+    },
   ];
 
   const [showAddPayment, setShowAddPayment] = useState(false);
-  const isTherapist = user?.role === 'therapist';
+  const isTherapist = user?.role === "therapist";
 
   const addPaymentMethod = () => {
     setShowAddPayment(true);
@@ -357,15 +365,15 @@ export default function PaymentsService({ user }: PaymentsProps) {
                 </div>
                 <div class="detail-row">
                     <span class="label">Date:</span>
-                    <span class="value">${new Date(payment.date).toLocaleDateString('en-GB', { 
-                        year: 'numeric', 
-                        month: 'long', 
-                        day: 'numeric' 
+                    <span class="value">${new Date(payment.date).toLocaleDateString("en-GB", {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
                     })}</span>
                 </div>
                 <div class="detail-row">
                     <span class="label">Client:</span>
-                    <span class="value">${user?.firstName || 'Demo'} ${user?.lastName || 'User'}</span>
+                    <span class="value">${user?.firstName || "Demo"} ${user?.lastName || "User"}</span>
                 </div>
             </div>
 
@@ -419,7 +427,7 @@ export default function PaymentsService({ user }: PaymentsProps) {
             <p>This receipt is for your records. Please retain for insurance claims and tax purposes.</p>
             <p>For questions about this payment, please contact billing support.</p>
             <p>All therapy sessions are confidential and GDPR compliant.</p>
-            <p>Generated on: ${new Date().toLocaleString('en-GB')}</p>
+            <p>Generated on: ${new Date().toLocaleString("en-GB")}</p>
         </div>
     </div>
 
@@ -443,14 +451,15 @@ export default function PaymentsService({ user }: PaymentsProps) {
     `;
 
     // Open receipt in new tab instead of downloading
-    const newWindow = window.open('', '_blank');
+    const newWindow = window.open("", "_blank");
     if (newWindow) {
       newWindow.document.write(receiptHTML);
       newWindow.document.close();
-      
+
       toast({
         title: "Receipt Opened",
-        description: "Your receipt has been opened in a new tab. You can print or save it from there.",
+        description:
+          "Your receipt has been opened in a new tab. You can print or save it from there.",
       });
     } else {
       toast({
@@ -467,37 +476,44 @@ export default function PaymentsService({ user }: PaymentsProps) {
     setShowAutoPaySetup(true);
     toast({
       title: "Auto-Pay Setup",
-      description: "Auto-pay setup wizard would open in a real implementation. This would allow you to automatically charge your primary payment method for upcoming sessions.",
+      description:
+        "Auto-pay setup wizard would open in a real implementation. This would allow you to automatically charge your primary payment method for upcoming sessions.",
     });
   };
 
   const contactBillingSupport = () => {
     toast({
       title: "Contacting Billing Support",
-      description: "Opening billing support chat. In a real implementation, this would connect you to our billing team for insurance and payment assistance.",
+      description:
+        "Opening billing support chat. In a real implementation, this would connect you to our billing team for insurance and payment assistance.",
     });
   };
 
   const editPaymentMethod = () => {
     toast({
       title: "Edit Payment Method",
-      description: "Payment method editor would open. You could update card details, billing address, or set as primary payment method.",
+      description:
+        "Payment method editor would open. You could update card details, billing address, or set as primary payment method.",
     });
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: 'GBP'
+    return new Intl.NumberFormat("en-GB", {
+      style: "currency",
+      currency: "GBP",
     }).format(amount);
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'paid': return 'bg-green-100 text-green-800';
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'failed': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "paid":
+        return "bg-green-100 text-green-800";
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "failed":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -509,11 +525,15 @@ export default function PaymentsService({ user }: PaymentsProps) {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-display font-bold text-gray-900">Earnings & Payouts</h1>
-            <p className="text-gray-600 font-body mt-2">Track your therapy session earnings and manage payouts</p>
+            <p className="text-gray-600 font-body mt-2">
+              Track your therapy session earnings and manage payouts
+            </p>
           </div>
-          <Button 
+          <Button
             className="button-primary"
-            onClick={() => toast({ title: "Request Payout", description: "Payout requested successfully" })}
+            onClick={() =>
+              toast({ title: "Request Payout", description: "Payout requested successfully" })
+            }
           >
             <Download className="w-4 h-4 mr-2" />
             Request Payout
@@ -560,9 +580,7 @@ export default function PaymentsService({ user }: PaymentsProps) {
                 </div>
                 <Badge className="bg-hive-light-blue text-hive-purple">This Month</Badge>
               </div>
-              <h3 className="font-display font-semibold text-hive-purple mt-4 mb-1">
-                18
-              </h3>
+              <h3 className="font-display font-semibold text-hive-purple mt-4 mb-1">18</h3>
               <p className="text-sm text-hive-black">Sessions Completed</p>
             </CardContent>
           </Card>
@@ -575,9 +593,7 @@ export default function PaymentsService({ user }: PaymentsProps) {
                 </div>
                 <Badge className="bg-hive-light-blue text-hive-purple">Rate</Badge>
               </div>
-              <h3 className="font-display font-semibold text-hive-purple mt-4 mb-1">
-                85%
-              </h3>
+              <h3 className="font-display font-semibold text-hive-purple mt-4 mb-1">85%</h3>
               <p className="text-sm text-hive-black">Commission Rate</p>
             </CardContent>
           </Card>
@@ -591,7 +607,10 @@ export default function PaymentsService({ user }: PaymentsProps) {
           <CardContent>
             <div className="space-y-4">
               {therapistEarnings.map((earning) => (
-                <div key={earning.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-xl">
+                <div
+                  key={earning.id}
+                  className="flex items-center justify-between p-4 border border-gray-200 rounded-xl"
+                >
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-full flex items-center justify-center">
                       <span className="text-white font-semibold text-sm">
@@ -600,7 +619,9 @@ export default function PaymentsService({ user }: PaymentsProps) {
                     </div>
                     <div>
                       <p className="font-semibold text-gray-900">{earning.description}</p>
-                      <p className="text-sm text-gray-600">{new Date(earning.date).toLocaleDateString('en-GB')}</p>
+                      <p className="text-sm text-gray-600">
+                        {new Date(earning.date).toLocaleDateString("en-GB")}
+                      </p>
                     </div>
                   </div>
                   <div className="text-right">
@@ -646,12 +667,11 @@ export default function PaymentsService({ user }: PaymentsProps) {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-display font-bold text-gray-900">Payments & Billing</h1>
-          <p className="text-gray-600 font-body mt-2">Manage your payment methods and billing history</p>
+          <p className="text-gray-600 font-body mt-2">
+            Manage your payment methods and billing history
+          </p>
         </div>
-        <Button 
-          className="button-primary"
-          onClick={addPaymentMethod}
-        >
+        <Button className="button-primary" onClick={addPaymentMethod}>
           <Plus className="w-4 h-4 mr-2" />
           Add Payment Method
         </Button>
@@ -697,9 +717,7 @@ export default function PaymentsService({ user }: PaymentsProps) {
               </div>
               <Badge className="bg-hive-light-blue text-hive-purple">Next</Badge>
             </div>
-            <h3 className="font-display font-semibold text-hive-purple mt-4 mb-1">
-              July 7
-            </h3>
+            <h3 className="font-display font-semibold text-hive-purple mt-4 mb-1">July 7</h3>
             <p className="text-sm text-hive-black">Next Payment</p>
           </CardContent>
         </Card>
@@ -712,9 +730,7 @@ export default function PaymentsService({ user }: PaymentsProps) {
               </div>
               <Badge className="bg-orange-100 text-orange-800">Active</Badge>
             </div>
-            <h3 className="font-display font-semibold text-gray-900 mt-4 mb-1">
-              Auto-Pay
-            </h3>
+            <h3 className="font-display font-semibold text-gray-900 mt-4 mb-1">Auto-Pay</h3>
             <p className="text-sm text-gray-600">Enabled</p>
           </CardContent>
         </Card>
@@ -740,22 +756,14 @@ export default function PaymentsService({ user }: PaymentsProps) {
                 </div>
                 <div className="flex items-center gap-2">
                   <Badge className="bg-green-100 text-green-800">Primary</Badge>
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    onClick={editPaymentMethod}
-                  >
+                  <Button variant="outline" size="sm" onClick={editPaymentMethod}>
                     Edit
                   </Button>
                 </div>
               </div>
             </div>
 
-            <Button 
-              variant="outline" 
-              className="w-full"
-              onClick={addPaymentMethod}
-            >
+            <Button variant="outline" className="w-full" onClick={addPaymentMethod}>
               <Plus className="w-4 h-4 mr-2" />
               Add New Payment Method
             </Button>
@@ -765,11 +773,7 @@ export default function PaymentsService({ user }: PaymentsProps) {
               <p className="text-blue-800 text-sm mb-3">
                 Automatically charge your primary payment method for upcoming sessions.
               </p>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={setupAutoPay}
-              >
+              <Button variant="outline" size="sm" onClick={setupAutoPay}>
                 Manage Auto-Pay
               </Button>
             </div>
@@ -789,23 +793,21 @@ export default function PaymentsService({ user }: PaymentsProps) {
                     <h4 className="font-semibold text-gray-900">{payment.description}</h4>
                     <p className="text-sm text-gray-600 mt-1">{payment.method}</p>
                     <p className="text-xs text-gray-500 mt-1">
-                      {new Date(payment.date).toLocaleDateString('en-GB', {
-                        year: 'numeric',
-                        month: 'long', 
-                        day: 'numeric'
+                      {new Date(payment.date).toLocaleDateString("en-GB", {
+                        year: "numeric",
+                        month: "long",
+                        day: "numeric",
                       })}
                     </p>
                   </div>
                   <div className="text-right">
                     <p className="font-semibold text-gray-900">
-                      {payment.amount > 0 ? formatCurrency(payment.amount) : 'Free'}
+                      {payment.amount > 0 ? formatCurrency(payment.amount) : "Free"}
                     </p>
-                    <Badge className={getStatusColor(payment.status)}>
-                      {payment.status}
-                    </Badge>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+                    <Badge className={getStatusColor(payment.status)}>{payment.status}</Badge>
+                    <Button
+                      variant="outline"
+                      size="sm"
                       className="mt-2"
                       onClick={() => downloadReceipt(payment.id)}
                     >
@@ -819,8 +821,6 @@ export default function PaymentsService({ user }: PaymentsProps) {
           </CardContent>
         </Card>
       </div>
-
-
 
       {/* Add Payment Method Modal with Stripe Integration */}
       {showAddPayment && (
@@ -845,7 +845,8 @@ export default function PaymentsService({ user }: PaymentsProps) {
               <div className="p-4 bg-blue-50 rounded-lg">
                 <h4 className="font-semibold text-blue-900 mb-2">Current Settings</h4>
                 <p className="text-blue-800 text-sm">
-                  Auto-Pay is currently <span className="font-semibold">enabled</span> for upcoming sessions
+                  Auto-Pay is currently <span className="font-semibold">enabled</span> for upcoming
+                  sessions
                 </p>
               </div>
               <div className="space-y-3">

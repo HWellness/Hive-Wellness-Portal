@@ -2,14 +2,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { 
-  Brain, 
-  CheckCircle, 
-  AlertTriangle, 
-  TrendingUp, 
+import {
+  Brain,
+  CheckCircle,
+  AlertTriangle,
+  TrendingUp,
   Target,
   Lightbulb,
-  Star
+  Star,
 } from "lucide-react";
 
 interface AIAnalysisResult {
@@ -29,12 +29,12 @@ interface AIAnalysisModalProps {
   therapistName: string;
 }
 
-export default function AIAnalysisModal({ 
-  isOpen, 
-  onClose, 
-  analysisResult, 
-  clientName, 
-  therapistName 
+export default function AIAnalysisModal({
+  isOpen,
+  onClose,
+  analysisResult,
+  clientName,
+  therapistName,
 }: AIAnalysisModalProps) {
   if (!analysisResult) return null;
 
@@ -65,18 +65,26 @@ export default function AIAnalysisModal({
           <div className="bg-gradient-to-r from-hive-purple/10 to-hive-light-blue/10 p-4 rounded-lg">
             <div className="flex items-center justify-between mb-3">
               <div>
-                <h3 className="font-semibold text-lg">{clientName} ↔ {therapistName}</h3>
-                <p className="text-sm text-gray-600">AI-powered therapeutic compatibility assessment</p>
+                <h3 className="font-semibold text-lg">
+                  {clientName} ↔ {therapistName}
+                </h3>
+                <p className="text-sm text-gray-600">
+                  AI-powered therapeutic compatibility assessment
+                </p>
               </div>
               <div className="flex items-center gap-4">
                 <div className="text-center">
-                  <Badge className={`text-lg px-3 py-1 ${getScoreColor(analysisResult.compatibilityScore)}`}>
+                  <Badge
+                    className={`text-lg px-3 py-1 ${getScoreColor(analysisResult.compatibilityScore)}`}
+                  >
                     {analysisResult.compatibilityScore}%
                   </Badge>
                   <p className="text-xs text-gray-500 mt-1">Compatibility</p>
                 </div>
                 <div className="text-center">
-                  <div className={`text-lg font-bold ${getConfidenceColor(analysisResult.confidence)}`}>
+                  <div
+                    className={`text-lg font-bold ${getConfidenceColor(analysisResult.confidence)}`}
+                  >
                     {analysisResult.confidence}%
                   </div>
                   <p className="text-xs text-gray-500">Confidence</p>
@@ -168,7 +176,7 @@ export default function AIAnalysisModal({
             <Button variant="outline" onClick={onClose}>
               Close Analysis
             </Button>
-            <Button 
+            <Button
               className="bg-green-600 hover:bg-green-700"
               onClick={() => {
                 // Handle approval action here

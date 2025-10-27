@@ -1,7 +1,7 @@
-import { MailService } from '@sendgrid/mail';
-import { db } from './db';
-import { emailQueue, users, appointments } from '@shared/schema';
-import { eq, and, isNull, sql } from 'drizzle-orm';
+import { MailService } from "@sendgrid/mail";
+import { db } from "./db";
+import { emailQueue, users, appointments } from "@shared/schema";
+import { eq, and, isNull, sql } from "drizzle-orm";
 
 // Email templates
 type EmailTemplate = {
@@ -11,7 +11,7 @@ type EmailTemplate = {
 
 const EMAIL_TEMPLATES: Record<string, EmailTemplate> = {
   welcome: {
-    subject: 'Welcome to Hive Wellness - Your Therapy Journey Begins',
+    subject: "Welcome to Hive Wellness - Your Therapy Journey Begins",
     template: (data: any) => `
       <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #ffffff;">
         
@@ -29,7 +29,7 @@ const EMAIL_TEMPLATES: Record<string, EmailTemplate> = {
 </div>
         
         <div style="background: linear-gradient(135deg, #F3F4F6 0%, #E5E7EB 100%); padding: 25px; border-radius: 12px; margin-bottom: 25px;">
-          <h2 style="color: #374151; font-size: 20px; margin-bottom: 15px;">Hello ${data.firstName || 'there'}!</h2>
+          <h2 style="color: #374151; font-size: 20px; margin-bottom: 15px;">Hello ${data.firstName || "there"}!</h2>
           <p style="color: #4B5563; font-size: 16px; line-height: 1.6; margin-bottom: 15px;">
             Welcome to Hive Wellness, where professional mental health support meets cutting-edge technology. 
             We're committed to helping you achieve your therapeutic goals through our comprehensive platform.
@@ -63,7 +63,7 @@ const EMAIL_TEMPLATES: Record<string, EmailTemplate> = {
 </div>
         
         <div style="background: linear-gradient(135deg, #fef7ff 0%, #fef3ff 100%); padding: 20px; border-radius: 12px; margin-bottom: 25px;">
-          <p style="color: #374151; font-size: 16px; margin-bottom: 15px;">Hi ${data.clientName || 'there'},</p>
+          <p style="color: #374151; font-size: 16px; margin-bottom: 15px;">Hi ${data.clientName || "there"},</p>
           <p style="color: #4B5563; font-size: 16px; line-height: 1.6; margin: 0;">
             This is a friendly reminder about your upcoming therapy session. We're looking forward to supporting your continued progress.
           </p>
@@ -86,7 +86,7 @@ const EMAIL_TEMPLATES: Record<string, EmailTemplate> = {
             </div>
             <div style="display: flex; justify-content: space-between; padding: 8px 0;">
               <span style="color: #6B7280; font-weight: 500;">Session Type:</span>
-              <span style="color: #374151; font-weight: 600;">${data.sessionType || 'Individual Therapy'}</span>
+              <span style="color: #374151; font-weight: 600;">${data.sessionType || "Individual Therapy"}</span>
             </div>
           </div>
         </div>
@@ -106,7 +106,7 @@ const EMAIL_TEMPLATES: Record<string, EmailTemplate> = {
 </div>
         
         <div style="background: #F9FAFB; padding: 25px; border-radius: 12px; margin-bottom: 25px; border-left: 4px solid #9306B1;">
-          ${data.body || data.content || 'Thank you for using Hive Wellness.'}
+          ${data.body || data.content || "Thank you for using Hive Wellness."}
         </div>
 
         
@@ -124,9 +124,9 @@ const EMAIL_TEMPLATES: Record<string, EmailTemplate> = {
 </div>
         
         <div style="background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%); padding: 20px; border-radius: 12px; margin-bottom: 25px;">
-          <p style="color: #374151; font-size: 16px; margin-bottom: 15px;">Hi ${data.clientName || 'there'},</p>
+          <p style="color: #374151; font-size: 16px; margin-bottom: 15px;">Hi ${data.clientName || "there"},</p>
           <p style="color: #4B5563; font-size: 16px; line-height: 1.6; margin: 0;">
-            Thank you for completing your therapy session with ${data.therapistName || 'your therapist'}. We hope it was helpful and supportive.
+            Thank you for completing your therapy session with ${data.therapistName || "your therapist"}. We hope it was helpful and supportive.
           </p>
         </div>
 
@@ -139,11 +139,11 @@ const EMAIL_TEMPLATES: Record<string, EmailTemplate> = {
             </div>
             <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #F3F4F6;">
               <span style="color: #6B7280; font-weight: 500;">Duration:</span>
-              <span style="color: #374151; font-weight: 600;">${data.duration || '50'} minutes</span>
+              <span style="color: #374151; font-weight: 600;">${data.duration || "50"} minutes</span>
             </div>
             <div style="display: flex; justify-content: space-between; padding: 8px 0;">
               <span style="color: #6B7280; font-weight: 500;">Focus:</span>
-              <span style="color: #374151; font-weight: 600;">${data.sessionFocus || 'Individual Therapy'}</span>
+              <span style="color: #374151; font-weight: 600;">${data.sessionFocus || "Individual Therapy"}</span>
             </div>
           </div>
         </div>
@@ -190,10 +190,10 @@ const EMAIL_TEMPLATES: Record<string, EmailTemplate> = {
         <p>We're excited to have you on our team!</p>
         <p>Best regards,<br>The Hive Wellness Team</p>
       </div>
-    `
+    `,
   },
   connectingComplete: {
-    subject: 'Great News - You\'ve Been Connected with a Therapist!',
+    subject: "Great News - You've Been Connected with a Therapist!",
     template: (data: any) => `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
         
@@ -225,8 +225,8 @@ const EMAIL_TEMPLATES: Record<string, EmailTemplate> = {
         <p>We're confident this will be a great therapeutic partnership. If you have any questions, please don't hesitate to reach out.</p>
         <p>Best regards,<br>Hive Wellness Clinical Team</p>
       </div>
-    `
-  }
+    `,
+  },
 };
 
 export class EmailEngine {
@@ -234,8 +234,8 @@ export class EmailEngine {
   private fromEmail: string;
 
   constructor() {
-    this.fromEmail = process.env.FROM_EMAIL || 'support@hive-wellness.co.uk';
-    
+    this.fromEmail = process.env.FROM_EMAIL || "support@hive-wellness.co.uk";
+
     if (process.env.SENDGRID_API_KEY) {
       this.mailService = new MailService();
       this.mailService.setApiKey(process.env.SENDGRID_API_KEY);
@@ -249,7 +249,7 @@ export class EmailEngine {
     type: keyof typeof EMAIL_TEMPLATES,
     to: string,
     data: any,
-    priority: 'high' | 'normal' | 'low' = 'normal',
+    priority: "high" | "normal" | "low" = "normal",
     scheduledFor?: Date
   ) {
     try {
@@ -257,22 +257,25 @@ export class EmailEngine {
       const subject = this.replaceVariables(template.subject, data);
       const htmlContent = template.template(data);
 
-      const [emailRecord] = await db.insert(emailQueue).values({
-        id: `email-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-        type,
-        to,
-        subject,
-        htmlContent,
-        data: JSON.stringify(data),
-        priority,
-        status: 'queued',
-        scheduledFor: scheduledFor || new Date(),
-        createdAt: new Date()
-      }).returning();
+      const [emailRecord] = await db
+        .insert(emailQueue)
+        .values({
+          id: `email-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          type,
+          to,
+          subject,
+          htmlContent,
+          data: JSON.stringify(data),
+          priority,
+          status: "queued",
+          scheduledFor: scheduledFor || new Date(),
+          createdAt: new Date(),
+        })
+        .returning();
 
       return emailRecord;
     } catch (error) {
-      console.error('Error queueing email:', error);
+      console.error("Error queueing email:", error);
       throw error;
     }
   }
@@ -284,12 +287,7 @@ export class EmailEngine {
       const pendingEmails = await db
         .select()
         .from(emailQueue)
-        .where(
-          and(
-            eq(emailQueue.status, 'queued'),
-            sql`${emailQueue.scheduledFor} <= NOW()`
-          )
-        )
+        .where(and(eq(emailQueue.status, "queued"), sql`${emailQueue.scheduledFor} <= NOW()`))
         .orderBy(
           sql`CASE ${emailQueue.priority} WHEN 'high' THEN 1 WHEN 'normal' THEN 2 WHEN 'low' THEN 3 END`,
           emailQueue.scheduledFor
@@ -303,10 +301,10 @@ export class EmailEngine {
           // Mark as processing
           await db
             .update(emailQueue)
-            .set({ 
-              status: 'processing',
+            .set({
+              status: "processing",
               attempts: sql`${emailQueue.attempts} + 1`,
-              lastAttempt: new Date()
+              lastAttempt: new Date(),
             })
             .where(eq(emailQueue.id, email.id));
 
@@ -316,48 +314,47 @@ export class EmailEngine {
               to: email.to,
               from: this.fromEmail,
               subject: email.subject,
-              html: email.htmlContent
+              html: email.htmlContent,
             });
           } else {
-            throw new Error('Email service not configured');
+            throw new Error("Email service not configured");
           }
 
           // Mark as sent
           await db
             .update(emailQueue)
-            .set({ 
-              status: 'sent',
-              sentAt: new Date()
+            .set({
+              status: "sent",
+              sentAt: new Date(),
             })
             .where(eq(emailQueue.id, email.id));
 
-          results.push({ id: email.id, status: 'sent' });
-
+          results.push({ id: email.id, status: "sent" });
         } catch (sendError) {
           console.error(`Error sending email ${email.id}:`, sendError);
-          
+
           // Mark as failed or retry
           const shouldRetry = (email.attempts || 0) < 3;
           await db
             .update(emailQueue)
-            .set({ 
-              status: shouldRetry ? 'queued' : 'failed',
-              error: sendError instanceof Error ? sendError.message : 'Unknown error',
-              scheduledFor: shouldRetry ? new Date(Date.now() + 30 * 60 * 1000) : undefined // Retry in 30 minutes
+            .set({
+              status: shouldRetry ? "queued" : "failed",
+              error: sendError instanceof Error ? sendError.message : "Unknown error",
+              scheduledFor: shouldRetry ? new Date(Date.now() + 30 * 60 * 1000) : undefined, // Retry in 30 minutes
             })
             .where(eq(emailQueue.id, email.id));
 
-          results.push({ 
-            id: email.id, 
-            status: shouldRetry ? 'retrying' : 'failed',
-            error: sendError instanceof Error ? sendError.message : 'Unknown error'
+          results.push({
+            id: email.id,
+            status: shouldRetry ? "retrying" : "failed",
+            error: sendError instanceof Error ? sendError.message : "Unknown error",
           });
         }
       }
 
       return results;
     } catch (error) {
-      console.error('Error processing email queue:', error);
+      console.error("Error processing email queue:", error);
       throw error;
     }
   }
@@ -369,7 +366,7 @@ export class EmailEngine {
         .select({
           status: emailQueue.status,
           priority: emailQueue.priority,
-          count: sql<number>`COUNT(*)`
+          count: sql<number>`COUNT(*)`,
         })
         .from(emailQueue)
         .groupBy(emailQueue.status, emailQueue.priority);
@@ -383,14 +380,14 @@ export class EmailEngine {
         byPriority: {
           high: 0,
           normal: 0,
-          low: 0
-        }
+          low: 0,
+        },
       };
 
-      stats.forEach(stat => {
+      stats.forEach((stat) => {
         summary.total += stat.count;
-        const statusKey = stat.status as 'total' | 'queued' | 'processing' | 'sent' | 'failed';
-        if (statusKey !== 'total') {
+        const statusKey = stat.status as "total" | "queued" | "processing" | "sent" | "failed";
+        if (statusKey !== "total") {
           (summary as any)[statusKey] = ((summary as any)[statusKey] || 0) + stat.count;
         }
         summary.byPriority[stat.priority as keyof typeof summary.byPriority] += stat.count;
@@ -398,7 +395,7 @@ export class EmailEngine {
 
       return summary;
     } catch (error) {
-      console.error('Error getting email stats:', error);
+      console.error("Error getting email stats:", error);
       throw error;
     }
   }
@@ -408,10 +405,15 @@ export class EmailEngine {
     const [user] = await db.select().from(users).where(eq(users.id, userId));
     if (!user || !user.email) return;
 
-    await this.queueEmail('welcome', user.email, {
-      firstName: user.firstName || 'there',
-      portalUrl: `${process.env.BASE_URL || 'https://hivewellness.com'}/portal`
-    }, 'high');
+    await this.queueEmail(
+      "welcome",
+      user.email,
+      {
+        firstName: user.firstName || "there",
+        portalUrl: `${process.env.BASE_URL || "https://hivewellness.com"}/portal`,
+      },
+      "high"
+    );
   }
 
   async triggerAppointmentReminder(appointmentId: string) {
@@ -425,10 +427,7 @@ export class EmailEngine {
 
     if (!appointment.clientId || !appointment.therapistId) return;
 
-    const [clientUser] = await db
-      .select()
-      .from(users)
-      .where(eq(users.id, appointment.clientId));
+    const [clientUser] = await db.select().from(users).where(eq(users.id, appointment.clientId));
 
     const [therapistUser] = await db
       .select()
@@ -438,16 +437,22 @@ export class EmailEngine {
     if (!clientUser?.email) return;
 
     const sessionDate = new Date(appointment.scheduledAt);
-    
-    await this.queueEmail('appointmentReminder', clientUser.email, {
-      clientName: `${clientUser.firstName} ${clientUser.lastName}`,
-      date: sessionDate.toLocaleDateString('en-GB'),
-      time: sessionDate.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
-      therapistName: `${therapistUser?.firstName || 'Dr.'} ${therapistUser?.lastName || 'Therapist'}`,
-      sessionType: appointment.sessionType,
-      sessionUrl: `${process.env.BASE_URL}/portal/video-session/${appointment.id}`,
-      rescheduleUrl: `${process.env.BASE_URL}/portal/appointments`
-    }, 'high', new Date(sessionDate.getTime() - 24 * 60 * 60 * 1000)); // 24 hours before
+
+    await this.queueEmail(
+      "appointmentReminder",
+      clientUser.email,
+      {
+        clientName: `${clientUser.firstName} ${clientUser.lastName}`,
+        date: sessionDate.toLocaleDateString("en-GB"),
+        time: sessionDate.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit" }),
+        therapistName: `${therapistUser?.firstName || "Dr."} ${therapistUser?.lastName || "Therapist"}`,
+        sessionType: appointment.sessionType,
+        sessionUrl: `${process.env.BASE_URL}/portal/video-session/${appointment.id}`,
+        rescheduleUrl: `${process.env.BASE_URL}/portal/appointments`,
+      },
+      "high",
+      new Date(sessionDate.getTime() - 24 * 60 * 60 * 1000)
+    ); // 24 hours before
   }
 
   async triggerSessionCompleteEmail(appointmentId: string) {
@@ -464,7 +469,7 @@ export class EmailEngine {
       .where(
         and(
           sql`${appointments.scheduledAt} BETWEEN NOW() + INTERVAL '23 HOURS' AND NOW() + INTERVAL '25 HOURS'`,
-          eq(appointments.status, 'confirmed'),
+          eq(appointments.status, "confirmed"),
           isNull(sql`reminder_sent`) // Assuming we add this column
         )
       );
@@ -486,15 +491,17 @@ export class EmailEngine {
   }) {
     try {
       if (!this.mailService) {
-        throw new Error('Email service not configured. Please check SENDGRID_API_KEY environment variable.');
+        throw new Error(
+          "Email service not configured. Please check SENDGRID_API_KEY environment variable."
+        );
       }
 
       const { to, cc, subject, body, template, from } = params;
-      
+
       // Use template if provided, otherwise use plain body
       let htmlContent = body;
       if (template && EMAIL_TEMPLATES[template]) {
-        const templateData = typeof params === 'object' ? params : {};
+        const templateData = typeof params === "object" ? params : {};
         htmlContent = EMAIL_TEMPLATES[template].template(templateData);
       }
 
@@ -504,18 +511,18 @@ export class EmailEngine {
         cc: cc || [],
         from: from || this.fromEmail,
         subject: subject,
-        html: htmlContent
+        html: htmlContent,
       };
 
       await this.mailService.send(emailData);
-      
+
       return {
         success: true,
-        message: 'Email sent successfully',
-        recipients: to.length + (cc ? cc.length : 0)
+        message: "Email sent successfully",
+        recipients: to.length + (cc ? cc.length : 0),
       };
     } catch (error) {
-      console.error('Error sending direct email:', error);
+      console.error("Error sending direct email:", error);
       throw error;
     }
   }

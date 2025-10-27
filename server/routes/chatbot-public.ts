@@ -1,6 +1,6 @@
-import { Request, Response } from 'express';
-import OpenAI from 'openai';
-import { z } from 'zod';
+import { Request, Response } from "express";
+import OpenAI from "openai";
+import { z } from "zod";
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -14,7 +14,7 @@ const ChatRequestSchema = z.object({
 
 const FeedbackRequestSchema = z.object({
   messageId: z.string(),
-  feedback: z.enum(['positive', 'negative']),
+  feedback: z.enum(["positive", "negative"]),
   conversationId: z.string().optional(),
 });
 
@@ -27,7 +27,7 @@ function getRateLimit(ip: string): { allowed: boolean; remaining: number } {
   const maxRequests = 10; // 10 requests per minute
 
   const record = rateLimitStore.get(ip);
-  
+
   if (!record || now > record.resetTime) {
     rateLimitStore.set(ip, { count: 1, resetTime: now + windowMs });
     return { allowed: true, remaining: maxRequests - 1 };
@@ -50,7 +50,7 @@ function containsInappropriateContent(message: string): boolean {
     // Add more patterns as needed
   ];
 
-  return inappropriatePatterns.some(pattern => pattern.test(message));
+  return inappropriatePatterns.some((pattern) => pattern.test(message));
 }
 
 // System prompt for public website chatbot
@@ -130,19 +130,22 @@ export async function handlePublicChatbot(req: Request, res: Response) {
   try {
     // Add CORS headers for external website embedding
     const origin = req.headers.origin;
-    res.header('Access-Control-Allow-Origin', origin || '*');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-    res.header('Access-Control-Allow-Credentials', 'true');
-    
-    const clientIp = req.ip || req.connection.remoteAddress || 'unknown';
-    
+    res.header("Access-Control-Allow-Origin", origin || "*");
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    res.header(
+      "Access-Control-Allow-Headers",
+      "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+    );
+    res.header("Access-Control-Allow-Credentials", "true");
+
+    const clientIp = req.ip || req.connection.remoteAddress || "unknown";
+
     // Rate limiting
     const rateLimit = getRateLimit(clientIp);
     if (!rateLimit.allowed) {
       return res.status(429).json({
-        error: 'Rate limit exceeded. Please try again later.',
-        remaining: rateLimit.remaining
+        error: "Rate limit exceeded. Please try again later.",
+        remaining: rateLimit.remaining,
       });
     }
 
@@ -150,8 +153,8 @@ export async function handlePublicChatbot(req: Request, res: Response) {
     const validationResult = ChatRequestSchema.safeParse(req.body);
     if (!validationResult.success) {
       return res.status(400).json({
-        error: 'Invalid request format',
-        details: validationResult.error.errors
+        error: "Invalid request format",
+        details: validationResult.error.errors,
       });
     }
 
@@ -160,22 +163,23 @@ export async function handlePublicChatbot(req: Request, res: Response) {
     // Content filtering
     if (containsInappropriateContent(message)) {
       return res.json({
-        response: "I understand you may be going through a difficult time. For immediate support, please contact:\n\n• Emergency services: 999\n• Samaritans: 116 123 (free, 24/7)\n• Crisis Text Line: Text SHOUT to 85258\n\nFor ongoing support, I'd recommend booking a consultation with one of our qualified therapists.",
+        response:
+          "I understand you may be going through a difficult time. For immediate support, please contact:\n\n• Emergency services: 999\n• Samaritans: 116 123 (free, 24/7)\n• Crisis Text Line: Text SHOUT to 85258\n\nFor ongoing support, I'd recommend booking a consultation with one of our qualified therapists.",
         conversationId: conversationId || `conv_${Date.now()}`,
-        filtered: true
+        filtered: true,
       });
     }
 
     // Import FAQ system and AI response generator
-    const { generateChatResponse } = await import('../chatbot/ai-response');
-    
+    const { generateChatResponse } = await import("../chatbot/ai-response");
+
     // Use the same system that includes FAQ search first, then AI fallback
     const chatResponse = await generateChatResponse(message);
-    
+
     const response = chatResponse.response;
 
     // Log the interaction with enhanced database storage
-    const { logChatInteraction } = await import('../chatbot/ai-response');
+    const { logChatInteraction } = await import("../chatbot/ai-response");
     await logChatInteraction(
       null, // anonymous user
       chatResponse.maskedMessage || message, // Use PII-masked version for logging
@@ -186,21 +190,20 @@ export async function handlePublicChatbot(req: Request, res: Response) {
       [], // redactedItems
       conversationId || `conv_${Date.now()}`,
       clientIp,
-      req.get('User-Agent'),
-      'wordpress' // source
+      req.get("User-Agent"),
+      "wordpress" // source
     );
 
     res.json({
       response,
       conversationId: conversationId || `conv_${Date.now()}`,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
-    console.error('Public chatbot error:', error);
+    console.error("Public chatbot error:", error);
     res.status(500).json({
-      error: 'Internal server error',
-      response: "I'm sorry, I'm having technical difficulties. Please try again in a moment."
+      error: "Internal server error",
+      response: "I'm sorry, I'm having technical difficulties. Please try again in a moment.",
     });
   }
 }
@@ -209,18 +212,21 @@ export async function handlePublicFeedback(req: Request, res: Response) {
   try {
     // Add CORS headers for external website embedding
     const origin = req.headers.origin;
-    res.header('Access-Control-Allow-Origin', origin || '*');
-    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
-    res.header('Access-Control-Allow-Credentials', 'true');
-    
-    const clientIp = req.ip || req.connection.remoteAddress || 'unknown';
-    
+    res.header("Access-Control-Allow-Origin", origin || "*");
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+    res.header(
+      "Access-Control-Allow-Headers",
+      "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+    );
+    res.header("Access-Control-Allow-Credentials", "true");
+
+    const clientIp = req.ip || req.connection.remoteAddress || "unknown";
+
     // Rate limiting
     const rateLimit = getRateLimit(clientIp);
     if (!rateLimit.allowed) {
       return res.status(429).json({
-        error: 'Rate limit exceeded. Please try again later.'
+        error: "Rate limit exceeded. Please try again later.",
       });
     }
 
@@ -228,31 +234,30 @@ export async function handlePublicFeedback(req: Request, res: Response) {
     const validationResult = FeedbackRequestSchema.safeParse(req.body);
     if (!validationResult.success) {
       return res.status(400).json({
-        error: 'Invalid feedback format',
-        details: validationResult.error.errors
+        error: "Invalid feedback format",
+        details: validationResult.error.errors,
       });
     }
 
     const { messageId, feedback, conversationId } = validationResult.data;
 
     // Log feedback (in production, store in database)
-    console.log('Public chatbot feedback:', {
+    console.log("Public chatbot feedback:", {
       ip: clientIp,
       messageId,
       feedback,
       conversationId,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
 
     res.json({
       success: true,
-      message: 'Feedback received. Thank you for helping us improve!'
+      message: "Feedback received. Thank you for helping us improve!",
     });
-
   } catch (error) {
-    console.error('Public feedback error:', error);
+    console.error("Public feedback error:", error);
     res.status(500).json({
-      error: 'Internal server error'
+      error: "Internal server error",
     });
   }
 }

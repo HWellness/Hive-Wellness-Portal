@@ -1,13 +1,19 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { FormGuidance, ValidatedInput, PhoneInput, PostcodeInput, EmailInput } from "@/components/ui/form-guidance";
-import { 
-  phoneValidation, 
-  postcodeValidation, 
+import {
+  FormGuidance,
+  ValidatedInput,
+  PhoneInput,
+  PostcodeInput,
+  EmailInput,
+} from "@/components/ui/form-guidance";
+import {
+  phoneValidation,
+  postcodeValidation,
   emailValidation,
   formatPhoneNumber,
-  formatPostcode
+  formatPostcode,
 } from "@/lib/form-validation";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -27,11 +33,11 @@ export default function EnhancedProfileForm() {
   const { toast } = useToast();
   const [formData, setFormData] = useState<ProfileFormData>({
     personalInfo: {
-      phone: '',
-      emergencyPhone: '',
-      postcode: '',
-      email: ''
-    }
+      phone: "",
+      emergencyPhone: "",
+      postcode: "",
+      email: "",
+    },
   });
 
   const [validationResults, setValidationResults] = useState<{
@@ -43,77 +49,86 @@ export default function EnhancedProfileForm() {
     phone: { isValid: true },
     emergencyPhone: { isValid: true },
     postcode: { isValid: true },
-    email: { isValid: true }
+    email: { isValid: true },
   });
 
-  const validateField = (field: keyof ProfileFormData['personalInfo'], value: string) => {
-    let result = { isValid: true, message: '', suggestions: [] as string[] };
+  const validateField = (field: keyof ProfileFormData["personalInfo"], value: string) => {
+    let result = { isValid: true, message: "", suggestions: [] as string[] };
 
     switch (field) {
-      case 'phone':
-      case 'emergencyPhone':
+      case "phone":
+      case "emergencyPhone":
         try {
           phoneValidation.parse(value);
-          result = { isValid: true, message: 'Valid UK phone number format ✓', suggestions: [] };
+          result = { isValid: true, message: "Valid UK phone number format ✓", suggestions: [] };
         } catch (error: any) {
           result = {
             isValid: false,
-            message: error.errors?.[0]?.message || 'Invalid phone number',
-            suggestions: ['Use format: +44 7123 456789 or 07123 456789', 'Phone numbers are required for appointment bookings']
+            message: error.errors?.[0]?.message || "Invalid phone number",
+            suggestions: [
+              "Use format: +44 7123 456789 or 07123 456789",
+              "Phone numbers are required for appointment bookings",
+            ],
           };
         }
         break;
 
-      case 'postcode':
+      case "postcode":
         try {
           postcodeValidation.parse(value);
-          result = { isValid: true, message: 'Valid UK postcode format ✓', suggestions: [] };
+          result = { isValid: true, message: "Valid UK postcode format ✓", suggestions: [] };
         } catch (error: any) {
           result = {
             isValid: false,
-            message: error.errors?.[0]?.message || 'Invalid postcode',
-            suggestions: ['Use format: SW1A 1AA or M1 1AA', 'Postcode helps us match you with local therapists']
+            message: error.errors?.[0]?.message || "Invalid postcode",
+            suggestions: [
+              "Use format: SW1A 1AA or M1 1AA",
+              "Postcode helps us match you with local therapists",
+            ],
           };
         }
         break;
 
-      case 'email':
+      case "email":
         try {
           emailValidation.parse(value);
-          result = { isValid: true, message: 'Valid email address format ✓', suggestions: [] };
+          result = { isValid: true, message: "Valid email address format ✓", suggestions: [] };
         } catch (error: any) {
           result = {
             isValid: false,
-            message: error.errors?.[0]?.message || 'Invalid email',
-            suggestions: ['Use format: name@example.com', 'Email is required for appointment confirmations']
+            message: error.errors?.[0]?.message || "Invalid email",
+            suggestions: [
+              "Use format: name@example.com",
+              "Email is required for appointment confirmations",
+            ],
           };
         }
         break;
     }
 
-    setValidationResults(prev => ({
+    setValidationResults((prev) => ({
       ...prev,
-      [field]: result
+      [field]: result,
     }));
 
     return result.isValid;
   };
 
-  const handleFieldChange = (field: keyof ProfileFormData['personalInfo'], value: string) => {
+  const handleFieldChange = (field: keyof ProfileFormData["personalInfo"], value: string) => {
     // Format value if necessary
     let formattedValue = value;
-    if (field === 'phone' || field === 'emergencyPhone') {
+    if (field === "phone" || field === "emergencyPhone") {
       formattedValue = formatPhoneNumber(value);
-    } else if (field === 'postcode') {
+    } else if (field === "postcode") {
       formattedValue = formatPostcode(value);
     }
 
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       personalInfo: {
         ...prev.personalInfo,
-        [field]: formattedValue
-      }
+        [field]: formattedValue,
+      },
     }));
 
     // Validate after user stops typing (debounced validation would be better in production)
@@ -126,7 +141,7 @@ export default function EnhancedProfileForm() {
 
   const saveProfileMutation = useMutation({
     mutationFn: async (data: ProfileFormData) => {
-      return await apiRequest('POST', '/api/client/profile', data);
+      return await apiRequest("POST", "/api/client/profile", data);
     },
     onSuccess: () => {
       toast({
@@ -135,13 +150,15 @@ export default function EnhancedProfileForm() {
       });
     },
     onError: (error: any) => {
-      console.error('Profile save error:', error);
-      
+      console.error("Profile save error:", error);
+
       // Check for validation error response from server
-      if (error?.response?.data?.code === 'VALIDATION_ERROR') {
+      if (error?.response?.data?.code === "VALIDATION_ERROR") {
         toast({
           title: "Form Validation Failed",
-          description: error.response.data.userGuidance?.message || "Please check your form data and try again.",
+          description:
+            error.response.data.userGuidance?.message ||
+            "Please check your form data and try again.",
           variant: "destructive",
         });
       } else {
@@ -156,10 +173,13 @@ export default function EnhancedProfileForm() {
 
   const handleSave = () => {
     // Validate all fields before saving
-    const phoneValid = validateField('phone', formData.personalInfo.phone);
-    const emergencyPhoneValid = validateField('emergencyPhone', formData.personalInfo.emergencyPhone);
-    const postcodeValid = validateField('postcode', formData.personalInfo.postcode);
-    const emailValid = validateField('email', formData.personalInfo.email);
+    const phoneValid = validateField("phone", formData.personalInfo.phone);
+    const emergencyPhoneValid = validateField(
+      "emergencyPhone",
+      formData.personalInfo.emergencyPhone
+    );
+    const postcodeValid = validateField("postcode", formData.personalInfo.postcode);
+    const emailValid = validateField("email", formData.personalInfo.email);
 
     if (phoneValid && emergencyPhoneValid && postcodeValid && emailValid) {
       saveProfileMutation.mutate(formData);
@@ -181,7 +201,6 @@ export default function EnhancedProfileForm() {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        
         <FormGuidance
           type="info"
           title="Enhanced Security & Validation"
@@ -190,7 +209,7 @@ export default function EnhancedProfileForm() {
             "All data is validated before saving to prevent security issues",
             "Phone numbers and postcodes are automatically formatted",
             "Clear error messages guide you to correct format",
-            "Security system protects against harmful input while allowing legitimate data"
+            "Security system protects against harmful input while allowing legitimate data",
           ]}
         />
 
@@ -201,7 +220,7 @@ export default function EnhancedProfileForm() {
             type="tel"
             placeholder="+44 7123 456789 or 07123 456789"
             value={formData.personalInfo.phone}
-            onChange={(value) => handleFieldChange('phone', value)}
+            onChange={(value) => handleFieldChange("phone", value)}
             validation={validationResults.phone}
             required
             helpText="UK phone numbers only. Include country code or start with 0."
@@ -213,7 +232,7 @@ export default function EnhancedProfileForm() {
             type="tel"
             placeholder="+44 7123 456789 or 07123 456789"
             value={formData.personalInfo.emergencyPhone}
-            onChange={(value) => handleFieldChange('emergencyPhone', value)}
+            onChange={(value) => handleFieldChange("emergencyPhone", value)}
             validation={validationResults.emergencyPhone}
             required
             helpText="Emergency contact phone number for safety."
@@ -225,7 +244,7 @@ export default function EnhancedProfileForm() {
             type="text"
             placeholder="SW1A 1AA"
             value={formData.personalInfo.postcode}
-            onChange={(value) => handleFieldChange('postcode', value)}
+            onChange={(value) => handleFieldChange("postcode", value)}
             validation={validationResults.postcode}
             required
             helpText="UK postcode format. Space will be added automatically."
@@ -238,7 +257,7 @@ export default function EnhancedProfileForm() {
             type="email"
             placeholder="name@example.com"
             value={formData.personalInfo.email}
-            onChange={(value) => handleFieldChange('email', value)}
+            onChange={(value) => handleFieldChange("email", value)}
             validation={validationResults.email}
             required
             helpText="Must be a valid email address without spaces."

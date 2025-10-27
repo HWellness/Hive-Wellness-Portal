@@ -1,4 +1,4 @@
-import { MailService } from '@sendgrid/mail';
+import { MailService } from "@sendgrid/mail";
 
 if (!process.env.SENDGRID_API_KEY) {
   throw new Error("SENDGRID_API_KEY environment variable must be set");
@@ -19,18 +19,19 @@ interface BookingDetails {
 }
 
 // Generate public access video meeting link for introduction calls
-function generateVideoMeetingLink(bookingId: string, email: string, role: 'admin' | 'client' = 'client'): string {
-  const baseUrl = 'https://api.hive-wellness.co.uk/api/video-sessions';
+function generateVideoMeetingLink(
+  bookingId: string,
+  email: string,
+  role: "admin" | "client" = "client"
+): string {
+  const baseUrl = "https://api.hive-wellness.co.uk/api/video-sessions";
   return `${baseUrl}/introduction-call/${bookingId}/access?email=${encodeURIComponent(email)}`;
 }
 
 // Brand-compliant email template structure
-function createBrandedEmailTemplate(params: {
-  headingText: string;
-  bodyContent: string;
-}) {
+function createBrandedEmailTemplate(params: { headingText: string; bodyContent: string }) {
   const { headingText, bodyContent } = params;
-  
+
   return `
     <!DOCTYPE html>
     <html lang="en">
@@ -94,11 +95,12 @@ function createBrandedEmailTemplate(params: {
 }
 
 export class BookingEmailService {
-  
   // Send immediate confirmation email to user
   async sendUserConfirmation(booking: BookingDetails): Promise<boolean> {
-    const clientVideoLink = booking.videoSessionLink || generateVideoMeetingLink(booking.bookingId, booking.email, 'client');
-    
+    const clientVideoLink =
+      booking.videoSessionLink ||
+      generateVideoMeetingLink(booking.bookingId, booking.email, "client");
+
     const bodyContent = `
       <!-- Rounded Content Box -->
       <div style="background: #f8f9fa; padding: 25px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #e9ecef;">
@@ -155,7 +157,9 @@ export class BookingEmailService {
         </ul>
       </div>
       
-      ${booking.message ? `
+      ${
+        booking.message
+          ? `
       <!-- Rounded Content Box -->
       <div style="background: #f8f9fa; padding: 25px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #e9ecef;">
         <h3 style="font-family: 'Palatino Linotype', 'Book Antiqua', Palatino, Georgia, serif; color: #9306B1; margin: 0 0 15px 0; font-size: 18px;">
@@ -165,7 +169,9 @@ export class BookingEmailService {
           "${booking.message}"
         </p>
       </div>
-      ` : ''}
+      `
+          : ""
+      }
       
       <div style="text-align: center; margin: 30px 0;">
         <a href="https://hive-wellness.co.uk/contact" style="background: #9306B1; color: white; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-family: 'Open Sans', sans-serif; font-weight: 600; display: inline-block; font-size: 16px;">
@@ -180,8 +186,8 @@ export class BookingEmailService {
     `;
 
     const userEmailHtml = createBrandedEmailTemplate({
-      headingText: 'Your Initial Chat is Confirmed!',
-      bodyContent
+      headingText: "Your Initial Chat is Confirmed!",
+      bodyContent,
     });
 
     const userEmailText = `
@@ -203,7 +209,7 @@ export class BookingEmailService {
       • Prepare any questions about our services
       • Need to reschedule? Just reply to this email
       
-      ${booking.message ? `YOUR MESSAGE: "${booking.message}"` : ''}
+      ${booking.message ? `YOUR MESSAGE: "${booking.message}"` : ""}
       
       Questions? Contact us at support@hive-wellness.co.uk
       
@@ -218,24 +224,26 @@ export class BookingEmailService {
       await mailService.send({
         to: booking.email,
         from: {
-          email: 'support@hive-wellness.co.uk',
-          name: 'Hive Wellness'
+          email: "support@hive-wellness.co.uk",
+          name: "Hive Wellness",
         },
         subject: `Your Initial Chat is Confirmed - ${booking.preferredDate} at ${booking.preferredTime}`,
         text: userEmailText,
-        html: userEmailHtml
+        html: userEmailHtml,
       });
       return true;
     } catch (error) {
-      console.error('Failed to send user confirmation email:', error);
+      console.error("Failed to send user confirmation email:", error);
       return false;
     }
   }
-  
+
   // Send admin notification email
   async sendAdminNotification(booking: BookingDetails): Promise<boolean> {
-    const sharedVideoLink = booking.videoSessionLink || generateVideoMeetingLink(booking.bookingId, booking.email, 'client');
-    
+    const sharedVideoLink =
+      booking.videoSessionLink ||
+      generateVideoMeetingLink(booking.bookingId, booking.email, "client");
+
     const bodyContent = `
       <!-- Rounded Content Box -->
       <div style="background: #f8f9fa; padding: 25px; border-radius: 12px; margin-bottom: 25px; border: 1px solid #e9ecef;">
@@ -255,12 +263,12 @@ export class BookingEmailService {
         <p style="font-family: 'Open Sans', sans-serif; line-height: 1.7; color: #333; margin: 0;">
           <strong>Name:</strong> ${booking.name}<br>
           <strong>Email:</strong> ${booking.email}<br>
-          <strong>Phone:</strong> ${booking.phone || 'Not provided'}<br>
+          <strong>Phone:</strong> ${booking.phone || "Not provided"}<br>
           <strong>Preferred Date:</strong> ${booking.preferredDate}<br>
           <strong>Preferred Time:</strong> ${booking.preferredTime}<br>
           <strong>Booking ID:</strong> ${booking.bookingId}<br>
           <strong>Source:</strong> WordPress Widget
-          ${booking.message ? `<br><strong>Message:</strong> "${booking.message}"` : ''}
+          ${booking.message ? `<br><strong>Message:</strong> "${booking.message}"` : ""}
         </p>
       </div>
       
@@ -313,34 +321,36 @@ export class BookingEmailService {
     `;
 
     const adminEmailHtml = createBrandedEmailTemplate({
-      headingText: 'New Booking Alert',
-      bodyContent
+      headingText: "New Booking Alert",
+      bodyContent,
     });
 
     try {
       await mailService.send({
-        to: ['admin@hive-wellness.co.uk', 'support@hive-wellness.co.uk'],
+        to: ["admin@hive-wellness.co.uk", "support@hive-wellness.co.uk"],
         from: {
-          email: 'support@hive-wellness.co.uk',
-          name: 'Hive Wellness Booking System'
+          email: "support@hive-wellness.co.uk",
+          name: "Hive Wellness Booking System",
         },
         subject: `New Booking: ${booking.name} - ${booking.preferredDate} ${booking.preferredTime}`,
-        html: adminEmailHtml
+        html: adminEmailHtml,
       });
       return true;
     } catch (error) {
-      console.error('Failed to send admin notification email:', error);
+      console.error("Failed to send admin notification email:", error);
       return false;
     }
   }
-  
+
   // Send both confirmation emails
-  async sendBookingConfirmations(booking: BookingDetails): Promise<{ userSent: boolean; adminSent: boolean }> {
+  async sendBookingConfirmations(
+    booking: BookingDetails
+  ): Promise<{ userSent: boolean; adminSent: boolean }> {
     const [userSent, adminSent] = await Promise.all([
       this.sendUserConfirmation(booking),
-      this.sendAdminNotification(booking)
+      this.sendAdminNotification(booking),
     ]);
-    
+
     return { userSent, adminSent };
   }
 }

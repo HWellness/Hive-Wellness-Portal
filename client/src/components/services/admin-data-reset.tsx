@@ -45,24 +45,28 @@ export default function AdminDataReset() {
     preserveUsers: true,
   });
 
-  const { data: preview, isLoading: previewLoading, refetch } = useQuery<DataPreview>({
-    queryKey: ['/api/admin/data-reset/preview'],
+  const {
+    data: preview,
+    isLoading: previewLoading,
+    refetch,
+  } = useQuery<DataPreview>({
+    queryKey: ["/api/admin/data-reset/preview"],
   });
 
   const resetMutation = useMutation({
     mutationFn: async () => {
       const response = await apiRequest("POST", "/api/admin/data-reset", {
         confirmationCode,
-        resetOptions
+        resetOptions,
       });
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.message || 'Failed to reset data');
+        throw new Error(error.message || "Failed to reset data");
       }
       return response.json();
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/data-reset/preview'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/data-reset/preview"] });
       setShowConfirmDialog(false);
       setConfirmationCode("");
       toast({
@@ -85,7 +89,7 @@ export default function AdminDataReset() {
   };
 
   const handleConfirmReset = () => {
-    if (confirmationCode !== 'RESET_DEMO_DATA') {
+    if (confirmationCode !== "RESET_DEMO_DATA") {
       toast({
         title: "Invalid Code",
         description: "Please enter the exact confirmation code.",
@@ -102,14 +106,17 @@ export default function AdminDataReset() {
         <Trash2 className="h-8 w-8 text-red-600" />
         <div>
           <h2 className="text-2xl font-bold font-century text-hive-purple">Data Reset</h2>
-          <p className="text-sm text-hive-black/70">Reset demo and test data for clean environment</p>
+          <p className="text-sm text-hive-black/70">
+            Reset demo and test data for clean environment
+          </p>
         </div>
       </div>
 
       <Alert variant="destructive">
         <AlertTriangle className="h-4 w-4" />
         <AlertDescription>
-          <strong>⚠️ Warning:</strong> This action is irreversible. Only use for demo/test data. Never use in production with real client data.
+          <strong>⚠️ Warning:</strong> This action is irreversible. Only use for demo/test data.
+          Never use in production with real client data.
         </AlertDescription>
       </Alert>
 
@@ -127,7 +134,10 @@ export default function AdminDataReset() {
             <div className="grid grid-cols-2 gap-4">
               <div className="p-4 bg-hive-light-blue rounded-lg">
                 <div className="text-sm text-hive-black/70">Appointments</div>
-                <div className="text-3xl font-bold text-hive-purple" data-testid="count-appointments">
+                <div
+                  className="text-3xl font-bold text-hive-purple"
+                  data-testid="count-appointments"
+                >
                   {preview?.appointmentsCount || 0}
                 </div>
               </div>
@@ -139,7 +149,10 @@ export default function AdminDataReset() {
               </div>
               <div className="p-4 bg-hive-light-blue rounded-lg">
                 <div className="text-sm text-hive-black/70">Introduction Calls</div>
-                <div className="text-3xl font-bold text-hive-purple" data-testid="count-intro-calls">
+                <div
+                  className="text-3xl font-bold text-hive-purple"
+                  data-testid="count-intro-calls"
+                >
                   {preview?.introductionCallsCount || 0}
                 </div>
               </div>
@@ -170,8 +183,8 @@ export default function AdminDataReset() {
             <Checkbox
               id="appointments"
               checked={resetOptions.resetAppointments}
-              onCheckedChange={(checked) => 
-                setResetOptions(prev => ({ ...prev, resetAppointments: checked as boolean }))
+              onCheckedChange={(checked) =>
+                setResetOptions((prev) => ({ ...prev, resetAppointments: checked as boolean }))
               }
               data-testid="checkbox-reset-appointments"
             />
@@ -184,8 +197,8 @@ export default function AdminDataReset() {
             <Checkbox
               id="messages"
               checked={resetOptions.resetMessages}
-              onCheckedChange={(checked) => 
-                setResetOptions(prev => ({ ...prev, resetMessages: checked as boolean }))
+              onCheckedChange={(checked) =>
+                setResetOptions((prev) => ({ ...prev, resetMessages: checked as boolean }))
               }
               data-testid="checkbox-reset-messages"
             />
@@ -198,8 +211,8 @@ export default function AdminDataReset() {
             <Checkbox
               id="intro-calls"
               checked={resetOptions.resetIntroductionCalls}
-              onCheckedChange={(checked) => 
-                setResetOptions(prev => ({ ...prev, resetIntroductionCalls: checked as boolean }))
+              onCheckedChange={(checked) =>
+                setResetOptions((prev) => ({ ...prev, resetIntroductionCalls: checked as boolean }))
               }
               data-testid="checkbox-reset-intro-calls"
             />
@@ -212,8 +225,8 @@ export default function AdminDataReset() {
             <Checkbox
               id="payments"
               checked={resetOptions.resetPayments}
-              onCheckedChange={(checked) => 
-                setResetOptions(prev => ({ ...prev, resetPayments: checked as boolean }))
+              onCheckedChange={(checked) =>
+                setResetOptions((prev) => ({ ...prev, resetPayments: checked as boolean }))
               }
               data-testid="checkbox-reset-payments"
             />
@@ -239,11 +252,7 @@ export default function AdminDataReset() {
       </Card>
 
       <div className="flex justify-end gap-3">
-        <Button
-          variant="outline"
-          onClick={() => refetch()}
-          data-testid="button-refresh-preview"
-        >
+        <Button variant="outline" onClick={() => refetch()} data-testid="button-refresh-preview">
           <RefreshCw className="h-4 w-4 mr-2" />
           Refresh Preview
         </Button>
@@ -266,7 +275,8 @@ export default function AdminDataReset() {
               Confirm Data Reset
             </DialogTitle>
             <DialogDescription>
-              This action will permanently delete the selected data. Type the confirmation code to proceed.
+              This action will permanently delete the selected data. Type the confirmation code to
+              proceed.
             </DialogDescription>
           </DialogHeader>
 
@@ -306,7 +316,7 @@ export default function AdminDataReset() {
             <Button
               variant="destructive"
               onClick={handleConfirmReset}
-              disabled={confirmationCode !== 'RESET_DEMO_DATA' || resetMutation.isPending}
+              disabled={confirmationCode !== "RESET_DEMO_DATA" || resetMutation.isPending}
               data-testid="button-confirm-reset"
             >
               {resetMutation.isPending ? (

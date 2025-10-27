@@ -35,65 +35,57 @@ const defaultTherapyOptions: TherapyOption[] = [
     id: "default-1",
     title: "Counselling Approaches",
     price: 65,
-    description: "Gentle, supportive therapy to help you navigate life's challenges, improve emotional resilience, and build healthier coping strategies.",
-    therapistTypes: [
-      "Counsellor",
-      "Psychosexual Therapist"
-    ],
-    tier: 'counsellor',
-    color: 'from-purple-500 to-purple-600'
+    description:
+      "Gentle, supportive therapy to help you navigate life's challenges, improve emotional resilience, and build healthier coping strategies.",
+    therapistTypes: ["Counsellor", "Psychosexual Therapist"],
+    tier: "counsellor",
+    color: "from-purple-500 to-purple-600",
   },
   {
     id: "default-2",
     title: "CBT & Psychotherapy",
     price: 80,
-    description: "Evidence-based therapies to help manage your thoughts, feelings, and behaviours. Suitable for adults seeking help with issues such as stress, low mood, anxiety, or relationship difficulties.",
-    therapistTypes: [
-      "Cognitive Behavioural Therapist",
-      "Psychotherapist"
-    ],
-    tier: 'psychotherapist',
-    color: 'from-blue-500 to-blue-600'
+    description:
+      "Evidence-based therapies to help manage your thoughts, feelings, and behaviours. Suitable for adults seeking help with issues such as stress, low mood, anxiety, or relationship difficulties.",
+    therapistTypes: ["Cognitive Behavioural Therapist", "Psychotherapist"],
+    tier: "psychotherapist",
+    color: "from-blue-500 to-blue-600",
   },
   {
     id: "default-3",
     title: "Psychological Therapies",
     price: 90,
-    description: "Targeted support for adult mental health concerns like anxiety disorders, depression, or trauma. These therapies use advanced, evidence-based techniques to shift thought patterns and behaviours.",
-    therapistTypes: [
-      "Clinical Psychologist",
-      "Counselling Psychologist"
-    ],
-    tier: 'psychologist',
-    color: 'from-green-500 to-green-600'
+    description:
+      "Targeted support for adult mental health concerns like anxiety disorders, depression, or trauma. These therapies use advanced, evidence-based techniques to shift thought patterns and behaviours.",
+    therapistTypes: ["Clinical Psychologist", "Counselling Psychologist"],
+    tier: "psychologist",
+    color: "from-green-500 to-green-600",
   },
   {
     id: "default-4",
     title: "Specialist Therapies",
     price: 120,
-    description: "Specialist support for complex, longstanding, or severe psychological difficulties, drawing on advanced therapeutic approaches and expert clinical insight. Evidence-based techniques to shift thought.",
-    therapistTypes: [
-      "Clinical Psychologist",
-      "Clinical Psychologist & Director"
-    ],
-    tier: 'specialist',
-    color: 'from-orange-500 to-orange-600'
-  }
+    description:
+      "Specialist support for complex, longstanding, or severe psychological difficulties, drawing on advanced therapeutic approaches and expert clinical insight. Evidence-based techniques to shift thought.",
+    therapistTypes: ["Clinical Psychologist", "Clinical Psychologist & Director"],
+    tier: "specialist",
+    color: "from-orange-500 to-orange-600",
+  },
 ];
 
 // Map therapy category names to colors and tiers
 const getCategoryColorAndTier = (name: string): { color: string; tier: string } => {
   const lowerName = name.toLowerCase();
-  if (lowerName.includes('counselling')) {
-    return { color: 'from-purple-500 to-purple-600', tier: 'counsellor' };
-  } else if (lowerName.includes('cbt') || lowerName.includes('psychotherapy')) {
-    return { color: 'from-blue-500 to-blue-600', tier: 'psychotherapist' };
-  } else if (lowerName.includes('psychological')) {
-    return { color: 'from-green-500 to-green-600', tier: 'psychologist' };
-  } else if (lowerName.includes('specialist')) {
-    return { color: 'from-orange-500 to-orange-600', tier: 'specialist' };
+  if (lowerName.includes("counselling")) {
+    return { color: "from-purple-500 to-purple-600", tier: "counsellor" };
+  } else if (lowerName.includes("cbt") || lowerName.includes("psychotherapy")) {
+    return { color: "from-blue-500 to-blue-600", tier: "psychotherapist" };
+  } else if (lowerName.includes("psychological")) {
+    return { color: "from-green-500 to-green-600", tier: "psychologist" };
+  } else if (lowerName.includes("specialist")) {
+    return { color: "from-orange-500 to-orange-600", tier: "specialist" };
   }
-  return { color: 'from-gray-500 to-gray-600', tier: 'general' };
+  return { color: "from-gray-500 to-gray-600", tier: "general" };
 };
 
 interface TherapyPricingDisplayProps {
@@ -102,22 +94,22 @@ interface TherapyPricingDisplayProps {
   isAuthenticated?: boolean;
 }
 
-export function TherapyPricingDisplay({ 
-  onSelectTherapy, 
+export function TherapyPricingDisplay({
+  onSelectTherapy,
   showBookingButtons = true,
-  isAuthenticated = false 
+  isAuthenticated = false,
 }: TherapyPricingDisplayProps) {
-  
   // Fetch therapist categories only if authenticated
-  const { data: therapistData, isLoading: isLoadingCategories } = useQuery<TherapistCategoriesResponse>({
-    queryKey: ['/api/client/therapist-categories'],
-    enabled: isAuthenticated, // Only fetch if user is authenticated
-    retry: false, // Don't retry if no therapist assigned
-  });
+  const { data: therapistData, isLoading: isLoadingCategories } =
+    useQuery<TherapistCategoriesResponse>({
+      queryKey: ["/api/client/therapist-categories"],
+      enabled: isAuthenticated, // Only fetch if user is authenticated
+      retry: false, // Don't retry if no therapist assigned
+    });
 
   // Determine which options to display
   let therapyOptions: TherapyOption[] = defaultTherapyOptions;
-  
+
   if (isAuthenticated && therapistData?.categories) {
     // Use therapist's categories with correct pricing
     therapyOptions = therapistData.categories.map((cat, index) => {
@@ -129,7 +121,7 @@ export function TherapyPricingDisplay({
         description: cat.description,
         therapistTypes: cat.availableTherapistTypes || [],
         tier,
-        color
+        color,
       };
     });
   }
@@ -143,7 +135,7 @@ export function TherapyPricingDisplay({
       </div>
     );
   }
-  
+
   return (
     <div className="space-y-6">
       {/* Introduction Call Banner */}
@@ -154,7 +146,8 @@ export function TherapyPricingDisplay({
             Free Introduction Call
           </CardTitle>
           <CardDescription className="text-white/90 text-base">
-            Start your journey with a complimentary 20-minute consultation to discuss your needs and find the right therapist for you.
+            Start your journey with a complimentary 20-minute consultation to discuss your needs and
+            find the right therapist for you.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -164,8 +157,8 @@ export function TherapyPricingDisplay({
               <p className="text-sm text-white/80">No account required</p>
             </div>
             <Link to="/book-admin-call-widget">
-              <Button 
-                size="lg" 
+              <Button
+                size="lg"
                 variant="secondary"
                 className="bg-white text-hive-purple hover:bg-white/90"
                 data-testid="button-book-intro-call"
@@ -180,8 +173,8 @@ export function TherapyPricingDisplay({
       {/* Therapy Session Options */}
       <div className="grid gap-6 md:grid-cols-2">
         {therapyOptions.map((option) => (
-          <Card 
-            key={option.id} 
+          <Card
+            key={option.id}
             className="hover:shadow-lg transition-shadow duration-300 border-2 border-gray-200 hover:border-hive-purple"
             data-testid={`card-therapy-${option.tier}`}
           >
@@ -191,7 +184,9 @@ export function TherapyPricingDisplay({
                   <CardTitle className="text-xl text-hive-dark mb-2">
                     {option.id}. {option.title}
                   </CardTitle>
-                  <div className={`inline-flex items-center justify-center px-4 py-2 rounded-lg bg-gradient-to-r ${option.color} text-white font-bold text-2xl mb-3`}>
+                  <div
+                    className={`inline-flex items-center justify-center px-4 py-2 rounded-lg bg-gradient-to-r ${option.color} text-white font-bold text-2xl mb-3`}
+                  >
                     £{option.price}
                   </div>
                 </div>
@@ -212,11 +207,11 @@ export function TherapyPricingDisplay({
                   ))}
                 </div>
               </div>
-              
+
               {showBookingButtons && (
                 <div className="pt-4">
                   {isAuthenticated ? (
-                    <Button 
+                    <Button
                       className="w-full bg-hive-purple hover:bg-hive-purple/90"
                       onClick={() => onSelectTherapy?.(option.tier, option.price, option.id)}
                       data-testid={`button-book-${option.tier}`}
@@ -225,7 +220,7 @@ export function TherapyPricingDisplay({
                     </Button>
                   ) : (
                     <Link to="/portal">
-                      <Button 
+                      <Button
                         className="w-full bg-hive-purple hover:bg-hive-purple/90"
                         data-testid={`button-book-${option.tier}`}
                       >
@@ -244,7 +239,9 @@ export function TherapyPricingDisplay({
       <Card className="bg-hive-background border-hive-purple/20">
         <CardContent className="pt-6">
           <p className="text-sm text-gray-600 text-center">
-            <strong>Note:</strong> All therapy sessions are 50 minutes in duration. Pricing is based on therapist qualifications and experience. All therapists provide exceptional care regardless of tier.
+            <strong>Note:</strong> All therapy sessions are 50 minutes in duration. Pricing is based
+            on therapist qualifications and experience. All therapists provide exceptional care
+            regardless of tier.
           </p>
         </CardContent>
       </Card>

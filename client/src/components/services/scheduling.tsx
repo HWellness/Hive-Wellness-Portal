@@ -13,7 +13,9 @@ import type { User } from "@shared/schema";
 
 // Initialize Stripe
 // TEMPORARY: Using test keys in production for testing webhook flow
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_TEST_PUBLIC_KEY || import.meta.env.VITE_STRIPE_PUBLIC_KEY || "");
+const stripePromise = loadStripe(
+  import.meta.env.VITE_STRIPE_TEST_PUBLIC_KEY || import.meta.env.VITE_STRIPE_PUBLIC_KEY || ""
+);
 
 interface SchedulingProps {
   user: User;
@@ -32,13 +34,13 @@ function PaymentForm({ sessionData, onSuccess, onCancel }: any) {
 
     try {
       // For demo purposes, simulate payment success after 2 seconds
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, 2000));
 
       // Create appointment after simulated payment success
       const appointmentResponse = await apiRequest("POST", "/api/appointments", {
         ...sessionData,
         paymentIntentId: `demo_payment_${Date.now()}`,
-        status: "confirmed"
+        status: "confirmed",
       });
 
       onSuccess(appointmentResponse);
@@ -74,23 +76,22 @@ function PaymentForm({ sessionData, onSuccess, onCancel }: any) {
           }}
         />
       </div>
-      
+
       <div className="bg-hive-light-blue p-4 rounded-lg">
         <h4 className="font-semibold text-hive-black mb-2">Session Details</h4>
         <p className="text-sm text-gray-600">
-          <strong>Date:</strong> {sessionData.date}<br/>
-          <strong>Time:</strong> {sessionData.time}<br/>
-          <strong>Duration:</strong> {sessionData.duration}<br/>
+          <strong>Date:</strong> {sessionData.date}
+          <br />
+          <strong>Time:</strong> {sessionData.time}
+          <br />
+          <strong>Duration:</strong> {sessionData.duration}
+          <br />
           <strong>Amount:</strong> £{sessionData.price}
         </p>
       </div>
 
       <div className="flex space-x-3">
-        <Button
-          type="submit"
-          disabled={!stripe || isProcessing}
-          className="btn-primary flex-1"
-        >
+        <Button type="submit" disabled={!stripe || isProcessing} className="btn-primary flex-1">
           {isProcessing ? "Processing..." : `Pay £${sessionData.price}`}
         </Button>
         <Button
@@ -112,39 +113,39 @@ export default function Scheduling({ user }: SchedulingProps) {
   const queryClient = useQueryClient();
   const [selectedSlot, setSelectedSlot] = useState<any>(null);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
-  
+
   const { data: appointments, isLoading } = useQuery({
     queryKey: ["/api/appointments"],
     retry: false,
   });
 
   const availableSlots = [
-    { 
+    {
       id: 1,
-      date: "Tomorrow", 
-      time: "2:00 PM", 
-      duration: "50 minutes", 
+      date: "Tomorrow",
+      time: "2:00 PM",
+      duration: "50 minutes",
       price: 120,
       sessionType: "therapy",
-      therapist: "Dr. Sarah Johnson"
+      therapist: "Dr. Sarah Johnson",
     },
-    { 
+    {
       id: 2,
-      date: "Friday", 
-      time: "10:00 AM", 
-      duration: "50 minutes", 
+      date: "Friday",
+      time: "10:00 AM",
+      duration: "50 minutes",
       price: 120,
       sessionType: "therapy",
-      therapist: "Dr. Sarah Johnson"
+      therapist: "Dr. Sarah Johnson",
     },
-    { 
+    {
       id: 3,
-      date: "Monday", 
-      time: "3:00 PM", 
-      duration: "50 minutes", 
+      date: "Monday",
+      time: "3:00 PM",
+      duration: "50 minutes",
       price: 120,
       sessionType: "therapy",
-      therapist: "Dr. Sarah Johnson"
+      therapist: "Dr. Sarah Johnson",
     },
   ];
 
@@ -152,7 +153,7 @@ export default function Scheduling({ user }: SchedulingProps) {
     const sessionData = {
       ...slot,
       clientId: user.id,
-      clientName: `${user.firstName || 'Demo'} ${user.lastName || 'Client'}`,
+      clientName: `${user.firstName || "Demo"} ${user.lastName || "Client"}`,
       therapistId: "demo-therapist-1",
       scheduledAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
       duration: 50,
@@ -186,9 +187,7 @@ export default function Scheduling({ user }: SchedulingProps) {
         <CardHeader>
           <CardTitle className="text-xl font-semibold text-hive-black flex items-center justify-between">
             Session Scheduling
-            <Badge className="bg-hive-purple text-white">
-              Therapy Sessions
-            </Badge>
+            <Badge className="bg-hive-purple text-white">Therapy Sessions</Badge>
           </CardTitle>
         </CardHeader>
         <CardContent className="p-6">
@@ -198,7 +197,10 @@ export default function Scheduling({ user }: SchedulingProps) {
               <h4 className="font-semibold text-hive-black mb-4">Available Slots</h4>
               <div className="space-y-3">
                 {availableSlots.map((slot) => (
-                  <div key={slot.id} className="p-4 border border-gray-200 rounded-lg hover:bg-hive-light-blue transition-colors">
+                  <div
+                    key={slot.id}
+                    className="p-4 border border-gray-200 rounded-lg hover:bg-hive-light-blue transition-colors"
+                  >
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
                         <div className="font-semibold text-hive-black mb-1">
@@ -209,19 +211,13 @@ export default function Scheduling({ user }: SchedulingProps) {
                           {slot.duration} • {slot.therapist}
                         </div>
                         <div className="flex items-center gap-2">
-                          <Badge className="bg-blue-100 text-blue-800">
-                            Therapy Session
-                          </Badge>
-                          <Badge className="bg-hive-purple text-white">
-                            Requires Payment
-                          </Badge>
+                          <Badge className="bg-blue-100 text-blue-800">Therapy Session</Badge>
+                          <Badge className="bg-hive-purple text-white">Requires Payment</Badge>
                         </div>
                       </div>
-                      
+
                       <div className="text-right ml-4">
-                        <div className="font-bold text-hive-black text-lg mb-2">
-                          £{slot.price}
-                        </div>
+                        <div className="font-bold text-hive-black text-lg mb-2">£{slot.price}</div>
                         <Button
                           size="sm"
                           onClick={() => handleBookSlot(slot)}
@@ -236,7 +232,7 @@ export default function Scheduling({ user }: SchedulingProps) {
                 ))}
               </div>
             </div>
-            
+
             {/* Upcoming Sessions */}
             <div>
               <h4 className="font-semibold text-hive-black mb-4">Upcoming Sessions</h4>
@@ -250,18 +246,18 @@ export default function Scheduling({ user }: SchedulingProps) {
                             {new Date(appointment.scheduledAt).toLocaleDateString()}
                           </div>
                           <div className="text-sm text-gray-600">
-                            with {appointment.therapistName || 'Dr. Sarah Johnson'}
+                            with {appointment.therapistName || "Dr. Sarah Johnson"}
                           </div>
-                          <div className="text-xs text-gray-500 mt-1">
-                            Therapy Session
-                          </div>
+                          <div className="text-xs text-gray-500 mt-1">Therapy Session</div>
                         </div>
                         <div className="text-right">
-                          <Badge 
+                          <Badge
                             className={`text-xs mb-1 ${
-                              appointment.status === "confirmed" ? "bg-green-100 text-green-800" :
-                              appointment.status === "scheduled" ? "bg-blue-100 text-blue-800" :
-                              "bg-gray-100 text-gray-800"
+                              appointment.status === "confirmed"
+                                ? "bg-green-100 text-green-800"
+                                : appointment.status === "scheduled"
+                                  ? "bg-blue-100 text-blue-800"
+                                  : "bg-gray-100 text-gray-800"
                             }`}
                           >
                             {appointment.status.toUpperCase()}
@@ -279,9 +275,7 @@ export default function Scheduling({ user }: SchedulingProps) {
                 ) : (
                   <div className="p-4 bg-gray-50 rounded-lg text-center">
                     <Calendar className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-                    <div className="text-gray-600 text-sm">
-                      No upcoming sessions scheduled
-                    </div>
+                    <div className="text-gray-600 text-sm">No upcoming sessions scheduled</div>
                   </div>
                 )}
               </div>
@@ -296,7 +290,7 @@ export default function Scheduling({ user }: SchedulingProps) {
           <DialogHeader>
             <DialogTitle className="text-hive-black">Complete Payment</DialogTitle>
           </DialogHeader>
-          
+
           <Elements stripe={stripePromise}>
             <PaymentForm
               sessionData={selectedSlot}

@@ -59,11 +59,17 @@ export default function PaymentsCopyHelper() {
 
         <div className="space-y-3">
           {copyBlocks.map((block) => (
-            <div key={block.key} className="p-3 bg-gray-50 rounded-lg border border-gray-200" data-testid={`copy-block-${block.key}`}>
+            <div
+              key={block.key}
+              className="p-3 bg-gray-50 rounded-lg border border-gray-200"
+              data-testid={`copy-block-${block.key}`}
+            >
               <div className="flex items-start justify-between gap-3">
                 <div className="flex-1">
                   <div className="text-sm font-medium text-gray-700 mb-1">{block.label}</div>
-                  <div className="text-sm text-gray-900" data-testid={`copy-value-${block.key}`}>{block.value}</div>
+                  <div className="text-sm text-gray-900" data-testid={`copy-value-${block.key}`}>
+                    {block.value}
+                  </div>
                 </div>
                 <Button
                   variant="ghost"

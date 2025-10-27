@@ -1,23 +1,60 @@
-import { useState } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { useAuth } from '@/hooks/useAuth';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
-import { useToast } from '@/hooks/use-toast';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { FileText, Calendar, User, Download, Plus, Shield, CheckCircle, Search, Filter, Video, Eye, Lock, ChevronDown, Clock } from 'lucide-react';
-import { apiRequest, queryClient } from '@/lib/queryClient';
+import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/hooks/use-toast";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import {
+  FileText,
+  Calendar,
+  User,
+  Download,
+  Plus,
+  Shield,
+  CheckCircle,
+  Search,
+  Filter,
+  Video,
+  Eye,
+  Lock,
+  ChevronDown,
+  Clock,
+} from "lucide-react";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 const sessionNoteSchema = z.object({
   appointmentId: z.string().min(1, "Appointment ID is required"),
@@ -161,7 +198,7 @@ export default function DocumentSessionTracking() {
   // Create session note mutation
   const createSessionNoteMutation = useMutation({
     mutationFn: async (noteData: z.infer<typeof sessionNoteSchema>) => {
-      return await apiRequest('POST', '/api/session-notes', noteData);
+      return await apiRequest("POST", "/api/session-notes", noteData);
     },
     onSuccess: () => {
       toast({
@@ -184,7 +221,7 @@ export default function DocumentSessionTracking() {
   // Create document mutation
   const createDocumentMutation = useMutation({
     mutationFn: async (documentData: z.infer<typeof documentSchema>) => {
-      return await apiRequest('POST', '/api/documents', documentData);
+      return await apiRequest("POST", "/api/documents", documentData);
     },
     onSuccess: () => {
       toast({
@@ -205,25 +242,49 @@ export default function DocumentSessionTracking() {
   });
 
   const sessionFocusOptions = [
-    "Anxiety", "Depression", "Trauma", "Relationships", "Stress Management", 
-    "Grief", "Addiction", "Self-esteem", "Communication", "Career", "Family"
+    "Anxiety",
+    "Depression",
+    "Trauma",
+    "Relationships",
+    "Stress Management",
+    "Grief",
+    "Addiction",
+    "Self-esteem",
+    "Communication",
+    "Career",
+    "Family",
   ];
 
   const interventionOptions = [
-    "CBT", "DBT", "EMDR", "Mindfulness", "Exposure Therapy", "Solution-Focused",
-    "Psychodynamic", "Gestalt", "Humanistic", "Somatic", "Art Therapy"
+    "CBT",
+    "DBT",
+    "EMDR",
+    "Mindfulness",
+    "Exposure Therapy",
+    "Solution-Focused",
+    "Psychodynamic",
+    "Gestalt",
+    "Humanistic",
+    "Somatic",
+    "Art Therapy",
   ];
 
   const documentTypes = [
-    "session_notes", "therapy_plan", "assessment", "consent_form", 
-    "homework", "insurance", "progress_report", "discharge_summary"
+    "session_notes",
+    "therapy_plan",
+    "assessment",
+    "consent_form",
+    "homework",
+    "insurance",
+    "progress_report",
+    "discharge_summary",
   ];
 
   const confidentialityLevels = [
     { value: "low", label: "Low", color: "bg-green-100 text-green-800" },
     { value: "medium", label: "Medium", color: "bg-yellow-100 text-yellow-800" },
     { value: "high", label: "High", color: "bg-orange-100 text-orange-800" },
-    { value: "restricted", label: "Restricted", color: "bg-red-100 text-red-800" }
+    { value: "restricted", label: "Restricted", color: "bg-red-100 text-red-800" },
   ];
 
   const handleSessionNoteSubmit = (values: z.infer<typeof sessionNoteSchema>) => {
@@ -257,7 +318,11 @@ export default function DocumentSessionTracking() {
             <Plus className="h-4 w-4" />
             New Session Note
           </Button>
-          <Button onClick={() => setShowNewDocument(true)} variant="outline" className="flex items-center gap-2">
+          <Button
+            onClick={() => setShowNewDocument(true)}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
             <Plus className="h-4 w-4" />
             New Document
           </Button>
@@ -347,27 +412,32 @@ export default function DocumentSessionTracking() {
           <div className="grid gap-4">
             {sessionNotes && sessionNotes.length > 0 ? (
               sessionNotes.map((note) => (
-                <Card key={note.id} className="cursor-pointer hover:shadow-md transition-shadow"
-                      onClick={() => setSelectedNote(note)}>
+                <Card
+                  key={note.id}
+                  className="cursor-pointer hover:shadow-md transition-shadow"
+                  onClick={() => setSelectedNote(note)}
+                >
                   <CardHeader>
                     <div className="flex justify-between items-start">
                       <div>
-                        <CardTitle className="text-lg">Session Note - {note.appointmentId}</CardTitle>
+                        <CardTitle className="text-lg">
+                          Session Note - {note.appointmentId}
+                        </CardTitle>
                         <CardDescription>
                           Created: {new Date(note.createdAt).toLocaleDateString()}
                         </CardDescription>
                       </div>
                       <div className="flex gap-2">
                         {note.sessionFocus.map((focus) => (
-                          <Badge key={focus} variant="secondary">{focus}</Badge>
+                          <Badge key={focus} variant="secondary">
+                            {focus}
+                          </Badge>
                         ))}
                       </div>
                     </div>
                   </CardHeader>
                   <CardContent>
-                    <p className="text-sm text-muted-foreground line-clamp-2">
-                      {note.assessment}
-                    </p>
+                    <p className="text-sm text-muted-foreground line-clamp-2">{note.assessment}</p>
                   </CardContent>
                 </Card>
               ))
@@ -387,8 +457,11 @@ export default function DocumentSessionTracking() {
           <div className="grid gap-4">
             {documents && documents.length > 0 ? (
               documents.map((doc) => (
-                <Card key={doc.id} className="cursor-pointer hover:shadow-md transition-shadow"
-                      onClick={() => setSelectedDocument(doc)}>
+                <Card
+                  key={doc.id}
+                  className="cursor-pointer hover:shadow-md transition-shadow"
+                  onClick={() => setSelectedDocument(doc)}
+                >
                   <CardHeader>
                     <div className="flex justify-between items-start">
                       <div>
@@ -397,21 +470,24 @@ export default function DocumentSessionTracking() {
                           {doc.title}
                         </CardTitle>
                         <CardDescription>
-                          Type: {doc.type} • Version: {doc.version} • 
-                          Created: {new Date(doc.createdAt).toLocaleDateString()}
+                          Type: {doc.type} • Version: {doc.version} • Created:{" "}
+                          {new Date(doc.createdAt).toLocaleDateString()}
                         </CardDescription>
                       </div>
                       <div className="flex flex-col items-end gap-2">
-                        <Badge 
+                        <Badge
                           className={
-                            confidentialityLevels.find(l => l.value === doc.confidentialityLevel)?.color
+                            confidentialityLevels.find((l) => l.value === doc.confidentialityLevel)
+                              ?.color
                           }
                         >
                           <Lock className="h-3 w-3 mr-1" />
                           {doc.confidentialityLevel}
                         </Badge>
                         {doc.tags.map((tag) => (
-                          <Badge key={tag} variant="outline">{tag}</Badge>
+                          <Badge key={tag} variant="outline">
+                            {tag}
+                          </Badge>
                         ))}
                       </div>
                     </div>
@@ -443,9 +519,12 @@ export default function DocumentSessionTracking() {
                           Session Recording - {recording.appointmentId}
                         </CardTitle>
                         <CardDescription>
-                          Duration: {recording.duration ? `${Math.floor(recording.duration / 60)}:${recording.duration % 60}` : 'N/A'} • 
-                          Status: {recording.recordingStatus} • 
-                          Created: {new Date(recording.createdAt).toLocaleDateString()}
+                          Duration:{" "}
+                          {recording.duration
+                            ? `${Math.floor(recording.duration / 60)}:${recording.duration % 60}`
+                            : "N/A"}{" "}
+                          • Status: {recording.recordingStatus} • Created:{" "}
+                          {new Date(recording.createdAt).toLocaleDateString()}
                         </CardDescription>
                       </div>
                       <div className="flex flex-col items-end gap-2">
@@ -567,7 +646,10 @@ export default function DocumentSessionTracking() {
             </DialogDescription>
           </DialogHeader>
           <Form {...sessionNoteForm}>
-            <form onSubmit={sessionNoteForm.handleSubmit(handleSessionNoteSubmit)} className="space-y-6">
+            <form
+              onSubmit={sessionNoteForm.handleSubmit(handleSessionNoteSubmit)}
+              className="space-y-6"
+            >
               <FormField
                 control={sessionNoteForm.control}
                 name="appointmentId"
@@ -596,15 +678,21 @@ export default function DocumentSessionTracking() {
                           </SelectTrigger>
                           <SelectContent>
                             {sessionFocusOptions.map((focus) => (
-                              <SelectItem key={focus} value={focus}>{focus}</SelectItem>
+                              <SelectItem key={focus} value={focus}>
+                                {focus}
+                              </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
                       </FormControl>
                       <div className="flex flex-wrap gap-1 mt-2">
                         {field.value.map((focus) => (
-                          <Badge key={focus} variant="secondary" className="cursor-pointer"
-                                 onClick={() => field.onChange(field.value.filter(f => f !== focus))}>
+                          <Badge
+                            key={focus}
+                            variant="secondary"
+                            className="cursor-pointer"
+                            onClick={() => field.onChange(field.value.filter((f) => f !== focus))}
+                          >
                             {focus} ×
                           </Badge>
                         ))}
@@ -627,15 +715,23 @@ export default function DocumentSessionTracking() {
                           </SelectTrigger>
                           <SelectContent>
                             {interventionOptions.map((intervention) => (
-                              <SelectItem key={intervention} value={intervention}>{intervention}</SelectItem>
+                              <SelectItem key={intervention} value={intervention}>
+                                {intervention}
+                              </SelectItem>
                             ))}
                           </SelectContent>
                         </Select>
                       </FormControl>
                       <div className="flex flex-wrap gap-1 mt-2">
                         {field.value.map((intervention) => (
-                          <Badge key={intervention} variant="secondary" className="cursor-pointer"
-                                 onClick={() => field.onChange(field.value.filter(i => i !== intervention))}>
+                          <Badge
+                            key={intervention}
+                            variant="secondary"
+                            className="cursor-pointer"
+                            onClick={() =>
+                              field.onChange(field.value.filter((i) => i !== intervention))
+                            }
+                          >
                             {intervention} ×
                           </Badge>
                         ))}
@@ -653,10 +749,10 @@ export default function DocumentSessionTracking() {
                   <FormItem>
                     <FormLabel>Subjective (Client's Reported Experience)</FormLabel>
                     <FormControl>
-                      <Textarea 
+                      <Textarea
                         placeholder="Document what the client reports about their experience, feelings, symptoms, and concerns..."
                         className="min-h-[100px]"
-                        {...field} 
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
@@ -671,10 +767,10 @@ export default function DocumentSessionTracking() {
                   <FormItem>
                     <FormLabel>Objective (Clinical Observations)</FormLabel>
                     <FormControl>
-                      <Textarea 
+                      <Textarea
                         placeholder="Document observable behaviours, appearance, mood, affect, and clinical observations..."
                         className="min-h-[100px]"
-                        {...field} 
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
@@ -689,10 +785,10 @@ export default function DocumentSessionTracking() {
                   <FormItem>
                     <FormLabel>Assessment (Clinical Analysis)</FormLabel>
                     <FormControl>
-                      <Textarea 
+                      <Textarea
                         placeholder="Document clinical assessment, diagnosis considerations, treatment response, and progress..."
                         className="min-h-[100px]"
-                        {...field} 
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
@@ -707,10 +803,10 @@ export default function DocumentSessionTracking() {
                   <FormItem>
                     <FormLabel>Plan (Therapy Plan and Goals)</FormLabel>
                     <FormControl>
-                      <Textarea 
+                      <Textarea
                         placeholder="Document therapy plan, session goals, interventions planned, and next steps..."
                         className="min-h-[100px]"
-                        {...field} 
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
@@ -726,9 +822,9 @@ export default function DocumentSessionTracking() {
                     <FormItem>
                       <FormLabel>Homework Assigned (Optional)</FormLabel>
                       <FormControl>
-                        <Textarea 
+                        <Textarea
                           placeholder="Document any homework or exercises assigned to the client..."
-                          {...field} 
+                          {...field}
                         />
                       </FormControl>
                       <FormMessage />
@@ -743,9 +839,9 @@ export default function DocumentSessionTracking() {
                     <FormItem>
                       <FormLabel>Next Session Goals (Optional)</FormLabel>
                       <FormControl>
-                        <Textarea 
+                        <Textarea
                           placeholder="Document goals and focus areas for the next session..."
-                          {...field} 
+                          {...field}
                         />
                       </FormControl>
                       <FormMessage />
@@ -755,7 +851,11 @@ export default function DocumentSessionTracking() {
               </div>
 
               <DialogFooter>
-                <Button type="button" variant="outline" onClick={() => setShowNewSessionNote(false)}>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowNewSessionNote(false)}
+                >
                   Cancel
                 </Button>
                 <Button type="submit" disabled={createSessionNoteMutation.isPending}>
@@ -794,7 +894,7 @@ export default function DocumentSessionTracking() {
                         <SelectContent>
                           {documentTypes.map((type) => (
                             <SelectItem key={type} value={type}>
-                              {type.replace('_', ' ').toUpperCase()}
+                              {type.replace("_", " ").toUpperCase()}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -851,10 +951,10 @@ export default function DocumentSessionTracking() {
                   <FormItem>
                     <FormLabel>Document Content</FormLabel>
                     <FormControl>
-                      <Textarea 
+                      <Textarea
                         placeholder="Enter document content..."
                         className="min-h-[200px]"
-                        {...field} 
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />

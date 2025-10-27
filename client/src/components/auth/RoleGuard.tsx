@@ -1,9 +1,16 @@
-import { useAuth } from '@/hooks/useAuth';
-import { AuthUser, UserRole, hasRole, hasAnyRole, hasMinimumRole, canAccessRoute } from '@/types/auth';
-import { Card, CardContent } from '@/components/ui/card';
-import { AlertTriangle, Lock } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useLocation } from 'wouter';
+import { useAuth } from "@/hooks/useAuth";
+import {
+  AuthUser,
+  UserRole,
+  hasRole,
+  hasAnyRole,
+  hasMinimumRole,
+  canAccessRoute,
+} from "@/types/auth";
+import { Card, CardContent } from "@/components/ui/card";
+import { AlertTriangle, Lock } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { useLocation } from "wouter";
 
 interface RoleGuardProps {
   children: React.ReactNode;
@@ -22,7 +29,7 @@ export function RoleGuard({
   minimumRole,
   requireRoute,
   fallback,
-  showErrorMessage = true
+  showErrorMessage = true,
 }: RoleGuardProps) {
   const { user, isAuthenticated, isLoading } = useAuth();
   const [, setLocation] = useLocation();
@@ -39,7 +46,7 @@ export function RoleGuard({
   // Not authenticated
   if (!isAuthenticated || !user) {
     if (fallback) return <>{fallback}</>;
-    
+
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <Card className="w-full max-w-md">
@@ -47,10 +54,8 @@ export function RoleGuard({
             <div className="text-center space-y-4">
               <Lock className="h-12 w-12 text-muted-foreground mx-auto" />
               <h2 className="text-xl font-semibold">Access Restricted</h2>
-              <p className="text-muted-foreground">
-                You need to be logged in to access this page.
-              </p>
-              <Button onClick={() => setLocation('/login')} className="w-full">
+              <p className="text-muted-foreground">You need to be logged in to access this page.</p>
+              <Button onClick={() => setLocation("/login")} className="w-full">
                 Sign In
               </Button>
             </div>
@@ -100,16 +105,16 @@ export function RoleGuard({
               <div className="text-sm text-muted-foreground">
                 Your role: <span className="font-medium capitalize">{typedUser.role}</span>
               </div>
-              <Button 
+              <Button
                 onClick={() => {
                   // Redirect to appropriate dashboard based on role
                   const dashboardRoutes = {
-                    client: '/client-dashboard',
-                    therapist: '/therapist-dashboard', 
-                    admin: '/admin-dashboard',
-                    institution: '/institution-dashboard'
+                    client: "/client-dashboard",
+                    therapist: "/therapist-dashboard",
+                    admin: "/admin-dashboard",
+                    institution: "/institution-dashboard",
                   };
-                  setLocation(dashboardRoutes[typedUser.role] || '/');
+                  setLocation(dashboardRoutes[typedUser.role] || "/");
                 }}
                 className="w-full"
               >
@@ -127,43 +132,67 @@ export function RoleGuard({
 }
 
 // Convenience components for specific roles
-export const AdminOnly = ({ children, fallback }: { children: React.ReactNode; fallback?: React.ReactNode }) => (
+export const AdminOnly = ({
+  children,
+  fallback,
+}: {
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}) => (
   <RoleGuard requiredRole="admin" fallback={fallback}>
     {children}
   </RoleGuard>
 );
 
-export const TherapistOnly = ({ children, fallback }: { children: React.ReactNode; fallback?: React.ReactNode }) => (
+export const TherapistOnly = ({
+  children,
+  fallback,
+}: {
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}) => (
   <RoleGuard requiredRole="therapist" fallback={fallback}>
     {children}
   </RoleGuard>
 );
 
-export const ClientOnly = ({ children, fallback }: { children: React.ReactNode; fallback?: React.ReactNode }) => (
+export const ClientOnly = ({
+  children,
+  fallback,
+}: {
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}) => (
   <RoleGuard requiredRole="client" fallback={fallback}>
     {children}
   </RoleGuard>
 );
 
-export const InstitutionOnly = ({ children, fallback }: { children: React.ReactNode; fallback?: React.ReactNode }) => (
+export const InstitutionOnly = ({
+  children,
+  fallback,
+}: {
+  children: React.ReactNode;
+  fallback?: React.ReactNode;
+}) => (
   <RoleGuard requiredRole="institution" fallback={fallback}>
     {children}
   </RoleGuard>
 );
 
 // Role-based conditional rendering component
-export const ShowForRoles = ({ 
-  roles, 
-  children, 
-  user 
-}: { 
-  roles: UserRole[]; 
-  children: React.ReactNode; 
-  user?: AuthUser 
+export const ShowForRoles = ({
+  roles,
+  children,
+  user,
+}: {
+  roles: UserRole[];
+  children: React.ReactNode;
+  user?: AuthUser;
 }) => {
   const { user: authUser } = useAuth();
   const targetUser = user || authUser;
-  
+
   if (!targetUser || !hasAnyRole(targetUser as AuthUser, roles)) {
     return null;
   }

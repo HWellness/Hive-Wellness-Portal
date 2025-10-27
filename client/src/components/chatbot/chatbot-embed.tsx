@@ -1,5 +1,5 @@
-import React from 'react';
-import ChatbotWidget from './chatbot-widget';
+import React from "react";
+import ChatbotWidget from "./chatbot-widget";
 
 interface ChatbotEmbedProps {
   height?: string;
@@ -7,13 +7,13 @@ interface ChatbotEmbedProps {
   title?: string;
 }
 
-export function ChatbotEmbed({ 
-  height = '500px', 
-  width = '100%', 
-  title = 'Hive Wellness Chat Assistant' 
+export function ChatbotEmbed({
+  height = "500px",
+  width = "100%",
+  title = "Hive Wellness Chat Assistant",
 }: ChatbotEmbedProps) {
   return (
-    <div 
+    <div
       className="chatbot-embed-container border rounded-lg overflow-hidden shadow-lg"
       style={{ height, width }}
     >

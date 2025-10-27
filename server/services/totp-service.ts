@@ -1,6 +1,6 @@
-import { TOTP, Secret } from 'otpauth';
-import { createHash, randomBytes } from 'crypto';
-import QRCode from 'qrcode';
+import { TOTP, Secret } from "otpauth";
+import { createHash, randomBytes } from "crypto";
+import QRCode from "qrcode";
 
 export interface TOTPSetupResult {
   secret: string;
@@ -15,8 +15,8 @@ export interface TOTPVerificationResult {
 }
 
 export class TOTPService {
-  private readonly issuer = 'Hive Wellness';
-  private readonly algorithm = 'SHA1';
+  private readonly issuer = "Hive Wellness";
+  private readonly algorithm = "SHA1";
   private readonly digits = 6;
   private readonly period = 30;
 
@@ -27,7 +27,7 @@ export class TOTPService {
     try {
       // Generate a random secret
       const secret = new Secret();
-      
+
       // Create TOTP instance
       const totp = new TOTP({
         issuer: this.issuer,
@@ -40,18 +40,18 @@ export class TOTPService {
 
       // Generate the provisioning URI for QR code
       const uri = totp.toString();
-      
+
       // Generate QR code as data URL
       const qrCodeUrl = await QRCode.toDataURL(uri, {
-        errorCorrectionLevel: 'M',
-        type: 'image/png',
+        errorCorrectionLevel: "M",
+        type: "image/png",
         quality: 0.92,
         margin: 1,
         color: {
-          dark: '#000000',
-          light: '#FFFFFF'
+          dark: "#000000",
+          light: "#FFFFFF",
         },
-        width: 256
+        width: 256,
       });
 
       // Generate backup codes
@@ -64,12 +64,11 @@ export class TOTPService {
         secret: secret.base32,
         qrCodeUrl,
         backupCodes,
-        manualEntryKey
+        manualEntryKey,
       };
-
     } catch (error) {
-      console.error('Error generating TOTP setup:', error);
-      throw new Error('Failed to generate TOTP setup data');
+      console.error("Error generating TOTP setup:", error);
+      throw new Error("Failed to generate TOTP setup data");
     }
   }
 
@@ -79,13 +78,13 @@ export class TOTPService {
   verifyTOTP(token: string, secret: string): TOTPVerificationResult {
     try {
       // Clean the token (remove spaces, etc.)
-      const cleanToken = token.replace(/\s/g, '');
-      
+      const cleanToken = token.replace(/\s/g, "");
+
       // Validate token format
       if (!/^\d{6}$/.test(cleanToken)) {
         return {
           success: false,
-          error: 'Invalid token format. Please enter a 6-digit code.'
+          error: "Invalid token format. Please enter a 6-digit code.",
         };
       }
 
@@ -110,15 +109,14 @@ export class TOTPService {
       } else {
         return {
           success: false,
-          error: 'Invalid or expired verification code. Please try again.'
+          error: "Invalid or expired verification code. Please try again.",
         };
       }
-
     } catch (error) {
-      console.error('Error verifying TOTP:', error);
+      console.error("Error verifying TOTP:", error);
       return {
         success: false,
-        error: 'Failed to verify code. Please try again.'
+        error: "Failed to verify code. Please try again.",
       };
     }
   }
@@ -126,48 +124,50 @@ export class TOTPService {
   /**
    * Verify a backup code against stored hashed codes
    */
-  verifyBackupCode(code: string, hashedCodes: string[]): { success: boolean; remainingCodes: string[]; error?: string } {
+  verifyBackupCode(
+    code: string,
+    hashedCodes: string[]
+  ): { success: boolean; remainingCodes: string[]; error?: string } {
     try {
       // Clean the code (remove spaces and hyphens, convert to uppercase for base32)
-      const cleanCode = code.replace(/[\s-]/g, '').toUpperCase();
-      
+      const cleanCode = code.replace(/[\s-]/g, "").toUpperCase();
+
       // Validate format (12 characters, base32)
       if (!/^[A-Z2-7]{12}$/.test(cleanCode)) {
         return {
           success: false,
           remainingCodes: hashedCodes,
-          error: 'Invalid backup code format. Codes are 12 characters in base32 format.'
+          error: "Invalid backup code format. Codes are 12 characters in base32 format.",
         };
       }
 
       // Hash the provided code
       const providedHash = this.hashBackupCode(cleanCode);
-      
+
       // Check if the hash matches any stored code
-      const matchIndex = hashedCodes.findIndex(hash => hash === providedHash);
-      
+      const matchIndex = hashedCodes.findIndex((hash) => hash === providedHash);
+
       if (matchIndex !== -1) {
         // Remove the used code from the list
         const remainingCodes = hashedCodes.filter((_, index) => index !== matchIndex);
-        
+
         return {
           success: true,
-          remainingCodes
+          remainingCodes,
         };
       } else {
         return {
           success: false,
           remainingCodes: hashedCodes,
-          error: 'Invalid backup code or code already used.'
+          error: "Invalid backup code or code already used.",
         };
       }
-
     } catch (error) {
-      console.error('Error verifying backup code:', error);
+      console.error("Error verifying backup code:", error);
       return {
         success: false,
         remainingCodes: hashedCodes,
-        error: 'Failed to verify backup code. Please try again.'
+        error: "Failed to verify backup code. Please try again.",
       };
     }
   }
@@ -178,23 +178,23 @@ export class TOTPService {
    */
   generateBackupCodes(count: number = 10): string[] {
     const codes: string[] = [];
-    const charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567'; // Base32 charset
-    
+    const charset = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"; // Base32 charset
+
     for (let i = 0; i < count; i++) {
       // Generate 12-character base32 code (~60-bit entropy) using crypto-secure randomness
       const bytes = randomBytes(12);
-      let code = '';
-      
+      let code = "";
+
       // Convert bytes to base32 using unbiased selection
       for (let j = 0; j < 12; j++) {
         const randomIndex = bytes[j] % charset.length;
         code += charset[randomIndex];
       }
       // Format as XXXX-XXXX-XXXX for better readability
-      const formattedCode = code.match(/.{1,4}/g)?.join('-') || code;
+      const formattedCode = code.match(/.{1,4}/g)?.join("-") || code;
       codes.push(formattedCode);
     }
-    
+
     return codes;
   }
 
@@ -202,7 +202,7 @@ export class TOTPService {
    * Hash backup codes for secure storage
    */
   hashBackupCodes(codes: string[]): string[] {
-    return codes.map(code => this.hashBackupCode(code));
+    return codes.map((code) => this.hashBackupCode(code));
   }
 
   /**
@@ -210,8 +210,8 @@ export class TOTPService {
    * Normalizes code by removing hyphens and converting to uppercase
    */
   private hashBackupCode(code: string): string {
-    const normalizedCode = code.replace(/[-\s]/g, '').toUpperCase();
-    return createHash('sha256').update(normalizedCode).digest('hex');
+    const normalizedCode = code.replace(/[-\s]/g, "").toUpperCase();
+    return createHash("sha256").update(normalizedCode).digest("hex");
   }
 
   /**

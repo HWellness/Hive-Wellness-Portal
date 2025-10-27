@@ -1,32 +1,38 @@
-import { useState, useRef } from 'react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { useToast } from '@/hooks/use-toast';
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { apiRequest } from '@/lib/queryClient';
-import { 
-  Upload, 
-  FileText, 
-  Download, 
-  Eye, 
-  Trash2, 
+import { useState, useRef } from "react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { useToast } from "@/hooks/use-toast";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import {
+  Upload,
+  FileText,
+  Download,
+  Eye,
+  Trash2,
   Shield,
   Lock,
   CheckCircle,
   AlertCircle,
   File,
   Image,
-  FileArchive
-} from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
-import DocumentUploadGuidance from './document-upload-guidance';
+  FileArchive,
+} from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import DocumentUploadGuidance from "./document-upload-guidance";
 
 interface Document {
   id: string;
@@ -55,16 +61,16 @@ export function TherapistNotesUpload({ appointmentId }: TherapistNotesUploadProp
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [documentTitle, setDocumentTitle] = useState('');
-  const [documentType, setDocumentType] = useState('session_notes');
-  const [documentContent, setDocumentContent] = useState('');
-  const [confidentialityLevel, setConfidentialityLevel] = useState('high');
+  const [documentTitle, setDocumentTitle] = useState("");
+  const [documentType, setDocumentType] = useState("session_notes");
+  const [documentContent, setDocumentContent] = useState("");
+  const [confidentialityLevel, setConfidentialityLevel] = useState("high");
   const [uploadProgress, setUploadProgress] = useState(0);
   const [isUploading, setIsUploading] = useState(false);
 
-  if (user?.role !== 'therapist' && user?.role !== 'admin') {
+  if (user?.role !== "therapist" && user?.role !== "admin") {
     return (
       <Alert>
         <Shield className="h-4 w-4" />
@@ -76,59 +82,63 @@ export function TherapistNotesUpload({ appointmentId }: TherapistNotesUploadProp
   }
 
   const documentTypes = [
-    { value: 'session_notes', label: 'Session Notes', icon: FileText },
-    { value: 'therapy_plan', label: 'Therapy Plan', icon: File },
-    { value: 'assessment', label: 'Assessment', icon: FileText },
-    { value: 'homework', label: 'Homework Assignment', icon: File },
-    { value: 'progress_report', label: 'Progress Report', icon: FileText },
+    { value: "session_notes", label: "Session Notes", icon: FileText },
+    { value: "therapy_plan", label: "Therapy Plan", icon: File },
+    { value: "assessment", label: "Assessment", icon: FileText },
+    { value: "homework", label: "Homework Assignment", icon: File },
+    { value: "progress_report", label: "Progress Report", icon: FileText },
   ];
 
   const confidentialityLevels = [
-    { value: 'high', label: 'High', description: 'Restricted access - therapist and client only' },
-    { value: 'medium', label: 'Medium', description: 'Limited access - authorised staff' },
-    { value: 'restricted', label: 'Restricted', description: 'Highly confidential - encrypted storage' },
+    { value: "high", label: "High", description: "Restricted access - therapist and client only" },
+    { value: "medium", label: "Medium", description: "Limited access - authorised staff" },
+    {
+      value: "restricted",
+      label: "Restricted",
+      description: "Highly confidential - encrypted storage",
+    },
   ];
 
   const { data: documents, isLoading } = useQuery<Document[]>({
-    queryKey: ['/api/documents/user', user?.id],
+    queryKey: ["/api/documents/user", user?.id],
     queryFn: async () => {
-      const response = await apiRequest('GET', `/api/documents/user/${user?.id}`);
+      const response = await apiRequest("GET", `/api/documents/user/${user?.id}`);
       return response.json();
     },
     enabled: !!user?.id,
   });
 
   const uploadMutation = useMutation({
-    mutationFn: async ({ file, metadata }: { file: File, metadata: any }) => {
+    mutationFn: async ({ file, metadata }: { file: File; metadata: any }) => {
       setIsUploading(true);
       setUploadProgress(0);
 
-      const uploadResponse = await apiRequest('POST', '/api/objects/upload');
+      const uploadResponse = await apiRequest("POST", "/api/objects/upload");
       const { uploadURL } = await uploadResponse.json();
 
       const xhr = new XMLHttpRequest();
-      
+
       return new Promise((resolve, reject) => {
-        xhr.upload.addEventListener('progress', (e) => {
+        xhr.upload.addEventListener("progress", (e) => {
           if (e.lengthComputable) {
             const progress = (e.loaded / e.total) * 90;
             setUploadProgress(progress);
           }
         });
 
-        xhr.addEventListener('load', async () => {
+        xhr.addEventListener("load", async () => {
           if (xhr.status === 200) {
             try {
               setUploadProgress(95);
-              const documentResponse = await apiRequest('POST', '/api/documents', {
+              const documentResponse = await apiRequest("POST", "/api/documents", {
                 ...metadata,
-                fileUrl: uploadURL.split('?')[0],
+                fileUrl: uploadURL.split("?")[0],
                 mimeType: file.type,
                 fileSize: file.size,
                 userId: user?.id,
                 appointmentId: appointmentId || null,
               });
-              
+
               const result = await documentResponse.json();
               setUploadProgress(100);
               resolve(result);
@@ -136,14 +146,14 @@ export function TherapistNotesUpload({ appointmentId }: TherapistNotesUploadProp
               reject(error);
             }
           } else {
-            reject(new Error('Upload failed'));
+            reject(new Error("Upload failed"));
           }
         });
 
-        xhr.addEventListener('error', () => reject(new Error('Upload failed')));
-        
-        xhr.open('PUT', uploadURL);
-        xhr.setRequestHeader('Content-Type', file.type);
+        xhr.addEventListener("error", () => reject(new Error("Upload failed")));
+
+        xhr.open("PUT", uploadURL);
+        xhr.setRequestHeader("Content-Type", file.type);
         xhr.send(file);
       });
     },
@@ -153,7 +163,7 @@ export function TherapistNotesUpload({ appointmentId }: TherapistNotesUploadProp
         description: "Your document has been securely uploaded and encrypted.",
         duration: 3000,
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/documents/user', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["/api/documents/user", user?.id] });
       resetForm();
     },
     onError: (error: Error) => {
@@ -171,14 +181,14 @@ export function TherapistNotesUpload({ appointmentId }: TherapistNotesUploadProp
 
   const deleteMutation = useMutation({
     mutationFn: async (documentId: string) => {
-      return await apiRequest('DELETE', `/api/documents/${documentId}`);
+      return await apiRequest("DELETE", `/api/documents/${documentId}`);
     },
     onSuccess: () => {
       toast({
         title: "Document Deleted",
         description: "Document has been permanently removed.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/documents/user', user?.id] });
+      queryClient.invalidateQueries({ queryKey: ["/api/documents/user", user?.id] });
     },
     onError: () => {
       toast({
@@ -224,7 +234,7 @@ export function TherapistNotesUpload({ appointmentId }: TherapistNotesUploadProp
         title: documentTitle,
         content: documentContent,
         confidentialityLevel,
-        tags: [documentType, 'therapist_notes'],
+        tags: [documentType, "therapist_notes"],
         isActive: true,
         version: 1,
       },
@@ -233,32 +243,32 @@ export function TherapistNotesUpload({ appointmentId }: TherapistNotesUploadProp
 
   const resetForm = () => {
     setSelectedFile(null);
-    setDocumentTitle('');
-    setDocumentType('session_notes');
-    setDocumentContent('');
-    setConfidentialityLevel('high');
+    setDocumentTitle("");
+    setDocumentType("session_notes");
+    setDocumentContent("");
+    setConfidentialityLevel("high");
     if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      fileInputRef.current.value = "";
     }
   };
 
   const getFileIcon = (mimeType?: string) => {
     if (!mimeType) return File;
-    if (mimeType.includes('image')) return Image;
-    if (mimeType.includes('pdf')) return FileText;
-    if (mimeType.includes('zip') || mimeType.includes('compressed')) return FileArchive;
+    if (mimeType.includes("image")) return Image;
+    if (mimeType.includes("pdf")) return FileText;
+    if (mimeType.includes("zip") || mimeType.includes("compressed")) return FileArchive;
     return File;
   };
 
   const formatFileSize = (bytes?: number) => {
-    if (!bytes) return 'Unknown';
+    if (!bytes) return "Unknown";
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
   const filteredDocuments = appointmentId
-    ? documents?.filter(doc => doc.appointmentId === appointmentId)
+    ? documents?.filter((doc) => doc.appointmentId === appointmentId)
     : documents;
 
   return (
@@ -285,7 +295,8 @@ export function TherapistNotesUpload({ appointmentId }: TherapistNotesUploadProp
           <Alert>
             <Shield className="h-4 w-4" />
             <AlertDescription>
-              All documents are encrypted and stored securely. Only authorised therapists can access these files.
+              All documents are encrypted and stored securely. Only authorised therapists can access
+              these files.
             </AlertDescription>
           </Alert>
 
@@ -331,11 +342,7 @@ export function TherapistNotesUpload({ appointmentId }: TherapistNotesUploadProp
 
             <div>
               <Label htmlFor="document-type">Document Type *</Label>
-              <Select
-                value={documentType}
-                onValueChange={setDocumentType}
-                disabled={isUploading}
-              >
+              <Select value={documentType} onValueChange={setDocumentType} disabled={isUploading}>
                 <SelectTrigger className="mt-2" data-testid="select-document-type">
                   <SelectValue />
                 </SelectTrigger>
@@ -411,7 +418,7 @@ export function TherapistNotesUpload({ appointmentId }: TherapistNotesUploadProp
                 data-testid="button-upload-document"
               >
                 <Upload className="h-4 w-4 mr-2" />
-                {isUploading ? 'Uploading...' : 'Upload Document'}
+                {isUploading ? "Uploading..." : "Upload Document"}
               </Button>
               {selectedFile && (
                 <Button
@@ -431,15 +438,11 @@ export function TherapistNotesUpload({ appointmentId }: TherapistNotesUploadProp
       <Card>
         <CardHeader>
           <CardTitle>Uploaded Documents</CardTitle>
-          <CardDescription>
-            {filteredDocuments?.length || 0} documents uploaded
-          </CardDescription>
+          <CardDescription>{filteredDocuments?.length || 0} documents uploaded</CardDescription>
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="text-center py-8 text-hive-black/60">
-              Loading documents...
-            </div>
+            <div className="text-center py-8 text-hive-black/60">Loading documents...</div>
           ) : filteredDocuments && filteredDocuments.length > 0 ? (
             <ScrollArea className="h-[400px]">
               <div className="space-y-3">
@@ -453,12 +456,10 @@ export function TherapistNotesUpload({ appointmentId }: TherapistNotesUploadProp
                             <FileIcon className="h-5 w-5 text-hive-purple" />
                           </div>
                           <div className="flex-1 min-w-0">
-                            <h4 className="font-medium text-hive-black truncate">
-                              {doc.title}
-                            </h4>
+                            <h4 className="font-medium text-hive-black truncate">{doc.title}</h4>
                             <div className="flex items-center gap-2 mt-1 flex-wrap">
                               <Badge variant="secondary" className="text-xs">
-                                {doc.type.replace('_', ' ')}
+                                {doc.type.replace("_", " ")}
                               </Badge>
                               <Badge variant="outline" className="text-xs">
                                 {doc.confidentialityLevel}
@@ -483,7 +484,9 @@ export function TherapistNotesUpload({ appointmentId }: TherapistNotesUploadProp
                               <Button
                                 size="sm"
                                 variant="ghost"
-                                onClick={() => window.open(`/api/documents/${doc.id}/view`, '_blank')}
+                                onClick={() =>
+                                  window.open(`/api/documents/${doc.id}/view`, "_blank")
+                                }
                                 data-testid={`button-view-${doc.id}`}
                               >
                                 <Eye className="h-4 w-4" />
@@ -492,7 +495,7 @@ export function TherapistNotesUpload({ appointmentId }: TherapistNotesUploadProp
                                 size="sm"
                                 variant="ghost"
                                 onClick={() => {
-                                  const link = document.createElement('a');
+                                  const link = document.createElement("a");
                                   link.href = `/api/documents/${doc.id}/view`;
                                   link.download = doc.title;
                                   link.click();
@@ -507,7 +510,11 @@ export function TherapistNotesUpload({ appointmentId }: TherapistNotesUploadProp
                             size="sm"
                             variant="ghost"
                             onClick={() => {
-                              if (confirm('Are you sure you want to delete this document? This action cannot be undone.')) {
+                              if (
+                                confirm(
+                                  "Are you sure you want to delete this document? This action cannot be undone."
+                                )
+                              ) {
                                 deleteMutation.mutate(doc.id);
                               }
                             }}

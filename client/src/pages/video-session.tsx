@@ -1,20 +1,20 @@
-import React from 'react';
-import { useRoute } from 'wouter';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
-import { 
-  Video, 
-  Calendar, 
-  Clock, 
-  User, 
-  ExternalLink, 
+import React from "react";
+import { useRoute } from "wouter";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import {
+  Video,
+  Calendar,
+  Clock,
+  User,
+  ExternalLink,
   AlertCircle,
   CheckCircle,
-  Loader2
-} from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
+  Loader2,
+} from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
 interface VideoSessionData {
   id: string;
@@ -31,58 +31,67 @@ interface VideoSessionData {
 }
 
 function VideoSession() {
-  const [match, params] = useRoute('/video-session/:sessionId');
-  const sessionId = params?.sessionId || '';
-  
-  const { data: sessionData, isLoading, error, refetch } = useQuery<VideoSessionData>({
-    queryKey: ['/api/video-session', sessionId],
+  const [match, params] = useRoute("/video-session/:sessionId");
+  const sessionId = params?.sessionId || "";
+
+  const {
+    data: sessionData,
+    isLoading,
+    error,
+    refetch,
+  } = useQuery<VideoSessionData>({
+    queryKey: ["/api/video-session", sessionId],
     enabled: !!sessionId,
     retry: 3,
-    retryDelay: 1000
+    retryDelay: 1000,
   });
 
   const handleJoinMeeting = () => {
     if (sessionData?.meetingUrl) {
       // Open Google Meet in a new tab
-      window.open(sessionData.meetingUrl, '_blank', 'noopener,noreferrer');
+      window.open(sessionData.meetingUrl, "_blank", "noopener,noreferrer");
     }
   };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-GB', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+    return date.toLocaleDateString("en-GB", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleTimeString('en-GB', {
-      hour: '2-digit',
-      minute: '2-digit',
-      timeZone: 'Europe/London'
+    return date.toLocaleTimeString("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+      timeZone: "Europe/London",
     });
   };
 
   const getStatusBadgeVariant = (status: string) => {
     switch (status?.toLowerCase()) {
-      case 'confirmed': return 'default';
-      case 'in-progress': return 'secondary';
-      case 'completed': return 'outline';
-      default: return 'secondary';
+      case "confirmed":
+        return "default";
+      case "in-progress":
+        return "secondary";
+      case "completed":
+        return "outline";
+      default:
+        return "secondary";
     }
   };
 
   const isSessionAccessible = () => {
     if (!sessionData) return false;
-    
+
     const now = new Date();
     const sessionTime = new Date(sessionData.scheduledAt);
     const timeDiff = sessionTime.getTime() - now.getTime();
-    
+
     // Allow access 15 minutes before and up to 2 hours after
     return timeDiff <= 15 * 60 * 1000 && timeDiff >= -2 * 60 * 60 * 1000;
   };
@@ -130,9 +139,7 @@ function VideoSession() {
               <Button variant="outline" onClick={() => refetch()}>
                 Try Again
               </Button>
-              <Button onClick={() => window.history.back()}>
-                Return to Portal
-              </Button>
+              <Button onClick={() => window.history.back()}>Return to Portal</Button>
             </div>
           </CardContent>
         </Card>
@@ -149,17 +156,18 @@ function VideoSession() {
           </div>
           <CardTitle className="text-2xl">Your Video Session</CardTitle>
           <CardDescription>
-            {sessionData.sessionType === 'introduction-call' 
-              ? 'Free Introduction Call' 
-              : 'Therapy Session'} with Hive Wellness
+            {sessionData.sessionType === "introduction-call"
+              ? "Free Introduction Call"
+              : "Therapy Session"}{" "}
+            with Hive Wellness
           </CardDescription>
         </CardHeader>
-        
+
         <CardContent className="space-y-6">
           {/* Session Status */}
           <div className="flex justify-center">
             <Badge variant={getStatusBadgeVariant(sessionData.status)}>
-              {sessionData.status === 'confirmed' ? (
+              {sessionData.status === "confirmed" ? (
                 <>
                   <CheckCircle className="h-3 w-3 mr-1" />
                   Session Confirmed
@@ -181,17 +189,15 @@ function VideoSession() {
                 </p>
               </div>
             </div>
-            
+
             <div className="flex items-center gap-3">
               <Clock className="h-4 w-4 text-muted-foreground" />
               <p className="text-sm">Duration: {sessionData.duration} minutes</p>
             </div>
-            
+
             <div className="flex items-center gap-3">
               <User className="h-4 w-4 text-muted-foreground" />
-              <p className="text-sm">
-                With: {sessionData.therapistName || 'Hive Wellness Team'}
-              </p>
+              <p className="text-sm">With: {sessionData.therapistName || "Hive Wellness Team"}</p>
             </div>
           </div>
 
@@ -199,8 +205,8 @@ function VideoSession() {
           {sessionData.meetingUrl && (
             <div className="space-y-4">
               <div className="text-center">
-                <Button 
-                  size="lg" 
+                <Button
+                  size="lg"
                   onClick={handleJoinMeeting}
                   disabled={!isSessionAccessible()}
                   className="w-full sm:w-auto"
@@ -244,10 +250,10 @@ function VideoSession() {
           <div className="border-t pt-4">
             <h4 className="font-medium mb-2">Need Help?</h4>
             <p className="text-sm text-muted-foreground">
-              If you experience any technical difficulties, contact us at{' '}
+              If you experience any technical difficulties, contact us at{" "}
               <a href="mailto:support@hive-wellness.co.uk" className="text-primary hover:underline">
                 support@hive-wellness.co.uk
-              </a>{' '}
+              </a>{" "}
               or call during business hours.
             </p>
           </div>

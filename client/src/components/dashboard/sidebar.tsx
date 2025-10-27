@@ -1,6 +1,21 @@
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Home, Calendar, Video, Settings, BarChart, Users, Building, CreditCard, TrendingUp, Shield, Mail, UserPlus, PoundSterling, PieChart } from "lucide-react";
+import {
+  Home,
+  Calendar,
+  Video,
+  Settings,
+  BarChart,
+  Users,
+  Building,
+  CreditCard,
+  TrendingUp,
+  Shield,
+  Mail,
+  UserPlus,
+  PoundSterling,
+  PieChart,
+} from "lucide-react";
 import type { User } from "@shared/schema";
 
 interface SidebarProps {
@@ -38,12 +53,19 @@ export default function Sidebar({ user, services, currentService, onServiceSelec
       <div className="p-6">
         <div className="flex items-center space-x-3 mb-6">
           <Avatar className="w-12 h-12">
-            <AvatarImage 
-              src={user.profileImageUrl ? (user.profileImageUrl.startsWith('/objects/') ? user.profileImageUrl : `/objects/${user.profileImageUrl.replace(/^\/+/, '')}`) : undefined} 
+            <AvatarImage
+              src={
+                user.profileImageUrl
+                  ? user.profileImageUrl.startsWith("/objects/")
+                    ? user.profileImageUrl
+                    : `/objects/${user.profileImageUrl.replace(/^\/+/, "")}`
+                  : undefined
+              }
               alt={`${user.firstName} ${user.lastName}`}
             />
             <AvatarFallback className="bg-hive-light-blue text-hive-purple">
-              {user.firstName?.[0]}{user.lastName?.[0]}
+              {user.firstName?.[0]}
+              {user.lastName?.[0]}
             </AvatarFallback>
           </Avatar>
           <div>
@@ -53,19 +75,19 @@ export default function Sidebar({ user, services, currentService, onServiceSelec
             <div className="text-xs text-gray-600">{user.email}</div>
           </div>
         </div>
-        
+
         {/* Service Navigation */}
         <nav className="space-y-2">
           {services.map((service) => {
             const IconComponent = iconMap[service.icon as keyof typeof iconMap] || Home;
             const isActive = currentService === service.id;
-            
+
             return (
               <Button
                 key={service.id}
                 onClick={() => onServiceSelect(service.id)}
                 variant="ghost"
-                className={`nav-item ${isActive ? 'active' : ''}`}
+                className={`nav-item ${isActive ? "active" : ""}`}
               >
                 <div className="flex items-center space-x-3">
                   <IconComponent className="w-5 h-5" />

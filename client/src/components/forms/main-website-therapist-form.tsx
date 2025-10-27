@@ -523,8 +523,6 @@ export default function MainWebsiteTherapistForm() {
             </Form>
           </div>
         </div>
-      </CardContent>
-    </Card>
       </div>
     </div>
   );

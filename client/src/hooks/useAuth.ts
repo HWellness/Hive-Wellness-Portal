@@ -1,8 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
-import { AuthUser, AuthState } from '@/types/auth';
+import { AuthUser, AuthState } from "@/types/auth";
 
 export function useAuth(): AuthState & { error: any } {
-  const { data: user, isLoading, error } = useQuery<AuthUser>({
+  const {
+    data: user,
+    isLoading,
+    error,
+  } = useQuery<AuthUser>({
     queryKey: ["/api/auth/user"],
     retry: 0, // No retries for faster login page loading
     refetchOnWindowFocus: false,
@@ -17,11 +21,11 @@ export function useAuth(): AuthState & { error: any } {
   });
 
   const isAuthenticated = !!user && !error;
-  
+
   // Performance: Remove debug logging for faster loading
 
   return {
-    user: error ? null : (user || null),
+    user: error ? null : user || null,
     isLoading,
     isAuthenticated,
     error,

@@ -1,7 +1,7 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from "express";
 
 // Define user roles
-export type UserRole = 'client' | 'therapist' | 'admin' | 'institution';
+export type UserRole = "client" | "therapist" | "admin" | "institution";
 
 // Extend Express Request to include typed user
 declare global {
@@ -33,26 +33,30 @@ export function requireRole(...allowedRoles: UserRole[]) {
     // Check if user is authenticated
     if (!req.user) {
       return res.status(401).json({
-        error: 'Authentication required',
-        message: 'You must be logged in to access this resource.'
+        error: "Authentication required",
+        message: "You must be logged in to access this resource.",
       });
     }
 
     // Check if user has required role
     if (!allowedRoles.includes(req.user.role)) {
-      console.warn(`🚫 RBAC: User ${req.user.id} (${req.user.role}) denied access to ${req.method} ${req.path}. Required roles: ${allowedRoles.join(', ')}`);
-      
+      console.warn(
+        `🚫 RBAC: User ${req.user.id} (${req.user.role}) denied access to ${req.method} ${req.path}. Required roles: ${allowedRoles.join(", ")}`
+      );
+
       return res.status(403).json({
-        error: 'Insufficient permissions',
-        message: `Access denied. Required role: ${allowedRoles.join(' or ')}. Your role: ${req.user.role}`,
+        error: "Insufficient permissions",
+        message: `Access denied. Required role: ${allowedRoles.join(" or ")}. Your role: ${req.user.role}`,
         userRole: req.user.role,
-        requiredRoles: allowedRoles
+        requiredRoles: allowedRoles,
       });
     }
 
     // Log successful access for admin/sensitive operations
-    if (allowedRoles.includes('admin') || req.path.includes('admin')) {
-      console.log(`✅ RBAC: User ${req.user.id} (${req.user.role}) accessing ${req.method} ${req.path}`);
+    if (allowedRoles.includes("admin") || req.path.includes("admin")) {
+      console.log(
+        `✅ RBAC: User ${req.user.id} (${req.user.role}) accessing ${req.method} ${req.path}`
+      );
     }
 
     next();
@@ -64,8 +68,8 @@ export function requireMinimumRole(minimumRole: UserRole) {
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
       return res.status(401).json({
-        error: 'Authentication required',
-        message: 'You must be logged in to access this resource.'
+        error: "Authentication required",
+        message: "You must be logged in to access this resource.",
       });
     }
 
@@ -73,15 +77,17 @@ export function requireMinimumRole(minimumRole: UserRole) {
     const requiredLevel = ROLE_HIERARCHY[minimumRole];
 
     if (userLevel < requiredLevel) {
-      console.warn(`🚫 RBAC: User ${req.user.id} (${req.user.role}, level ${userLevel}) denied access to ${req.method} ${req.path}. Required minimum: ${minimumRole} (level ${requiredLevel})`);
-      
+      console.warn(
+        `🚫 RBAC: User ${req.user.id} (${req.user.role}, level ${userLevel}) denied access to ${req.method} ${req.path}. Required minimum: ${minimumRole} (level ${requiredLevel})`
+      );
+
       return res.status(403).json({
-        error: 'Insufficient permissions',
+        error: "Insufficient permissions",
         message: `Access denied. Minimum required role: ${minimumRole}. Your role: ${req.user.role}`,
         userRole: req.user.role,
         minimumRole,
         userLevel,
-        requiredLevel
+        requiredLevel,
       });
     }
 
@@ -90,38 +96,41 @@ export function requireMinimumRole(minimumRole: UserRole) {
 }
 
 // Specific role middleware functions for common cases
-export const requireAdmin = requireRole('admin');
-export const requireTherapist = requireRole('therapist', 'admin'); // Admins can access therapist resources
-export const requireClient = requireRole('client');
-export const requireInstitution = requireRole('institution', 'admin'); // Admins can access institution resources
+export const requireAdmin = requireRole("admin");
+export const requireTherapist = requireRole("therapist", "admin"); // Admins can access therapist resources
+export const requireClient = requireRole("client");
+export const requireInstitution = requireRole("institution", "admin"); // Admins can access institution resources
 
 // Combined middleware for multiple role requirements
-export const requireAdminOrTherapist = requireRole('admin', 'therapist');
-export const requireClientOrTherapist = requireRole('client', 'therapist');
+export const requireAdminOrTherapist = requireRole("admin", "therapist");
+export const requireClientOrTherapist = requireRole("client", "therapist");
 
 // Resource ownership verification
-export function requireOwnershipOrAdmin(userIdField: string = 'userId') {
+export function requireOwnershipOrAdmin(userIdField: string = "userId") {
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user) {
       return res.status(401).json({
-        error: 'Authentication required'
+        error: "Authentication required",
       });
     }
 
     // Admin can access any resource
-    if (req.user.role === 'admin') {
+    if (req.user.role === "admin") {
       return next();
     }
 
     // Check if user owns the resource
-    const resourceUserId = req.params[userIdField] || req.body[userIdField] || req.query[userIdField];
-    
+    const resourceUserId =
+      req.params[userIdField] || req.body[userIdField] || req.query[userIdField];
+
     if (resourceUserId !== req.user.id) {
-      console.warn(`🚫 RBAC: User ${req.user.id} denied access to resource owned by ${resourceUserId}`);
-      
+      console.warn(
+        `🚫 RBAC: User ${req.user.id} denied access to resource owned by ${resourceUserId}`
+      );
+
       return res.status(403).json({
-        error: 'Access denied',
-        message: 'You can only access your own resources.'
+        error: "Access denied",
+        message: "You can only access your own resources.",
       });
     }
 
@@ -133,16 +142,19 @@ export function requireOwnershipOrAdmin(userIdField: string = 'userId') {
 export function auditLog(operation: string) {
   return (req: Request, res: Response, next: NextFunction) => {
     if (req.user) {
-      console.log(`🔍 AUDIT: User ${req.user.id} (${req.user.role}) ${operation} - ${req.method} ${req.path}`, {
-        userId: req.user.id,
-        userRole: req.user.role,
-        operation,
-        method: req.method,
-        path: req.path,
-        ip: req.ip,
-        userAgent: req.get('User-Agent'),
-        timestamp: new Date().toISOString()
-      });
+      console.log(
+        `🔍 AUDIT: User ${req.user.id} (${req.user.role}) ${operation} - ${req.method} ${req.path}`,
+        {
+          userId: req.user.id,
+          userRole: req.user.role,
+          operation,
+          method: req.method,
+          path: req.path,
+          ip: req.ip,
+          userAgent: req.get("User-Agent"),
+          timestamp: new Date().toISOString(),
+        }
+      );
     }
     next();
   };
@@ -150,9 +162,11 @@ export function auditLog(operation: string) {
 
 // Role validation helper for internal use
 export function validateUserRole(user: any): user is { role: UserRole } {
-  return user && 
-         typeof user.role === 'string' && 
-         ['client', 'therapist', 'admin', 'institution'].includes(user.role);
+  return (
+    user &&
+    typeof user.role === "string" &&
+    ["client", "therapist", "admin", "institution"].includes(user.role)
+  );
 }
 
 export default {
@@ -166,5 +180,5 @@ export default {
   requireClientOrTherapist,
   requireOwnershipOrAdmin,
   auditLog,
-  validateUserRole
+  validateUserRole,
 };

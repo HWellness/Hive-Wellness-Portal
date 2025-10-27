@@ -39,7 +39,7 @@ export function getSession() {
     cookie: {
       httpOnly: true,
       secure: false, // Always false for development and iframe compatibility
-      sameSite: 'lax', // Allow cross-site requests for login
+      sameSite: "lax", // Allow cross-site requests for login
       maxAge: sessionTtl,
     },
   });
@@ -55,9 +55,7 @@ function updateUserSession(
   user.expires_at = user.claims?.exp;
 }
 
-async function upsertUser(
-  claims: any,
-) {
+async function upsertUser(claims: any) {
   await storage.upsertUser({
     id: claims["sub"],
     email: claims["email"],
@@ -85,8 +83,7 @@ export async function setupAuth(app: Express) {
     verified(null, user);
   };
 
-  for (const domain of process.env
-    .REPLIT_DOMAINS!.split(",")) {
+  for (const domain of process.env.REPLIT_DOMAINS!.split(",")) {
     const strategy = new Strategy(
       {
         name: `replitauth:${domain}`,
@@ -94,7 +91,7 @@ export async function setupAuth(app: Express) {
         scope: "openid email profile offline_access",
         callbackURL: `https://${domain}/api/callback`,
       },
-      verify,
+      verify
     );
     passport.use(strategy);
   }
@@ -128,7 +125,7 @@ export async function setupAuth(app: Express) {
           // Check if user has MFA enabled
           let userData;
           const userId = user.claims?.sub || user.id;
-          
+
           if (userId) {
             try {
               userData = await storage.getUserById(userId);
@@ -170,33 +167,36 @@ export async function setupAuth(app: Express) {
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   // Public endpoints that don't require authentication
-  const publicEndpoints = [
-    '/api/calendar/availability',
-    '/api/health',
-    '/api/therapy-categories',
-  ];
-  
+  const publicEndpoints = ["/api/calendar/availability", "/api/health", "/api/therapy-categories"];
+
   // Skip authentication for public endpoints
   // Use originalUrl because req.path has /api prefix stripped when middleware is mounted
-  if (publicEndpoints.some(path => req.originalUrl === path || req.originalUrl.startsWith(path + '?') || req.originalUrl.startsWith(path + '/'))) {
+  if (
+    publicEndpoints.some(
+      (path) =>
+        req.originalUrl === path ||
+        req.originalUrl.startsWith(path + "?") ||
+        req.originalUrl.startsWith(path + "/")
+    )
+  ) {
     return next();
   }
-  
+
   // Fast session checks first - no logging to improve performance
-  
+
   // Priority 1: Email auth user (fastest check)
   if ((req.session as any)?.emailAuthUser) {
     req.user = (req.session as any).emailAuthUser;
-    
+
     // Check if MFA verification is needed
-    if ((req.session as any)?.needsMfaVerification && !req.path.startsWith('/api/mfa')) {
-      return res.status(403).json({ 
+    if ((req.session as any)?.needsMfaVerification && !req.path.startsWith("/api/mfa")) {
+      return res.status(403).json({
         message: "MFA verification required",
         code: "MFA_REQUIRED",
-        redirectTo: "/mfa-verify"
+        redirectTo: "/mfa-verify",
       });
     }
-    
+
     return next();
   }
 
@@ -205,7 +205,7 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     req.user = (req.session as any).demoUser;
     return next();
   }
-  
+
   // Priority 3: Regular session user
   if ((req.session as any)?.user) {
     req.user = (req.session as any).user;
@@ -216,7 +216,7 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
   if (req.isAuthenticated && !req.isAuthenticated()) {
     return res.status(401).json({ message: "Not authenticated" });
   }
-  
+
   // If no isAuthenticated method, fall back to checking for user in request
   if (!req.isAuthenticated && !req.user) {
     return res.status(401).json({ message: "Not authenticated" });
@@ -225,16 +225,16 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const user = req.user as any;
 
   // Check if MFA verification is needed (for Replit Auth users)
-  if ((req.session as any)?.needsMfaVerification && !req.path.startsWith('/api/mfa')) {
-    return res.status(403).json({ 
+  if ((req.session as any)?.needsMfaVerification && !req.path.startsWith("/api/mfa")) {
+    return res.status(403).json({
       message: "MFA verification required",
       code: "MFA_REQUIRED",
-      redirectTo: "/mfa-verify"
+      redirectTo: "/mfa-verify",
     });
   }
 
   // Demo users don't need token checks
-  if (user && user.id && user.id.startsWith('demo-')) {
+  if (user && user.id && user.id.startsWith("demo-")) {
     return next();
   }
 
@@ -307,19 +307,18 @@ export const isAuthenticatedWithMFA: RequestHandler = async (req, res, next) => 
       const now = Date.now();
       const mfaTimeout = 30 * 60 * 1000; // 30 minutes
 
-      if (session.mfaVerifiedAt && (now - session.mfaVerifiedAt) < mfaTimeout) {
+      if (session.mfaVerifiedAt && now - session.mfaVerifiedAt < mfaTimeout) {
         return next();
       }
 
       // MFA verification required
-      return res.status(403).json({ 
+      return res.status(403).json({
         message: "MFA verification required",
         code: "MFA_VERIFICATION_REQUIRED",
-        mfaEnabled: true
+        mfaEnabled: true,
       });
-
     } catch (error) {
-      console.error('MFA authentication check error:', error);
+      console.error("MFA authentication check error:", error);
       return res.status(500).json({ message: "Authentication error" });
     }
   });

@@ -6,11 +6,17 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { 
+import {
   Building,
   Users,
   UserPlus,
@@ -32,7 +38,7 @@ import {
   AlertCircle,
   Eye,
   Edit,
-  Trash2
+  Trash2,
 } from "lucide-react";
 import type { User } from "@shared/schema";
 
@@ -43,7 +49,7 @@ interface InstitutionalDashboardProps {
 interface InstitutionData {
   id: string;
   name: string;
-  type: 'university' | 'healthcare' | 'corporate' | 'government';
+  type: "university" | "healthcare" | "corporate" | "government";
   contactPerson: string;
   email: string;
   phone: string;
@@ -55,7 +61,7 @@ interface InstitutionData {
   monthlyBudget: number;
   contractStart: string;
   contractEnd: string;
-  status: 'active' | 'pending' | 'suspended';
+  status: "active" | "pending" | "suspended";
 }
 
 interface UserManagement {
@@ -95,8 +101,8 @@ interface BillingData {
 export default function InstitutionalDashboard({ user }: InstitutionalDashboardProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [selectedTab, setSelectedTab] = useState('overview');
-  const [selectedDepartment, setSelectedDepartment] = useState<string>('all');
+  const [selectedTab, setSelectedTab] = useState("overview");
+  const [selectedDepartment, setSelectedDepartment] = useState<string>("all");
 
   const { data: institutionData } = useQuery<InstitutionData>({
     queryKey: ["/api/institution/data", user.id],
@@ -120,7 +126,7 @@ export default function InstitutionalDashboard({ user }: InstitutionalDashboardP
 
   const addUserMutation = useMutation({
     mutationFn: async (userData: any) => {
-      return await apiRequest('POST', '/api/institution/add-user', userData);
+      return await apiRequest("POST", "/api/institution/add-user", userData);
     },
     onSuccess: () => {
       toast({
@@ -140,7 +146,7 @@ export default function InstitutionalDashboard({ user }: InstitutionalDashboardP
 
   const bulkInviteMutation = useMutation({
     mutationFn: async (inviteData: any) => {
-      return await apiRequest('POST', '/api/institution/bulk-invite', inviteData);
+      return await apiRequest("POST", "/api/institution/bulk-invite", inviteData);
     },
     onSuccess: (data: any) => {
       toast({
@@ -159,29 +165,29 @@ export default function InstitutionalDashboard({ user }: InstitutionalDashboardP
   });
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-GB', {
-      style: 'currency',
-      currency: 'GBP'
+    return new Intl.NumberFormat("en-GB", {
+      style: "currency",
+      currency: "GBP",
     }).format(amount);
   };
 
   // Demo data for institutional dashboard
   const demoInstitution: InstitutionData = {
-    id: 'inst-1',
-    name: 'University of Manchester',
-    type: 'university',
-    contactPerson: 'Dr. Sarah Wilson',
-    email: 'sarah.wilson@manchester.ac.uk',
-    phone: '+44 161 306 6000',
-    address: 'Oxford Road, Manchester M13 9PL, UK',
-    website: 'www.manchester.ac.uk',
+    id: "inst-1",
+    name: "University of Manchester",
+    type: "university",
+    contactPerson: "Dr. Sarah Wilson",
+    email: "sarah.wilson@manchester.ac.uk",
+    phone: "+44 161 306 6000",
+    address: "Oxford Road, Manchester M13 9PL, UK",
+    website: "www.manchester.ac.uk",
     employeeCount: 12500,
     activeUsers: 2847,
     totalSessions: 15643,
     monthlyBudget: 25000,
-    contractStart: '2024-09-01',
-    contractEnd: '2025-08-31',
-    status: 'active'
+    contractStart: "2024-09-01",
+    contractEnd: "2025-08-31",
+    status: "active",
   };
 
   const demoUserManagement: UserManagement = {
@@ -189,17 +195,17 @@ export default function InstitutionalDashboard({ user }: InstitutionalDashboardP
     activeUsers: 2234,
     newUsersThisMonth: 127,
     usersByDepartment: {
-      'Student Services': 1245,
-      'Faculty': 892,
-      'Administrative Staff': 456,
-      'Research Staff': 254
+      "Student Services": 1245,
+      Faculty: 892,
+      "Administrative Staff": 456,
+      "Research Staff": 254,
     },
     usersByRole: {
-      'Students': 1834,
-      'Faculty': 651,
-      'Staff': 362
+      Students: 1834,
+      Faculty: 651,
+      Staff: 362,
     },
-    utilisationRate: 78.5
+    utilisationRate: 78.5,
   };
 
   const demoSessionAnalytics: SessionAnalytics = {
@@ -208,16 +214,22 @@ export default function InstitutionalDashboard({ user }: InstitutionalDashboardP
     cancelledSessions: 1516,
     averageSessionDuration: 52,
     satisfactionScore: 4.3,
-    mostCommonConcerns: ['Academic Stress', 'Anxiety', 'Depression', 'Relationship Issues', 'Career Concerns'],
-    peakUsageHours: ['14:00-16:00', '18:00-20:00'],
+    mostCommonConcerns: [
+      "Academic Stress",
+      "Anxiety",
+      "Depression",
+      "Relationship Issues",
+      "Career Concerns",
+    ],
+    peakUsageHours: ["14:00-16:00", "18:00-20:00"],
     monthlyTrend: [
-      { month: 'Sep 2024', sessions: 1234, users: 456 },
-      { month: 'Oct 2024', sessions: 1456, users: 523 },
-      { month: 'Nov 2024', sessions: 1623, users: 612 },
-      { month: 'Dec 2024', sessions: 1345, users: 498 },
-      { month: 'Jan 2025', sessions: 1789, users: 678 },
-      { month: 'Feb 2025', sessions: 1567, users: 634 }
-    ]
+      { month: "Sep 2024", sessions: 1234, users: 456 },
+      { month: "Oct 2024", sessions: 1456, users: 523 },
+      { month: "Nov 2024", sessions: 1623, users: 612 },
+      { month: "Dec 2024", sessions: 1345, users: 498 },
+      { month: "Jan 2025", sessions: 1789, users: 678 },
+      { month: "Feb 2025", sessions: 1567, users: 634 },
+    ],
   };
 
   const demoBillingData: BillingData = {
@@ -227,10 +239,25 @@ export default function InstitutionalDashboard({ user }: InstitutionalDashboardP
     budgetRemaining: 21360,
     averageCostPerUser: 9.01,
     paymentHistory: [
-      { date: '2025-02-01', amount: 25640, description: 'Monthly subscription + session charges', status: 'paid' },
-      { date: '2025-01-01', amount: 23450, description: 'Monthly subscription + session charges', status: 'paid' },
-      { date: '2024-12-01', amount: 21230, description: 'Monthly subscription + session charges', status: 'paid' }
-    ]
+      {
+        date: "2025-02-01",
+        amount: 25640,
+        description: "Monthly subscription + session charges",
+        status: "paid",
+      },
+      {
+        date: "2025-01-01",
+        amount: 23450,
+        description: "Monthly subscription + session charges",
+        status: "paid",
+      },
+      {
+        date: "2024-12-01",
+        amount: 21230,
+        description: "Monthly subscription + session charges",
+        status: "paid",
+      },
+    ],
   };
 
   const displayInstitution = institutionData || demoInstitution;
@@ -240,20 +267,29 @@ export default function InstitutionalDashboard({ user }: InstitutionalDashboardP
 
   const getTypeColor = (type: string) => {
     switch (type) {
-      case 'university': return 'bg-blue-100 text-blue-800';
-      case 'healthcare': return 'bg-green-100 text-green-800';
-      case 'corporate': return 'bg-purple-100 text-purple-800';
-      case 'government': return 'bg-orange-100 text-orange-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "university":
+        return "bg-blue-100 text-blue-800";
+      case "healthcare":
+        return "bg-green-100 text-green-800";
+      case "corporate":
+        return "bg-purple-100 text-purple-800";
+      case "government":
+        return "bg-orange-100 text-orange-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'active': return 'bg-green-100 text-green-800';
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'suspended': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "active":
+        return "bg-green-100 text-green-800";
+      case "pending":
+        return "bg-yellow-100 text-yellow-800";
+      case "suspended":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -272,7 +308,8 @@ export default function InstitutionalDashboard({ user }: InstitutionalDashboardP
               {displayInstitution.status}
             </Badge>
             <span className="text-gray-600">
-              Contract: {new Date(displayInstitution.contractStart).toLocaleDateString()} - {new Date(displayInstitution.contractEnd).toLocaleDateString()}
+              Contract: {new Date(displayInstitution.contractStart).toLocaleDateString()} -{" "}
+              {new Date(displayInstitution.contractEnd).toLocaleDateString()}
             </span>
           </div>
         </div>
@@ -289,7 +326,9 @@ export default function InstitutionalDashboard({ user }: InstitutionalDashboardP
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-blue-700">Active Users</p>
-                <p className="text-2xl font-bold text-blue-900">{displayUserManagement.activeUsers.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-blue-900">
+                  {displayUserManagement.activeUsers.toLocaleString()}
+                </p>
                 <p className="text-xs text-blue-600">
                   {displayUserManagement.utilisationRate}% utilisation
                 </p>
@@ -305,7 +344,8 @@ export default function InstitutionalDashboard({ user }: InstitutionalDashboardP
               <div>
                 <p className="text-sm font-medium text-green-700">Sessions This Month</p>
                 <p className="text-2xl font-bold text-green-900">
-                  {displayAnalytics.monthlyTrend[displayAnalytics.monthlyTrend.length - 1]?.sessions || 0}
+                  {displayAnalytics.monthlyTrend[displayAnalytics.monthlyTrend.length - 1]
+                    ?.sessions || 0}
                 </p>
                 <p className="text-xs text-green-600">
                   {displayAnalytics.satisfactionScore}/5 satisfaction
@@ -342,7 +382,10 @@ export default function InstitutionalDashboard({ user }: InstitutionalDashboardP
                   {formatCurrency(displayBilling.budgetRemaining)}
                 </p>
                 <p className="text-xs text-orange-600">
-                  {Math.round((displayBilling.budgetRemaining / displayInstitution.monthlyBudget) * 100)}% left
+                  {Math.round(
+                    (displayBilling.budgetRemaining / displayInstitution.monthlyBudget) * 100
+                  )}
+                  % left
                 </p>
               </div>
               <TrendingUp className="w-8 h-8 text-orange-600" />
@@ -395,7 +438,12 @@ export default function InstitutionalDashboard({ user }: InstitutionalDashboardP
                 </div>
                 <div className="flex items-center gap-2">
                   <Globe className="w-4 h-4 text-gray-500" />
-                  <a href={`https://${displayInstitution.website}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline text-sm">
+                  <a
+                    href={`https://${displayInstitution.website}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-600 hover:underline text-sm"
+                  >
                     {displayInstitution.website}
                   </a>
                 </div>
@@ -443,7 +491,9 @@ export default function InstitutionalDashboard({ user }: InstitutionalDashboardP
                   <UserPlus className="w-5 h-5 text-blue-600" />
                   <div className="flex-1">
                     <p className="font-medium">127 new users joined this month</p>
-                    <p className="text-sm text-gray-600">Primarily from Student Services department</p>
+                    <p className="text-sm text-gray-600">
+                      Primarily from Student Services department
+                    </p>
                   </div>
                   <span className="text-xs text-gray-500">2 hours ago</span>
                 </div>
@@ -459,7 +509,9 @@ export default function InstitutionalDashboard({ user }: InstitutionalDashboardP
                   <PoundSterling className="w-5 h-5 text-purple-600" />
                   <div className="flex-1">
                     <p className="font-medium">Monthly invoice processed</p>
-                    <p className="text-sm text-gray-600">{formatCurrency(displayBilling.totalCostThisMonth)} charged</p>
+                    <p className="text-sm text-gray-600">
+                      {formatCurrency(displayBilling.totalCostThisMonth)} charged
+                    </p>
                   </div>
                   <span className="text-xs text-gray-500">3 days ago</span>
                 </div>
@@ -493,15 +545,21 @@ export default function InstitutionalDashboard({ user }: InstitutionalDashboardP
                 <div className="space-y-2">
                   <div className="flex justify-between">
                     <span className="text-sm">Total Users:</span>
-                    <span className="font-medium">{displayUserManagement.totalUsers.toLocaleString()}</span>
+                    <span className="font-medium">
+                      {displayUserManagement.totalUsers.toLocaleString()}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm">Active Users:</span>
-                    <span className="font-medium">{displayUserManagement.activeUsers.toLocaleString()}</span>
+                    <span className="font-medium">
+                      {displayUserManagement.activeUsers.toLocaleString()}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm">New This Month:</span>
-                    <span className="font-medium text-green-600">+{displayUserManagement.newUsersThisMonth}</span>
+                    <span className="font-medium text-green-600">
+                      +{displayUserManagement.newUsersThisMonth}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-sm">Utilisation Rate:</span>
@@ -518,20 +576,24 @@ export default function InstitutionalDashboard({ user }: InstitutionalDashboardP
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {Object.entries(displayUserManagement.usersByDepartment).map(([department, count]) => (
-                    <div key={department} className="flex items-center justify-between">
-                      <span className="text-sm">{department}</span>
-                      <div className="flex items-center gap-2">
-                        <div className="w-16 bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-hive-purple h-2 rounded-full"
-                            style={{ width: `${(count / displayUserManagement.totalUsers) * 100}%` }}
-                          ></div>
+                  {Object.entries(displayUserManagement.usersByDepartment).map(
+                    ([department, count]) => (
+                      <div key={department} className="flex items-center justify-between">
+                        <span className="text-sm">{department}</span>
+                        <div className="flex items-center gap-2">
+                          <div className="w-16 bg-gray-200 rounded-full h-2">
+                            <div
+                              className="bg-hive-purple h-2 rounded-full"
+                              style={{
+                                width: `${(count / displayUserManagement.totalUsers) * 100}%`,
+                              }}
+                            ></div>
+                          </div>
+                          <span className="text-sm font-medium w-12">{count}</span>
                         </div>
-                        <span className="text-sm font-medium w-12">{count}</span>
                       </div>
-                    </div>
-                  ))}
+                    )
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -548,9 +610,11 @@ export default function InstitutionalDashboard({ user }: InstitutionalDashboardP
                       <span className="text-sm">{role}</span>
                       <div className="flex items-center gap-2">
                         <div className="w-16 bg-gray-200 rounded-full h-2">
-                          <div 
+                          <div
                             className="bg-blue-500 h-2 rounded-full"
-                            style={{ width: `${(count / displayUserManagement.totalUsers) * 100}%` }}
+                            style={{
+                              width: `${(count / displayUserManagement.totalUsers) * 100}%`,
+                            }}
                           ></div>
                         </div>
                         <span className="text-sm font-medium w-12">{count}</span>
@@ -576,7 +640,7 @@ export default function InstitutionalDashboard({ user }: InstitutionalDashboardP
                     placeholder="Enter email addresses, one per line..."
                     rows={6}
                   />
-                  <Button 
+                  <Button
                     className="mt-2 w-full"
                     onClick={() => bulkInviteMutation.mutate({ emails: [] })}
                     disabled={bulkInviteMutation.isPending}
@@ -616,21 +680,30 @@ export default function InstitutionalDashboard({ user }: InstitutionalDashboardP
                 <div className="grid grid-cols-2 gap-4 text-sm">
                   <div>
                     <span className="font-medium">Total Sessions:</span>
-                    <p className="text-lg font-semibold">{displayAnalytics.totalSessions.toLocaleString()}</p>
+                    <p className="text-lg font-semibold">
+                      {displayAnalytics.totalSessions.toLocaleString()}
+                    </p>
                   </div>
                   <div>
                     <span className="font-medium">Completion Rate:</span>
                     <p className="text-lg font-semibold text-green-600">
-                      {Math.round((displayAnalytics.completedSessions / displayAnalytics.totalSessions) * 100)}%
+                      {Math.round(
+                        (displayAnalytics.completedSessions / displayAnalytics.totalSessions) * 100
+                      )}
+                      %
                     </p>
                   </div>
                   <div>
                     <span className="font-medium">Avg Duration:</span>
-                    <p className="text-lg font-semibold">{displayAnalytics.averageSessionDuration} min</p>
+                    <p className="text-lg font-semibold">
+                      {displayAnalytics.averageSessionDuration} min
+                    </p>
                   </div>
                   <div>
                     <span className="font-medium">Satisfaction:</span>
-                    <p className="text-lg font-semibold text-blue-600">{displayAnalytics.satisfactionScore}/5</p>
+                    <p className="text-lg font-semibold text-blue-600">
+                      {displayAnalytics.satisfactionScore}/5
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -648,12 +721,12 @@ export default function InstitutionalDashboard({ user }: InstitutionalDashboardP
                       <span className="text-sm">{concern}</span>
                       <div className="flex items-center gap-2">
                         <div className="w-20 bg-gray-200 rounded-full h-2">
-                          <div 
+                          <div
                             className="bg-hive-purple h-2 rounded-full"
-                            style={{ width: `${100 - (index * 15)}%` }}
+                            style={{ width: `${100 - index * 15}%` }}
                           ></div>
                         </div>
-                        <span className="text-sm font-medium">{100 - (index * 15)}%</span>
+                        <span className="text-sm font-medium">{100 - index * 15}%</span>
                       </div>
                     </div>
                   ))}
@@ -674,20 +747,18 @@ export default function InstitutionalDashboard({ user }: InstitutionalDashboardP
                     <div key={data.month} className="text-center">
                       <div className="mb-2">
                         <div className="w-full bg-gray-200 rounded h-20 flex flex-col justify-end">
-                          <div 
+                          <div
                             className="bg-blue-500 rounded-b"
                             style={{ height: `${(data.sessions / 2000) * 100}%` }}
                           ></div>
                         </div>
                       </div>
-                      <p className="text-xs font-medium">{data.month.split(' ')[0]}</p>
+                      <p className="text-xs font-medium">{data.month.split(" ")[0]}</p>
                       <p className="text-xs text-gray-600">{data.sessions}</p>
                     </div>
                   ))}
                 </div>
-                <div className="text-center text-sm text-gray-600">
-                  Monthly Session Volume
-                </div>
+                <div className="text-center text-sm text-gray-600">Monthly Session Volume</div>
               </div>
             </CardContent>
           </Card>
@@ -703,7 +774,10 @@ export default function InstitutionalDashboard({ user }: InstitutionalDashboardP
                   <h4 className="font-medium mb-3">Peak Hours</h4>
                   <div className="space-y-2">
                     {displayAnalytics.peakUsageHours.map((hour) => (
-                      <div key={hour} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                      <div
+                        key={hour}
+                        className="flex items-center justify-between p-2 bg-gray-50 rounded"
+                      >
                         <span className="text-sm">{hour}</span>
                         <Badge variant="secondary">High Traffic</Badge>
                       </div>
@@ -735,22 +809,30 @@ export default function InstitutionalDashboard({ user }: InstitutionalDashboardP
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span>Monthly Subscription:</span>
-                    <span className="font-medium">{formatCurrency(displayBilling.monthlySubscription)}</span>
+                    <span className="font-medium">
+                      {formatCurrency(displayBilling.monthlySubscription)}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span>Session-based Charges:</span>
-                    <span className="font-medium">{formatCurrency(displayBilling.sessionBasedCharges)}</span>
+                    <span className="font-medium">
+                      {formatCurrency(displayBilling.sessionBasedCharges)}
+                    </span>
                   </div>
                   <div className="border-t pt-2">
                     <div className="flex justify-between">
                       <span className="font-medium">Total This Month:</span>
-                      <span className="font-bold text-lg">{formatCurrency(displayBilling.totalCostThisMonth)}</span>
+                      <span className="font-bold text-lg">
+                        {formatCurrency(displayBilling.totalCostThisMonth)}
+                      </span>
                     </div>
                   </div>
                   <div className="bg-green-50 p-3 rounded-lg">
                     <div className="flex justify-between">
                       <span className="text-green-800">Budget Remaining:</span>
-                      <span className="font-bold text-green-900">{formatCurrency(displayBilling.budgetRemaining)}</span>
+                      <span className="font-bold text-green-900">
+                        {formatCurrency(displayBilling.budgetRemaining)}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -766,18 +848,25 @@ export default function InstitutionalDashboard({ user }: InstitutionalDashboardP
                 <div className="space-y-3">
                   <div className="flex justify-between">
                     <span>Cost per Active User:</span>
-                    <span className="font-medium">{formatCurrency(displayBilling.averageCostPerUser)}</span>
+                    <span className="font-medium">
+                      {formatCurrency(displayBilling.averageCostPerUser)}
+                    </span>
                   </div>
                   <div className="flex justify-between">
                     <span>Budget Utilization:</span>
                     <span className="font-medium">
-                      {Math.round((displayBilling.totalCostThisMonth / displayInstitution.monthlyBudget) * 100)}%
+                      {Math.round(
+                        (displayBilling.totalCostThisMonth / displayInstitution.monthlyBudget) * 100
+                      )}
+                      %
                     </span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-3">
-                    <div 
+                    <div
                       className="bg-blue-600 h-3 rounded-full"
-                      style={{ width: `${(displayBilling.totalCostThisMonth / displayInstitution.monthlyBudget) * 100}%` }}
+                      style={{
+                        width: `${(displayBilling.totalCostThisMonth / displayInstitution.monthlyBudget) * 100}%`,
+                      }}
                     ></div>
                   </div>
                   <div className="text-sm text-gray-600">
@@ -796,14 +885,23 @@ export default function InstitutionalDashboard({ user }: InstitutionalDashboardP
             <CardContent>
               <div className="space-y-3">
                 {displayBilling.paymentHistory.map((payment, index) => (
-                  <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-3 border rounded-lg"
+                  >
                     <div>
                       <p className="font-medium">{formatCurrency(payment.amount)}</p>
                       <p className="text-sm text-gray-600">{payment.description}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-sm">{new Date(payment.date).toLocaleDateString()}</p>
-                      <Badge className={payment.status === 'paid' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
+                      <Badge
+                        className={
+                          payment.status === "paid"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }
+                      >
                         {payment.status}
                       </Badge>
                     </div>
@@ -856,23 +954,23 @@ export default function InstitutionalDashboard({ user }: InstitutionalDashboardP
                   </div>
                   <div>
                     <Label htmlFor="monthlyBudget">Monthly Budget</Label>
-                    <Input id="monthlyBudget" type="number" defaultValue={displayInstitution.monthlyBudget} />
+                    <Input
+                      id="monthlyBudget"
+                      type="number"
+                      defaultValue={displayInstitution.monthlyBudget}
+                    />
                   </div>
                 </div>
               </div>
-              
+
               <div>
                 <Label htmlFor="address">Address</Label>
                 <Textarea id="address" defaultValue={displayInstitution.address} rows={3} />
               </div>
 
               <div className="flex gap-2">
-                <Button className="bg-hive-purple hover:bg-hive-purple/90">
-                  Save Changes
-                </Button>
-                <Button variant="outline">
-                  Cancel
-                </Button>
+                <Button className="bg-hive-purple hover:bg-hive-purple/90">Save Changes</Button>
+                <Button variant="outline">Cancel</Button>
               </div>
             </CardContent>
           </Card>
@@ -916,7 +1014,7 @@ export default function InstitutionalDashboard({ user }: InstitutionalDashboardP
                   </div>
                 </div>
               </div>
-              
+
               <Button variant="outline" className="w-full">
                 <FileText className="w-4 h-4 mr-2" />
                 Download Compliance Report

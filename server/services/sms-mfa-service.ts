@@ -1,5 +1,5 @@
-import * as crypto from 'crypto';
-import twilio, { Twilio } from 'twilio';
+import * as crypto from "crypto";
+import twilio, { Twilio } from "twilio";
 
 export interface SMSMFASetupResult {
   phoneNumber: string;
@@ -22,7 +22,7 @@ export class SMSMFAService {
   private twilio: Twilio | null = null;
   private initialized: boolean = false;
   private initError: string | null = null;
-  
+
   constructor() {
     this.initializeTwilio();
   }
@@ -34,20 +34,21 @@ export class SMSMFAService {
       const fromNumber = process.env.TWILIO_PHONE_NUMBER;
 
       if (!accountSid || !authToken || !fromNumber) {
-        this.initError = 'Twilio credentials not configured. Missing: ' +
-          (!accountSid ? 'TWILIO_ACCOUNT_SID ' : '') +
-          (!authToken ? 'TWILIO_AUTH_TOKEN ' : '') +
-          (!fromNumber ? 'TWILIO_PHONE_NUMBER' : '');
-        console.error('🚨 SMS MFA Service initialization failed:', this.initError);
+        this.initError =
+          "Twilio credentials not configured. Missing: " +
+          (!accountSid ? "TWILIO_ACCOUNT_SID " : "") +
+          (!authToken ? "TWILIO_AUTH_TOKEN " : "") +
+          (!fromNumber ? "TWILIO_PHONE_NUMBER" : "");
+        console.error("🚨 SMS MFA Service initialization failed:", this.initError);
         return;
       }
 
       this.twilio = twilio(accountSid, authToken);
       this.initialized = true;
-      console.log('✅ SMS MFA Service initialized successfully with number:', fromNumber);
+      console.log("✅ SMS MFA Service initialized successfully with number:", fromNumber);
     } catch (error: any) {
       this.initError = `Twilio initialization error: ${error.message}`;
-      console.error('🚨 SMS MFA Service initialization failed:', error);
+      console.error("🚨 SMS MFA Service initialization failed:", error);
     }
   }
 
@@ -70,7 +71,7 @@ export class SMSMFAService {
    * Hash a verification code for secure storage
    */
   hashCode(code: string): string {
-    return crypto.createHash('sha256').update(code.toLowerCase()).digest('hex');
+    return crypto.createHash("sha256").update(code.toLowerCase()).digest("hex");
   }
 
   /**
@@ -78,19 +79,19 @@ export class SMSMFAService {
    */
   normalizePhoneNumber(phoneNumber: string): string {
     // Remove all non-digit characters except +
-    let normalized = phoneNumber.replace(/[^\d+]/g, '');
-    
+    let normalized = phoneNumber.replace(/[^\d+]/g, "");
+
     // If no country code, assume UK (+44)
-    if (!normalized.startsWith('+')) {
-      if (normalized.startsWith('0')) {
+    if (!normalized.startsWith("+")) {
+      if (normalized.startsWith("0")) {
         // UK mobile number starting with 0
-        normalized = '+44' + normalized.substring(1);
+        normalized = "+44" + normalized.substring(1);
       } else {
         // Assume it needs UK country code
-        normalized = '+44' + normalized;
+        normalized = "+44" + normalized;
       }
     }
-    
+
     return normalized;
   }
 
@@ -102,17 +103,17 @@ export class SMSMFAService {
     try {
       // Check if service is initialized
       if (!this.initialized || !this.twilio) {
-        const error = this.initError || 'SMS service not initialized';
-        console.error('🚨 Cannot send SMS:', error);
+        const error = this.initError || "SMS service not initialized";
+        console.error("🚨 Cannot send SMS:", error);
         return {
           success: false,
           error: error,
-          errorCode: 'SERVICE_NOT_INITIALIZED'
+          errorCode: "SERVICE_NOT_INITIALIZED",
         };
       }
 
       const normalizedPhone = this.normalizePhoneNumber(phoneNumber);
-      
+
       console.log(`📱 Sending SMS to ${normalizedPhone}...`);
 
       // Always send real SMS via Twilio
@@ -125,23 +126,23 @@ export class SMSMFAService {
       console.log(`✅ SMS sent successfully to ${normalizedPhone}: ${message.sid}`);
       return {
         success: true,
-        messageSid: message.sid
+        messageSid: message.sid,
       };
     } catch (error: any) {
-      const errorMessage = error.message || 'Unknown error';
-      const errorCode = error.code || 'UNKNOWN_ERROR';
-      
-      console.error('🚨 SMS sending error:', {
+      const errorMessage = error.message || "Unknown error";
+      const errorCode = error.code || "UNKNOWN_ERROR";
+
+      console.error("🚨 SMS sending error:", {
         error: errorMessage,
         code: errorCode,
         status: error.status,
-        moreInfo: error.moreInfo
+        moreInfo: error.moreInfo,
       });
 
       return {
         success: false,
         error: `Twilio error: ${errorMessage}`,
-        errorCode: errorCode
+        errorCode: errorCode,
       };
     }
   }
@@ -150,7 +151,7 @@ export class SMSMFAService {
    * Verify SMS code against stored hash
    */
   verifySMSCode(providedCode: string, storedHashedCode: string): boolean {
-    const providedHash = this.hashCode(providedCode.replace(/\s/g, ''));
+    const providedHash = this.hashCode(providedCode.replace(/\s/g, ""));
     return providedHash === storedHashedCode;
   }
 

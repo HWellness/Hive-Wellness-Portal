@@ -7,7 +7,7 @@ import EmailTemplateManagement from "@/components/admin/email-template-managemen
 export default function AdminEmailTemplates() {
   const { user } = useAuth();
 
-  if (!user || user.role !== 'admin') {
+  if (!user || user.role !== "admin") {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -33,9 +33,7 @@ export default function AdminEmailTemplates() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-primary text-hive-purple">
-              Email Template Management
-            </h1>
+            <h1 className="text-3xl font-primary text-hive-purple">Email Template Management</h1>
             <p className="text-hive-black/70 font-secondary">
               Full control over all automated email communications
             </p>

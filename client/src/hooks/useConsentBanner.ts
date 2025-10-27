@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
-import { useQuery } from '@tanstack/react-query';
-import { useAuth } from '@/hooks/useAuth';
+import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
 
 interface ConsentPreferences {
   essential: boolean;
@@ -27,8 +27,8 @@ export function useConsentBanner() {
 
   // Fetch current consent status from backend
   const { data: consentStatus, isLoading: consentLoading } = useQuery<ConsentStatus>({
-    queryKey: ['/api/user/consent'],
-    enabled: !authLoading,  // Enable for ALL visitors, not just authenticated
+    queryKey: ["/api/user/consent"],
+    enabled: !authLoading, // Enable for ALL visitors, not just authenticated
     retry: false,
     // Don't show stale data
     staleTime: 0,
@@ -36,12 +36,12 @@ export function useConsentBanner() {
 
   useEffect(() => {
     if (authLoading || consentLoading) return;
-    
+
     // GDPR consent required for ALL visitors (authenticated and unauthenticated)
     // Check localStorage first for quick UI response
-    const localConsentGiven = localStorage.getItem('gdpr_consent_given');
-    
-    if (localConsentGiven === 'true') {
+    const localConsentGiven = localStorage.getItem("gdpr_consent_given");
+
+    if (localConsentGiven === "true") {
       // User has already interacted with consent banner in this session
       setShowBanner(false);
       return;
@@ -73,8 +73,8 @@ export function useConsentBanner() {
 
   const markConsentAsGiven = () => {
     // Mark consent as given in localStorage after explicit choice
-    localStorage.setItem('gdpr_consent_given', 'true');
-    localStorage.setItem('gdpr_consent_timestamp', new Date().toISOString());
+    localStorage.setItem("gdpr_consent_given", "true");
+    localStorage.setItem("gdpr_consent_timestamp", new Date().toISOString());
     setShowBanner(false);
   };
 

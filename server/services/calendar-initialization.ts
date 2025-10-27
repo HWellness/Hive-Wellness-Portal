@@ -3,9 +3,9 @@
  * Handles startup and configuration of calendar services
  */
 
-import { calendarService } from './calendar-service';
-import { calendarChannelManager } from './calendar-channel-manager';
-import { storage } from '../storage';
+import { calendarService } from "./calendar-service";
+import { calendarChannelManager } from "./calendar-channel-manager";
+import { storage } from "../storage";
 
 export class CalendarInitialization {
   private static isInitialized = false;
@@ -15,12 +15,12 @@ export class CalendarInitialization {
    */
   static async initialize(): Promise<void> {
     if (this.isInitialized) {
-      console.log('📋 Calendar services already initialized');
+      console.log("📋 Calendar services already initialized");
       return;
     }
 
     try {
-      console.log('🚀 Initializing calendar services...');
+      console.log("🚀 Initializing calendar services...");
 
       // Initialize channel manager
       await calendarChannelManager.initialize();
@@ -32,10 +32,9 @@ export class CalendarInitialization {
       this.setupMaintenanceTasks();
 
       this.isInitialized = true;
-      console.log('✅ Calendar services initialized successfully');
-
+      console.log("✅ Calendar services initialized successfully");
     } catch (error: any) {
-      console.error('❌ Failed to initialize calendar services:', error);
+      console.error("❌ Failed to initialize calendar services:", error);
       throw error;
     }
   }
@@ -45,11 +44,11 @@ export class CalendarInitialization {
    */
   private static async verifyExistingCalendars(): Promise<void> {
     try {
-      console.log('🔍 Verifying existing therapist calendars...');
+      console.log("🔍 Verifying existing therapist calendars...");
 
       const calendars = await storage.listTherapistCalendars();
-      const activeCalendars = calendars.filter(cal => 
-        cal.integrationStatus === 'active' && cal.googleCalendarId
+      const activeCalendars = calendars.filter(
+        (cal) => cal.integrationStatus === "active" && cal.googleCalendarId
       );
 
       console.log(`📋 Found ${activeCalendars.length} active calendars to verify`);
@@ -61,32 +60,34 @@ export class CalendarInitialization {
         try {
           // Check if calendar is accessible
           const health = await calendarService.healthCheck();
-          
-          if (health.status === 'healthy') {
+
+          if (health.status === "healthy") {
             healthyCalendars++;
-            
+
             // Check webhook channel status
             const now = new Date();
             const expiryWarning = new Date(now.getTime() + 24 * 60 * 60 * 1000); // 24 hours
-            
+
             if (calendar.channelExpiresAt && calendar.channelExpiresAt <= expiryWarning) {
-              console.log(`⚠️ Channel for calendar ${calendar.googleCalendarId} expires soon, scheduling renewal`);
+              console.log(
+                `⚠️ Channel for calendar ${calendar.googleCalendarId} expires soon, scheduling renewal`
+              );
             }
           } else {
             unhealthyCalendars++;
             console.warn(`⚠️ Calendar ${calendar.googleCalendarId} health check failed`);
           }
-
         } catch (error: any) {
           unhealthyCalendars++;
           console.error(`❌ Error verifying calendar ${calendar.googleCalendarId}:`, error);
         }
       }
 
-      console.log(`📊 Calendar verification complete: ${healthyCalendars} healthy, ${unhealthyCalendars} unhealthy`);
-
+      console.log(
+        `📊 Calendar verification complete: ${healthyCalendars} healthy, ${unhealthyCalendars} unhealthy`
+      );
     } catch (error: any) {
-      console.error('❌ Error verifying existing calendars:', error);
+      console.error("❌ Error verifying existing calendars:", error);
     }
   }
 
@@ -95,7 +96,7 @@ export class CalendarInitialization {
    */
   private static setupMaintenanceTasks(): void {
     // Channel renewal check every 6 hours is handled by CalendarChannelManager
-    console.log('⏰ Periodic maintenance tasks configured');
+    console.log("⏰ Periodic maintenance tasks configured");
   }
 
   /**
@@ -118,16 +119,15 @@ export class CalendarInitialization {
    */
   static async shutdown(): Promise<void> {
     try {
-      console.log('🔄 Shutting down calendar services...');
+      console.log("🔄 Shutting down calendar services...");
 
       // Shutdown channel manager
       calendarChannelManager.shutdown();
 
       this.isInitialized = false;
-      console.log('✅ Calendar services shutdown complete');
-
+      console.log("✅ Calendar services shutdown complete");
     } catch (error: any) {
-      console.error('❌ Error during calendar services shutdown:', error);
+      console.error("❌ Error during calendar services shutdown:", error);
     }
   }
 
@@ -135,34 +135,33 @@ export class CalendarInitialization {
    * Health check for all calendar services
    */
   static async healthCheck(): Promise<{
-    status: 'healthy' | 'unhealthy';
+    status: "healthy" | "unhealthy";
     details: any;
   }> {
     try {
       const calendarHealth = await calendarService.healthCheck();
       const channelHealth = await calendarChannelManager.healthCheck();
 
-      const overallStatus = 
-        calendarHealth.status === 'healthy' && 
-        channelHealth.status === 'healthy' 
-          ? 'healthy' : 'unhealthy';
+      const overallStatus =
+        calendarHealth.status === "healthy" && channelHealth.status === "healthy"
+          ? "healthy"
+          : "unhealthy";
 
       return {
         status: overallStatus,
         details: {
           initialized: this.isInitialized,
           calendar: calendarHealth,
-          channels: channelHealth
-        }
+          channels: channelHealth,
+        },
       };
-
     } catch (error: any) {
       return {
-        status: 'unhealthy',
+        status: "unhealthy",
         details: {
           initialized: this.isInitialized,
-          error: error.message
-        }
+          error: error.message,
+        },
       };
     }
   }
@@ -177,7 +176,7 @@ export class CalendarInitialization {
       await CalendarInitialization.initialize();
     }, 2000);
   } catch (error) {
-    console.error('❌ Auto-initialization of calendar services failed:', error);
+    console.error("❌ Auto-initialization of calendar services failed:", error);
   }
 })();
 

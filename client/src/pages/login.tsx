@@ -5,7 +5,14 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Mail, Lock, User, Settings, Building, Eye, EyeOff } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -46,7 +53,7 @@ export default function LoginPage() {
             description: "You must change your password before continuing.",
             variant: "default",
           });
-          
+
           // Redirect to change password page
           setTimeout(() => {
             setLocation("/change-password");
@@ -62,18 +69,23 @@ export default function LoginPage() {
         // Invalidate auth queries and force immediate redirect
         await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
         queryClient.setQueryData(["/api/auth/user"], result.user);
-        
+
         // Force immediate hard refresh to role-specific dashboard
         const targetUrl = (() => {
           switch (result.user.role) {
-            case "client": return "/client-dashboard";
-            case "therapist": return "/portal";
-            case "admin": return "/admin-dashboard";
-            case "institution": return "/institution-dashboard";
-            default: return "/";
+            case "client":
+              return "/client-dashboard";
+            case "therapist":
+              return "/portal";
+            case "admin":
+              return "/admin-dashboard";
+            case "institution":
+              return "/institution-dashboard";
+            default:
+              return "/";
           }
         })();
-        
+
         window.location.replace(targetUrl);
       } else {
         toast({
@@ -93,54 +105,53 @@ export default function LoginPage() {
     }
   };
 
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-hive-light-purple via-hive-white to-hive-light-blue flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Header */}
         <div className="text-center mb-8">
-          <Button 
-            variant="ghost" 
-            size="sm" 
+          <Button
+            variant="ghost"
+            size="sm"
             className="mb-4 text-hive-purple hover:text-hive-purple/80"
             onClick={async () => {
               try {
                 // First, verify that user is actually logged out by checking session
-                const authResponse = await fetch('/api/auth/user', { 
-                  credentials: 'include',
-                  cache: 'no-cache' 
+                const authResponse = await fetch("/api/auth/user", {
+                  credentials: "include",
+                  cache: "no-cache",
                 });
-                
+
                 // If still authenticated, wait a moment for session destruction to complete
                 if (authResponse.ok) {
-                  console.log('Session still active, waiting for destruction...');
-                  await new Promise(resolve => setTimeout(resolve, 500)); // Wait 500ms
-                  
+                  console.log("Session still active, waiting for destruction...");
+                  await new Promise((resolve) => setTimeout(resolve, 500)); // Wait 500ms
+
                   // Check again
-                  const retryResponse = await fetch('/api/auth/user', { 
-                    credentials: 'include',
-                    cache: 'no-cache' 
+                  const retryResponse = await fetch("/api/auth/user", {
+                    credentials: "include",
+                    cache: "no-cache",
                   });
-                  
+
                   if (retryResponse.ok) {
-                    console.warn('Session still persists after retry, forcing logout...');
+                    console.warn("Session still persists after retry, forcing logout...");
                     // Force a logout if session is still active
-                    await fetch('/api/auth/logout', { 
-                      method: 'POST', 
-                      credentials: 'include' 
+                    await fetch("/api/auth/logout", {
+                      method: "POST",
+                      credentials: "include",
                     });
-                    await new Promise(resolve => setTimeout(resolve, 200)); // Wait for logout
+                    await new Promise((resolve) => setTimeout(resolve, 200)); // Wait for logout
                   }
                 }
 
                 // Clear all frontend authentication state
                 await queryClient.removeQueries({ queryKey: ["/api/auth/user"] });
                 queryClient.clear();
-                
+
                 // Force navigation to portal
                 window.location.href = "/";
               } catch (error) {
-                console.error('Error during back to portal navigation:', error);
+                console.error("Error during back to portal navigation:", error);
                 // Fallback: clear cache and navigate anyway
                 await queryClient.removeQueries({ queryKey: ["/api/auth/user"] });
                 queryClient.clear();
@@ -153,7 +164,9 @@ export default function LoginPage() {
           </Button>
           <div className="mb-6">
             <h1 className="text-3xl font-bold font-century text-hive-purple mb-2">Welcome Back</h1>
-            <p className="text-hive-black/70 font-secondary">Sign in to your Hive Wellness account</p>
+            <p className="text-hive-black/70 font-secondary">
+              Sign in to your Hive Wellness account
+            </p>
           </div>
         </div>
 
@@ -179,8 +192,8 @@ export default function LoginPage() {
                       <FormControl>
                         <div className="relative">
                           <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 text-hive-purple/50 w-4 h-4" />
-                          <Input 
-                            {...field} 
+                          <Input
+                            {...field}
                             type="email"
                             className="pl-10 border-hive-purple/20 focus:border-hive-purple"
                             placeholder="Enter your email address"
@@ -202,8 +215,8 @@ export default function LoginPage() {
                       <FormControl>
                         <div className="relative">
                           <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-hive-purple/50 w-4 h-4" />
-                          <Input 
-                            {...field} 
+                          <Input
+                            {...field}
                             type={showPassword ? "text" : "password"}
                             className="pl-10 pr-10 border-hive-purple/20 focus:border-hive-purple"
                             placeholder="••••••••"
@@ -229,8 +242,8 @@ export default function LoginPage() {
                   )}
                 />
 
-                <Button 
-                  type="submit" 
+                <Button
+                  type="submit"
                   className="w-full bg-hive-purple hover:bg-hive-purple/90 text-white font-medium"
                   disabled={isLoading}
                 >
@@ -239,10 +252,11 @@ export default function LoginPage() {
               </form>
             </Form>
 
-
-
             <div className="mt-4 text-center">
-              <Link href="/forgot-password" className="text-sm text-hive-purple hover:text-hive-purple/80 font-medium">
+              <Link
+                href="/forgot-password"
+                className="text-sm text-hive-purple hover:text-hive-purple/80 font-medium"
+              >
                 Forgot your password?
               </Link>
             </div>

@@ -1,15 +1,15 @@
-import { Request, Response, NextFunction } from 'express';
-import { z, ZodError, ZodSchema } from 'zod';
-import { fromZodError } from 'zod-validation-error';
+import { Request, Response, NextFunction } from "express";
+import { z, ZodError, ZodSchema } from "zod";
+import { fromZodError } from "zod-validation-error";
 
 /**
  * Validation middleware factory for standardized input validation across all API routes.
  * Ensures consistent validation with Zod schemas and clear error messages.
- * 
+ *
  * Usage:
- * app.post('/api/endpoint', 
+ * app.post('/api/endpoint',
  *   sanitizeInput, // Always run sanitization first
- *   validate({ body: mySchema }), 
+ *   validate({ body: mySchema }),
  *   async (req, res) => { ... }
  * );
  */
@@ -43,32 +43,32 @@ export const validate = (schemas: ValidationSchemas) => {
       if (error instanceof ZodError) {
         // Convert Zod errors to user-friendly format
         const validationError = fromZodError(error);
-        
+
         // Log validation failure (HIPAA-compliant - no sensitive data)
-        console.error('❌ Validation failed:', {
+        console.error("❌ Validation failed:", {
           path: req.path,
           method: req.method,
-          errors: error.errors.map(e => ({
-            field: e.path.join('.'),
+          errors: error.errors.map((e) => ({
+            field: e.path.join("."),
             message: e.message,
-            code: e.code
-          }))
+            code: e.code,
+          })),
         });
 
         return res.status(400).json({
-          error: 'Validation failed',
+          error: "Validation failed",
           message: validationError.message,
-          details: error.errors.map(e => ({
-            field: e.path.join('.'),
-            message: e.message
-          }))
+          details: error.errors.map((e) => ({
+            field: e.path.join("."),
+            message: e.message,
+          })),
         });
       }
 
       // Handle unexpected errors
-      console.error('❌ Unexpected validation error:', error);
+      console.error("❌ Unexpected validation error:", error);
       return res.status(500).json({
-        error: 'Internal server error during validation'
+        error: "Internal server error during validation",
       });
     }
   };
@@ -100,7 +100,7 @@ export const validateParams = (schema: ZodSchema) => {
  */
 export const validateOptional = (schemas: ValidationSchemas) => {
   const optionalSchemas: ValidationSchemas = {};
-  
+
   if (schemas.body) {
     optionalSchemas.body = schemas.body.optional();
   }
@@ -110,6 +110,6 @@ export const validateOptional = (schemas: ValidationSchemas) => {
   if (schemas.params) {
     optionalSchemas.params = schemas.params.optional();
   }
-  
+
   return validate(optionalSchemas);
 };

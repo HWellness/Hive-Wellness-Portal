@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 
 // Skip to main content link for keyboard navigation
 export function SkipToMain() {
@@ -15,16 +15,15 @@ export function SkipToMain() {
 }
 
 // Announce important changes to screen readers
-export function LiveRegion({ children, politeness = 'polite' }: {
+export function LiveRegion({
+  children,
+  politeness = "polite",
+}: {
   children: React.ReactNode;
-  politeness?: 'polite' | 'assertive' | 'off';
+  politeness?: "polite" | "assertive" | "off";
 }) {
   return (
-    <div
-      aria-live={politeness}
-      aria-atomic="true"
-      className="sr-only"
-    >
+    <div aria-live={politeness} aria-atomic="true" className="sr-only">
       {children}
     </div>
   );
@@ -46,12 +45,12 @@ export function useFocusManagement() {
     const focusableElements = container.querySelectorAll(
       'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
     );
-    
+
     const firstElement = focusableElements[0] as HTMLElement;
     const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
 
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Tab') {
+      if (e.key === "Tab") {
         if (e.shiftKey) {
           if (document.activeElement === firstElement) {
             e.preventDefault();
@@ -66,11 +65,11 @@ export function useFocusManagement() {
       }
     };
 
-    container.addEventListener('keydown', handleKeyDown);
+    container.addEventListener("keydown", handleKeyDown);
     firstElement?.focus();
 
     return () => {
-      container.removeEventListener('keydown', handleKeyDown);
+      container.removeEventListener("keydown", handleKeyDown);
     };
   };
 
@@ -82,15 +81,15 @@ export function useHighContrast() {
   const [isHighContrast, setIsHighContrast] = useState(false);
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-contrast: high)');
+    const mediaQuery = window.matchMedia("(prefers-contrast: high)");
     setIsHighContrast(mediaQuery.matches);
 
     const handleChange = (e: MediaQueryListEvent) => {
       setIsHighContrast(e.matches);
     };
 
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
   }, []);
 
   return isHighContrast;
@@ -101,15 +100,15 @@ export function useReducedMotion() {
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
 
   useEffect(() => {
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
     setPrefersReducedMotion(mediaQuery.matches);
 
     const handleChange = (e: MediaQueryListEvent) => {
       setPrefersReducedMotion(e.matches);
     };
 
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
   }, []);
 
   return prefersReducedMotion;
@@ -120,21 +119,21 @@ export function useKeyboardNavigation() {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Add visual focus indicators when using keyboard
-      if (e.key === 'Tab') {
-        document.body.classList.add('keyboard-navigation');
+      if (e.key === "Tab") {
+        document.body.classList.add("keyboard-navigation");
       }
     };
 
     const handleMouseDown = () => {
-      document.body.classList.remove('keyboard-navigation');
+      document.body.classList.remove("keyboard-navigation");
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    document.addEventListener('mousedown', handleMouseDown);
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("mousedown", handleMouseDown);
 
     return () => {
-      document.removeEventListener('keydown', handleKeyDown);
-      document.removeEventListener('mousedown', handleMouseDown);
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("mousedown", handleMouseDown);
     };
   }, []);
 }
@@ -142,24 +141,24 @@ export function useKeyboardNavigation() {
 // ARIA helpers
 export const ariaHelpers = {
   // Generate unique IDs for form associations
-  generateId: (prefix: string = 'id') => `${prefix}-${Math.random().toString(36).substr(2, 9)}`,
-  
+  generateId: (prefix: string = "id") => `${prefix}-${Math.random().toString(36).substr(2, 9)}`,
+
   // Common ARIA attributes for form validation
   getErrorAttributes: (hasError: boolean, errorId?: string) => ({
-    'aria-invalid': hasError,
-    'aria-describedby': hasError && errorId ? errorId : undefined,
+    "aria-invalid": hasError,
+    "aria-describedby": hasError && errorId ? errorId : undefined,
   }),
-  
+
   // Loading state attributes
   getLoadingAttributes: (isLoading: boolean) => ({
-    'aria-busy': isLoading,
-    'aria-live': 'polite' as const,
+    "aria-busy": isLoading,
+    "aria-live": "polite" as const,
   }),
-  
+
   // Modal attributes
   getModalAttributes: (isOpen: boolean, labelledBy?: string) => ({
-    role: 'dialog' as const,
-    'aria-modal': isOpen,
-    'aria-labelledby': labelledBy,
+    role: "dialog" as const,
+    "aria-modal": isOpen,
+    "aria-labelledby": labelledBy,
   }),
 };

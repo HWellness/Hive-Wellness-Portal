@@ -55,15 +55,15 @@ export default {
         // Hive Wellness specific colors
         hive: {
           purple: "var(--hive-purple)",
-          'light-purple': "var(--hive-light-purple)",
+          "light-purple": "var(--hive-light-purple)",
           background: "var(--hive-background)",
           dark: "var(--hive-dark)",
           white: "var(--hive-white)",
           blue: "var(--hive-blue)",
-          'light-blue': "var(--hive-light-blue)",
+          "light-blue": "var(--hive-light-blue)",
           black: "var(--hive-black)",
           gray: "var(--hive-gray)",
-          'light-gray': "var(--hive-light-gray)",
+          "light-gray": "var(--hive-light-gray)",
           success: "var(--hive-success)",
           warning: "var(--hive-warning)",
           error: "var(--hive-error)",

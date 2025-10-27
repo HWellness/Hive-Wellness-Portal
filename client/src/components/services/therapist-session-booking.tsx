@@ -6,22 +6,28 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { 
-  Calendar, 
-  Clock, 
-  Users, 
-  Video, 
-  Plus, 
+import {
+  Calendar,
+  Clock,
+  Users,
+  Video,
+  Plus,
   Edit,
   Trash2,
   CheckCircle,
   AlertCircle,
   User as UserIcon,
   MessageCircle,
-  PoundSterling
+  PoundSterling,
 } from "lucide-react";
 import type { User } from "@shared/schema";
 
@@ -34,10 +40,10 @@ interface SessionSlot {
   date: string;
   time: string;
   duration: number;
-  sessionType: 'video-therapy';
+  sessionType: "video-therapy";
   clientId?: string;
   clientName?: string;
-  status: 'available' | 'booked' | 'completed' | 'cancelled';
+  status: "available" | "booked" | "completed" | "cancelled";
   notes?: string;
   sessionRate: number;
 }
@@ -59,7 +65,7 @@ interface AssignedClient {
   assignedDate: string;
   sessionCount: number;
   lastSession?: string;
-  status: 'active' | 'pending' | 'paused';
+  status: "active" | "pending" | "paused";
   hasPaymentMethod: boolean;
 }
 
@@ -67,11 +73,11 @@ export default function TherapistSessionBooking({ user }: TherapistSessionBookin
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [isCreatingSession, setIsCreatingSession] = useState(false);
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split("T")[0]);
   const [newSession, setNewSession] = useState<Partial<BookingRequest>>({
     duration: 60, // 1 hour (50 minutes + 10-minute buffer)
-    sessionType: 'video-therapy', // Only video therapy sessions allowed
-    sessionRate: 60 // Default session rate £60
+    sessionType: "video-therapy", // Only video therapy sessions allowed
+    sessionRate: 60, // Default session rate £60
   });
 
   const { data: sessions = [], isLoading } = useQuery<SessionSlot[]>({
@@ -91,7 +97,7 @@ export default function TherapistSessionBooking({ user }: TherapistSessionBookin
 
   const createSessionMutation = useMutation({
     mutationFn: async (sessionData: BookingRequest) => {
-      return await apiRequest('POST', '/api/therapist/create-session-with-approval', sessionData);
+      return await apiRequest("POST", "/api/therapist/create-session-with-approval", sessionData);
     },
     onSuccess: (data: any) => {
       if (data.requiresPaymentApproval) {
@@ -108,7 +114,7 @@ export default function TherapistSessionBooking({ user }: TherapistSessionBookin
       queryClient.invalidateQueries({ queryKey: ["/api/therapist/sessions"] });
       queryClient.invalidateQueries({ queryKey: ["/api/therapist/assigned-clients"] });
       setIsCreatingSession(false);
-      setNewSession({ duration: 60, sessionType: 'video-therapy', sessionRate: 60 });
+      setNewSession({ duration: 60, sessionType: "video-therapy", sessionRate: 60 });
     },
     onError: (error: any) => {
       toast({
@@ -120,8 +126,14 @@ export default function TherapistSessionBooking({ user }: TherapistSessionBookin
   });
 
   const updateSessionMutation = useMutation({
-    mutationFn: async ({ sessionId, updates }: { sessionId: string; updates: Partial<SessionSlot> }) => {
-      return await apiRequest('PATCH', `/api/therapist/sessions/${sessionId}`, updates);
+    mutationFn: async ({
+      sessionId,
+      updates,
+    }: {
+      sessionId: string;
+      updates: Partial<SessionSlot>;
+    }) => {
+      return await apiRequest("PATCH", `/api/therapist/sessions/${sessionId}`, updates);
     },
     onSuccess: () => {
       toast({
@@ -141,7 +153,7 @@ export default function TherapistSessionBooking({ user }: TherapistSessionBookin
 
   const cancelSessionMutation = useMutation({
     mutationFn: async (sessionId: string) => {
-      return await apiRequest('DELETE', `/api/therapist/sessions/${sessionId}`);
+      return await apiRequest("DELETE", `/api/therapist/sessions/${sessionId}`);
     },
     onSuccess: () => {
       toast({
@@ -170,44 +182,57 @@ export default function TherapistSessionBooking({ user }: TherapistSessionBookin
     }
 
     if (!newSession.sessionRate) {
-      setNewSession({...newSession, sessionRate: 60});
+      setNewSession({ ...newSession, sessionRate: 60 });
     }
 
     const sessionData = {
       ...newSession,
       sessionRate: newSession.sessionRate || 60,
-      therapistId: user.id
+      therapistId: user.id,
     } as BookingRequest;
 
     createSessionMutation.mutate(sessionData);
   };
 
-  const todaySessions = sessions.filter(session => 
-    new Date(session.date).toDateString() === new Date().toDateString()
+  const todaySessions = sessions.filter(
+    (session) => new Date(session.date).toDateString() === new Date().toDateString()
   );
 
-  const upcomingSessions = sessions.filter(session => 
-    new Date(session.date) > new Date() && 
-    new Date(session.date).toDateString() !== new Date().toDateString()
-  ).slice(0, 5);
+  const upcomingSessions = sessions
+    .filter(
+      (session) =>
+        new Date(session.date) > new Date() &&
+        new Date(session.date).toDateString() !== new Date().toDateString()
+    )
+    .slice(0, 5);
 
   const getSessionTypeColor = (type: string) => {
     switch (type) {
-      case 'individual': return 'bg-blue-100 text-blue-800';
-      case 'group': return 'bg-purple-100 text-purple-800';
-      case 'consultation': return 'bg-green-100 text-green-800';
-      case 'peer-session': return 'bg-orange-100 text-orange-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "individual":
+        return "bg-blue-100 text-blue-800";
+      case "group":
+        return "bg-purple-100 text-purple-800";
+      case "consultation":
+        return "bg-green-100 text-green-800";
+      case "peer-session":
+        return "bg-orange-100 text-orange-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'available': return 'bg-green-100 text-green-800';
-      case 'booked': return 'bg-blue-100 text-blue-800';
-      case 'completed': return 'bg-gray-100 text-gray-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case "available":
+        return "bg-green-100 text-green-800";
+      case "booked":
+        return "bg-blue-100 text-blue-800";
+      case "completed":
+        return "bg-gray-100 text-gray-800";
+      case "cancelled":
+        return "bg-red-100 text-red-800";
+      default:
+        return "bg-gray-100 text-gray-800";
     }
   };
 
@@ -215,12 +240,12 @@ export default function TherapistSessionBooking({ user }: TherapistSessionBookin
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-century font-bold text-hive-black">Session Management</h2>
-        <Button 
+        <Button
           onClick={(e) => {
             e.preventDefault();
-            console.log('Main Create Session button clicked');
+            console.log("Main Create Session button clicked");
             setIsCreatingSession(true);
-            console.log('isCreatingSession set to true (main button)');
+            console.log("isCreatingSession set to true (main button)");
           }}
           className="bg-hive-purple hover:bg-hive-purple/90"
         >
@@ -273,7 +298,11 @@ export default function TherapistSessionBooking({ user }: TherapistSessionBookin
               <div>
                 <p className="text-sm text-orange-600">Monthly Earnings</p>
                 <p className="text-2xl font-bold text-orange-900">
-                  £{sessions.filter(s => s.status === 'completed').reduce((total, s) => total + s.sessionRate, 0).toFixed(2)}
+                  £
+                  {sessions
+                    .filter((s) => s.status === "completed")
+                    .reduce((total, s) => total + s.sessionRate, 0)
+                    .toFixed(2)}
                 </p>
               </div>
               <PoundSterling className="w-8 h-8 text-orange-600" />
@@ -303,17 +332,20 @@ export default function TherapistSessionBooking({ user }: TherapistSessionBookin
                 <div key={client.id} className="border rounded-lg p-4 hover:bg-gray-50">
                   <div className="flex items-start justify-between mb-3">
                     <div>
-                      <h4 className="font-medium text-gray-900">
-                        {client.name}
-                      </h4>
+                      <h4 className="font-medium text-gray-900">{client.name}</h4>
                       <p className="text-sm text-gray-500">{client.email}</p>
-                      <p className="text-xs text-gray-400 mt-1">Client profile access coming soon</p>
+                      <p className="text-xs text-gray-400 mt-1">
+                        Client profile access coming soon
+                      </p>
                     </div>
-                    <Badge variant={client.hasPaymentMethod ? 'default' : 'destructive'} className="text-xs">
-                      {client.hasPaymentMethod ? 'Payment Ready' : 'No Payment Method'}
+                    <Badge
+                      variant={client.hasPaymentMethod ? "default" : "destructive"}
+                      className="text-xs"
+                    >
+                      {client.hasPaymentMethod ? "Payment Ready" : "No Payment Method"}
                     </Badge>
                   </div>
-                  
+
                   <div className="space-y-2 text-sm text-gray-600">
                     <div className="flex justify-between">
                       <span>Sessions:</span>
@@ -332,19 +364,19 @@ export default function TherapistSessionBooking({ user }: TherapistSessionBookin
                   </div>
 
                   <div className="mt-4 space-y-2">
-                    <Button 
-                      size="sm" 
+                    <Button
+                      size="sm"
                       className="w-full bg-hive-purple hover:bg-hive-purple/90"
                       onClick={(e) => {
                         e.preventDefault();
-                        console.log('Create Session button clicked for client:', client.name);
+                        console.log("Create Session button clicked for client:", client.name);
                         setNewSession({
                           ...newSession,
                           clientId: client.id,
-                          sessionRate: 60 // Default rate £60, can be adjusted
+                          sessionRate: 60, // Default rate £60, can be adjusted
                         });
                         setIsCreatingSession(true);
-                        console.log('isCreatingSession set to true');
+                        console.log("isCreatingSession set to true");
                       }}
                     >
                       <Plus className="w-4 h-4 mr-2" />
@@ -376,9 +408,9 @@ export default function TherapistSessionBooking({ user }: TherapistSessionBookin
                 <Input
                   id="sessionDate"
                   type="date"
-                  value={newSession.date || ''}
-                  onChange={(e) => setNewSession({...newSession, date: e.target.value})}
-                  min={new Date().toISOString().split('T')[0]}
+                  value={newSession.date || ""}
+                  onChange={(e) => setNewSession({ ...newSession, date: e.target.value })}
+                  min={new Date().toISOString().split("T")[0]}
                 />
               </div>
               <div>
@@ -386,8 +418,8 @@ export default function TherapistSessionBooking({ user }: TherapistSessionBookin
                 <Input
                   id="sessionTime"
                   type="time"
-                  value={newSession.time || ''}
-                  onChange={(e) => setNewSession({...newSession, time: e.target.value})}
+                  value={newSession.time || ""}
+                  onChange={(e) => setNewSession({ ...newSession, time: e.target.value })}
                 />
               </div>
             </div>
@@ -395,7 +427,10 @@ export default function TherapistSessionBooking({ user }: TherapistSessionBookin
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="sessionType">Session Type</Label>
-                <Select value={newSession.sessionType} onValueChange={(value) => setNewSession({...newSession, sessionType: value})}>
+                <Select
+                  value={newSession.sessionType}
+                  onValueChange={(value) => setNewSession({ ...newSession, sessionType: value })}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Video Therapy Session" />
                   </SelectTrigger>
@@ -406,7 +441,12 @@ export default function TherapistSessionBooking({ user }: TherapistSessionBookin
               </div>
               <div>
                 <Label htmlFor="duration">Duration</Label>
-                <Select value={newSession.duration?.toString()} onValueChange={(value) => setNewSession({...newSession, duration: parseInt(value)})}>
+                <Select
+                  value={newSession.duration?.toString()}
+                  onValueChange={(value) =>
+                    setNewSession({ ...newSession, duration: parseInt(value) })
+                  }
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="1 hour (recommended)" />
                   </SelectTrigger>
@@ -414,30 +454,39 @@ export default function TherapistSessionBooking({ user }: TherapistSessionBookin
                     <SelectItem value="60">1 hour (50 minutes + 10-minute buffer)</SelectItem>
                   </SelectContent>
                 </Select>
-                <p className="text-sm text-gray-600 mt-1">Standard therapy sessions are 1 hour with built-in buffer time</p>
+                <p className="text-sm text-gray-600 mt-1">
+                  Standard therapy sessions are 1 hour with built-in buffer time
+                </p>
               </div>
             </div>
 
             <div>
               <Label htmlFor="client">Assigned Client (Optional)</Label>
-              <Select value={newSession.clientId} onValueChange={(value) => setNewSession({...newSession, clientId: value})}>
+              <Select
+                value={newSession.clientId}
+                onValueChange={(value) => setNewSession({ ...newSession, clientId: value })}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select client (leave empty for open slot)" />
                 </SelectTrigger>
                 <SelectContent>
-                  {Array.isArray(assignedClients) && assignedClients.map((client: any) => (
-                    <SelectItem key={client.id} value={client.id}>
-                      <div className="flex items-center gap-2">
-                        <span>{client.name}</span>
-                        <Badge variant="outline" className="text-xs bg-gray-100 text-gray-600">
-                          {client.sessionCount} sessions
-                        </Badge>
-                      </div>
-                    </SelectItem>
-                  ))}
+                  {Array.isArray(assignedClients) &&
+                    assignedClients.map((client: any) => (
+                      <SelectItem key={client.id} value={client.id}>
+                        <div className="flex items-center gap-2">
+                          <span>{client.name}</span>
+                          <Badge variant="outline" className="text-xs bg-gray-100 text-gray-600">
+                            {client.sessionCount} sessions
+                          </Badge>
+                        </div>
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
-              <p className="text-sm text-gray-600 mt-1">Select a client to schedule a session with them, or leave empty for an open appointment slot</p>
+              <p className="text-sm text-gray-600 mt-1">
+                Select a client to schedule a session with them, or leave empty for an open
+                appointment slot
+              </p>
             </div>
 
             <div>
@@ -450,9 +499,14 @@ export default function TherapistSessionBooking({ user }: TherapistSessionBookin
                 step="5"
                 placeholder="60"
                 value={newSession.sessionRate || 60}
-                onChange={(e) => setNewSession({...newSession, sessionRate: parseInt(e.target.value) || 60})}
+                onChange={(e) =>
+                  setNewSession({ ...newSession, sessionRate: parseInt(e.target.value) || 60 })
+                }
               />
-              <p className="text-sm text-gray-600 mt-1">You will receive 85% (£{((newSession.sessionRate || 60) * 0.85).toFixed(2)}) after platform fees</p>
+              <p className="text-sm text-gray-600 mt-1">
+                You will receive 85% (£{((newSession.sessionRate || 60) * 0.85).toFixed(2)}) after
+                platform fees
+              </p>
             </div>
 
             <div>
@@ -460,23 +514,20 @@ export default function TherapistSessionBooking({ user }: TherapistSessionBookin
               <Textarea
                 id="notes"
                 placeholder="Add any notes about this session..."
-                value={newSession.notes || ''}
-                onChange={(e) => setNewSession({...newSession, notes: e.target.value})}
+                value={newSession.notes || ""}
+                onChange={(e) => setNewSession({ ...newSession, notes: e.target.value })}
               />
             </div>
 
             <div className="flex gap-2">
-              <Button 
+              <Button
                 onClick={handleCreateSession}
                 disabled={createSessionMutation.isPending}
                 className="bg-hive-purple hover:bg-hive-purple/90"
               >
-                {createSessionMutation.isPending ? 'Creating...' : 'Create Session'}
+                {createSessionMutation.isPending ? "Creating..." : "Create Session"}
               </Button>
-              <Button 
-                variant="outline" 
-                onClick={() => setIsCreatingSession(false)}
-              >
+              <Button variant="outline" onClick={() => setIsCreatingSession(false)}>
                 Cancel
               </Button>
             </div>
@@ -501,7 +552,10 @@ export default function TherapistSessionBooking({ user }: TherapistSessionBookin
           ) : (
             <div className="space-y-4">
               {todaySessions.map((session) => (
-                <div key={session.id} className="flex items-center justify-between p-4 bg-hive-light-blue rounded-lg">
+                <div
+                  key={session.id}
+                  className="flex items-center justify-between p-4 bg-hive-light-blue rounded-lg"
+                >
                   <div className="flex items-center gap-4">
                     <div className="flex flex-col">
                       <span className="font-semibold text-hive-black">{session.time}</span>
@@ -512,12 +566,10 @@ export default function TherapistSessionBooking({ user }: TherapistSessionBookin
                         <Badge className={getSessionTypeColor(session.sessionType)}>
                           {session.sessionType}
                         </Badge>
-                        <Badge className={getStatusColor(session.status)}>
-                          {session.status}
-                        </Badge>
+                        <Badge className={getStatusColor(session.status)}>{session.status}</Badge>
                       </div>
                       <span className="text-sm text-gray-600 mt-1">
-                        {session.clientName || 'Available slot'}
+                        {session.clientName || "Available slot"}
                       </span>
                     </div>
                   </div>
@@ -557,21 +609,30 @@ export default function TherapistSessionBooking({ user }: TherapistSessionBookin
           ) : (
             <div className="space-y-3">
               {upcomingSessions.map((session) => (
-                <div key={session.id} className="flex items-center justify-between p-3 border rounded-lg">
+                <div
+                  key={session.id}
+                  className="flex items-center justify-between p-3 border rounded-lg"
+                >
                   <div className="flex items-center gap-3">
                     <div className="text-sm">
-                      <div className="font-medium">{new Date(session.date).toLocaleDateString()}</div>
-                      <div className="text-gray-600">{session.time} - {session.duration} min</div>
+                      <div className="font-medium">
+                        {new Date(session.date).toLocaleDateString()}
+                      </div>
+                      <div className="text-gray-600">
+                        {session.time} - {session.duration} min
+                      </div>
                     </div>
                     <Badge className={getSessionTypeColor(session.sessionType)}>
                       {session.sessionType}
                     </Badge>
                     <span className="text-sm text-gray-600">
-                      {session.clientName || 'Available'}
+                      {session.clientName || "Available"}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-green-600">£{session.sessionRate}</span>
+                    <span className="text-sm font-medium text-green-600">
+                      £{session.sessionRate}
+                    </span>
                     <Button size="sm" variant="outline">
                       <Edit className="w-4 h-4" />
                     </Button>

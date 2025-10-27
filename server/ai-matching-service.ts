@@ -113,10 +113,12 @@ export class AIConnectingService {
   ): Promise<ConnectingResult> {
     try {
       const prompt = this.buildConnectingPrompt(clientProfile, therapistProfile);
-      
+
       // Protect PII before sending to OpenAI (use AI detection for contextual PII like names/locations)
-      const { maskedText: maskedPrompt } = await piiDetectionService.detectAndMask(prompt, {  useAIDetection: true });
-      
+      const { maskedText: maskedPrompt } = await piiDetectionService.detectAndMask(prompt, {
+        useAIDetection: true,
+      });
+
       // Use tracking wrapper instead of direct OpenAI call
       const response = await openaiTracking.createChatCompletion(
         {
@@ -146,40 +148,43 @@ export class AIConnectingService {
                 "considerations": ["consideration1", "consideration2", ...],
                 "confidence": number,
                 "recommendations": ["rec1", "rec2", ...]
-              }`
+              }`,
             },
             {
               role: "user",
-              content: maskedPrompt
-            }
+              content: maskedPrompt,
+            },
           ],
           response_format: { type: "json_object" },
           temperature: 0.3, // Lower temperature for more consistent analysis
-          max_tokens: 2000
+          max_tokens: 2000,
         },
         {
           userId,
-          featureType: 'therapist_matching',
+          featureType: "therapist_matching",
           metadata: {
             clientId: clientProfile.id,
-            therapistId: therapistProfile.id
-          }
+            therapistId: therapistProfile.id,
+          },
         }
       );
 
       const result = JSON.parse(response.choices[0].message.content || "{}");
-      
+
       return {
         compatibilityScore: Math.max(1, Math.min(100, result.compatibilityScore || 50)),
         reasoning: result.reasoning || "Analysis completed",
         strengths: result.strengths || [],
         considerations: result.considerations || [],
         confidence: Math.max(0, Math.min(100, result.confidence || 70)),
-        recommendations: result.recommendations || []
+        recommendations: result.recommendations || [],
       };
     } catch (error) {
-      console.error('AI connecting analysis error:', error);
-      throw new Error('Failed to analyse compatibility: ' + (error instanceof Error ? error.message : String(error)));
+      console.error("AI connecting analysis error:", error);
+      throw new Error(
+        "Failed to analyse compatibility: " +
+          (error instanceof Error ? error.message : String(error))
+      );
     }
   }
 
@@ -187,14 +192,14 @@ export class AIConnectingService {
     return `
 CLIENT PROFILE:
 Demographics: ${client.demographics.age}yo ${client.demographics.gender}, ${client.demographics.location}
-Cultural Background: ${client.demographics.culturalBackground || 'Not specified'}
-Languages: ${client.demographics.languages.join(', ')}
+Cultural Background: ${client.demographics.culturalBackground || "Not specified"}
+Languages: ${client.demographics.languages.join(", ")}
 
-Primary Concerns: ${client.therapeuticNeeds.primaryConcerns.join(', ')}
-Secondary Concerns: ${client.therapeuticNeeds.secondaryConcerns.join(', ')}
-Trauma History: ${client.therapeuticNeeds.traumaHistory ? 'Yes' : 'No'}
-Previous Therapy: ${client.therapeuticNeeds.previousTherapyExperience ? 'Yes' : 'No'}
-Mental Health Diagnoses: ${client.therapeuticNeeds.mentalHealthDiagnoses.join(', ') || 'None specified'}
+Primary Concerns: ${client.therapeuticNeeds.primaryConcerns.join(", ")}
+Secondary Concerns: ${client.therapeuticNeeds.secondaryConcerns.join(", ")}
+Trauma History: ${client.therapeuticNeeds.traumaHistory ? "Yes" : "No"}
+Previous Therapy: ${client.therapeuticNeeds.previousTherapyExperience ? "Yes" : "No"}
+Mental Health Diagnoses: ${client.therapeuticNeeds.mentalHealthDiagnoses.join(", ") || "None specified"}
 Medication Status: ${client.therapeuticNeeds.medicationStatus}
 
 Client Preferences:
@@ -203,7 +208,7 @@ Client Preferences:
 - Session Format: ${client.preferences.sessionFormat}
 - Communication Style: ${client.preferences.communicationStyle}
 - Religious Considerations: ${client.preferences.religiousConsiderations}
-- LGBTQ+ Affirming: ${client.preferences.lgbtqAffirming ? 'Yes' : 'No'}
+- LGBTQ+ Affirming: ${client.preferences.lgbtqAffirming ? "Yes" : "No"}
 
 Personality (1-10 scale):
 - Introversion: ${client.personalityFactors.introversion}
@@ -213,27 +218,27 @@ Personality (1-10 scale):
 - Agreeableness: ${client.personalityFactors.agreeableness}
 
 Goals:
-- Short-term: ${client.goals.shortTerm.join(', ')}
-- Long-term: ${client.goals.longTerm.join(', ')}
-- Specific Outcomes: ${client.goals.specificOutcomes.join(', ')}
+- Short-term: ${client.goals.shortTerm.join(", ")}
+- Long-term: ${client.goals.longTerm.join(", ")}
+- Specific Outcomes: ${client.goals.specificOutcomes.join(", ")}
 
 THERAPIST PROFILE:
 Demographics: ${therapist.demographics.age}yo ${therapist.demographics.gender}
 Cultural Background: ${therapist.demographics.culturalBackground}
-Languages: ${therapist.demographics.languages.join(', ')}
+Languages: ${therapist.demographics.languages.join(", ")}
 Experience: ${therapist.credentials.yearsExperience} years
 
-Licenses: ${therapist.credentials.licenses.join(', ')}
-Education: ${therapist.credentials.education.join(', ')}
-Specialisations: ${therapist.specialisations.primarySpecialties.join(', ')}
-Secondary Specialisations: ${therapist.specialisations.secondarySpecialties.join(', ')}
-Populations Served: ${therapist.specialisations.populationsServed.join(', ')}
-Issues Addressed: ${therapist.specialisations.issuesAddressed.join(', ')}
+Licenses: ${therapist.credentials.licenses.join(", ")}
+Education: ${therapist.credentials.education.join(", ")}
+Specialisations: ${therapist.specialisations.primarySpecialties.join(", ")}
+Secondary Specialisations: ${therapist.specialisations.secondarySpecialties.join(", ")}
+Populations Served: ${therapist.specialisations.populationsServed.join(", ")}
+Issues Addressed: ${therapist.specialisations.issuesAddressed.join(", ")}
 
 Therapeutic Approaches:
-- Primary: ${therapist.therapeuticApproaches.primaryApproaches.join(', ')}
-- Secondary: ${therapist.therapeuticApproaches.secondaryApproaches.join(', ')}
-- Evidence-Based: ${therapist.therapeuticApproaches.evidenceBasedPractices.join(', ')}
+- Primary: ${therapist.therapeuticApproaches.primaryApproaches.join(", ")}
+- Secondary: ${therapist.therapeuticApproaches.secondaryApproaches.join(", ")}
+- Evidence-Based: ${therapist.therapeuticApproaches.evidenceBasedPractices.join(", ")}
 
 Communication Style: ${therapist.personalityProfile.communicationStyle}
 Therapeutic Style: ${therapist.personalityProfile.therapeuticStyle}
@@ -243,9 +248,9 @@ Structure: ${therapist.personalityProfile.structure}/10
 Flexibility: ${therapist.personalityProfile.flexibility}/10
 
 Practice Details:
-- Session Formats: ${therapist.practiceDetails.sessionFormats.join(', ')}
+- Session Formats: ${therapist.practiceDetails.sessionFormats.join(", ")}
 - Location: ${therapist.practiceDetails.location}
-- Session Length: ${therapist.practiceDetails.sessionLength.join(', ')}
+- Session Length: ${therapist.practiceDetails.sessionLength.join(", ")}
 
 Please analyse this client-therapist pairing and provide a comprehensive compatibility assessment.
     `;
@@ -264,22 +269,24 @@ Analyse this client profile and provide therapeutic insights:
 
 CLIENT PROFILE:
 Demographics: ${clientProfile.demographics.age}yo ${clientProfile.demographics.gender}, ${clientProfile.demographics.location}
-Cultural Background: ${clientProfile.demographics.culturalBackground || 'Not specified'}
-Languages: ${clientProfile.demographics.languages.join(', ')}
+Cultural Background: ${clientProfile.demographics.culturalBackground || "Not specified"}
+Languages: ${clientProfile.demographics.languages.join(", ")}
 
-Primary Concerns: ${clientProfile.therapeuticNeeds.primaryConcerns.join(', ')}
-Secondary Concerns: ${clientProfile.therapeuticNeeds.secondaryConcerns.join(', ')}
-Trauma History: ${clientProfile.therapeuticNeeds.traumaHistory ? 'Yes' : 'No'}
-Previous Therapy: ${clientProfile.therapeuticNeeds.previousTherapyExperience ? 'Yes' : 'No'}
-Mental Health Diagnoses: ${clientProfile.therapeuticNeeds.mentalHealthDiagnoses.join(', ') || 'None specified'}
+Primary Concerns: ${clientProfile.therapeuticNeeds.primaryConcerns.join(", ")}
+Secondary Concerns: ${clientProfile.therapeuticNeeds.secondaryConcerns.join(", ")}
+Trauma History: ${clientProfile.therapeuticNeeds.traumaHistory ? "Yes" : "No"}
+Previous Therapy: ${clientProfile.therapeuticNeeds.previousTherapyExperience ? "Yes" : "No"}
+Mental Health Diagnoses: ${clientProfile.therapeuticNeeds.mentalHealthDiagnoses.join(", ") || "None specified"}
 
 Goals:
-- Short-term: ${clientProfile.goals.shortTerm.join(', ')}
-- Long-term: ${clientProfile.goals.longTerm.join(', ')}
+- Short-term: ${clientProfile.goals.shortTerm.join(", ")}
+- Long-term: ${clientProfile.goals.longTerm.join(", ")}
       `;
 
       // Protect PII before sending to OpenAI (use AI detection for contextual PII like names/locations)
-      const { maskedText: maskedPrompt } = await piiDetectionService.detectAndMask(prompt, { useAIDetection: true });
+      const { maskedText: maskedPrompt } = await piiDetectionService.detectAndMask(prompt, {
+        useAIDetection: true,
+      });
 
       const response = await openai.chat.completions.create({
         model: "gpt-4o",
@@ -297,21 +304,21 @@ Goals:
               "recommendedApproaches": ["approach1", "approach2", ...],
               "culturalConsiderations": ["consideration1", "consideration2", ...],
               "progressIndicators": ["indicator1", "indicator2", ...]
-            }`
+            }`,
           },
           {
             role: "user",
-            content: maskedPrompt
-          }
+            content: maskedPrompt,
+          },
         ],
         response_format: { type: "json_object" },
-        temperature: 0.2
+        temperature: 0.2,
       });
 
       return JSON.parse(response.choices[0].message.content || "{}");
     } catch (error) {
-      console.error('Client analysis error:', error);
-      throw new Error('Failed to analyse client profile');
+      console.error("Client analysis error:", error);
+      throw new Error("Failed to analyse client profile");
     }
   }
 
@@ -329,14 +336,16 @@ Analyse this therapist profile and provide professional insights:
 THERAPIST PROFILE:
 Demographics: ${therapistProfile.demographics.age}yo ${therapistProfile.demographics.gender}
 Experience: ${therapistProfile.credentials.yearsExperience} years
-Specialisations: ${therapistProfile.specialisations.primarySpecialties.join(', ')}
-Approaches: ${therapistProfile.therapeuticApproaches.primaryApproaches.join(', ')}
+Specialisations: ${therapistProfile.specialisations.primarySpecialties.join(", ")}
+Approaches: ${therapistProfile.therapeuticApproaches.primaryApproaches.join(", ")}
 Communication Style: ${therapistProfile.personalityProfile.communicationStyle}
 Therapeutic Style: ${therapistProfile.personalityProfile.therapeuticStyle}
       `;
 
       // Protect PII before sending to OpenAI (use AI detection for contextual PII like names/locations)
-      const { maskedText: maskedPrompt } = await piiDetectionService.detectAndMask(prompt, { useAIDetection: true });
+      const { maskedText: maskedPrompt } = await piiDetectionService.detectAndMask(prompt, {
+        useAIDetection: true,
+      });
 
       const response = await openai.chat.completions.create({
         model: "gpt-4o",
@@ -354,21 +363,21 @@ Therapeutic Style: ${therapistProfile.personalityProfile.therapeuticStyle}
               "approaches": ["approach1", "approach2", ...],
               "culturalCompetencies": ["competency1", "competency2", ...],
               "practiceStyle": "description of therapeutic style"
-            }`
+            }`,
           },
           {
             role: "user",
-            content: maskedPrompt
-          }
+            content: maskedPrompt,
+          },
         ],
         response_format: { type: "json_object" },
-        temperature: 0.2
+        temperature: 0.2,
       });
 
       return JSON.parse(response.choices[0].message.content || "{}");
     } catch (error) {
-      console.error('Therapist analysis error:', error);
-      throw new Error('Failed to analyse therapist profile');
+      console.error("Therapist analysis error:", error);
+      throw new Error("Failed to analyse therapist profile");
     }
   }
 }

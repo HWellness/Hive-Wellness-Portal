@@ -21,7 +21,7 @@ export const sessions = pgTable(
     sess: jsonb("sess").notNull(),
     expire: timestamp("expire").notNull(),
   },
-  (table) => [index("IDX_session_expire").on(table.expire)],
+  (table) => [index("IDX_session_expire").on(table.expire)]
 );
 
 // User storage table with unified role management
@@ -32,7 +32,7 @@ export const users: any = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
-  role: varchar("role", { enum: ['client', 'therapist', 'admin', 'institution'] }).notNull(),
+  role: varchar("role", { enum: ["client", "therapist", "admin", "institution"] }).notNull(),
   serviceAccess: jsonb("service_access"), // Which services user can access
   profileData: jsonb("profile_data"), // Role-specific profile information
   stripeCustomerId: varchar("stripe_customer_id"),
@@ -58,7 +58,7 @@ export const users: any = pgTable("users", {
   showWellnessMetrics: boolean("show_wellness_metrics").default(true), // User preference for wellness metrics display
   // Multi-Factor Authentication fields
   mfaEnabled: boolean("mfa_enabled").default(false), // Whether MFA is enabled for this user
-  mfaMethods: varchar("mfa_methods").array().default(['totp']), // Enabled MFA methods: totp, sms, email
+  mfaMethods: varchar("mfa_methods").array().default(["totp"]), // Enabled MFA methods: totp, sms, email
   totpSecret: varchar("totp_secret"), // Base32 encoded TOTP secret
   backupCodes: varchar("backup_codes").array(), // Array of hashed backup recovery codes (SHA-256)
   phoneNumber: varchar("phone_number"), // Phone number for SMS MFA (E.164 format)
@@ -79,21 +79,25 @@ export const users: any = pgTable("users", {
 });
 
 // GDPR Consent Management - Production-ready Article 7 compliance
-export const consentLogs = pgTable("consent_logs", {
-  id: varchar("id").primaryKey().notNull(),
-  userIdentifier: varchar("user_identifier").notNull(), // Session ID, email, or user ID
-  userId: varchar("user_id").references(() => users.id), // If logged in
-  consentGiven: boolean("consent_given").notNull(),
-  consentCategories: jsonb("consent_categories").notNull(), // {necessary: true, analytics: false, marketing: false}
-  ipAddress: varchar("ip_address"), // For audit trail
-  userAgent: text("user_agent"), // For audit trail
-  consentVersion: varchar("consent_version").default("1.0"), // Track policy version
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-}, (table) => [
-  index("idx_consent_user_identifier").on(table.userIdentifier),
-  index("idx_consent_user_id").on(table.userId),
-]);
+export const consentLogs = pgTable(
+  "consent_logs",
+  {
+    id: varchar("id").primaryKey().notNull(),
+    userIdentifier: varchar("user_identifier").notNull(), // Session ID, email, or user ID
+    userId: varchar("user_id").references(() => users.id), // If logged in
+    consentGiven: boolean("consent_given").notNull(),
+    consentCategories: jsonb("consent_categories").notNull(), // {necessary: true, analytics: false, marketing: false}
+    ipAddress: varchar("ip_address"), // For audit trail
+    userAgent: text("user_agent"), // For audit trail
+    consentVersion: varchar("consent_version").default("1.0"), // Track policy version
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_consent_user_identifier").on(table.userIdentifier),
+    index("idx_consent_user_id").on(table.userId),
+  ]
+);
 
 // Unified session tracking across all services
 export const userSessions = pgTable("user_sessions", {
@@ -118,32 +122,38 @@ export const therapyCategories = pgTable("therapy_categories", {
 });
 
 // Therapist Calendars - Enterprise-grade per-therapist calendar management
-export const therapistCalendars = pgTable("therapist_calendars", {
-  id: varchar("id").primaryKey().notNull(),
-  therapistId: varchar("therapist_id").references(() => users.id).notNull(),
-  mode: varchar("mode", { enum: ['managed', 'oauth', 'external'] }).notNull(),
-  ownerAccountEmail: varchar("owner_account_email").notNull(), // e.g., 'support@hive-wellness.co.uk'
-  therapistSharedEmail: varchar("therapist_shared_email"), // Therapist's personal email for sharing
-  googleCalendarId: varchar("google_calendar_id").unique(), // Unique Google calendar identifier
-  aclRole: varchar("acl_role", { enum: ['writer', 'reader'] }).default('writer'),
-  integrationStatus: varchar("integration_status", { 
-    enum: ['pending', 'active', 'error'] 
-  }).default('pending'),
-  syncToken: varchar("sync_token"), // For efficient Google API syncing
-  channelId: varchar("channel_id"), // For Google webhook notifications
-  channelResourceId: varchar("channel_resource_id"), // Google webhook resource
-  channelExpiresAt: timestamp("channel_expires_at"), // Webhook channel expiration
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-}, (table) => [
-  // Ensure one calendar type per therapist
-  uniqueIndex("unique_therapist_mode").on(table.therapistId, table.mode),
-  // Performance indexes
-  index("idx_therapist_calendars_therapist_id").on(table.therapistId),
-  index("idx_therapist_calendars_status").on(table.integrationStatus),
-  index("idx_therapist_calendars_google_id").on(table.googleCalendarId),
-  index("idx_therapist_calendars_channel_expires").on(table.channelExpiresAt),
-]);
+export const therapistCalendars = pgTable(
+  "therapist_calendars",
+  {
+    id: varchar("id").primaryKey().notNull(),
+    therapistId: varchar("therapist_id")
+      .references(() => users.id)
+      .notNull(),
+    mode: varchar("mode", { enum: ["managed", "oauth", "external"] }).notNull(),
+    ownerAccountEmail: varchar("owner_account_email").notNull(), // e.g., 'support@hive-wellness.co.uk'
+    therapistSharedEmail: varchar("therapist_shared_email"), // Therapist's personal email for sharing
+    googleCalendarId: varchar("google_calendar_id").unique(), // Unique Google calendar identifier
+    aclRole: varchar("acl_role", { enum: ["writer", "reader"] }).default("writer"),
+    integrationStatus: varchar("integration_status", {
+      enum: ["pending", "active", "error"],
+    }).default("pending"),
+    syncToken: varchar("sync_token"), // For efficient Google API syncing
+    channelId: varchar("channel_id"), // For Google webhook notifications
+    channelResourceId: varchar("channel_resource_id"), // Google webhook resource
+    channelExpiresAt: timestamp("channel_expires_at"), // Webhook channel expiration
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [
+    // Ensure one calendar type per therapist
+    uniqueIndex("unique_therapist_mode").on(table.therapistId, table.mode),
+    // Performance indexes
+    index("idx_therapist_calendars_therapist_id").on(table.therapistId),
+    index("idx_therapist_calendars_status").on(table.integrationStatus),
+    index("idx_therapist_calendars_google_id").on(table.googleCalendarId),
+    index("idx_therapist_calendars_channel_expires").on(table.channelExpiresAt),
+  ]
+);
 
 // Therapist profiles
 export const therapistProfiles = pgTable("therapist_profiles", {
@@ -159,17 +169,17 @@ export const therapistProfiles = pgTable("therapist_profiles", {
   stripeConnectAccountId: varchar("stripe_connect_account_id"),
   therapyCategories: varchar("therapy_categories").array(), // Categories this therapist can provide
   adminAssignedCategories: varchar("admin_assigned_categories").array(), // Manual admin assignments
-  therapistTier: varchar("therapist_tier", { 
-    enum: ['counsellor', 'psychotherapist', 'psychologist', 'specialist'] 
+  therapistTier: varchar("therapist_tier", {
+    enum: ["counsellor", "psychotherapist", "psychologist", "specialist"],
   }), // Step 50: Therapist tier for pricing defaults
   // Google Workspace Integration Fields
   googleWorkspaceEmail: varchar("google_workspace_email"),
   googleCalendarId: varchar("google_calendar_id"),
   workspaceAccountCreated: boolean("workspace_account_created").default(false),
   workspaceCreatedAt: timestamp("workspace_created_at"),
-  workspaceAccountStatus: varchar("workspace_account_status", { 
-    enum: ['pending', 'active', 'suspended', 'deleted'] 
-  }).default('pending'),
+  workspaceAccountStatus: varchar("workspace_account_status", {
+    enum: ["pending", "active", "suspended", "deleted"],
+  }).default("pending"),
   workspaceTempPassword: varchar("workspace_temp_password"), // Encrypted temporary password
   workspaceLastLogin: timestamp("workspace_last_login"),
   calendarPermissionsConfigured: boolean("calendar_permissions_configured").default(false),
@@ -179,77 +189,97 @@ export const therapistProfiles = pgTable("therapist_profiles", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Enhanced Appointments/Sessions with multi-participant support  
-export const appointments = pgTable("appointments", {
-  id: varchar("id").primaryKey().notNull(),
-  clientId: varchar("client_id").references(() => users.id),
-  primaryTherapistId: varchar("primary_therapist_id").references(() => users.id).notNull(), // Made NOT NULL for exclusion constraint
-  userId: varchar("user_id").references(() => users.id),
-  scheduledAt: timestamp("scheduled_at").notNull(),
-  endTime: timestamp("end_time").notNull(), // For conflict detection
-  duration: integer("duration").default(50), // minutes
-  status: varchar("status", { enum: ['scheduled', 'confirmed', 'in_progress', 'completed', 'cancelled', 'rescheduled'] }).default('scheduled'),
-  sessionType: varchar("session_type", { enum: ['consultation', 'therapy', 'follow_up', 'assessment'] }).default('therapy'),
-  type: varchar("type", { enum: ['consultation', 'therapy', 'check-in'] }).default('therapy'),
-  therapyCategory: varchar("therapy_category"), // Selected therapy category
-  notes: text("notes"),
-  price: decimal("price", { precision: 10, scale: 2 }),
-  paymentStatus: varchar("payment_status", { enum: ['pending', 'paid', 'refunded'] }).default('pending'),
-  videoRoomId: varchar("video_room_id"),
-  dailyRoomName: varchar("daily_room_name"), // Daily.co room identifier
-  dailyRoomUrl: varchar("daily_room_url"), // Daily.co room URL
-  isRecurring: boolean("is_recurring").default(false),
-  recurringPattern: varchar("recurring_pattern", { enum: ['weekly', 'biweekly', 'monthly'] }),
-  recurringEndDate: timestamp("recurring_end_date"),
-  parentAppointmentId: varchar("parent_appointment_id"), // For recurring sessions
-  cancellationReason: text("cancellation_reason"),
-  reminderSent: boolean("reminder_sent").default(false),
-  calendarEventId: varchar("calendar_event_id"), // External calendar integration
-  googleEventId: varchar("google_event_id"), // Google Calendar event ID
-  therapistCalendarId: varchar("therapist_calendar_id").references(() => therapistCalendars.id).notNull(), // Made NOT NULL with FK
-  googleMeetLink: varchar("google_meet_link"), // Google Meet conference URL
-  conflictChecked: boolean("conflict_checked").default(false),
-  backdated: boolean("backdated").default(false), // Indicates if appointment was scheduled for past date
-  backdatedReason: text("backdated_reason"), // Audit trail for backdated bookings
-  idempotencyKey: varchar("idempotency_key").unique(), // CRITICAL: Prevent duplicate bookings
-  // Archive functionality for managing past/completed sessions
-  isArchived: boolean("is_archived").default(false), // Hide from default appointment lists
-  archivedAt: timestamp("archived_at"), // When session was archived
-  archivedBy: varchar("archived_by").references(() => users.id), // Who archived the session
-  archivedReason: varchar("archived_reason"), // Reason for archiving (manual/auto/cleanup)
-  // Reschedule tracking
-  rescheduledAt: timestamp("rescheduled_at"), // When appointment was last rescheduled
-  rescheduleCount: integer("reschedule_count").default(0), // Number of times rescheduled
-  originalAppointmentId: varchar("original_appointment_id"), // Reference to original appointment if rescheduled
-  deletedAt: timestamp("deleted_at"), // Soft delete support for data retention
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-}, (table) => [
-  // CRITICAL: Exclusion constraint to prevent overlapping appointments
-  // This prevents any two appointments for the same therapist from overlapping in time
-  // Uses GIST index with temporal range overlap (&&) operator
-  // Note: In Drizzle, we'll add this constraint via raw SQL migration
-  index("idx_appointments_therapist_time").on(table.primaryTherapistId, table.scheduledAt, table.endTime),
-  index("idx_appointments_therapist_calendar").on(table.therapistCalendarId),
-  index("idx_appointments_conflict_check").on(table.primaryTherapistId, table.conflictChecked),
-  index("idx_appointments_status_date").on(table.status, table.scheduledAt),
-  index("idx_appointments_archived").on(table.isArchived), // Performance for filtering archived
-  index("idx_appointments_client_archived").on(table.clientId, table.isArchived), // Client view filtering
-  index("idx_appointments_therapist_archived").on(table.primaryTherapistId, table.isArchived), // Therapist view filtering
-  uniqueIndex("idx_appointments_idempotency").on(table.idempotencyKey),
-]);
+// Enhanced Appointments/Sessions with multi-participant support
+export const appointments = pgTable(
+  "appointments",
+  {
+    id: varchar("id").primaryKey().notNull(),
+    clientId: varchar("client_id").references(() => users.id),
+    primaryTherapistId: varchar("primary_therapist_id")
+      .references(() => users.id)
+      .notNull(), // Made NOT NULL for exclusion constraint
+    userId: varchar("user_id").references(() => users.id),
+    scheduledAt: timestamp("scheduled_at").notNull(),
+    endTime: timestamp("end_time").notNull(), // For conflict detection
+    duration: integer("duration").default(50), // minutes
+    status: varchar("status", {
+      enum: ["scheduled", "confirmed", "in_progress", "completed", "cancelled", "rescheduled"],
+    }).default("scheduled"),
+    sessionType: varchar("session_type", {
+      enum: ["consultation", "therapy", "follow_up", "assessment"],
+    }).default("therapy"),
+    type: varchar("type", { enum: ["consultation", "therapy", "check-in"] }).default("therapy"),
+    therapyCategory: varchar("therapy_category"), // Selected therapy category
+    notes: text("notes"),
+    price: decimal("price", { precision: 10, scale: 2 }),
+    paymentStatus: varchar("payment_status", { enum: ["pending", "paid", "refunded"] }).default(
+      "pending"
+    ),
+    videoRoomId: varchar("video_room_id"),
+    dailyRoomName: varchar("daily_room_name"), // Daily.co room identifier
+    dailyRoomUrl: varchar("daily_room_url"), // Daily.co room URL
+    isRecurring: boolean("is_recurring").default(false),
+    recurringPattern: varchar("recurring_pattern", { enum: ["weekly", "biweekly", "monthly"] }),
+    recurringEndDate: timestamp("recurring_end_date"),
+    parentAppointmentId: varchar("parent_appointment_id"), // For recurring sessions
+    cancellationReason: text("cancellation_reason"),
+    reminderSent: boolean("reminder_sent").default(false),
+    calendarEventId: varchar("calendar_event_id"), // External calendar integration
+    googleEventId: varchar("google_event_id"), // Google Calendar event ID
+    therapistCalendarId: varchar("therapist_calendar_id")
+      .references(() => therapistCalendars.id)
+      .notNull(), // Made NOT NULL with FK
+    googleMeetLink: varchar("google_meet_link"), // Google Meet conference URL
+    conflictChecked: boolean("conflict_checked").default(false),
+    backdated: boolean("backdated").default(false), // Indicates if appointment was scheduled for past date
+    backdatedReason: text("backdated_reason"), // Audit trail for backdated bookings
+    idempotencyKey: varchar("idempotency_key").unique(), // CRITICAL: Prevent duplicate bookings
+    // Archive functionality for managing past/completed sessions
+    isArchived: boolean("is_archived").default(false), // Hide from default appointment lists
+    archivedAt: timestamp("archived_at"), // When session was archived
+    archivedBy: varchar("archived_by").references(() => users.id), // Who archived the session
+    archivedReason: varchar("archived_reason"), // Reason for archiving (manual/auto/cleanup)
+    // Reschedule tracking
+    rescheduledAt: timestamp("rescheduled_at"), // When appointment was last rescheduled
+    rescheduleCount: integer("reschedule_count").default(0), // Number of times rescheduled
+    originalAppointmentId: varchar("original_appointment_id"), // Reference to original appointment if rescheduled
+    deletedAt: timestamp("deleted_at"), // Soft delete support for data retention
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [
+    // CRITICAL: Exclusion constraint to prevent overlapping appointments
+    // This prevents any two appointments for the same therapist from overlapping in time
+    // Uses GIST index with temporal range overlap (&&) operator
+    // Note: In Drizzle, we'll add this constraint via raw SQL migration
+    index("idx_appointments_therapist_time").on(
+      table.primaryTherapistId,
+      table.scheduledAt,
+      table.endTime
+    ),
+    index("idx_appointments_therapist_calendar").on(table.therapistCalendarId),
+    index("idx_appointments_conflict_check").on(table.primaryTherapistId, table.conflictChecked),
+    index("idx_appointments_status_date").on(table.status, table.scheduledAt),
+    index("idx_appointments_archived").on(table.isArchived), // Performance for filtering archived
+    index("idx_appointments_client_archived").on(table.clientId, table.isArchived), // Client view filtering
+    index("idx_appointments_therapist_archived").on(table.primaryTherapistId, table.isArchived), // Therapist view filtering
+    uniqueIndex("idx_appointments_idempotency").on(table.idempotencyKey),
+  ]
+);
 
 // Removed multi-participant session support - enforcing 1:1 therapist-client relationship
 
 // Therapist availability for conflict detection
 export const therapistAvailability = pgTable("therapist_availability", {
   id: varchar("id").primaryKey().notNull(),
-  therapistId: varchar("therapist_id").references(() => users.id).notNull(),
+  therapistId: varchar("therapist_id")
+    .references(() => users.id)
+    .notNull(),
   dayOfWeek: integer("day_of_week"), // 0-6 (Sunday-Saturday)
   startTime: varchar("start_time"), // HH:MM format
   endTime: varchar("end_time"), // HH:MM format
   isAvailable: boolean("is_available").default(true),
-  timezone: varchar("timezone").default('Europe/London'),
+  timezone: varchar("timezone").default("Europe/London"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -257,9 +287,13 @@ export const therapistAvailability = pgTable("therapist_availability", {
 // Calendar conflict tracking
 export const calendarConflicts = pgTable("calendar_conflicts", {
   id: varchar("id").primaryKey().notNull(),
-  userId: varchar("user_id").references(() => users.id).notNull(),
+  userId: varchar("user_id")
+    .references(() => users.id)
+    .notNull(),
   appointmentId: varchar("appointment_id").references(() => appointments.id),
-  conflictType: varchar("conflict_type", { enum: ['overlap', 'double_booking', 'unavailable', 'blocked_time'] }).notNull(),
+  conflictType: varchar("conflict_type", {
+    enum: ["overlap", "double_booking", "unavailable", "blocked_time"],
+  }).notNull(),
   conflictWith: varchar("conflict_with"), // ID of conflicting appointment or event
   startTime: timestamp("start_time").notNull(),
   endTime: timestamp("end_time").notNull(),
@@ -275,8 +309,8 @@ export const adminCalendarBlocks = pgTable("admin_calendar_blocks", {
   description: text("description"),
   startTime: timestamp("start_time").notNull(),
   endTime: timestamp("end_time").notNull(),
-  blockType: varchar("block_type", { 
-    enum: ['meeting', 'blocked', 'holiday', 'training', 'personal', 'maintenance'] 
+  blockType: varchar("block_type", {
+    enum: ["meeting", "blocked", "holiday", "training", "personal", "maintenance"],
   }).notNull(),
   isRecurring: boolean("is_recurring").default(false),
   recurringPattern: varchar("recurring_pattern"), // "weekly", "daily", "monthly"
@@ -303,7 +337,7 @@ export const therapistApplications = pgTable("therapist_applications", {
   motivation: text("motivation"),
   availability: jsonb("availability"), // Days and hours availability
   profileImageUrl: varchar("profile_image_url"), // Profile photo
-  status: varchar("status", { enum: ['pending', 'approved', 'rejected'] }).default('pending'),
+  status: varchar("status", { enum: ["pending", "approved", "rejected"] }).default("pending"),
   adminNotes: text("admin_notes"),
   reviewedBy: varchar("reviewed_by").references(() => users.id),
   reviewedAt: timestamp("reviewed_at"),
@@ -327,11 +361,11 @@ export const introductionCalls = pgTable("introduction_calls", {
   email: varchar("email").notNull(),
   phone: varchar("phone"),
   message: text("message"),
-  preferredDate: timestamp("preferred_date"),  // Optional to accept string conversion
+  preferredDate: timestamp("preferred_date"), // Optional to accept string conversion
   preferredTime: varchar("preferred_time").notNull(),
-  status: varchar("status", { 
-    enum: ['pending', 'confirmed', 'completed', 'cancelled', 'rescheduled'] 
-  }).default('pending'),
+  status: varchar("status", {
+    enum: ["pending", "confirmed", "completed", "cancelled", "rescheduled"],
+  }).default("pending"),
   adminNotes: text("admin_notes"),
   // Daily.co integration fields (for therapy sessions)
   dailyRoomName: varchar("daily_room_name"), // Daily.co room identifier
@@ -345,8 +379,8 @@ export const introductionCalls = pgTable("introduction_calls", {
   reminderSent: boolean("reminder_sent").default(false),
   confirmationEmailSent: boolean("confirmation_email_sent").default(false),
   followUpRequired: boolean("follow_up_required").default(false),
-  source: varchar("source").default('website'), // 'website', 'referral', 'social'
-  userType: varchar("user_type", { enum: ['client', 'therapist'] }).default('client'), // Type of user booking the call
+  source: varchar("source").default("website"), // 'website', 'referral', 'social'
+  userType: varchar("user_type", { enum: ["client", "therapist"] }).default("client"), // Type of user booking the call
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -358,17 +392,21 @@ export const payments = pgTable("payments", {
   appointmentId: varchar("appointment_id").references(() => appointments.id),
   stripePaymentIntentId: varchar("stripe_payment_intent_id"),
   amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
-  currency: varchar("currency").default('gbp'),
-  status: varchar("status", { enum: ['pending', 'succeeded', 'failed', 'cancelled', 'refunded', 'partially_refunded'] }).default('pending'),
+  currency: varchar("currency").default("gbp"),
+  status: varchar("status", {
+    enum: ["pending", "succeeded", "failed", "cancelled", "refunded", "partially_refunded"],
+  }).default("pending"),
   paymentMethod: varchar("payment_method"),
   therapistEarnings: decimal("therapist_earnings", { precision: 10, scale: 2 }),
   platformFee: decimal("platform_fee", { precision: 10, scale: 2 }),
   clientId: varchar("client_id").references(() => users.id),
   therapistId: varchar("therapist_id").references(() => users.id),
-  stripeProcessingFee: decimal("stripe_processing_fee", { precision: 10, scale: 2 }).default('0.00'),
-  payoutMethod: varchar("payout_method", { 
-    enum: ['charge_split', 'post_transfer', 'pending'] 
-  }).default('pending'), // Financial safety: track which payout method was used
+  stripeProcessingFee: decimal("stripe_processing_fee", { precision: 10, scale: 2 }).default(
+    "0.00"
+  ),
+  payoutMethod: varchar("payout_method", {
+    enum: ["charge_split", "post_transfer", "pending"],
+  }).default("pending"), // Financial safety: track which payout method was used
   payoutCompleted: boolean("payout_completed").default(false), // Double-payment guard
   payoutTransferId: varchar("payout_transfer_id"), // Track associated transfer
   createdAt: timestamp("created_at").defaultNow(),
@@ -376,74 +414,106 @@ export const payments = pgTable("payments", {
 });
 
 // ELEMENT #5: Therapist Payouts - Production-ready payout tracking and management
-export const therapistPayouts = pgTable("therapist_payouts", {
-  id: varchar("id").primaryKey().notNull(),
-  sessionId: varchar("session_id").references(() => appointments.id).notNull(),
-  paymentId: varchar("payment_id").references(() => payments.id).notNull(),
-  therapistId: varchar("therapist_id").references(() => users.id).notNull(),
-  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(), // Exact 85% amount
-  fee: decimal("fee", { precision: 10, scale: 2 }).default('0.00'), // Fee for instant payouts (1%)
-  netAmount: decimal("net_amount", { precision: 10, scale: 2 }).notNull(), // Amount after fees
-  payoutType: varchar("payout_type", { 
-    enum: ['standard', 'instant'] 
-  }).default('standard'),
-  payoutMethod: varchar("payout_method", { 
-    enum: ['transfer', 'payout'] 
-  }).default('transfer'), // transfer = standard transfers, payout = Stripe payouts API
-  status: varchar("status", { 
-    enum: ['pending', 'processing', 'completed', 'failed', 'cancelled', 'retrying'] 
-  }).default('pending'),
-  stripeTransferId: varchar("stripe_transfer_id"), // Stripe transfer ID when completed
-  stripePayoutId: varchar("stripe_payout_id"), // Stripe payout ID for instant payouts
-  stripeAccountId: varchar("stripe_account_id").notNull(), // Therapist's connected account
-  originalPaymentIntentId: varchar("original_payment_intent_id"), // Source payment
-  triggerSource: varchar("trigger_source", { 
-    enum: ['payment_confirmation', 'session_completion', 'manual', 'retry', 'webhook'] 
-  }).notNull(),
-  idempotencyKey: varchar("idempotency_key").notNull(),
-  retryCount: integer("retry_count").default(0),
-  maxRetries: integer("max_retries").default(5),
-  nextRetryAt: timestamp("next_retry_at"),
-  lastRetryAt: timestamp("last_retry_at"),
-  error: text("error"), // Last error message if failed
-  auditTrail: jsonb("audit_trail"), // Complete audit trail of all actions
-  metadata: jsonb("metadata"), // Additional payout metadata
-  completedAt: timestamp("completed_at"), // When payout was successfully completed
-  cancelledAt: timestamp("cancelled_at"), // When payout was cancelled
-  cancelledBy: varchar("cancelled_by"), // User who cancelled the payout
-  cancellationReason: text("cancellation_reason"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-}, (table) => [
-  // CRITICAL FINANCIAL SAFETY: Prevent duplicate payout records for same session/payment
-  // This database constraint is the foundation of our race condition protection
-  uniqueIndex("unique_session_payment_payout").on(table.sessionId, table.paymentId),
-  // Additional performance indexes
-  index("idx_therapist_payouts_therapist_id").on(table.therapistId),
-  index("idx_therapist_payouts_status").on(table.status),
-  uniqueIndex("idx_therapist_payouts_idempotency").on(table.idempotencyKey),
-]);
+export const therapistPayouts = pgTable(
+  "therapist_payouts",
+  {
+    id: varchar("id").primaryKey().notNull(),
+    sessionId: varchar("session_id")
+      .references(() => appointments.id)
+      .notNull(),
+    paymentId: varchar("payment_id")
+      .references(() => payments.id)
+      .notNull(),
+    therapistId: varchar("therapist_id")
+      .references(() => users.id)
+      .notNull(),
+    amount: decimal("amount", { precision: 10, scale: 2 }).notNull(), // Exact 85% amount
+    fee: decimal("fee", { precision: 10, scale: 2 }).default("0.00"), // Fee for instant payouts (1%)
+    netAmount: decimal("net_amount", { precision: 10, scale: 2 }).notNull(), // Amount after fees
+    payoutType: varchar("payout_type", {
+      enum: ["standard", "instant"],
+    }).default("standard"),
+    payoutMethod: varchar("payout_method", {
+      enum: ["transfer", "payout"],
+    }).default("transfer"), // transfer = standard transfers, payout = Stripe payouts API
+    status: varchar("status", {
+      enum: ["pending", "processing", "completed", "failed", "cancelled", "retrying"],
+    }).default("pending"),
+    stripeTransferId: varchar("stripe_transfer_id"), // Stripe transfer ID when completed
+    stripePayoutId: varchar("stripe_payout_id"), // Stripe payout ID for instant payouts
+    stripeAccountId: varchar("stripe_account_id").notNull(), // Therapist's connected account
+    originalPaymentIntentId: varchar("original_payment_intent_id"), // Source payment
+    triggerSource: varchar("trigger_source", {
+      enum: ["payment_confirmation", "session_completion", "manual", "retry", "webhook"],
+    }).notNull(),
+    idempotencyKey: varchar("idempotency_key").notNull(),
+    retryCount: integer("retry_count").default(0),
+    maxRetries: integer("max_retries").default(5),
+    nextRetryAt: timestamp("next_retry_at"),
+    lastRetryAt: timestamp("last_retry_at"),
+    error: text("error"), // Last error message if failed
+    auditTrail: jsonb("audit_trail"), // Complete audit trail of all actions
+    metadata: jsonb("metadata"), // Additional payout metadata
+    completedAt: timestamp("completed_at"), // When payout was successfully completed
+    cancelledAt: timestamp("cancelled_at"), // When payout was cancelled
+    cancelledBy: varchar("cancelled_by"), // User who cancelled the payout
+    cancellationReason: text("cancellation_reason"),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [
+    // CRITICAL FINANCIAL SAFETY: Prevent duplicate payout records for same session/payment
+    // This database constraint is the foundation of our race condition protection
+    uniqueIndex("unique_session_payment_payout").on(table.sessionId, table.paymentId),
+    // Additional performance indexes
+    index("idx_therapist_payouts_therapist_id").on(table.therapistId),
+    index("idx_therapist_payouts_status").on(table.status),
+    uniqueIndex("idx_therapist_payouts_idempotency").on(table.idempotencyKey),
+  ]
+);
 
 // Refunds tracking table
 export const refunds = pgTable("refunds", {
   id: varchar("id").primaryKey().notNull(),
-  paymentId: varchar("payment_id").references(() => payments.id).notNull(),
-  appointmentId: varchar("appointment_id").references(() => appointments.id).notNull(),
-  clientId: varchar("client_id").references(() => users.id).notNull(),
-  therapistId: varchar("therapist_id").references(() => users.id).notNull(),
+  paymentId: varchar("payment_id")
+    .references(() => payments.id)
+    .notNull(),
+  appointmentId: varchar("appointment_id")
+    .references(() => appointments.id)
+    .notNull(),
+  clientId: varchar("client_id")
+    .references(() => users.id)
+    .notNull(),
+  therapistId: varchar("therapist_id")
+    .references(() => users.id)
+    .notNull(),
   originalAmount: decimal("original_amount", { precision: 10, scale: 2 }).notNull(),
   refundAmount: decimal("refund_amount", { precision: 10, scale: 2 }).notNull(),
-  therapistCompensation: decimal("therapist_compensation", { precision: 10, scale: 2 }).default('0.00'),
-  stripeProcessingFeeRetained: decimal("stripe_processing_fee_retained", { precision: 10, scale: 2 }).default('0.00'),
+  therapistCompensation: decimal("therapist_compensation", { precision: 10, scale: 2 }).default(
+    "0.00"
+  ),
+  stripeProcessingFeeRetained: decimal("stripe_processing_fee_retained", {
+    precision: 10,
+    scale: 2,
+  }).default("0.00"),
   refundPercentage: integer("refund_percentage").notNull(), // 0, 50, or 100
-  refundReason: varchar("refund_reason", { 
-    enum: ['client_cancelled_48h+', 'client_cancelled_24-48h', 'client_cancelled_24h-', 'therapist_cancelled', 'system_cancelled', 'admin_cancelled'] 
+  refundReason: varchar("refund_reason", {
+    enum: [
+      "client_cancelled_48h+",
+      "client_cancelled_24-48h",
+      "client_cancelled_24h-",
+      "therapist_cancelled",
+      "system_cancelled",
+      "admin_cancelled",
+    ],
   }).notNull(),
   cancellationTime: timestamp("cancellation_time").notNull(), // When cancellation was requested
   sessionTime: timestamp("session_time").notNull(), // Original session time
   hoursBeforeSession: decimal("hours_before_session", { precision: 5, scale: 2 }).notNull(), // Calculated hours difference
   stripeRefundId: varchar("stripe_refund_id"), // Stripe refund transaction ID
-  status: varchar("status", { enum: ['pending', 'processing', 'completed', 'failed'] }).default('pending'),
+  status: varchar("status", { enum: ["pending", "processing", "completed", "failed"] }).default(
+    "pending"
+  ),
   refundPolicy: varchar("refund_policy").notNull(), // Description of applied policy
   processedBy: varchar("processed_by").references(() => users.id), // Admin who processed refund
   notes: text("notes"), // Additional notes about the refund
@@ -477,8 +547,12 @@ export const institutionProfiles = pgTable("institution_profiles", {
 // Therapist notifications
 export const therapistNotifications = pgTable("therapist_notifications", {
   id: varchar("id").primaryKey().notNull(),
-  therapistId: varchar("therapist_id").references(() => users.id).notNull(),
-  type: varchar("type", { enum: ['new_message', 'new_client_connection', 'appointment_reminder', 'system_alert'] }).notNull(),
+  therapistId: varchar("therapist_id")
+    .references(() => users.id)
+    .notNull(),
+  type: varchar("type", {
+    enum: ["new_message", "new_client_connection", "appointment_reminder", "system_alert"],
+  }).notNull(),
   title: varchar("title").notNull(),
   message: text("message").notNull(),
   senderId: varchar("sender_id").references(() => users.id),
@@ -494,9 +568,13 @@ export const therapistNotifications = pgTable("therapist_notifications", {
 // Client connection requests
 export const clientConnectionRequests = pgTable("client_connection_requests", {
   id: varchar("id").primaryKey().notNull(),
-  clientId: varchar("client_id").references(() => users.id).notNull(),
-  therapistId: varchar("therapist_id").references(() => users.id).notNull(),
-  status: varchar("status", { enum: ['pending', 'accepted', 'declined'] }).default('pending'),
+  clientId: varchar("client_id")
+    .references(() => users.id)
+    .notNull(),
+  therapistId: varchar("therapist_id")
+    .references(() => users.id)
+    .notNull(),
+  status: varchar("status", { enum: ["pending", "accepted", "declined"] }).default("pending"),
   message: text("message"),
   createdAt: timestamp("created_at").defaultNow(),
   respondedAt: timestamp("responded_at"),
@@ -512,7 +590,9 @@ export const formSubmissions = pgTable("form_submissions", {
   formId: varchar("form_id").notNull(), // therapy-matching, therapist-onboarding, etc.
   userId: varchar("user_id").references(() => users.id),
   submissionData: jsonb("submission_data").notNull(),
-  status: varchar("status", { enum: ['pending', 'processing', 'completed', 'failed'] }).default('pending'),
+  status: varchar("status", { enum: ["pending", "processing", "completed", "failed"] }).default(
+    "pending"
+  ),
   automatedTriggers: jsonb("automated_triggers"), // Trigger configuration
   triggerResults: jsonb("trigger_results"), // Results of automated processing
   deletedAt: timestamp("deleted_at"), // Soft delete support for data retention
@@ -524,10 +604,14 @@ export const automatedWorkflows = pgTable("automated_workflows", {
   id: varchar("id").primaryKey().notNull(),
   workflowType: varchar("workflow_type").notNull(), // therapist-matching, onboarding, etc.
   triggerFormId: varchar("trigger_form_id").references(() => formSubmissions.id),
-  status: varchar("status", { enum: ['initiated', 'processing', 'completed', 'failed'] }).default('initiated'),
+  status: varchar("status", { enum: ["initiated", "processing", "completed", "failed"] }).default(
+    "initiated"
+  ),
   workflowData: jsonb("workflow_data").notNull(),
   results: jsonb("results"),
-  priority: varchar("priority", { enum: ['low', 'standard', 'high', 'urgent'] }).default('standard'),
+  priority: varchar("priority", { enum: ["low", "standard", "high", "urgent"] }).default(
+    "standard"
+  ),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -589,16 +673,16 @@ export const therapistMatchingQuestionnaires = pgTable("therapist_matching_quest
   step8SupportAreas: jsonb("step8_support_areas"),
   step9TherapyTypes: jsonb("step9_therapy_types"),
   step10PreviousTherapy: varchar("step10_previous_therapy"),
-  
+
   // Enhanced matching preferences
   step11ReligionPreference: varchar("step11_religion_preference"), // Client's own religion or preference
-  step12TherapistGenderPreference: varchar("step12_therapist_gender_preference", { 
-    enum: ['male', 'female', 'no_preference'] 
-  }).default('no_preference'),
-  step13ReligionMatching: varchar("step13_religion_matching", { 
-    enum: ['same_religion', 'no_preference', 'non_religious'] 
-  }).default('no_preference'),
-  
+  step12TherapistGenderPreference: varchar("step12_therapist_gender_preference", {
+    enum: ["male", "female", "no_preference"],
+  }).default("no_preference"),
+  step13ReligionMatching: varchar("step13_religion_matching", {
+    enum: ["same_religion", "no_preference", "non_religious"],
+  }).default("no_preference"),
+
   status: varchar("status").default("pending"),
   completedAt: timestamp("completed_at").defaultNow(),
   aiMatchingScore: integer("ai_matching_score"),
@@ -609,7 +693,8 @@ export const therapistMatchingQuestionnaires = pgTable("therapist_matching_quest
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export type InsertTherapistMatchingQuestionnaire = typeof therapistMatchingQuestionnaires.$inferInsert;
+export type InsertTherapistMatchingQuestionnaire =
+  typeof therapistMatchingQuestionnaires.$inferInsert;
 export type TherapistMatchingQuestionnaire = typeof therapistMatchingQuestionnaires.$inferSelect;
 
 // Therapist enquiries table for onboarding workflow
@@ -622,8 +707,8 @@ export const therapistEnquiries = pgTable("therapist_enquiries", {
   phone: varchar("phone"),
   location: varchar("location"),
   religion: varchar("religion"),
-  gender: varchar("gender", { enum: ['male', 'female', 'non_binary', 'prefer_not_to_say'] }),
-  hasLimitedCompany: varchar("has_limited_company", { enum: ['yes', 'no'] }),
+  gender: varchar("gender", { enum: ["male", "female", "non_binary", "prefer_not_to_say"] }),
+  hasLimitedCompany: varchar("has_limited_company", { enum: ["yes", "no"] }),
   highestQualification: varchar("highest_qualification"),
   professionalBody: varchar("professional_body"),
   therapySpecialisations: varchar("therapy_specialisations").array(),
@@ -634,11 +719,21 @@ export const therapistEnquiries = pgTable("therapist_enquiries", {
   specializations: varchar("specializations").array(),
   availability: text("availability"),
   motivation: text("motivation"),
-  status: varchar("status", { enum: ['enquiry_received', 'call_scheduled', 'call_completed', 'onboarding_sent', 'onboarding_completed', 'approved', 'rejected'] }).default('enquiry_received'),
+  status: varchar("status", {
+    enum: [
+      "enquiry_received",
+      "call_scheduled",
+      "call_completed",
+      "onboarding_sent",
+      "onboarding_completed",
+      "approved",
+      "rejected",
+    ],
+  }).default("enquiry_received"),
   account_created: boolean("account_created").default(false),
   adminNotes: text("admin_notes"),
-  therapistTier: varchar("therapist_tier", { 
-    enum: ['counsellor', 'psychotherapist', 'psychologist', 'specialist'] 
+  therapistTier: varchar("therapist_tier", {
+    enum: ["counsellor", "psychotherapist", "psychologist", "specialist"],
   }),
   callScheduledAt: timestamp("call_scheduled_at"),
   callCompletedAt: timestamp("call_completed_at"),
@@ -663,13 +758,13 @@ export const therapistOnboardingApplications = pgTable("therapist_onboarding_app
   profilePhoto: varchar("profile_photo"),
   streetAddress: varchar("street_address").notNull(),
   postCode: varchar("post_code").notNull(),
-  
+
   // Emergency contact
   emergencyFirstName: varchar("emergency_first_name").notNull(),
   emergencyLastName: varchar("emergency_last_name").notNull(),
   emergencyRelationship: varchar("emergency_relationship").notNull(),
   emergencyPhoneNumber: varchar("emergency_phone_number").notNull(),
-  
+
   // Professional details
   jobTitle: varchar("job_title").notNull(),
   qualifications: jsonb("qualifications").notNull(),
@@ -677,37 +772,38 @@ export const therapistOnboardingApplications = pgTable("therapist_onboarding_app
   registrationNumber: varchar("registration_number"),
   enhancedDbsCertificate: varchar("enhanced_dbs_certificate").notNull(),
   workingWithOtherPlatforms: varchar("working_with_other_platforms").notNull(),
-  
+
   // Availability
   availability: jsonb("availability").notNull(),
   sessionsPerWeek: varchar("sessions_per_week").notNull(),
-  
+
   // Legal compliance
   selfEmploymentAcknowledgment: boolean("self_employment_acknowledgment").notNull(),
   taxResponsibilityAcknowledgment: boolean("tax_responsibility_acknowledgment").notNull(),
-  
+
   // Document uploads
   cvDocument: varchar("cv_document"),
   dbsCertificate: varchar("dbs_certificate"),
   professionalInsurance: varchar("professional_insurance"),
   membershipProof: varchar("membership_proof"),
   rightToWorkProof: varchar("right_to_work_proof"),
-  
+
   // Legal agreements
   policiesAgreement: boolean("policies_agreement").notNull(),
   signature: varchar("signature").notNull(),
   stripeConnectConsent: boolean("stripe_connect_consent").notNull(),
-  
+
   // Application status
   status: varchar("status").default("pending").notNull(),
   adminNotes: text("admin_notes"),
   stripeConnectAccountId: varchar("stripe_connect_account_id"),
-  
+
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export type InsertTherapistOnboardingApplication = typeof therapistOnboardingApplications.$inferInsert;
+export type InsertTherapistOnboardingApplication =
+  typeof therapistOnboardingApplications.$inferInsert;
 export type TherapistOnboardingApplication = typeof therapistOnboardingApplications.$inferSelect;
 
 // Therapist Onboarding Progress (Step 3) - CRITICAL LAUNCH REQUIREMENT
@@ -745,8 +841,8 @@ export const wordpressBookingIntegration = pgTable("wordpress_booking_integratio
 // PDF Document Storage - CRITICAL LAUNCH REQUIREMENT
 export const documentStorage = pgTable("document_storage", {
   id: varchar("id").primaryKey().notNull(),
-  documentType: varchar("document_type", { 
-    enum: ['therapist_info_pack', 'therapist_safeguarding_pack', 'client_info_pack'] 
+  documentType: varchar("document_type", {
+    enum: ["therapist_info_pack", "therapist_safeguarding_pack", "client_info_pack"],
   }).notNull(),
   fileName: varchar("file_name").notNull(),
   filePath: varchar("file_path").notNull(),
@@ -754,7 +850,9 @@ export const documentStorage = pgTable("document_storage", {
   mimeType: varchar("mime_type"),
   uploadedBy: varchar("uploaded_by").references(() => users.id),
   isActive: boolean("is_active").default(true),
-  accessLevel: varchar("access_level", { enum: ['public', 'therapist_only', 'client_only', 'admin_only'] }).default('public'),
+  accessLevel: varchar("access_level", {
+    enum: ["public", "therapist_only", "client_only", "admin_only"],
+  }).default("public"),
   downloadCount: integer("download_count").default(0),
   lastDownloadAt: timestamp("last_download_at"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -783,92 +881,100 @@ export const documents = pgTable("documents", {
   isActive: boolean("is_active").default(true).notNull(),
   confidentialityLevel: varchar("confidentiality_level").default("high").notNull(), // 'low', 'medium', 'high', 'restricted'
   tags: text("tags").array(),
-  
+
   // HIPAA compliance fields
   lastAccessedAt: timestamp("last_accessed_at"),
   lastAccessedBy: varchar("last_accessed_by"),
   retentionUntil: timestamp("retention_until"),
-  
+
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const sessionRecordings = pgTable("session_recordings", {
   id: varchar("id").primaryKey().notNull(),
-  appointmentId: varchar("appointment_id").notNull().references(() => appointments.id),
+  appointmentId: varchar("appointment_id")
+    .notNull()
+    .references(() => appointments.id),
   recordingUrl: varchar("recording_url"),
   transcriptUrl: varchar("transcript_url"),
   duration: integer("duration"), // in seconds
   fileSize: integer("file_size"), // in bytes
   recordingStatus: varchar("recording_status").default("processing").notNull(), // 'processing', 'ready', 'failed', 'deleted'
-  
+
   // Consent and compliance
   consentObtained: boolean("consent_obtained").default(false).notNull(),
   consentTimestamp: timestamp("consent_timestamp"),
   retentionUntil: timestamp("retention_until"),
-  
+
   // Quality metrics
   audioQuality: varchar("audio_quality"), // 'poor', 'fair', 'good', 'excellent'
   videoQuality: varchar("video_quality"), // 'poor', 'fair', 'good', 'excellent'
-  
+
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const sessionNotes = pgTable("session_notes", {
   id: varchar("id").primaryKey().notNull(),
-  appointmentId: varchar("appointment_id").notNull().references(() => appointments.id),
+  appointmentId: varchar("appointment_id")
+    .notNull()
+    .references(() => appointments.id),
   therapistId: varchar("therapist_id").notNull(),
-  
+
   // Note content
   subjectiveFeedback: text("subjective_feedback"), // Client's reported experience
   objectiveObservations: text("objective_observations"), // Therapist's clinical observations
   assessment: text("assessment"), // Clinical assessment
   planAndGoals: text("plan_and_goals"), // Therapy plan and session goals
-  
+
   // Session details
   sessionFocus: varchar("session_focus").array(), // ['anxiety', 'depression', 'relationships', etc.]
   interventionsUsed: varchar("interventions_used").array(), // ['CBT', 'mindfulness', 'exposure therapy', etc.]
   homeworkAssigned: text("homework_assigned"),
   nextSessionGoals: text("next_session_goals"),
-  
+
   // Progress tracking
   progressScore: integer("progress_score"), // 1-10 scale
   clientEngagement: varchar("client_engagement"), // 'low', 'moderate', 'high'
   therapistNotes: text("therapist_notes"),
-  
+
   // Risk assessment
   riskLevel: varchar("risk_level").default("low").notNull(), // 'low', 'moderate', 'high', 'critical'
   riskFactors: varchar("risk_factors").array(),
   safetyPlan: text("safety_plan"),
-  
+
   isConfidential: boolean("is_confidential").default(true).notNull(),
-  
+
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const documentVersions = pgTable("document_versions", {
   id: varchar("id").primaryKey().notNull(),
-  documentId: varchar("document_id").notNull().references(() => documents.id),
+  documentId: varchar("document_id")
+    .notNull()
+    .references(() => documents.id),
   version: integer("version").notNull(),
   content: text("content"),
   fileUrl: varchar("file_url"),
   changeNote: text("change_note"),
   modifiedBy: varchar("modified_by").notNull(),
-  
+
   createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Document access audit trail
 export const documentAccessLog = pgTable("document_access_log", {
   id: varchar("id").primaryKey().notNull(),
-  documentId: varchar("document_id").notNull().references(() => documents.id),
+  documentId: varchar("document_id")
+    .notNull()
+    .references(() => documents.id),
   userId: varchar("user_id").notNull(),
   action: varchar("action").notNull(), // 'view', 'edit', 'download', 'share', 'delete'
   ipAddress: varchar("ip_address"),
   userAgent: text("user_agent"),
-  
+
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -879,7 +985,9 @@ export const emailCampaigns = pgTable("email_campaigns", {
   templateId: varchar("template_id").notNull(),
   templateName: varchar("template_name").notNull(),
   targetAudience: varchar("target_audience").array(),
-  status: varchar("status", { enum: ['draft', 'scheduled', 'sending', 'sent', 'paused', 'cancelled'] }).default('draft'),
+  status: varchar("status", {
+    enum: ["draft", "scheduled", "sending", "sent", "paused", "cancelled"],
+  }).default("draft"),
   scheduledDate: timestamp("scheduled_date"),
   sentDate: timestamp("sent_date"),
   recipients: integer("recipients").default(0),
@@ -887,7 +995,7 @@ export const emailCampaigns = pgTable("email_campaigns", {
   clicked: integer("clicked").default(0),
   bounced: integer("bounced").default(0),
   isRecurring: boolean("is_recurring").default(false),
-  recurringType: varchar("recurring_type", { enum: ['daily', 'weekly', 'monthly', 'quarterly'] }),
+  recurringType: varchar("recurring_type", { enum: ["daily", "weekly", "monthly", "quarterly"] }),
   recurringInterval: integer("recurring_interval").default(1),
   nextRun: timestamp("next_run"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -899,21 +1007,21 @@ export const emailTemplates = pgTable("email_templates", {
   name: varchar("name").notNull(),
   subject: varchar("subject").notNull(),
   content: text("content").notNull(),
-  type: varchar("type", { 
+  type: varchar("type", {
     enum: [
-      'therapist_assignment', 
-      'welcome', 
-      'therapist_welcome', 
-      'therapist_onboarding', 
-      'client_onboarding', 
-      'appointment_reminder', 
-      'session_reminder', 
-      'session_confirmation', 
-      'payment_confirmation', 
-      'system_notification', 
-      'marketing', 
-      'custom'
-    ] 
+      "therapist_assignment",
+      "welcome",
+      "therapist_welcome",
+      "therapist_onboarding",
+      "client_onboarding",
+      "appointment_reminder",
+      "session_reminder",
+      "session_confirmation",
+      "payment_confirmation",
+      "system_notification",
+      "marketing",
+      "custom",
+    ],
   }).notNull(),
   variables: jsonb("variables"), // Available template variables
   isActive: boolean("is_active").default(true),
@@ -926,10 +1034,21 @@ export const emailTemplates = pgTable("email_templates", {
 export const emailAutomationRules = pgTable("email_automation_rules", {
   id: varchar("id").primaryKey().notNull(),
   name: varchar("name").notNull(),
-  trigger: varchar("trigger", { 
-    enum: ['user_registration', 'appointment_booked', 'appointment_reminder', 'session_completed', 
-           'payment_received', 'therapist_assigned', 'profile_incomplete', 'inactivity_detected',
-           'form_submission', 'subscription_started', 'subscription_ended', 'custom_event'] 
+  trigger: varchar("trigger", {
+    enum: [
+      "user_registration",
+      "appointment_booked",
+      "appointment_reminder",
+      "session_completed",
+      "payment_received",
+      "therapist_assigned",
+      "profile_incomplete",
+      "inactivity_detected",
+      "form_submission",
+      "subscription_started",
+      "subscription_ended",
+      "custom_event",
+    ],
   }).notNull(),
   templateId: varchar("template_id").references(() => emailTemplates.id),
   conditions: jsonb("conditions"), // Trigger conditions
@@ -946,7 +1065,7 @@ export const emailAutomationHistory = pgTable("email_automation_history", {
   ruleId: varchar("rule_id").references(() => emailAutomationRules.id),
   userId: varchar("user_id").references(() => users.id),
   templateId: varchar("template_id").references(() => emailTemplates.id),
-  status: varchar("status", { enum: ['pending', 'sent', 'failed', 'skipped'] }).default('pending'),
+  status: varchar("status", { enum: ["pending", "sent", "failed", "skipped"] }).default("pending"),
   triggerData: jsonb("trigger_data"), // Data that triggered the automation
   sentAt: timestamp("sent_at"),
   errorMessage: text("error_message"),
@@ -978,7 +1097,9 @@ export const institutionOnboarding = pgTable("institution_onboarding", {
   billingSetup: jsonb("billing_setup"),
   complianceSettings: jsonb("compliance_settings"),
   integrationSettings: jsonb("integration_settings"),
-  status: varchar("status", { enum: ['pending', 'in_progress', 'completed', 'on_hold'] }).default('pending'),
+  status: varchar("status", { enum: ["pending", "in_progress", "completed", "on_hold"] }).default(
+    "pending"
+  ),
   completedAt: timestamp("completed_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -990,9 +1111,9 @@ export const stripeConnectApplications = pgTable("stripe_connect_applications", 
   therapistId: varchar("therapist_id").references(() => users.id),
   applicationData: jsonb("application_data"), // Pre-filled application data
   stripeAccountId: varchar("stripe_account_id"),
-  accountStatus: varchar("account_status", { 
-    enum: ['pending', 'submitted', 'under_review', 'approved', 'rejected', 'restricted'] 
-  }).default('pending'),
+  accountStatus: varchar("account_status", {
+    enum: ["pending", "submitted", "under_review", "approved", "rejected", "restricted"],
+  }).default("pending"),
   onboardingUrl: varchar("onboarding_url"),
   requirementsNeeded: jsonb("requirements_needed"),
   payoutsEnabled: boolean("payouts_enabled").default(false),
@@ -1005,24 +1126,34 @@ export const stripeConnectApplications = pgTable("stripe_connect_applications", 
 // Messaging system tables
 export const conversations = pgTable("conversations", {
   id: varchar("id").primaryKey().notNull(),
-  participant1Id: varchar("participant1_id").notNull().references(() => users.id),
-  participant2Id: varchar("participant2_id").notNull().references(() => users.id),
+  participant1Id: varchar("participant1_id")
+    .notNull()
+    .references(() => users.id),
+  participant2Id: varchar("participant2_id")
+    .notNull()
+    .references(() => users.id),
   lastMessageId: varchar("last_message_id"),
-  status: varchar("status", { enum: ['active', 'archived'] }).default('active'),
-  
+  status: varchar("status", { enum: ["active", "archived"] }).default("active"),
+
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
 export const messages = pgTable("messages", {
   id: varchar("id").primaryKey().notNull(),
-  conversationId: varchar("conversation_id").notNull().references(() => conversations.id),
-  senderId: varchar("sender_id").notNull().references(() => users.id),
+  conversationId: varchar("conversation_id")
+    .notNull()
+    .references(() => conversations.id),
+  senderId: varchar("sender_id")
+    .notNull()
+    .references(() => users.id),
   content: text("content").notNull(),
-  messageType: varchar("message_type", { enum: ['text', 'image', 'file', 'system'] }).default('text'),
+  messageType: varchar("message_type", { enum: ["text", "image", "file", "system"] }).default(
+    "text"
+  ),
   read: boolean("read").default(false),
   attachments: jsonb("attachments"), // Array of attachment URLs/metadata
-  
+
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -1035,14 +1166,14 @@ export const emailQueue = pgTable("email_queue", {
   subject: varchar("subject").notNull(),
   htmlContent: text("html_content").notNull(),
   data: jsonb("data"), // Original data used to generate email
-  priority: varchar("priority", { enum: ['high', 'normal', 'low'] }).default('normal'),
-  status: varchar("status", { enum: ['queued', 'processing', 'sent', 'failed'] }).default('queued'),
+  priority: varchar("priority", { enum: ["high", "normal", "low"] }).default("normal"),
+  status: varchar("status", { enum: ["queued", "processing", "sent", "failed"] }).default("queued"),
   attempts: integer("attempts").default(0),
   error: text("error"),
   scheduledFor: timestamp("scheduled_for").notNull(),
   lastAttempt: timestamp("last_attempt"),
   sentAt: timestamp("sent_at"),
-  
+
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -1051,7 +1182,9 @@ export const reminderConfigurations = pgTable("reminder_configurations", {
   id: varchar("id").primaryKey().notNull(),
   reminderType: varchar("reminder_type").notNull(), // 'email', 'sms'
   eventType: varchar("event_type").notNull(), // 'session_reminder', 'follow_up', 'appointment_confirmation'
-  recipientRole: varchar("recipient_role", { enum: ['client', 'therapist', 'both'] }).notNull().default('both'), // Who receives this reminder
+  recipientRole: varchar("recipient_role", { enum: ["client", "therapist", "both"] })
+    .notNull()
+    .default("both"), // Who receives this reminder
   isEnabled: boolean("is_enabled").default(true),
   timeBefore: integer("time_before").notNull(), // Minutes before event
   templateId: varchar("template_id"),
@@ -1066,8 +1199,12 @@ export const reminderConfigurations = pgTable("reminder_configurations", {
 // Reminder Queue for scheduled reminders
 export const reminderQueue = pgTable("reminder_queue", {
   id: varchar("id").primaryKey().notNull(),
-  configurationId: varchar("configuration_id").notNull().references(() => reminderConfigurations.id),
-  appointmentId: varchar("appointment_id").notNull().references(() => appointments.id),
+  configurationId: varchar("configuration_id")
+    .notNull()
+    .references(() => reminderConfigurations.id),
+  appointmentId: varchar("appointment_id")
+    .notNull()
+    .references(() => appointments.id),
   userId: varchar("user_id").notNull(),
   reminderType: varchar("reminder_type").notNull(), // 'email', 'sms'
   recipientEmail: varchar("recipient_email"),
@@ -1076,7 +1213,7 @@ export const reminderQueue = pgTable("reminder_queue", {
   message: text("message").notNull(),
   scheduledAt: timestamp("scheduled_at").notNull(),
   sentAt: timestamp("sent_at"),
-  status: varchar("status").notNull().default('pending'), // 'pending', 'sent', 'failed', 'cancelled'
+  status: varchar("status").notNull().default("pending"), // 'pending', 'sent', 'failed', 'cancelled'
   failureReason: text("failure_reason"),
   retryCount: integer("retry_count").default(0),
   createdAt: timestamp("created_at").defaultNow(),
@@ -1088,7 +1225,9 @@ export const reminderQueue = pgTable("reminder_queue", {
 // User communication preferences and consent
 export const userCommunicationPreferences = pgTable("user_communication_preferences", {
   id: varchar("id").primaryKey().notNull(),
-  userId: varchar("user_id").notNull().references(() => users.id),
+  userId: varchar("user_id")
+    .notNull()
+    .references(() => users.id),
   emailEnabled: boolean("email_enabled").default(true),
   smsEnabled: boolean("sms_enabled").default(false),
   whatsappEnabled: boolean("whatsapp_enabled").default(false),
@@ -1110,8 +1249,18 @@ export const userCommunicationPreferences = pgTable("user_communication_preferen
 export const notificationTemplates = pgTable("notification_templates", {
   id: varchar("id").primaryKey().notNull(),
   name: varchar("name").notNull(),
-  channel: varchar("channel", { enum: ['email', 'sms', 'whatsapp', 'push'] }).notNull(),
-  type: varchar("type", { enum: ['appointment_confirmation', 'appointment_reminder', 'session_followup', 'welcome', 'therapist_connection', 'payment_confirmation', 'custom'] }).notNull(),
+  channel: varchar("channel", { enum: ["email", "sms", "whatsapp", "push"] }).notNull(),
+  type: varchar("type", {
+    enum: [
+      "appointment_confirmation",
+      "appointment_reminder",
+      "session_followup",
+      "welcome",
+      "therapist_connection",
+      "payment_confirmation",
+      "custom",
+    ],
+  }).notNull(),
   subject: varchar("subject"), // For email and push notifications
   body: text("body").notNull(),
   placeholders: jsonb("placeholders"), // Available variables like {client_name}, {therapist_name}, {date}, {time}
@@ -1125,14 +1274,28 @@ export const notificationTemplates = pgTable("notification_templates", {
 // Unified notifications table for all channels
 export const notifications = pgTable("notifications", {
   id: varchar("id").primaryKey().notNull(),
-  userId: varchar("user_id").notNull().references(() => users.id),
-  channel: varchar("channel", { enum: ['email', 'sms', 'whatsapp', 'push'] }).notNull(),
-  type: varchar("type", { enum: ['appointment_confirmation', 'appointment_reminder', 'session_followup', 'welcome', 'therapist_connection', 'payment_confirmation', 'custom'] }).notNull(),
+  userId: varchar("user_id")
+    .notNull()
+    .references(() => users.id),
+  channel: varchar("channel", { enum: ["email", "sms", "whatsapp", "push"] }).notNull(),
+  type: varchar("type", {
+    enum: [
+      "appointment_confirmation",
+      "appointment_reminder",
+      "session_followup",
+      "welcome",
+      "therapist_connection",
+      "payment_confirmation",
+      "custom",
+    ],
+  }).notNull(),
   templateId: varchar("template_id").references(() => notificationTemplates.id),
   recipient: varchar("recipient").notNull(), // email, phone number, or user ID
   subject: varchar("subject"),
   message: text("message").notNull(),
-  status: varchar("status", { enum: ['pending', 'sent', 'delivered', 'failed', 'read'] }).default('pending'),
+  status: varchar("status", { enum: ["pending", "sent", "delivered", "failed", "read"] }).default(
+    "pending"
+  ),
   sentAt: timestamp("sent_at"),
   deliveredAt: timestamp("delivered_at"),
   readAt: timestamp("read_at"),
@@ -1140,7 +1303,7 @@ export const notifications = pgTable("notifications", {
   retryCount: integer("retry_count").default(0),
   maxRetries: integer("max_retries").default(3),
   metadata: jsonb("metadata"), // Twilio message SID, SendGrid message ID, etc.
-  sentBy: varchar("sent_by", { enum: ['system', 'automated', 'admin'] }).default('system'),
+  sentBy: varchar("sent_by", { enum: ["system", "automated", "admin"] }).default("system"),
   appointmentId: varchar("appointment_id").references(() => appointments.id),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -1193,10 +1356,20 @@ export const sendgridWebhooks = pgTable("sendgrid_webhooks", {
 export const notificationAutomationRules = pgTable("notification_automation_rules", {
   id: varchar("id").primaryKey().notNull(),
   name: varchar("name").notNull(),
-  trigger: varchar("trigger", { 
-    enum: ['appointment_created', 'appointment_updated', 'user_registered', 'therapist_assigned', 
-           'session_completed', 'payment_received', 'profile_incomplete', 'reminder_24h', 
-           'reminder_1h', 'reminder_15min', 'custom_event'] 
+  trigger: varchar("trigger", {
+    enum: [
+      "appointment_created",
+      "appointment_updated",
+      "user_registered",
+      "therapist_assigned",
+      "session_completed",
+      "payment_received",
+      "profile_incomplete",
+      "reminder_24h",
+      "reminder_1h",
+      "reminder_15min",
+      "custom_event",
+    ],
   }).notNull(),
   channels: varchar("channels").array(), // ['email', 'sms', 'whatsapp']
   templateIds: jsonb("template_ids"), // Map of channel to template ID
@@ -1204,7 +1377,7 @@ export const notificationAutomationRules = pgTable("notification_automation_rule
   delay: integer("delay").default(0), // Minutes to wait before sending
   fallbackChannels: varchar("fallback_channels").array(), // Fallback order if primary fails
   isActive: boolean("is_active").default(true),
-  priority: varchar("priority", { enum: ['low', 'normal', 'high', 'urgent'] }).default('normal'),
+  priority: varchar("priority", { enum: ["low", "normal", "high", "urgent"] }).default("normal"),
   triggerCount: integer("trigger_count").default(0),
   successCount: integer("success_count").default(0),
   failureCount: integer("failure_count").default(0),
@@ -1233,9 +1406,11 @@ export const notificationLogs = pgTable("notification_logs", {
 export const optOutLogs = pgTable("opt_out_logs", {
   id: varchar("id").primaryKey().notNull(),
   userId: varchar("user_id").references(() => users.id),
-  channel: varchar("channel", { enum: ['email', 'sms', 'whatsapp', 'all'] }).notNull(),
-  action: varchar("action", { enum: ['opt_out', 'opt_in'] }).notNull(),
-  method: varchar("method", { enum: ['sms_reply', 'whatsapp_reply', 'email_link', 'settings_page', 'admin_action'] }).notNull(),
+  channel: varchar("channel", { enum: ["email", "sms", "whatsapp", "all"] }).notNull(),
+  action: varchar("action", { enum: ["opt_out", "opt_in"] }).notNull(),
+  method: varchar("method", {
+    enum: ["sms_reply", "whatsapp_reply", "email_link", "settings_page", "admin_action"],
+  }).notNull(),
   originalMessage: text("original_message"), // The message that triggered the opt-out
   ipAddress: varchar("ip_address"),
   userAgent: text("user_agent"),
@@ -1245,23 +1420,23 @@ export const optOutLogs = pgTable("opt_out_logs", {
 // Introduction calls booking table removed - using enhanced version above
 
 // Chatbot conversations for admin monitoring and quality assurance
-export const chatbotConversations = pgTable('chatbot_conversations', {
-  id: text('id').primaryKey(),
-  userId: text('user_id').references(() => users.id), // null for anonymous users
-  sessionId: text('session_id'), // For grouping conversation messages
-  userMessage: text('user_message').notNull(),
-  botResponse: text('bot_response').notNull(),
-  responseSource: text('response_source').notNull(), // 'faq', 'ai', 'privacy_warning', 'error'
-  confidence: text('confidence'), // 0.00-1.00 as text for simplicity
-  wasRedacted: boolean('was_redacted').default(false),
-  redactedItems: text('redacted_items'), // JSON string of what was redacted
-  messageLength: integer('message_length'),
-  responseLength: integer('response_length'),
-  ipAddress: text('ip_address'),
-  userAgent: text('user_agent'),
-  source: text('source').default('landing-page'), // 'landing-page', 'portal', 'wordpress', 'external'
-  feedback: text('feedback'), // 'positive', 'negative', null
-  createdAt: timestamp('created_at').defaultNow(),
+export const chatbotConversations = pgTable("chatbot_conversations", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").references(() => users.id), // null for anonymous users
+  sessionId: text("session_id"), // For grouping conversation messages
+  userMessage: text("user_message").notNull(),
+  botResponse: text("bot_response").notNull(),
+  responseSource: text("response_source").notNull(), // 'faq', 'ai', 'privacy_warning', 'error'
+  confidence: text("confidence"), // 0.00-1.00 as text for simplicity
+  wasRedacted: boolean("was_redacted").default(false),
+  redactedItems: text("redacted_items"), // JSON string of what was redacted
+  messageLength: integer("message_length"),
+  responseLength: integer("response_length"),
+  ipAddress: text("ip_address"),
+  userAgent: text("user_agent"),
+  source: text("source").default("landing-page"), // 'landing-page', 'portal', 'wordpress', 'external'
+  feedback: text("feedback"), // 'positive', 'negative', null
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 export type InsertDocument = typeof documents.$inferInsert;
@@ -1322,9 +1497,11 @@ export type AdminCalendarBlock = typeof adminCalendarBlocks.$inferSelect;
 // Admin availability settings for configurable working hours
 export const adminAvailabilitySettings = pgTable("admin_availability_settings", {
   id: varchar("id").primaryKey().notNull(),
-  adminId: varchar("admin_id").references(() => users.id).notNull(),
+  adminId: varchar("admin_id")
+    .references(() => users.id)
+    .notNull(),
   timeZone: varchar("time_zone").default("Europe/London").notNull(),
-  workingDays: varchar("working_days").array().default(['1', '2', '3', '4', '5']).notNull(), // 0=Sunday, 1=Monday, etc. - Expanded to Mon-Fri
+  workingDays: varchar("working_days").array().default(["1", "2", "3", "4", "5"]).notNull(), // 0=Sunday, 1=Monday, etc. - Expanded to Mon-Fri
   dailyStartTime: varchar("daily_start_time").default("09:00").notNull(),
   dailyEndTime: varchar("daily_end_time").default("17:00").notNull(),
   lunchBreakStart: varchar("lunch_break_start").default("12:00"),
@@ -1352,7 +1529,9 @@ export type ChatbotConversation = typeof chatbotConversations.$inferSelect;
 // Wellness metrics tracking table
 export const wellnessMetrics = pgTable("wellness_metrics", {
   id: varchar("id").primaryKey().notNull(),
-  userId: varchar("user_id").references(() => users.id).notNull(),
+  userId: varchar("user_id")
+    .references(() => users.id)
+    .notNull(),
   moodScore: decimal("mood_score", { precision: 3, scale: 1 }), // 0.0 to 10.0
   sleepQuality: decimal("sleep_quality", { precision: 3, scale: 1 }), // 0.0 to 10.0
   stressLevel: decimal("stress_level", { precision: 3, scale: 1 }), // 0.0 to 10.0
@@ -1368,16 +1547,31 @@ export const wellnessMetrics = pgTable("wellness_metrics", {
 // Therapy goals tracking table
 export const therapyGoals = pgTable("therapy_goals", {
   id: varchar("id").primaryKey().notNull(),
-  userId: varchar("user_id").references(() => users.id).notNull(),
+  userId: varchar("user_id")
+    .references(() => users.id)
+    .notNull(),
   title: varchar("title").notNull(),
   description: text("description"),
-  category: varchar("category", { 
-    enum: ['anxiety', 'depression', 'stress', 'sleep', 'relationships', 'coping', 'trauma', 'grief', 'addiction', 'self-esteem'] 
+  category: varchar("category", {
+    enum: [
+      "anxiety",
+      "depression",
+      "stress",
+      "sleep",
+      "relationships",
+      "coping",
+      "trauma",
+      "grief",
+      "addiction",
+      "self-esteem",
+    ],
   }).notNull(),
   targetDate: timestamp("target_date"),
   progress: integer("progress").default(0), // 0-100 percentage
-  status: varchar("status", { enum: ['active', 'completed', 'paused', 'cancelled'] }).default('active'),
-  priority: varchar("priority", { enum: ['low', 'medium', 'high', 'critical'] }).default('medium'),
+  status: varchar("status", { enum: ["active", "completed", "paused", "cancelled"] }).default(
+    "active"
+  ),
+  priority: varchar("priority", { enum: ["low", "medium", "high", "critical"] }).default("medium"),
   therapistId: varchar("therapist_id").references(() => users.id),
   milestones: jsonb("milestones"), // Array of milestone objects
   progressNotes: text("progress_notes"),
@@ -1386,12 +1580,18 @@ export const therapyGoals = pgTable("therapy_goals", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Session progress tracking table  
+// Session progress tracking table
 export const sessionProgressTable = pgTable("session_progress", {
   id: varchar("id").primaryKey().notNull(),
-  sessionId: varchar("session_id").references(() => appointments.id).notNull(),
-  userId: varchar("user_id").references(() => users.id).notNull(),
-  therapistId: varchar("therapist_id").references(() => users.id).notNull(),
+  sessionId: varchar("session_id")
+    .references(() => appointments.id)
+    .notNull(),
+  userId: varchar("user_id")
+    .references(() => users.id)
+    .notNull(),
+  therapistId: varchar("therapist_id")
+    .references(() => users.id)
+    .notNull(),
   moodBefore: decimal("mood_before", { precision: 3, scale: 1 }),
   moodAfter: decimal("mood_after", { precision: 3, scale: 1 }),
   sessionRating: integer("session_rating"), // 1-5 stars
@@ -1411,7 +1611,9 @@ export const sessionProgressTable = pgTable("session_progress", {
 // Overall progress summary table
 export const clientProgressSummary = pgTable("client_progress_summary", {
   id: varchar("id").primaryKey().notNull(),
-  userId: varchar("user_id").references(() => users.id).notNull(),
+  userId: varchar("user_id")
+    .references(() => users.id)
+    .notNull(),
   overallProgress: integer("overall_progress").default(0), // 0-100 percentage
   weeklyImprovement: decimal("weekly_improvement", { precision: 5, scale: 2 }), // percentage change
   monthlyImprovement: decimal("monthly_improvement", { precision: 5, scale: 2 }), // percentage change
@@ -1425,7 +1627,7 @@ export const clientProgressSummary = pgTable("client_progress_summary", {
   lastCalculated: timestamp("last_calculated").defaultNow(),
   therapistId: varchar("therapist_id").references(() => users.id),
   treatmentStartDate: timestamp("treatment_start_date"),
-  riskLevel: varchar("risk_level", { enum: ['low', 'medium', 'high', 'critical'] }).default('low'),
+  riskLevel: varchar("risk_level", { enum: ["low", "medium", "high", "critical"] }).default("low"),
   needsAttention: boolean("needs_attention").default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
@@ -1452,21 +1654,23 @@ export const insertTherapistCalendarSchema = createInsertSchema(therapistCalenda
 export const selectTherapistCalendarSchema = createSelectSchema(therapistCalendars);
 export const insertAppointmentSchema = createInsertSchema(appointments);
 export const selectAppointmentSchema = createSelectSchema(appointments);
-export const insertIntroductionCallSchema = createInsertSchema(introductionCalls).omit({
-  id: true,
-  createdAt: true,
-}).extend({
-  // Support both old format (preferredDate/preferredTime) and new format (date/time/timeZone)
-  preferredDate: z.string().optional(), // Legacy: Accept date string (DD-MM-YYYY or YYYY-MM-DD)
-  preferredTime: z.string().optional(), // Legacy: Display time
-  date: z.string().optional(), // New: Separate date field (DD-MM-YYYY or YYYY-MM-DD)
-  time: z.string().optional(), // New: Separate time field (HH:mm)
-  timeZone: z.string().optional(), // New: Explicit timezone
-  // Support both name OR (firstName + lastName)
-  name: z.string().optional(), // Single name field
-  firstName: z.string().optional(), // Split name fields
-  lastName: z.string().optional(),
-});
+export const insertIntroductionCallSchema = createInsertSchema(introductionCalls)
+  .omit({
+    id: true,
+    createdAt: true,
+  })
+  .extend({
+    // Support both old format (preferredDate/preferredTime) and new format (date/time/timeZone)
+    preferredDate: z.string().optional(), // Legacy: Accept date string (DD-MM-YYYY or YYYY-MM-DD)
+    preferredTime: z.string().optional(), // Legacy: Display time
+    date: z.string().optional(), // New: Separate date field (DD-MM-YYYY or YYYY-MM-DD)
+    time: z.string().optional(), // New: Separate time field (HH:mm)
+    timeZone: z.string().optional(), // New: Explicit timezone
+    // Support both name OR (firstName + lastName)
+    name: z.string().optional(), // Single name field
+    firstName: z.string().optional(), // Split name fields
+    lastName: z.string().optional(),
+  });
 
 // Widget-specific schema that accepts string dates (DD-MM-YYYY or YYYY-MM-DD)
 export const insertIntroductionCallWidgetSchema = z.object({
@@ -1474,7 +1678,7 @@ export const insertIntroductionCallWidgetSchema = z.object({
   email: z.string().email(),
   phone: z.string().optional(),
   message: z.string().optional(),
-  preferredDate: z.string().optional(), // Accept date string  
+  preferredDate: z.string().optional(), // Accept date string
   preferredTime: z.string().optional(),
   date: z.string().optional(), // New format
   time: z.string().optional(),
@@ -1498,14 +1702,22 @@ export const insertMessageSchema = createInsertSchema(messages);
 export const selectMessageSchema = createSelectSchema(messages);
 export const insertEmailQueueSchema = createInsertSchema(emailQueue);
 export const selectEmailQueueSchema = createSelectSchema(emailQueue);
-export const insertUserCommunicationPreferencesSchema = createInsertSchema(userCommunicationPreferences);
-export const selectUserCommunicationPreferencesSchema = createSelectSchema(userCommunicationPreferences);
+export const insertUserCommunicationPreferencesSchema = createInsertSchema(
+  userCommunicationPreferences
+);
+export const selectUserCommunicationPreferencesSchema = createSelectSchema(
+  userCommunicationPreferences
+);
 export const insertNotificationTemplateSchema = createInsertSchema(notificationTemplates);
 export const selectNotificationTemplateSchema = createSelectSchema(notificationTemplates);
 export const insertNotificationSchema = createInsertSchema(notifications);
 export const selectNotificationSchema = createSelectSchema(notifications);
-export const insertNotificationAutomationRuleSchema = createInsertSchema(notificationAutomationRules);
-export const selectNotificationAutomationRuleSchema = createSelectSchema(notificationAutomationRules);
+export const insertNotificationAutomationRuleSchema = createInsertSchema(
+  notificationAutomationRules
+);
+export const selectNotificationAutomationRuleSchema = createSelectSchema(
+  notificationAutomationRules
+);
 
 // GDPR Consent Schemas
 export const insertConsentLogSchema = createInsertSchema(consentLogs).omit({
@@ -1520,8 +1732,10 @@ export type ConsentLog = typeof consentLogs.$inferSelect;
 // Therapist Availability Audit table - for tracking all availability changes
 export const therapistAvailabilityAudit = pgTable("therapist_availability_audit", {
   id: varchar("id").primaryKey().notNull(),
-  therapistId: varchar("therapist_id").references(() => users.id).notNull(),
-  changeType: varchar("change_type", { enum: ['create', 'update', 'delete'] }).notNull(),
+  therapistId: varchar("therapist_id")
+    .references(() => users.id)
+    .notNull(),
+  changeType: varchar("change_type", { enum: ["create", "update", "delete"] }).notNull(),
   previousData: jsonb("previous_data"), // JSON snapshot of previous availability
   newData: jsonb("new_data"), // JSON snapshot of new availability
   changedBy: varchar("changed_by").references(() => users.id),
@@ -1539,24 +1753,32 @@ export type TherapistAvailabilityAudit = typeof therapistAvailabilityAudit.$infe
 // Workspace Accounts - tracks Google Workspace accounts per therapist
 export const workspaceAccounts = pgTable("workspace_accounts", {
   id: varchar("id").primaryKey().notNull(),
-  therapistId: varchar("therapist_id").references(() => users.id).notNull(),
+  therapistId: varchar("therapist_id")
+    .references(() => users.id)
+    .notNull(),
   workspaceEmail: varchar("workspace_email").notNull().unique(),
-  planType: varchar("plan_type", { 
-    enum: ['business-starter', 'business-standard', 'business-plus'] 
-  }).notNull().default('business-standard'),
+  planType: varchar("plan_type", {
+    enum: ["business-starter", "business-standard", "business-plus"],
+  })
+    .notNull()
+    .default("business-standard"),
   monthlyCost: decimal("monthly_cost", { precision: 10, scale: 2 }).notNull(),
-  currency: varchar("currency", { enum: ['GBP', 'USD'] }).notNull().default('GBP'),
+  currency: varchar("currency", { enum: ["GBP", "USD"] })
+    .notNull()
+    .default("GBP"),
   monthlyCostGBP: decimal("monthly_cost_gbp", { precision: 10, scale: 2 }),
   monthlyCostUSD: decimal("monthly_cost_usd", { precision: 10, scale: 2 }),
-  billingCycle: varchar("billing_cycle", { enum: ['monthly', 'annual'] }).default('monthly'),
+  billingCycle: varchar("billing_cycle", { enum: ["monthly", "annual"] }).default("monthly"),
   accountCreatedAt: timestamp("account_created_at").notNull(),
-  accountStatus: varchar("account_status", { 
-    enum: ['active', 'suspended', 'deleted'] 
-  }).default('active'),
+  accountStatus: varchar("account_status", {
+    enum: ["active", "suspended", "deleted"],
+  }).default("active"),
   lastBillingDate: timestamp("last_billing_date"),
   nextBillingDate: timestamp("next_billing_date"),
   storageQuotaGB: integer("storage_quota_gb").default(30), // Business Standard default
-  currentStorageUsedGB: decimal("current_storage_used_gb", { precision: 10, scale: 2 }).default('0'),
+  currentStorageUsedGB: decimal("current_storage_used_gb", { precision: 10, scale: 2 }).default(
+    "0"
+  ),
   licenseAssignedAt: timestamp("license_assigned_at"),
   licenseRevokedAt: timestamp("license_revoked_at"),
   costCenter: varchar("cost_center"), // For accounting/budgeting
@@ -1566,86 +1788,111 @@ export const workspaceAccounts = pgTable("workspace_accounts", {
 });
 
 // Usage Metrics - monthly usage tracking per therapist
-export const usageMetrics = pgTable("usage_metrics", {
-  id: varchar("id").primaryKey().notNull(),
-  therapistId: varchar("therapist_id").references(() => users.id).notNull(),
-  workspaceAccountId: varchar("workspace_account_id").references(() => workspaceAccounts.id),
-  month: varchar("month").notNull(), // YYYY-MM format
-  appointmentsScheduled: integer("appointments_scheduled").default(0),
-  calendarEventsCreated: integer("calendar_events_created").default(0),
-  googleMeetSessionsGenerated: integer("google_meet_sessions").default(0),
-  storageUsedGB: decimal("storage_used_gb", { precision: 10, scale: 2 }).default('0'),
-  emailsSent: integer("emails_sent").default(0),
-  collaboratorsAdded: integer("collaborators_added").default(0),
-  apiCallsUsed: integer("api_calls_used").default(0),
-  documentsCreated: integer("documents_created").default(0),
-  videosRecorded: integer("videos_recorded").default(0),
-  sharedDriveUsageGB: decimal("shared_drive_usage_gb", { precision: 10, scale: 2 }).default('0'),
-  adminAPIRequests: integer("admin_api_requests").default(0),
-  calendarAPIRequests: integer("calendar_api_requests").default(0),
-  meetAPIRequests: integer("meet_api_requests").default(0),
-  lastActiveDate: timestamp("last_active_date"),
-  utilizationScore: decimal("utilization_score", { precision: 5, scale: 2 }), // 0-100 efficiency score
-  recordedAt: timestamp("recorded_at").defaultNow(),
-  collectedBy: varchar("collected_by").default('automated'), // automated|manual
-  dataSource: varchar("data_source").default('api'), // api|manual|estimated
-}, (table) => [
-  uniqueIndex("unique_therapist_month").on(table.therapistId, table.month),
-]);
+export const usageMetrics = pgTable(
+  "usage_metrics",
+  {
+    id: varchar("id").primaryKey().notNull(),
+    therapistId: varchar("therapist_id")
+      .references(() => users.id)
+      .notNull(),
+    workspaceAccountId: varchar("workspace_account_id").references(() => workspaceAccounts.id),
+    month: varchar("month").notNull(), // YYYY-MM format
+    appointmentsScheduled: integer("appointments_scheduled").default(0),
+    calendarEventsCreated: integer("calendar_events_created").default(0),
+    googleMeetSessionsGenerated: integer("google_meet_sessions").default(0),
+    storageUsedGB: decimal("storage_used_gb", { precision: 10, scale: 2 }).default("0"),
+    emailsSent: integer("emails_sent").default(0),
+    collaboratorsAdded: integer("collaborators_added").default(0),
+    apiCallsUsed: integer("api_calls_used").default(0),
+    documentsCreated: integer("documents_created").default(0),
+    videosRecorded: integer("videos_recorded").default(0),
+    sharedDriveUsageGB: decimal("shared_drive_usage_gb", { precision: 10, scale: 2 }).default("0"),
+    adminAPIRequests: integer("admin_api_requests").default(0),
+    calendarAPIRequests: integer("calendar_api_requests").default(0),
+    meetAPIRequests: integer("meet_api_requests").default(0),
+    lastActiveDate: timestamp("last_active_date"),
+    utilizationScore: decimal("utilization_score", { precision: 5, scale: 2 }), // 0-100 efficiency score
+    recordedAt: timestamp("recorded_at").defaultNow(),
+    collectedBy: varchar("collected_by").default("automated"), // automated|manual
+    dataSource: varchar("data_source").default("api"), // api|manual|estimated
+  },
+  (table) => [uniqueIndex("unique_therapist_month").on(table.therapistId, table.month)]
+);
 
 // Cost Reports - monthly cost summaries and analytics
-export const costReports = pgTable("cost_reports", {
-  id: varchar("id").primaryKey().notNull(),
-  month: varchar("month").notNull(), // YYYY-MM format
-  currency: varchar("currency", { enum: ['GBP', 'USD'] }).notNull().default('GBP'),
-  totalWorkspaceCost: decimal("total_workspace_cost", { precision: 10, scale: 2 }).notNull(),
-  totalWorkspaceCostGBP: decimal("total_workspace_cost_gbp", { precision: 10, scale: 2 }),
-  totalWorkspaceCostUSD: decimal("total_workspace_cost_usd", { precision: 10, scale: 2 }),
-  totalStorageOverageCost: decimal("total_storage_overage_cost", { precision: 10, scale: 2 }).default('0'),
-  totalStorageOverageCostGBP: decimal("total_storage_overage_cost_gbp", { precision: 10, scale: 2 }).default('0'),
-  totalAPIOverageCost: decimal("total_api_overage_cost", { precision: 10, scale: 2 }).default('0'),
-  totalAPIOverageCostGBP: decimal("total_api_overage_cost_gbp", { precision: 10, scale: 2 }).default('0'),
-  totalCost: decimal("total_cost", { precision: 10, scale: 2 }).notNull(),
-  totalCostGBP: decimal("total_cost_gbp", { precision: 10, scale: 2 }),
-  totalCostUSD: decimal("total_cost_usd", { precision: 10, scale: 2 }),
-  activeTherapistAccounts: integer("active_therapist_accounts").notNull(),
-  totalAppointments: integer("total_appointments").notNull(),
-  totalCalendarEvents: integer("total_calendar_events").default(0),
-  totalGoogleMeetSessions: integer("total_google_meet_sessions").default(0),
-  averageCostPerTherapist: decimal("average_cost_per_therapist", { precision: 10, scale: 2 }),
-  averageCostPerTherapistGBP: decimal("average_cost_per_therapist_gbp", { precision: 10, scale: 2 }),
-  costPerAppointment: decimal("cost_per_appointment", { precision: 10, scale: 2 }),
-  costPerAppointmentGBP: decimal("cost_per_appointment_gbp", { precision: 10, scale: 2 }),
-  costPerCalendarEvent: decimal("cost_per_calendar_event", { precision: 10, scale: 2 }),
-  costPerCalendarEventGBP: decimal("cost_per_calendar_event_gbp", { precision: 10, scale: 2 }),
-  monthOverMonthChange: decimal("month_over_month_change", { precision: 10, scale: 2 }), // Percentage change
-  yearOverYearChange: decimal("year_over_year_change", { precision: 10, scale: 2 }), // Percentage change
-  projectedNextMonthCost: decimal("projected_next_month_cost", { precision: 10, scale: 2 }),
-  projectedNextMonthCostGBP: decimal("projected_next_month_cost_gbp", { precision: 10, scale: 2 }),
-  utilizationRate: decimal("utilization_rate", { precision: 5, scale: 2 }), // Overall system utilization
-  efficiencyScore: decimal("efficiency_score", { precision: 5, scale: 2 }), // Cost efficiency rating
-  topCostDrivers: jsonb("top_cost_drivers"), // Array of cost analysis insights
-  optimizationRecommendations: jsonb("optimization_recommendations"), // Array of cost-saving suggestions
-  budgetVariance: decimal("budget_variance", { precision: 10, scale: 2 }), // Actual vs budgeted cost
-  budgetVarianceGBP: decimal("budget_variance_gbp", { precision: 10, scale: 2 }), // Actual vs budgeted cost in GBP
-  budgetUtilization: decimal("budget_utilization", { precision: 5, scale: 2 }), // Percentage of budget used
-  generatedAt: timestamp("generated_at").defaultNow(),
-  generatedBy: varchar("generated_by").default('automated'),
-  reportVersion: varchar("report_version").default('1.0'),
-  dataQualityScore: decimal("data_quality_score", { precision: 5, scale: 2 }).default('100'), // Data completeness score
-}, (table) => [
-  uniqueIndex("unique_cost_report_month").on(table.month),
-]);
+export const costReports = pgTable(
+  "cost_reports",
+  {
+    id: varchar("id").primaryKey().notNull(),
+    month: varchar("month").notNull(), // YYYY-MM format
+    currency: varchar("currency", { enum: ["GBP", "USD"] })
+      .notNull()
+      .default("GBP"),
+    totalWorkspaceCost: decimal("total_workspace_cost", { precision: 10, scale: 2 }).notNull(),
+    totalWorkspaceCostGBP: decimal("total_workspace_cost_gbp", { precision: 10, scale: 2 }),
+    totalWorkspaceCostUSD: decimal("total_workspace_cost_usd", { precision: 10, scale: 2 }),
+    totalStorageOverageCost: decimal("total_storage_overage_cost", {
+      precision: 10,
+      scale: 2,
+    }).default("0"),
+    totalStorageOverageCostGBP: decimal("total_storage_overage_cost_gbp", {
+      precision: 10,
+      scale: 2,
+    }).default("0"),
+    totalAPIOverageCost: decimal("total_api_overage_cost", { precision: 10, scale: 2 }).default(
+      "0"
+    ),
+    totalAPIOverageCostGBP: decimal("total_api_overage_cost_gbp", {
+      precision: 10,
+      scale: 2,
+    }).default("0"),
+    totalCost: decimal("total_cost", { precision: 10, scale: 2 }).notNull(),
+    totalCostGBP: decimal("total_cost_gbp", { precision: 10, scale: 2 }),
+    totalCostUSD: decimal("total_cost_usd", { precision: 10, scale: 2 }),
+    activeTherapistAccounts: integer("active_therapist_accounts").notNull(),
+    totalAppointments: integer("total_appointments").notNull(),
+    totalCalendarEvents: integer("total_calendar_events").default(0),
+    totalGoogleMeetSessions: integer("total_google_meet_sessions").default(0),
+    averageCostPerTherapist: decimal("average_cost_per_therapist", { precision: 10, scale: 2 }),
+    averageCostPerTherapistGBP: decimal("average_cost_per_therapist_gbp", {
+      precision: 10,
+      scale: 2,
+    }),
+    costPerAppointment: decimal("cost_per_appointment", { precision: 10, scale: 2 }),
+    costPerAppointmentGBP: decimal("cost_per_appointment_gbp", { precision: 10, scale: 2 }),
+    costPerCalendarEvent: decimal("cost_per_calendar_event", { precision: 10, scale: 2 }),
+    costPerCalendarEventGBP: decimal("cost_per_calendar_event_gbp", { precision: 10, scale: 2 }),
+    monthOverMonthChange: decimal("month_over_month_change", { precision: 10, scale: 2 }), // Percentage change
+    yearOverYearChange: decimal("year_over_year_change", { precision: 10, scale: 2 }), // Percentage change
+    projectedNextMonthCost: decimal("projected_next_month_cost", { precision: 10, scale: 2 }),
+    projectedNextMonthCostGBP: decimal("projected_next_month_cost_gbp", {
+      precision: 10,
+      scale: 2,
+    }),
+    utilizationRate: decimal("utilization_rate", { precision: 5, scale: 2 }), // Overall system utilization
+    efficiencyScore: decimal("efficiency_score", { precision: 5, scale: 2 }), // Cost efficiency rating
+    topCostDrivers: jsonb("top_cost_drivers"), // Array of cost analysis insights
+    optimizationRecommendations: jsonb("optimization_recommendations"), // Array of cost-saving suggestions
+    budgetVariance: decimal("budget_variance", { precision: 10, scale: 2 }), // Actual vs budgeted cost
+    budgetVarianceGBP: decimal("budget_variance_gbp", { precision: 10, scale: 2 }), // Actual vs budgeted cost in GBP
+    budgetUtilization: decimal("budget_utilization", { precision: 5, scale: 2 }), // Percentage of budget used
+    generatedAt: timestamp("generated_at").defaultNow(),
+    generatedBy: varchar("generated_by").default("automated"),
+    reportVersion: varchar("report_version").default("1.0"),
+    dataQualityScore: decimal("data_quality_score", { precision: 5, scale: 2 }).default("100"), // Data completeness score
+  },
+  (table) => [uniqueIndex("unique_cost_report_month").on(table.month)]
+);
 
 // Cost Budget and Alerts
 export const costBudgets = pgTable("cost_budgets", {
   id: varchar("id").primaryKey().notNull(),
   budgetName: varchar("budget_name").notNull(),
-  budgetType: varchar("budget_type", { 
-    enum: ['monthly', 'quarterly', 'annual', 'per-therapist'] 
+  budgetType: varchar("budget_type", {
+    enum: ["monthly", "quarterly", "annual", "per-therapist"],
   }).notNull(),
   budgetAmount: decimal("budget_amount", { precision: 10, scale: 2 }).notNull(),
-  currentSpend: decimal("current_spend", { precision: 10, scale: 2 }).default('0'),
+  currentSpend: decimal("current_spend", { precision: 10, scale: 2 }).default("0"),
   budgetPeriod: varchar("budget_period"), // YYYY-MM or YYYY-Q1, etc.
   alertThresholds: jsonb("alert_thresholds"), // Array of percentage thresholds (50%, 75%, 90%, 100%)
   alertRecipients: varchar("alert_recipients").array(), // Email addresses
@@ -1661,19 +1908,25 @@ export const costBudgets = pgTable("cost_budgets", {
 export const costOptimizations = pgTable("cost_optimizations", {
   id: varchar("id").primaryKey().notNull(),
   recommendationType: varchar("recommendation_type", {
-    enum: ['low-utilization', 'plan-downgrade', 'storage-cleanup', 'api-optimization', 'license-consolidation']
+    enum: [
+      "low-utilization",
+      "plan-downgrade",
+      "storage-cleanup",
+      "api-optimization",
+      "license-consolidation",
+    ],
   }).notNull(),
   therapistId: varchar("therapist_id").references(() => users.id),
   workspaceAccountId: varchar("workspace_account_id").references(() => workspaceAccounts.id),
   description: text("description").notNull(),
   potentialMonthlySavings: decimal("potential_monthly_savings", { precision: 10, scale: 2 }),
-  implementationEffort: varchar("implementation_effort", { 
-    enum: ['low', 'medium', 'high'] 
-  }).default('medium'),
-  priority: varchar("priority", { enum: ['low', 'medium', 'high', 'critical'] }).default('medium'),
-  status: varchar("status", { 
-    enum: ['pending', 'approved', 'implemented', 'rejected', 'expired'] 
-  }).default('pending'),
+  implementationEffort: varchar("implementation_effort", {
+    enum: ["low", "medium", "high"],
+  }).default("medium"),
+  priority: varchar("priority", { enum: ["low", "medium", "high", "critical"] }).default("medium"),
+  status: varchar("status", {
+    enum: ["pending", "approved", "implemented", "rejected", "expired"],
+  }).default("pending"),
   implementedAt: timestamp("implemented_at"),
   actualSavings: decimal("actual_savings", { precision: 10, scale: 2 }),
   validUntil: timestamp("valid_until"),
@@ -1686,171 +1939,221 @@ export const costOptimizations = pgTable("cost_optimizations", {
 });
 
 // Webhook Events - Durable idempotency tracking for production reliability
-export const webhookEvents = pgTable("webhook_events", {
-  id: varchar("id").primaryKey().notNull(),
-  eventId: varchar("event_id").notNull().unique(), // Stripe event ID for idempotency
-  eventType: varchar("event_type").notNull(), // payment_intent.succeeded, etc.
-  webhookSource: varchar("webhook_source").notNull().default('stripe'),
-  eventData: jsonb("event_data").notNull(), // Full webhook payload
-  processingStatus: varchar("processing_status", {
-    enum: ['processing', 'completed', 'failed', 'retrying']
-  }).notNull().default('processing'),
-  attemptCount: integer("attempt_count").notNull().default(1),
-  lastAttemptAt: timestamp("last_attempt_at").notNull().defaultNow(),
-  completedAt: timestamp("completed_at"),
-  failureReason: text("failure_reason"),
-  createdAppointmentId: varchar("created_appointment_id").references(() => appointments.id),
-  createdPaymentId: varchar("created_payment_id"),
-  downstreamOperations: jsonb("downstream_operations"), // Track what operations were completed
-  processingNotes: text("processing_notes"),
-  receivedAt: timestamp("received_at").notNull().defaultNow(),
-  processedBy: varchar("processed_by").notNull().default('webhook-handler'),
-}, (table) => [
-  uniqueIndex("unique_webhook_event_id").on(table.eventId),
-  index("webhook_events_status_idx").on(table.processingStatus),
-  index("webhook_events_type_idx").on(table.eventType),
-  index("webhook_events_received_idx").on(table.receivedAt),
-]);
+export const webhookEvents = pgTable(
+  "webhook_events",
+  {
+    id: varchar("id").primaryKey().notNull(),
+    eventId: varchar("event_id").notNull().unique(), // Stripe event ID for idempotency
+    eventType: varchar("event_type").notNull(), // payment_intent.succeeded, etc.
+    webhookSource: varchar("webhook_source").notNull().default("stripe"),
+    eventData: jsonb("event_data").notNull(), // Full webhook payload
+    processingStatus: varchar("processing_status", {
+      enum: ["processing", "completed", "failed", "retrying"],
+    })
+      .notNull()
+      .default("processing"),
+    attemptCount: integer("attempt_count").notNull().default(1),
+    lastAttemptAt: timestamp("last_attempt_at").notNull().defaultNow(),
+    completedAt: timestamp("completed_at"),
+    failureReason: text("failure_reason"),
+    createdAppointmentId: varchar("created_appointment_id").references(() => appointments.id),
+    createdPaymentId: varchar("created_payment_id"),
+    downstreamOperations: jsonb("downstream_operations"), // Track what operations were completed
+    processingNotes: text("processing_notes"),
+    receivedAt: timestamp("received_at").notNull().defaultNow(),
+    processedBy: varchar("processed_by").notNull().default("webhook-handler"),
+  },
+  (table) => [
+    uniqueIndex("unique_webhook_event_id").on(table.eventId),
+    index("webhook_events_status_idx").on(table.processingStatus),
+    index("webhook_events_type_idx").on(table.eventType),
+    index("webhook_events_received_idx").on(table.receivedAt),
+  ]
+);
 
 // Webhook Processing Queue - Outbox pattern for atomic operations
-export const webhookProcessingQueue = pgTable("webhook_processing_queue", {
-  id: varchar("id").primaryKey().notNull(),
-  webhookEventId: varchar("webhook_event_id").references(() => webhookEvents.id).notNull(),
-  operationType: varchar("operation_type", {
-    enum: ['create_appointment', 'create_calendar_event', 'send_email', 'update_payment', 'process_payout']
-  }).notNull(),
-  operationData: jsonb("operation_data").notNull(),
-  status: varchar("status", {
-    enum: ['pending', 'in_progress', 'completed', 'failed', 'cancelled']
-  }).notNull().default('pending'),
-  priority: integer("priority").notNull().default(0), // Higher number = higher priority
-  maxRetries: integer("max_retries").notNull().default(3),
-  currentRetries: integer("current_retries").notNull().default(0),
-  lastAttemptAt: timestamp("last_attempt_at"),
-  nextRetryAt: timestamp("next_retry_at"),
-  completedAt: timestamp("completed_at"),
-  failureReason: text("failure_reason"),
-  dependsOn: varchar("depends_on").array(), // IDs of operations this depends on
-  scheduledFor: timestamp("scheduled_for").defaultNow(), // When to process
-  lockUntil: timestamp("lock_until"), // Distributed locking for workers
-  lockedBy: varchar("locked_by"), // Worker instance ID
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-}, (table) => [
-  index("webhook_queue_status_idx").on(table.status),
-  index("webhook_queue_scheduled_idx").on(table.scheduledFor),
-  index("webhook_queue_priority_idx").on(table.priority),
-  index("webhook_queue_webhook_event_idx").on(table.webhookEventId),
-]);
+export const webhookProcessingQueue = pgTable(
+  "webhook_processing_queue",
+  {
+    id: varchar("id").primaryKey().notNull(),
+    webhookEventId: varchar("webhook_event_id")
+      .references(() => webhookEvents.id)
+      .notNull(),
+    operationType: varchar("operation_type", {
+      enum: [
+        "create_appointment",
+        "create_calendar_event",
+        "send_email",
+        "update_payment",
+        "process_payout",
+      ],
+    }).notNull(),
+    operationData: jsonb("operation_data").notNull(),
+    status: varchar("status", {
+      enum: ["pending", "in_progress", "completed", "failed", "cancelled"],
+    })
+      .notNull()
+      .default("pending"),
+    priority: integer("priority").notNull().default(0), // Higher number = higher priority
+    maxRetries: integer("max_retries").notNull().default(3),
+    currentRetries: integer("current_retries").notNull().default(0),
+    lastAttemptAt: timestamp("last_attempt_at"),
+    nextRetryAt: timestamp("next_retry_at"),
+    completedAt: timestamp("completed_at"),
+    failureReason: text("failure_reason"),
+    dependsOn: varchar("depends_on").array(), // IDs of operations this depends on
+    scheduledFor: timestamp("scheduled_for").defaultNow(), // When to process
+    lockUntil: timestamp("lock_until"), // Distributed locking for workers
+    lockedBy: varchar("locked_by"), // Worker instance ID
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [
+    index("webhook_queue_status_idx").on(table.status),
+    index("webhook_queue_scheduled_idx").on(table.scheduledFor),
+    index("webhook_queue_priority_idx").on(table.priority),
+    index("webhook_queue_webhook_event_idx").on(table.webhookEventId),
+  ]
+);
 
 // Client Activation Tokens - Step 16: Gated client signup
-export const clientActivationTokens = pgTable("client_activation_tokens", {
-  id: varchar("id").primaryKey().notNull(),
-  clientEmail: varchar("client_email").notNull(),
-  activationToken: varchar("activation_token").unique().notNull(),
-  expiresAt: timestamp("expires_at").notNull(),
-  isUsed: boolean("is_used").default(false),
-  usedAt: timestamp("used_at"),
-  createdBy: varchar("created_by").references(() => users.id), // Admin who created the activation
-  matchedTherapistId: varchar("matched_therapist_id").references(() => users.id), // Therapist matched to this client
-  notes: text("notes"), // Admin notes about the activation
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-}, (table) => [
-  index("idx_activation_email").on(table.clientEmail),
-  index("idx_activation_token").on(table.activationToken),
-  index("idx_activation_expiry").on(table.expiresAt),
-]);
+export const clientActivationTokens = pgTable(
+  "client_activation_tokens",
+  {
+    id: varchar("id").primaryKey().notNull(),
+    clientEmail: varchar("client_email").notNull(),
+    activationToken: varchar("activation_token").unique().notNull(),
+    expiresAt: timestamp("expires_at").notNull(),
+    isUsed: boolean("is_used").default(false),
+    usedAt: timestamp("used_at"),
+    createdBy: varchar("created_by").references(() => users.id), // Admin who created the activation
+    matchedTherapistId: varchar("matched_therapist_id").references(() => users.id), // Therapist matched to this client
+    notes: text("notes"), // Admin notes about the activation
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_activation_email").on(table.clientEmail),
+    index("idx_activation_token").on(table.activationToken),
+    index("idx_activation_expiry").on(table.expiresAt),
+  ]
+);
 
 // Subscription Packages - Different therapy session packages
-export const subscriptionPackages = pgTable("subscription_packages", {
-  id: varchar("id").primaryKey().notNull(),
-  name: varchar("name").notNull(), // e.g., "4 Sessions Package", "8 Sessions Package"
-  description: text("description"),
-  sessionCount: integer("session_count").notNull(), // Number of sessions included
-  pricePerSession: decimal("price_per_session", { precision: 10, scale: 2 }).notNull(), // Regular price per session
-  discountPercentage: decimal("discount_percentage", { precision: 5, scale: 2 }), // Discount percentage
-  totalPrice: decimal("total_price", { precision: 10, scale: 2 }).notNull(), // Total package price after discount
-  billingInterval: varchar("billing_interval", { enum: ['one_time', 'monthly', 'quarterly', 'annual'] }).notNull(),
-  stripeProductId: varchar("stripe_product_id"), // Stripe product ID
-  stripePriceId: varchar("stripe_price_id"), // Stripe price ID
-  isActive: boolean("is_active").default(true),
-  features: jsonb("features"), // Additional features (priority booking, etc.)
-  validityDays: integer("validity_days"), // How many days the package is valid for (null = unlimited)
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-}, (table) => [
-  index("idx_subscription_packages_active").on(table.isActive),
-]);
+export const subscriptionPackages = pgTable(
+  "subscription_packages",
+  {
+    id: varchar("id").primaryKey().notNull(),
+    name: varchar("name").notNull(), // e.g., "4 Sessions Package", "8 Sessions Package"
+    description: text("description"),
+    sessionCount: integer("session_count").notNull(), // Number of sessions included
+    pricePerSession: decimal("price_per_session", { precision: 10, scale: 2 }).notNull(), // Regular price per session
+    discountPercentage: decimal("discount_percentage", { precision: 5, scale: 2 }), // Discount percentage
+    totalPrice: decimal("total_price", { precision: 10, scale: 2 }).notNull(), // Total package price after discount
+    billingInterval: varchar("billing_interval", {
+      enum: ["one_time", "monthly", "quarterly", "annual"],
+    }).notNull(),
+    stripeProductId: varchar("stripe_product_id"), // Stripe product ID
+    stripePriceId: varchar("stripe_price_id"), // Stripe price ID
+    isActive: boolean("is_active").default(true),
+    features: jsonb("features"), // Additional features (priority booking, etc.)
+    validityDays: integer("validity_days"), // How many days the package is valid for (null = unlimited)
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [index("idx_subscription_packages_active").on(table.isActive)]
+);
 
 // User Subscriptions - Track client subscriptions
-export const userSubscriptions = pgTable("user_subscriptions", {
-  id: varchar("id").primaryKey().notNull(),
-  userId: varchar("user_id").references(() => users.id).notNull(),
-  packageId: varchar("package_id").references(() => subscriptionPackages.id).notNull(),
-  stripeSubscriptionId: varchar("stripe_subscription_id").unique(), // Stripe subscription ID
-  status: varchar("status", { 
-    enum: ['active', 'paused', 'cancelled', 'expired', 'pending'] 
-  }).notNull(),
-  sessionsTotal: integer("sessions_total").notNull(), // Total sessions in subscription
-  sessionsUsed: integer("sessions_used").default(0).notNull(), // Sessions already used
-  sessionsRemaining: integer("sessions_remaining").notNull(), // Sessions remaining
-  currentPeriodStart: timestamp("current_period_start"),
-  currentPeriodEnd: timestamp("current_period_end"),
-  cancelAtPeriodEnd: boolean("cancel_at_period_end").default(false),
-  cancelledAt: timestamp("cancelled_at"),
-  expiresAt: timestamp("expires_at"), // When the subscription expires
-  autoRenew: boolean("auto_renew").default(false), // Auto-renew subscription
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-}, (table) => [
-  index("idx_user_subscriptions_user_id").on(table.userId),
-  index("idx_user_subscriptions_status").on(table.status),
-  index("idx_user_subscriptions_stripe_id").on(table.stripeSubscriptionId),
-]);
+export const userSubscriptions = pgTable(
+  "user_subscriptions",
+  {
+    id: varchar("id").primaryKey().notNull(),
+    userId: varchar("user_id")
+      .references(() => users.id)
+      .notNull(),
+    packageId: varchar("package_id")
+      .references(() => subscriptionPackages.id)
+      .notNull(),
+    stripeSubscriptionId: varchar("stripe_subscription_id").unique(), // Stripe subscription ID
+    status: varchar("status", {
+      enum: ["active", "paused", "cancelled", "expired", "pending"],
+    }).notNull(),
+    sessionsTotal: integer("sessions_total").notNull(), // Total sessions in subscription
+    sessionsUsed: integer("sessions_used").default(0).notNull(), // Sessions already used
+    sessionsRemaining: integer("sessions_remaining").notNull(), // Sessions remaining
+    currentPeriodStart: timestamp("current_period_start"),
+    currentPeriodEnd: timestamp("current_period_end"),
+    cancelAtPeriodEnd: boolean("cancel_at_period_end").default(false),
+    cancelledAt: timestamp("cancelled_at"),
+    expiresAt: timestamp("expires_at"), // When the subscription expires
+    autoRenew: boolean("auto_renew").default(false), // Auto-renew subscription
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_user_subscriptions_user_id").on(table.userId),
+    index("idx_user_subscriptions_status").on(table.status),
+    index("idx_user_subscriptions_stripe_id").on(table.stripeSubscriptionId),
+  ]
+);
 
 // Bulk Booking Discounts - Configuration for bulk booking discounts
-export const bulkBookingDiscounts = pgTable("bulk_booking_discounts", {
-  id: varchar("id").primaryKey().notNull(),
-  minSessions: integer("min_sessions").notNull(), // Minimum sessions for this discount tier
-  maxSessions: integer("max_sessions"), // Maximum sessions (null = unlimited)
-  discountPercentage: decimal("discount_percentage", { precision: 5, scale: 2 }).notNull(),
-  discountType: varchar("discount_type", { enum: ['percentage', 'fixed'] }).notNull(),
-  fixedDiscountAmount: decimal("fixed_discount_amount", { precision: 10, scale: 2 }), // Fixed discount amount
-  isActive: boolean("is_active").default(true),
-  description: text("description"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-}, (table) => [
-  index("idx_bulk_booking_discounts_active").on(table.isActive),
-  index("idx_bulk_booking_discounts_sessions").on(table.minSessions, table.maxSessions),
-]);
+export const bulkBookingDiscounts = pgTable(
+  "bulk_booking_discounts",
+  {
+    id: varchar("id").primaryKey().notNull(),
+    minSessions: integer("min_sessions").notNull(), // Minimum sessions for this discount tier
+    maxSessions: integer("max_sessions"), // Maximum sessions (null = unlimited)
+    discountPercentage: decimal("discount_percentage", { precision: 5, scale: 2 }).notNull(),
+    discountType: varchar("discount_type", { enum: ["percentage", "fixed"] }).notNull(),
+    fixedDiscountAmount: decimal("fixed_discount_amount", { precision: 10, scale: 2 }), // Fixed discount amount
+    isActive: boolean("is_active").default(true),
+    description: text("description"),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_bulk_booking_discounts_active").on(table.isActive),
+    index("idx_bulk_booking_discounts_sessions").on(table.minSessions, table.maxSessions),
+  ]
+);
 
 // Bulk Bookings - Track bulk booking purchases
-export const bulkBookings = pgTable("bulk_bookings", {
-  id: varchar("id").primaryKey().notNull(),
-  userId: varchar("user_id").references(() => users.id).notNull(),
-  therapistId: varchar("therapist_id").references(() => users.id).notNull(),
-  totalSessions: integer("total_sessions").notNull(),
-  sessionsCompleted: integer("sessions_completed").default(0).notNull(),
-  sessionsRemaining: integer("sessions_remaining").notNull(),
-  bookingPattern: varchar("booking_pattern", { enum: ['weekly', 'biweekly', 'monthly', 'custom'] }),
-  recurringDay: integer("recurring_day"), // Day of week for weekly bookings (1-7)
-  recurringTime: varchar("recurring_time"), // Preferred time (HH:mm format)
-  startDate: timestamp("start_date"),
-  pricePerSession: decimal("price_per_session", { precision: 10, scale: 2 }).notNull(),
-  discountApplied: decimal("discount_applied", { precision: 10, scale: 2 }).default('0'),
-  totalPrice: decimal("total_price", { precision: 10, scale: 2 }).notNull(),
-  stripePaymentIntentId: varchar("stripe_payment_intent_id"),
-  status: varchar("status", { enum: ['pending', 'active', 'completed', 'cancelled'] }).notNull(),
-  appointmentIds: varchar("appointment_ids").array(), // Array of created appointment IDs
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-}, (table) => [
-  index("idx_bulk_bookings_user_id").on(table.userId),
-  index("idx_bulk_bookings_therapist_id").on(table.therapistId),
-  index("idx_bulk_bookings_status").on(table.status),
-]);
+export const bulkBookings = pgTable(
+  "bulk_bookings",
+  {
+    id: varchar("id").primaryKey().notNull(),
+    userId: varchar("user_id")
+      .references(() => users.id)
+      .notNull(),
+    therapistId: varchar("therapist_id")
+      .references(() => users.id)
+      .notNull(),
+    totalSessions: integer("total_sessions").notNull(),
+    sessionsCompleted: integer("sessions_completed").default(0).notNull(),
+    sessionsRemaining: integer("sessions_remaining").notNull(),
+    bookingPattern: varchar("booking_pattern", {
+      enum: ["weekly", "biweekly", "monthly", "custom"],
+    }),
+    recurringDay: integer("recurring_day"), // Day of week for weekly bookings (1-7)
+    recurringTime: varchar("recurring_time"), // Preferred time (HH:mm format)
+    startDate: timestamp("start_date"),
+    pricePerSession: decimal("price_per_session", { precision: 10, scale: 2 }).notNull(),
+    discountApplied: decimal("discount_applied", { precision: 10, scale: 2 }).default("0"),
+    totalPrice: decimal("total_price", { precision: 10, scale: 2 }).notNull(),
+    stripePaymentIntentId: varchar("stripe_payment_intent_id"),
+    status: varchar("status", { enum: ["pending", "active", "completed", "cancelled"] }).notNull(),
+    appointmentIds: varchar("appointment_ids").array(), // Array of created appointment IDs
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_bulk_bookings_user_id").on(table.userId),
+    index("idx_bulk_bookings_therapist_id").on(table.therapistId),
+    index("idx_bulk_bookings_status").on(table.status),
+  ]
+);
 
 // Type definitions for cost monitoring tables
 export type WorkspaceAccount = typeof workspaceAccounts.$inferSelect;
@@ -1892,8 +2195,8 @@ export type InsertBulkBooking = typeof bulkBookings.$inferInsert;
 export const retentionPolicies = pgTable("retention_policies", {
   id: varchar("id").primaryKey().notNull(),
   name: varchar("name").notNull(),
-  dataType: varchar("data_type", { 
-    enum: ['users', 'sessions', 'form_submissions', 'appointments'] 
+  dataType: varchar("data_type", {
+    enum: ["users", "sessions", "form_submissions", "appointments"],
   }).notNull(),
   retentionDays: integer("retention_days").notNull(),
   enabled: boolean("enabled").default(true),
@@ -1904,55 +2207,67 @@ export const retentionPolicies = pgTable("retention_policies", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-export const retentionAuditLogs = pgTable("retention_audit_logs", {
-  id: varchar("id").primaryKey().notNull(),
-  timestamp: timestamp("timestamp").defaultNow(),
-  dataType: varchar("data_type").notNull(),
-  recordId: varchar("record_id").notNull(),
-  action: varchar("action", { 
-    enum: ['soft_delete', 'hard_delete', 'skip'] 
-  }).notNull(),
-  reason: text("reason").notNull(),
-  dryRun: boolean("dry_run").default(false),
-  policyId: varchar("policy_id").references(() => retentionPolicies.id),
-  executedBy: varchar("executed_by"), // 'system' or admin user ID
-  metadata: jsonb("metadata"), // Additional context
-  createdAt: timestamp("created_at").defaultNow(),
-}, (table) => [
-  index("idx_retention_logs_timestamp").on(table.timestamp),
-  index("idx_retention_logs_data_type").on(table.dataType),
-  index("idx_retention_logs_action").on(table.action),
-]);
+export const retentionAuditLogs = pgTable(
+  "retention_audit_logs",
+  {
+    id: varchar("id").primaryKey().notNull(),
+    timestamp: timestamp("timestamp").defaultNow(),
+    dataType: varchar("data_type").notNull(),
+    recordId: varchar("record_id").notNull(),
+    action: varchar("action", {
+      enum: ["soft_delete", "hard_delete", "skip"],
+    }).notNull(),
+    reason: text("reason").notNull(),
+    dryRun: boolean("dry_run").default(false),
+    policyId: varchar("policy_id").references(() => retentionPolicies.id),
+    executedBy: varchar("executed_by"), // 'system' or admin user ID
+    metadata: jsonb("metadata"), // Additional context
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_retention_logs_timestamp").on(table.timestamp),
+    index("idx_retention_logs_data_type").on(table.dataType),
+    index("idx_retention_logs_action").on(table.action),
+  ]
+);
 
 // GDPR Data Requests (Export & Deletion)
-export const dataRequests = pgTable("data_requests", {
-  id: varchar("id").primaryKey().notNull(),
-  userId: varchar("user_id").references(() => users.id).notNull(),
-  requestType: varchar("request_type", { 
-    enum: ['export', 'deletion'] 
-  }).notNull(),
-  status: varchar("status", { 
-    enum: ['pending', 'processing', 'completed', 'failed', 'cancelled'] 
-  }).default('pending').notNull(),
-  requestedAt: timestamp("requested_at").defaultNow(),
-  processedAt: timestamp("processed_at"),
-  completedAt: timestamp("completed_at"),
-  expiresAt: timestamp("expires_at"), // For exports - auto-delete after 7 days
-  scheduledDeletionAt: timestamp("scheduled_deletion_at"), // For deletion requests - 30 day grace period
-  filePath: varchar("file_path"), // For exports - where JSON file is stored
-  cancellationToken: varchar("cancellation_token"), // For deletion requests - unique token to cancel
-  errorMessage: text("error_message"), // If status is 'failed'
-  processedBy: varchar("processed_by"), // 'system' or admin user ID
-  metadata: jsonb("metadata"), // Additional context (file size, record counts, etc.)
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-}, (table) => [
-  index("idx_data_requests_user_id").on(table.userId),
-  index("idx_data_requests_type").on(table.requestType),
-  index("idx_data_requests_status").on(table.status),
-  index("idx_data_requests_scheduled_deletion").on(table.scheduledDeletionAt),
-  index("idx_data_requests_expires_at").on(table.expiresAt),
-]);
+export const dataRequests = pgTable(
+  "data_requests",
+  {
+    id: varchar("id").primaryKey().notNull(),
+    userId: varchar("user_id")
+      .references(() => users.id)
+      .notNull(),
+    requestType: varchar("request_type", {
+      enum: ["export", "deletion"],
+    }).notNull(),
+    status: varchar("status", {
+      enum: ["pending", "processing", "completed", "failed", "cancelled"],
+    })
+      .default("pending")
+      .notNull(),
+    requestedAt: timestamp("requested_at").defaultNow(),
+    processedAt: timestamp("processed_at"),
+    completedAt: timestamp("completed_at"),
+    expiresAt: timestamp("expires_at"), // For exports - auto-delete after 7 days
+    scheduledDeletionAt: timestamp("scheduled_deletion_at"), // For deletion requests - 30 day grace period
+    filePath: varchar("file_path"), // For exports - where JSON file is stored
+    cancellationToken: varchar("cancellation_token"), // For deletion requests - unique token to cancel
+    errorMessage: text("error_message"), // If status is 'failed'
+    processedBy: varchar("processed_by"), // 'system' or admin user ID
+    metadata: jsonb("metadata"), // Additional context (file size, record counts, etc.)
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_data_requests_user_id").on(table.userId),
+    index("idx_data_requests_type").on(table.requestType),
+    index("idx_data_requests_status").on(table.status),
+    index("idx_data_requests_scheduled_deletion").on(table.scheduledDeletionAt),
+    index("idx_data_requests_expires_at").on(table.expiresAt),
+  ]
+);
 
 // Type definitions for retention system
 export type RetentionPolicy = typeof retentionPolicies.$inferSelect;
@@ -1965,51 +2280,63 @@ export type DataRequest = typeof dataRequests.$inferSelect;
 export type InsertDataRequest = typeof dataRequests.$inferInsert;
 
 // GDPR Consent Tracking - Article 7 (Lawful Consent)
-export const userConsents = pgTable("user_consents", {
-  id: varchar("id").primaryKey().notNull(),
-  userId: varchar("user_id").references(() => users.id).notNull(),
-  consentType: varchar("consent_type", {
-    enum: ['essential', 'functional', 'analytics', 'marketing', 'medical_data_processing']
-  }).notNull(),
-  granted: boolean("granted").notNull(),
-  grantedAt: timestamp("granted_at"),
-  withdrawnAt: timestamp("withdrawn_at"),
-  ipAddress: varchar("ip_address"), // IP when consent was given/withdrawn
-  userAgent: varchar("user_agent"), // Browser info when consent was given/withdrawn
-  consentVersion: varchar("consent_version").default('1.0'), // Track consent text version
-  metadata: jsonb("metadata"), // Additional context (e.g., which page, referrer)
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-}, (table) => [
-  uniqueIndex("unique_user_consent_type").on(table.userId, table.consentType),
-  index("idx_user_consents_user_id").on(table.userId),
-  index("idx_user_consents_type").on(table.consentType),
-  index("idx_user_consents_granted").on(table.granted),
-]);
+export const userConsents = pgTable(
+  "user_consents",
+  {
+    id: varchar("id").primaryKey().notNull(),
+    userId: varchar("user_id")
+      .references(() => users.id)
+      .notNull(),
+    consentType: varchar("consent_type", {
+      enum: ["essential", "functional", "analytics", "marketing", "medical_data_processing"],
+    }).notNull(),
+    granted: boolean("granted").notNull(),
+    grantedAt: timestamp("granted_at"),
+    withdrawnAt: timestamp("withdrawn_at"),
+    ipAddress: varchar("ip_address"), // IP when consent was given/withdrawn
+    userAgent: varchar("user_agent"), // Browser info when consent was given/withdrawn
+    consentVersion: varchar("consent_version").default("1.0"), // Track consent text version
+    metadata: jsonb("metadata"), // Additional context (e.g., which page, referrer)
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [
+    uniqueIndex("unique_user_consent_type").on(table.userId, table.consentType),
+    index("idx_user_consents_user_id").on(table.userId),
+    index("idx_user_consents_type").on(table.consentType),
+    index("idx_user_consents_granted").on(table.granted),
+  ]
+);
 
 // GDPR Consent Audit Log - Complete history for compliance
-export const consentAuditLog = pgTable("consent_audit_log", {
-  id: varchar("id").primaryKey().notNull(),
-  userId: varchar("user_id").references(() => users.id).notNull(),
-  consentType: varchar("consent_type", {
-    enum: ['essential', 'functional', 'analytics', 'marketing', 'medical_data_processing']
-  }).notNull(),
-  action: varchar("action", {
-    enum: ['granted', 'withdrawn', 'updated']
-  }).notNull(),
-  previousValue: boolean("previous_value"), // Previous consent state
-  newValue: boolean("new_value").notNull(), // New consent state
-  ipAddress: varchar("ip_address"),
-  userAgent: varchar("user_agent"),
-  consentVersion: varchar("consent_version").default('1.0'),
-  triggeredBy: varchar("triggered_by"), // 'user' or admin user ID
-  metadata: jsonb("metadata"), // Context: page URL, referrer, etc.
-  timestamp: timestamp("timestamp").defaultNow(),
-}, (table) => [
-  index("idx_consent_audit_user_id").on(table.userId),
-  index("idx_consent_audit_type").on(table.consentType),
-  index("idx_consent_audit_timestamp").on(table.timestamp),
-]);
+export const consentAuditLog = pgTable(
+  "consent_audit_log",
+  {
+    id: varchar("id").primaryKey().notNull(),
+    userId: varchar("user_id")
+      .references(() => users.id)
+      .notNull(),
+    consentType: varchar("consent_type", {
+      enum: ["essential", "functional", "analytics", "marketing", "medical_data_processing"],
+    }).notNull(),
+    action: varchar("action", {
+      enum: ["granted", "withdrawn", "updated"],
+    }).notNull(),
+    previousValue: boolean("previous_value"), // Previous consent state
+    newValue: boolean("new_value").notNull(), // New consent state
+    ipAddress: varchar("ip_address"),
+    userAgent: varchar("user_agent"),
+    consentVersion: varchar("consent_version").default("1.0"),
+    triggeredBy: varchar("triggered_by"), // 'user' or admin user ID
+    metadata: jsonb("metadata"), // Context: page URL, referrer, etc.
+    timestamp: timestamp("timestamp").defaultNow(),
+  },
+  (table) => [
+    index("idx_consent_audit_user_id").on(table.userId),
+    index("idx_consent_audit_type").on(table.consentType),
+    index("idx_consent_audit_timestamp").on(table.timestamp),
+  ]
+);
 
 // Type definitions for GDPR consent
 export type UserConsent = typeof userConsents.$inferSelect;
@@ -2018,66 +2345,83 @@ export type ConsentAuditLog = typeof consentAuditLog.$inferSelect;
 export type InsertConsentAuditLog = typeof consentAuditLog.$inferInsert;
 
 // OpenAI Usage Logs - Track all AI API calls for cost control and compliance
-export const openaiUsageLogs = pgTable("openai_usage_logs", {
-  id: varchar("id").primaryKey().notNull(),
-  userId: varchar("user_id").references(() => users.id), // null for anonymous chatbot users
-  sessionId: varchar("session_id"), // Optional session tracking
-  featureType: varchar("feature_type", {
-    enum: ['chatbot', 'therapist_matching', 'therapist_assistant', 'other']
-  }).notNull(),
-  model: varchar("model").notNull(), // gpt-4o, gpt-4-turbo, etc.
-  promptTokens: integer("prompt_tokens").notNull(),
-  completionTokens: integer("completion_tokens").notNull(),
-  totalTokens: integer("total_tokens").notNull(),
-  estimatedCost: decimal("estimated_cost", { precision: 10, scale: 6 }), // In USD
-  requestMetadata: jsonb("request_metadata"), // Additional context (client ID, therapist ID, etc.)
-  responseTime: integer("response_time"), // Response time in milliseconds
-  success: boolean("success").default(true).notNull(),
-  errorMessage: text("error_message"), // If success is false
-  ipAddress: varchar("ip_address"), // For anonymous usage tracking
-  userAgent: varchar("user_agent"),
-  createdAt: timestamp("created_at").defaultNow(),
-}, (table) => [
-  index("idx_openai_usage_user_id").on(table.userId),
-  index("idx_openai_usage_feature_type").on(table.featureType),
-  index("idx_openai_usage_created_at").on(table.createdAt),
-  index("idx_openai_usage_model").on(table.model),
-]);
+export const openaiUsageLogs = pgTable(
+  "openai_usage_logs",
+  {
+    id: varchar("id").primaryKey().notNull(),
+    userId: varchar("user_id").references(() => users.id), // null for anonymous chatbot users
+    sessionId: varchar("session_id"), // Optional session tracking
+    featureType: varchar("feature_type", {
+      enum: ["chatbot", "therapist_matching", "therapist_assistant", "other"],
+    }).notNull(),
+    model: varchar("model").notNull(), // gpt-4o, gpt-4-turbo, etc.
+    promptTokens: integer("prompt_tokens").notNull(),
+    completionTokens: integer("completion_tokens").notNull(),
+    totalTokens: integer("total_tokens").notNull(),
+    estimatedCost: decimal("estimated_cost", { precision: 10, scale: 6 }), // In USD
+    requestMetadata: jsonb("request_metadata"), // Additional context (client ID, therapist ID, etc.)
+    responseTime: integer("response_time"), // Response time in milliseconds
+    success: boolean("success").default(true).notNull(),
+    errorMessage: text("error_message"), // If success is false
+    ipAddress: varchar("ip_address"), // For anonymous usage tracking
+    userAgent: varchar("user_agent"),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_openai_usage_user_id").on(table.userId),
+    index("idx_openai_usage_feature_type").on(table.featureType),
+    index("idx_openai_usage_created_at").on(table.createdAt),
+    index("idx_openai_usage_model").on(table.model),
+  ]
+);
 
 // OpenAI Usage Alerts - Track and configure usage anomaly detection
-export const openaiUsageAlerts = pgTable("openai_usage_alerts", {
-  id: varchar("id").primaryKey().notNull(),
-  alertType: varchar("alert_type", {
-    enum: ['daily_threshold', 'user_spike', 'cost_limit', 'error_rate', 'manual']
-  }).notNull(),
-  severity: varchar("severity", {
-    enum: ['low', 'medium', 'high', 'critical']
-  }).notNull(),
-  triggerValue: decimal("trigger_value", { precision: 10, scale: 2 }), // The value that triggered alert
-  thresholdValue: decimal("threshold_value", { precision: 10, scale: 2 }), // The configured threshold
-  userId: varchar("user_id").references(() => users.id), // If alert is user-specific
-  featureType: varchar("feature_type"), // If alert is feature-specific
-  message: text("message").notNull(),
-  notificationSent: boolean("notification_sent").default(false),
-  notifiedAt: timestamp("notified_at"),
-  resolvedAt: timestamp("resolved_at"),
-  resolvedBy: varchar("resolved_by").references(() => users.id),
-  resolutionNotes: text("resolution_notes"),
-  metadata: jsonb("metadata"), // Additional alert context
-  createdAt: timestamp("created_at").defaultNow(),
-}, (table) => [
-  index("idx_openai_alerts_type").on(table.alertType),
-  index("idx_openai_alerts_severity").on(table.severity),
-  index("idx_openai_alerts_created_at").on(table.createdAt),
-  index("idx_openai_alerts_resolved").on(table.resolvedAt),
-]);
+export const openaiUsageAlerts = pgTable(
+  "openai_usage_alerts",
+  {
+    id: varchar("id").primaryKey().notNull(),
+    alertType: varchar("alert_type", {
+      enum: ["daily_threshold", "user_spike", "cost_limit", "error_rate", "manual"],
+    }).notNull(),
+    severity: varchar("severity", {
+      enum: ["low", "medium", "high", "critical"],
+    }).notNull(),
+    triggerValue: decimal("trigger_value", { precision: 10, scale: 2 }), // The value that triggered alert
+    thresholdValue: decimal("threshold_value", { precision: 10, scale: 2 }), // The configured threshold
+    userId: varchar("user_id").references(() => users.id), // If alert is user-specific
+    featureType: varchar("feature_type"), // If alert is feature-specific
+    message: text("message").notNull(),
+    notificationSent: boolean("notification_sent").default(false),
+    notifiedAt: timestamp("notified_at"),
+    resolvedAt: timestamp("resolved_at"),
+    resolvedBy: varchar("resolved_by").references(() => users.id),
+    resolutionNotes: text("resolution_notes"),
+    metadata: jsonb("metadata"), // Additional alert context
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => [
+    index("idx_openai_alerts_type").on(table.alertType),
+    index("idx_openai_alerts_severity").on(table.severity),
+    index("idx_openai_alerts_created_at").on(table.createdAt),
+    index("idx_openai_alerts_resolved").on(table.resolvedAt),
+  ]
+);
 
 // OpenAI Usage Thresholds - Configurable limits for anomaly detection
 export const openaiUsageThresholds = pgTable("openai_usage_thresholds", {
   id: varchar("id").primaryKey().notNull(),
   thresholdType: varchar("threshold_type", {
-    enum: ['daily_tokens', 'daily_cost', 'hourly_requests', 'user_daily_tokens', 'user_daily_cost', 'error_rate']
-  }).notNull().unique(),
+    enum: [
+      "daily_tokens",
+      "daily_cost",
+      "hourly_requests",
+      "user_daily_tokens",
+      "user_daily_cost",
+      "error_rate",
+    ],
+  })
+    .notNull()
+    .unique(),
   limitValue: decimal("limit_value", { precision: 10, scale: 2 }).notNull(),
   warningValue: decimal("warning_value", { precision: 10, scale: 2 }), // Warn before hitting limit
   isActive: boolean("is_active").default(true).notNull(),
@@ -2156,20 +2500,26 @@ export const notificationIdParamSchema = z.object({
 });
 
 export const actionParamSchema = z.object({
-  action: z.enum(['approve', 'reject']),
+  action: z.enum(["approve", "reject"]),
 });
 
 // Query Parameter Schemas
 export const dateQuerySchema = z.object({
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format").optional(),
+  date: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Date must be in YYYY-MM-DD format")
+    .optional(),
 });
 
 export const monthQuerySchema = z.object({
-  month: z.string().regex(/^\d{4}-\d{2}$/, "Month must be in YYYY-MM format").optional(),
+  month: z
+    .string()
+    .regex(/^\d{4}-\d{2}$/, "Month must be in YYYY-MM format")
+    .optional(),
 });
 
 export const timeRangeQuerySchema = z.object({
-  timeRange: z.enum(['1M', '3M', '6M', '1Y', 'all']).optional(),
+  timeRange: z.enum(["1M", "3M", "6M", "1Y", "all"]).optional(),
 });
 
 export const paginationQuerySchema = z.object({
@@ -2179,7 +2529,7 @@ export const paginationQuerySchema = z.object({
 });
 
 export const formatQuerySchema = z.object({
-  format: z.enum(['csv', 'json', 'pdf']).optional(),
+  format: z.enum(["csv", "json", "pdf"]).optional(),
 });
 
 export const statusQuerySchema = z.object({
@@ -2187,42 +2537,57 @@ export const statusQuerySchema = z.object({
 });
 
 export const roleQuerySchema = z.object({
-  role: z.enum(['client', 'therapist', 'admin', 'institution']).optional(),
+  role: z.enum(["client", "therapist", "admin", "institution"]).optional(),
 });
 
 export const colorQuerySchema = z.object({
-  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Color must be a valid hex color").optional(),
+  color: z
+    .string()
+    .regex(/^#[0-9A-Fa-f]{6}$/, "Color must be a valid hex color")
+    .optional(),
 });
 
 export const compactModeQuerySchema = z.object({
-  compact: z.enum(['true', 'false']).optional(),
+  compact: z.enum(["true", "false"]).optional(),
 });
 
 export const brandingQuerySchema = z.object({
-  branding: z.enum(['true', 'false']).optional(),
+  branding: z.enum(["true", "false"]).optional(),
   showBranding: z.boolean().optional(),
 });
 
 export const positionQuerySchema = z.object({
-  position: z.enum(['bottom-right', 'bottom-left', 'top-right', 'top-left']).optional(),
+  position: z.enum(["bottom-right", "bottom-left", "top-right", "top-left"]).optional(),
 });
 
 // Combined common query schemas
 export const dateRangeQuerySchema = z.object({
-  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Start date must be in YYYY-MM-DD format").optional(),
-  endDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "End date must be in YYYY-MM-DD format").optional(),
+  startDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "Start date must be in YYYY-MM-DD format")
+    .optional(),
+  endDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/, "End date must be in YYYY-MM-DD format")
+    .optional(),
 });
 
 export const chatbotWidgetQuerySchema = z.object({
-  color: z.string().regex(/^#[0-9A-Fa-f]{6}$/, "Color must be a valid hex color").optional(),
-  position: z.enum(['bottom-right', 'bottom-left', 'top-right', 'top-left']).optional(),
-  compact: z.enum(['true', 'false']).optional(),
-  branding: z.enum(['true', 'false']).optional(),
+  color: z
+    .string()
+    .regex(/^#[0-9A-Fa-f]{6}$/, "Color must be a valid hex color")
+    .optional(),
+  position: z.enum(["bottom-right", "bottom-left", "top-right", "top-left"]).optional(),
+  compact: z.enum(["true", "false"]).optional(),
+  branding: z.enum(["true", "false"]).optional(),
 });
 
 export const analyticsQuerySchema = z.object({
-  timeRange: z.enum(['1M', '3M', '6M', '1Y', 'all']).optional(),
-  month: z.string().regex(/^\d{4}-\d{2}$/, "Month must be in YYYY-MM format").optional(),
+  timeRange: z.enum(["1M", "3M", "6M", "1Y", "all"]).optional(),
+  month: z
+    .string()
+    .regex(/^\d{4}-\d{2}$/, "Month must be in YYYY-MM format")
+    .optional(),
   therapistCount: z.coerce.number().int().min(1).optional(),
   months: z.coerce.number().int().min(1).max(24).optional(),
   planType: z.string().optional(),
@@ -2279,7 +2644,7 @@ export const registrationSchema = z.object({
   password: z.string().min(8, "Password must be at least 8 characters"),
   firstName: z.string().min(1, "First name is required"),
   lastName: z.string().min(1, "Last name is required"),
-  role: z.enum(['client', 'therapist', 'admin', 'institution']),
+  role: z.enum(["client", "therapist", "admin", "institution"]),
 });
 
 export const passwordResetRequestSchema = z.object({
@@ -2294,7 +2659,7 @@ export const passwordResetSchema = z.object({
 
 // Dry run schema for admin operations
 export const dryRunQuerySchema = z.object({
-  dryRun: z.enum(['true', 'false']).optional(),
+  dryRun: z.enum(["true", "false"]).optional(),
 });
 
 // Payment validation schemas
@@ -2325,7 +2690,7 @@ export const createSubscriptionSchema = z.object({
 
 export const stripeConnectSchema = z.object({
   businessName: z.string().min(1, "Business name required"),
-  accountType: z.enum(['individual', 'company']).optional(),
+  accountType: z.enum(["individual", "company"]).optional(),
   email: z.string().email("Invalid email").optional(),
 });
 
@@ -2343,8 +2708,8 @@ export const calendarBlockSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().optional(),
   startTime: z.string(), // ISO 8601 timestamp string
-  endTime: z.string(),   // ISO 8601 timestamp string
-  blockType: z.enum(['meeting', 'blocked', 'holiday', 'training', 'personal', 'maintenance']),
+  endTime: z.string(), // ISO 8601 timestamp string
+  blockType: z.enum(["meeting", "blocked", "holiday", "training", "personal", "maintenance"]),
   isRecurring: z.boolean().optional(),
   recurringPattern: z.string().optional(),
   recurringUntil: z.string().optional(),
@@ -2367,7 +2732,7 @@ export const eventIdParamSchema = z.object({
   eventId: z.string().min(1, "Event ID is required"),
 });
 
-// Profile ID param schema  
+// Profile ID param schema
 export const profileIdParamSchema = z.object({
   profileId: z.string().min(1, "Profile ID is required"),
 });
@@ -2422,10 +2787,12 @@ export const weeklyAvailabilityDaySchema = z.object({
   day: z.string(), // e.g., "Monday"
   dayNumber: z.number().min(0).max(6), // 0 = Sunday
   isAvailable: z.boolean(), // CRITICAL: Must be isAvailable (not "available")
-  timeSlots: z.array(z.object({
-    start: z.string(), // HH:mm format
-    end: z.string(), // HH:mm format
-  })),
+  timeSlots: z.array(
+    z.object({
+      start: z.string(), // HH:mm format
+      end: z.string(), // HH:mm format
+    })
+  ),
 });
 
 export type WeeklyAvailabilityDay = z.infer<typeof weeklyAvailabilityDaySchema>;

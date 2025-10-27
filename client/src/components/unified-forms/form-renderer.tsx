@@ -1,20 +1,20 @@
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Textarea } from '@/components/ui/textarea';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Badge } from '@/components/ui/badge';
-import { Progress } from '@/components/ui/progress';
-import { ArrowLeft, ArrowRight, CheckCircle } from 'lucide-react';
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Textarea } from "@/components/ui/textarea";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { ArrowLeft, ArrowRight, CheckCircle } from "lucide-react";
 
 interface FormField {
   id: string;
   title: string;
   subtitle?: string;
-  type: 'single-select' | 'multi-select' | 'radio-group' | 'textarea' | 'scale' | 'rating-matrix';
+  type: "single-select" | "multi-select" | "radio-group" | "textarea" | "scale" | "rating-matrix";
   options?: string[];
   scale?: string[];
   validation?: {
@@ -31,7 +31,12 @@ interface FormRendererProps {
   description?: string;
 }
 
-export default function FormRenderer({ fields, onComplete, title, description }: FormRendererProps) {
+export default function FormRenderer({
+  fields,
+  onComplete,
+  title,
+  description,
+}: FormRendererProps) {
   const [currentStep, setCurrentStep] = useState(0);
   const [responses, setResponses] = useState<Record<string, any>>({});
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -41,22 +46,26 @@ export default function FormRenderer({ fields, onComplete, title, description }:
 
   const validateField = (field: FormField, value: any): string | null => {
     if (field.validation?.required && (!value || (Array.isArray(value) && value.length === 0))) {
-      return 'This field is required';
+      return "This field is required";
     }
 
-    if (field.type === 'rating-matrix' && field.validation?.allOptionsRequired) {
-      if (!value || typeof value !== 'object') {
-        return 'Please rate all feelings';
+    if (field.type === "rating-matrix" && field.validation?.allOptionsRequired) {
+      if (!value || typeof value !== "object") {
+        return "Please rate all feelings";
       }
       const requiredOptions = field.options || [];
       for (const option of requiredOptions) {
         if (!value[option]) {
-          return 'Please rate all feelings';
+          return "Please rate all feelings";
         }
       }
     }
 
-    if (field.validation?.minLength && typeof value === 'string' && value.length < field.validation.minLength) {
+    if (
+      field.validation?.minLength &&
+      typeof value === "string" &&
+      value.length < field.validation.minLength
+    ) {
       return `Minimum ${field.validation.minLength} characters required`;
     }
 
@@ -65,13 +74,13 @@ export default function FormRenderer({ fields, onComplete, title, description }:
 
   const handleNext = () => {
     const error = validateField(currentField, responses[currentField.id]);
-    
+
     if (error) {
       setErrors({ ...errors, [currentField.id]: error });
       return;
     }
 
-    setErrors({ ...errors, [currentField.id]: '' });
+    setErrors({ ...errors, [currentField.id]: "" });
 
     if (currentStep < fields.length - 1) {
       setCurrentStep(currentStep + 1);
@@ -89,7 +98,7 @@ export default function FormRenderer({ fields, onComplete, title, description }:
   const updateResponse = (fieldId: string, value: any) => {
     setResponses({ ...responses, [fieldId]: value });
     if (errors[fieldId]) {
-      setErrors({ ...errors, [fieldId]: '' });
+      setErrors({ ...errors, [fieldId]: "" });
     }
   };
 
@@ -98,19 +107,19 @@ export default function FormRenderer({ fields, onComplete, title, description }:
     const error = errors[field.id];
 
     switch (field.type) {
-      case 'single-select':
-      case 'radio-group':
+      case "single-select":
+      case "radio-group":
         return (
           <div className="space-y-4">
             <RadioGroup
-              value={value || ''}
+              value={value || ""}
               onValueChange={(val) => updateResponse(field.id, val)}
               className="space-y-3"
             >
               {field.options?.map((option) => (
                 <div key={option} className="flex items-center space-x-2">
                   <RadioGroupItem value={option} id={`${field.id}-${option}`} />
-                  <Label 
+                  <Label
                     htmlFor={`${field.id}-${option}`}
                     className="font-secondary text-hive-black cursor-pointer"
                   >
@@ -123,7 +132,7 @@ export default function FormRenderer({ fields, onComplete, title, description }:
           </div>
         );
 
-      case 'multi-select':
+      case "multi-select":
         return (
           <div className="space-y-4">
             <div className="grid grid-cols-1 gap-3">
@@ -137,11 +146,14 @@ export default function FormRenderer({ fields, onComplete, title, description }:
                       if (checked) {
                         updateResponse(field.id, [...current, option]);
                       } else {
-                        updateResponse(field.id, current.filter((item: string) => item !== option));
+                        updateResponse(
+                          field.id,
+                          current.filter((item: string) => item !== option)
+                        );
                       }
                     }}
                   />
-                  <Label 
+                  <Label
                     htmlFor={`${field.id}-${option}`}
                     className="font-secondary text-hive-black cursor-pointer"
                   >
@@ -154,11 +166,11 @@ export default function FormRenderer({ fields, onComplete, title, description }:
           </div>
         );
 
-      case 'textarea':
+      case "textarea":
         return (
           <div className="space-y-4">
             <Textarea
-              value={value || ''}
+              value={value || ""}
               onChange={(e) => updateResponse(field.id, e.target.value)}
               placeholder="Please provide your response..."
               className="min-h-32 font-secondary"
@@ -173,7 +185,7 @@ export default function FormRenderer({ fields, onComplete, title, description }:
           </div>
         );
 
-      case 'scale':
+      case "scale":
         return (
           <div className="space-y-4">
             <div className="flex justify-between items-center mb-4">
@@ -181,14 +193,14 @@ export default function FormRenderer({ fields, onComplete, title, description }:
               <span className="text-sm text-gray-600">10 (Excellent)</span>
             </div>
             <RadioGroup
-              value={value?.toString() || ''}
+              value={value?.toString() || ""}
               onValueChange={(val) => updateResponse(field.id, parseInt(val))}
               className="grid grid-cols-5 gap-2"
             >
               {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
                 <div key={num} className="flex flex-col items-center space-y-2">
                   <RadioGroupItem value={num.toString()} id={`${field.id}-${num}`} />
-                  <Label 
+                  <Label
                     htmlFor={`${field.id}-${num}`}
                     className="text-sm font-secondary cursor-pointer"
                   >
@@ -201,22 +213,20 @@ export default function FormRenderer({ fields, onComplete, title, description }:
           </div>
         );
 
-      case 'rating-matrix':
+      case "rating-matrix":
         const matrixValue = value || {};
         return (
           <div className="space-y-6">
             {field.subtitle && (
               <p className="text-sm text-gray-600 font-secondary">{field.subtitle}</p>
             )}
-            
+
             {/* Scale Header */}
             <div className="grid grid-cols-6 gap-2 mb-4">
               <div></div>
               {field.scale?.map((scaleItem) => (
                 <div key={scaleItem} className="text-center">
-                  <Label className="text-xs font-secondary text-gray-600">
-                    {scaleItem}
-                  </Label>
+                  <Label className="text-xs font-secondary text-gray-600">{scaleItem}</Label>
                 </div>
               ))}
             </div>
@@ -225,9 +235,7 @@ export default function FormRenderer({ fields, onComplete, title, description }:
             {field.options?.map((option) => (
               <div key={option} className="grid grid-cols-6 gap-2 items-center">
                 <div className="pr-4">
-                  <Label className="font-secondary text-sm text-hive-black">
-                    {option}
-                  </Label>
+                  <Label className="font-secondary text-sm text-hive-black">{option}</Label>
                 </div>
                 {field.scale?.map((scaleItem) => (
                   <div key={`${option}-${scaleItem}`} className="flex justify-center">
@@ -239,7 +247,7 @@ export default function FormRenderer({ fields, onComplete, title, description }:
                       onChange={() => {
                         updateResponse(field.id, {
                           ...matrixValue,
-                          [option]: scaleItem
+                          [option]: scaleItem,
                         });
                       }}
                       className="w-4 h-4 text-hive-purple focus:ring-hive-purple"
@@ -256,7 +264,7 @@ export default function FormRenderer({ fields, onComplete, title, description }:
         return (
           <div className="space-y-4">
             <Input
-              value={value || ''}
+              value={value || ""}
               onChange={(e) => updateResponse(field.id, e.target.value)}
               className="font-secondary"
             />
@@ -272,20 +280,18 @@ export default function FormRenderer({ fields, onComplete, title, description }:
         <Card className="max-w-4xl mx-auto bg-white/90 backdrop-blur-sm border-0 shadow-xl">
           <CardHeader className="text-center space-y-4">
             {title && (
-              <CardTitle className="text-3xl font-primary text-hive-purple">
-                {title}
-              </CardTitle>
+              <CardTitle className="text-3xl font-primary text-hive-purple">{title}</CardTitle>
             )}
             {description && (
-              <p className="text-hive-black/70 font-secondary max-w-2xl mx-auto">
-                {description}
-              </p>
+              <p className="text-hive-black/70 font-secondary max-w-2xl mx-auto">{description}</p>
             )}
-            
+
             {/* Progress Bar */}
             <div className="space-y-2">
               <div className="flex justify-between text-sm text-gray-600">
-                <span>Step {currentStep + 1} of {fields.length}</span>
+                <span>
+                  Step {currentStep + 1} of {fields.length}
+                </span>
                 <span>{Math.round(progress)}% Complete</span>
               </div>
               <Progress value={progress} className="h-2" />
@@ -295,13 +301,9 @@ export default function FormRenderer({ fields, onComplete, title, description }:
           <CardContent className="space-y-8">
             <div className="space-y-6">
               <div className="text-center space-y-2">
-                <h3 className="text-xl font-primary text-hive-purple">
-                  {currentField.title}
-                </h3>
-                {currentField.subtitle && currentField.type !== 'rating-matrix' && (
-                  <p className="text-hive-black/70 font-secondary">
-                    {currentField.subtitle}
-                  </p>
+                <h3 className="text-xl font-primary text-hive-purple">{currentField.title}</h3>
+                {currentField.subtitle && currentField.type !== "rating-matrix" && (
+                  <p className="text-hive-black/70 font-secondary">{currentField.subtitle}</p>
                 )}
               </div>
 

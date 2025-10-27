@@ -1,25 +1,65 @@
-import { useState } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
-import { useAuth } from '@/hooks/useAuth';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from '@/components/ui/form';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { Calendar as CalendarComponent } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { useToast } from '@/hooks/use-toast';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { format } from 'date-fns';
-import { Mail, Send, Settings, Plus, Eye, EyeOff, Calendar, CalendarIcon, TrendingUp, Activity, Users, BarChart3, Clock, CheckCircle, XCircle, AlertCircle, Edit, Trash2 } from 'lucide-react';
-import { apiRequest, queryClient } from '@/lib/queryClient';
+import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useAuth } from "@/hooks/useAuth";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+  FormDescription,
+} from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useToast } from "@/hooks/use-toast";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { format } from "date-fns";
+import {
+  Mail,
+  Send,
+  Settings,
+  Plus,
+  Eye,
+  EyeOff,
+  Calendar,
+  CalendarIcon,
+  TrendingUp,
+  Activity,
+  Users,
+  BarChart3,
+  Clock,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  Edit,
+  Trash2,
+} from "lucide-react";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 
 const emailTemplateSchema = z.object({
   name: z.string().min(1, "Template name is required"),
@@ -42,11 +82,15 @@ const automationRuleSchema = z.object({
   name: z.string().min(1, "Rule name is required"),
   trigger: z.string().min(1, "Trigger is required"),
   templateId: z.string().min(1, "Template is required"),
-  conditions: z.array(z.object({
-    field: z.string(),
-    operator: z.string(),
-    value: z.string(),
-  })).optional(),
+  conditions: z
+    .array(
+      z.object({
+        field: z.string(),
+        operator: z.string(),
+        value: z.string(),
+      })
+    )
+    .optional(),
   isActive: z.boolean().default(true),
 });
 
@@ -109,7 +153,7 @@ export default function AutomatedEmailEngine() {
   const [previewTemplate, setPreviewTemplate] = useState<EmailTemplate | null>(null);
 
   // Admin-only access control
-  if (user?.role !== 'admin') {
+  if (user?.role !== "admin") {
     return (
       <div className="min-h-screen bg-gray-50 p-6">
         <div className="max-w-2xl mx-auto">
@@ -122,10 +166,12 @@ export default function AutomatedEmailEngine() {
             </CardHeader>
             <CardContent>
               <p className="text-gray-600 mb-4">
-                Email automation controls are restricted to administrative users only for security and compliance reasons.
+                Email automation controls are restricted to administrative users only for security
+                and compliance reasons.
               </p>
               <p className="text-sm text-gray-500">
-                This ensures proper oversight of all automated communications and maintains HIPAA compliance standards.
+                This ensures proper oversight of all automated communications and maintains HIPAA
+                compliance standards.
               </p>
             </CardContent>
           </Card>
@@ -135,8 +181,8 @@ export default function AutomatedEmailEngine() {
   }
 
   // Admin-only access control
-  const isAdmin = user?.role === 'admin';
-  
+  const isAdmin = user?.role === "admin";
+
   if (!isAdmin) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
@@ -149,7 +195,8 @@ export default function AutomatedEmailEngine() {
               Email automation and SendGrid workflows are restricted to admin users only.
             </p>
             <p className="text-sm text-gray-500">
-              Therapist accounts cannot access messaging automation controls for security and compliance reasons.
+              Therapist accounts cannot access messaging automation controls for security and
+              compliance reasons.
             </p>
           </CardContent>
         </Card>
@@ -194,39 +241,39 @@ export default function AutomatedEmailEngine() {
 
   // Fetch email templates
   const { data: templates, isLoading: templatesLoading } = useQuery<EmailTemplate[]>({
-    queryKey: ['/api/admin/email-templates'],
+    queryKey: ["/api/admin/email-templates"],
     retry: false,
   });
 
   // Fetch email campaigns
   const { data: campaigns, isLoading: campaignsLoading } = useQuery<EmailCampaign[]>({
-    queryKey: ['/api/admin/email-campaigns'],
+    queryKey: ["/api/admin/email-campaigns"],
     retry: false,
   });
 
   // Fetch automation rules
   const { data: automationRules, isLoading: automationLoading } = useQuery<AutomationRule[]>({
-    queryKey: ['/api/admin/email-automation'],
+    queryKey: ["/api/admin/email-automation"],
     retry: false,
   });
 
   // Fetch email analytics
   const { data: analytics, isLoading: analyticsLoading } = useQuery({
-    queryKey: [`/api/email-analytics/${user?.id || 'current'}`],
+    queryKey: [`/api/email-analytics/${user?.id || "current"}`],
     retry: false,
   });
 
   // Create template mutation
   const createTemplateMutation = useMutation({
     mutationFn: async (templateData: z.infer<typeof emailTemplateSchema>) => {
-      return await apiRequest('POST', '/api/admin/email-templates', templateData);
+      return await apiRequest("POST", "/api/admin/email-templates", templateData);
     },
     onSuccess: () => {
       toast({
         title: "Template Created",
         description: "Email template has been successfully created.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/email-templates'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/email-templates"] });
       setShowNewTemplate(false);
       templateForm.reset();
     },
@@ -242,14 +289,14 @@ export default function AutomatedEmailEngine() {
   // Create campaign mutation
   const createCampaignMutation = useMutation({
     mutationFn: async (campaignData: z.infer<typeof emailCampaignSchema>) => {
-      return await apiRequest('POST', '/api/email-campaigns', campaignData);
+      return await apiRequest("POST", "/api/email-campaigns", campaignData);
     },
     onSuccess: () => {
       toast({
         title: "Campaign Created",
         description: "Email campaign has been successfully created.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/email-campaigns'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/email-campaigns"] });
       setShowNewCampaign(false);
       campaignForm.reset();
     },
@@ -265,14 +312,14 @@ export default function AutomatedEmailEngine() {
   // Create automation mutation
   const createAutomationMutation = useMutation({
     mutationFn: async (automationData: z.infer<typeof automationRuleSchema>) => {
-      return await apiRequest('POST', '/api/email-automation', automationData);
+      return await apiRequest("POST", "/api/email-automation", automationData);
     },
     onSuccess: () => {
       toast({
         title: "Automation Created",
         description: "Email automation rule has been successfully created.",
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/email-automation'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/email-automation"] });
       setShowNewAutomation(false);
       automationForm.reset();
     },
@@ -286,20 +333,40 @@ export default function AutomatedEmailEngine() {
   });
 
   const templateTypes = [
-    "welcome", "appointment_reminder", "appointment_confirmation", 
-    "session_feedback", "newsletter", "promotional", "administrative",
-    "password_reset", "account_activation", "payment_confirmation"
+    "welcome",
+    "appointment_reminder",
+    "appointment_confirmation",
+    "session_feedback",
+    "newsletter",
+    "promotional",
+    "administrative",
+    "password_reset",
+    "account_activation",
+    "payment_confirmation",
   ];
 
   const audienceOptions = [
-    "all_users", "clients", "therapists", "institutions", "new_clients", 
-    "active_clients", "inactive_clients", "premium_users", "trial_users"
+    "all_users",
+    "clients",
+    "therapists",
+    "institutions",
+    "new_clients",
+    "active_clients",
+    "inactive_clients",
+    "premium_users",
+    "trial_users",
   ];
 
   const triggerOptions = [
-    "user_registration", "appointment_booked", "session_completed", 
-    "payment_received", "subscription_expired", "inactive_user", 
-    "birthday", "session_reminder", "follow_up_due"
+    "user_registration",
+    "appointment_booked",
+    "session_completed",
+    "payment_received",
+    "subscription_expired",
+    "inactive_user",
+    "birthday",
+    "session_reminder",
+    "follow_up_due",
   ];
 
   const handleTemplateSubmit = (values: z.infer<typeof emailTemplateSchema>) => {
@@ -337,7 +404,11 @@ export default function AutomatedEmailEngine() {
             <Plus className="h-4 w-4" />
             New Template
           </Button>
-          <Button onClick={() => setShowNewCampaign(true)} variant="outline" className="flex items-center gap-2">
+          <Button
+            onClick={() => setShowNewCampaign(true)}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
             <Plus className="h-4 w-4" />
             New Campaign
           </Button>
@@ -353,9 +424,7 @@ export default function AutomatedEmailEngine() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">0</div>
-            <p className="text-xs text-muted-foreground">
-              +0% from last month
-            </p>
+            <p className="text-xs text-muted-foreground">+0% from last month</p>
           </CardContent>
         </Card>
         <Card>
@@ -365,9 +434,7 @@ export default function AutomatedEmailEngine() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">0%</div>
-            <p className="text-xs text-muted-foreground">
-              +0% from last month
-            </p>
+            <p className="text-xs text-muted-foreground">+0% from last month</p>
           </CardContent>
         </Card>
         <Card>
@@ -377,9 +444,7 @@ export default function AutomatedEmailEngine() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">0%</div>
-            <p className="text-xs text-muted-foreground">
-              +0% from last month
-            </p>
+            <p className="text-xs text-muted-foreground">+0% from last month</p>
           </CardContent>
         </Card>
         <Card>
@@ -389,9 +454,7 @@ export default function AutomatedEmailEngine() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">0</div>
-            <p className="text-xs text-muted-foreground">
-              0 triggered today
-            </p>
+            <p className="text-xs text-muted-foreground">0 triggered today</p>
           </CardContent>
         </Card>
       </div>
@@ -410,7 +473,10 @@ export default function AutomatedEmailEngine() {
           <div className="grid gap-4">
             {templates && templates.length > 0 ? (
               templates.map((template) => (
-                <Card key={template.id} className="cursor-pointer hover:shadow-md transition-shadow">
+                <Card
+                  key={template.id}
+                  className="cursor-pointer hover:shadow-md transition-shadow"
+                >
                   <CardHeader>
                     <div className="flex justify-between items-start">
                       <div>
@@ -426,7 +492,11 @@ export default function AutomatedEmailEngine() {
                         <Badge variant={template.isActive ? "default" : "secondary"}>
                           {template.isActive ? "Active" : "Inactive"}
                         </Badge>
-                        <Button size="sm" variant="outline" onClick={() => setPreviewTemplate(template)}>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => setPreviewTemplate(template)}
+                        >
                           <Eye className="h-4 w-4" />
                         </Button>
                         <Button size="sm" variant="outline">
@@ -438,7 +508,12 @@ export default function AutomatedEmailEngine() {
                   <CardContent>
                     <div className="flex justify-between items-center text-sm text-muted-foreground">
                       <span>Used {template.usage} times</span>
-                      <span>Last used: {template.lastUsed ? new Date(template.lastUsed).toLocaleDateString() : 'Never'}</span>
+                      <span>
+                        Last used:{" "}
+                        {template.lastUsed
+                          ? new Date(template.lastUsed).toLocaleDateString()
+                          : "Never"}
+                      </span>
                     </div>
                   </CardContent>
                 </Card>
@@ -472,16 +547,20 @@ export default function AutomatedEmailEngine() {
                         </CardDescription>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Badge variant={
-                          campaign.status === 'sent' ? 'default' :
-                          campaign.status === 'scheduled' ? 'secondary' :
-                          campaign.status === 'draft' ? 'outline' : 'destructive'
-                        }>
+                        <Badge
+                          variant={
+                            campaign.status === "sent"
+                              ? "default"
+                              : campaign.status === "scheduled"
+                                ? "secondary"
+                                : campaign.status === "draft"
+                                  ? "outline"
+                                  : "destructive"
+                          }
+                        >
                           {campaign.status}
                         </Badge>
-                        {campaign.isRecurring && (
-                          <Badge variant="outline">Recurring</Badge>
-                        )}
+                        {campaign.isRecurring && <Badge variant="outline">Recurring</Badge>}
                       </div>
                     </div>
                   </CardHeader>
@@ -489,20 +568,31 @@ export default function AutomatedEmailEngine() {
                     <div className="grid grid-cols-4 gap-4 text-sm">
                       <div>
                         <p className="font-medium">Opened</p>
-                        <p className="text-muted-foreground">{campaign.opened} ({((campaign.opened / campaign.recipients) * 100).toFixed(1)}%)</p>
+                        <p className="text-muted-foreground">
+                          {campaign.opened} (
+                          {((campaign.opened / campaign.recipients) * 100).toFixed(1)}%)
+                        </p>
                       </div>
                       <div>
                         <p className="font-medium">Clicked</p>
-                        <p className="text-muted-foreground">{campaign.clicked} ({((campaign.clicked / campaign.recipients) * 100).toFixed(1)}%)</p>
+                        <p className="text-muted-foreground">
+                          {campaign.clicked} (
+                          {((campaign.clicked / campaign.recipients) * 100).toFixed(1)}%)
+                        </p>
                       </div>
                       <div>
                         <p className="font-medium">Bounced</p>
-                        <p className="text-muted-foreground">{campaign.bounced} ({((campaign.bounced / campaign.recipients) * 100).toFixed(1)}%)</p>
+                        <p className="text-muted-foreground">
+                          {campaign.bounced} (
+                          {((campaign.bounced / campaign.recipients) * 100).toFixed(1)}%)
+                        </p>
                       </div>
                       <div>
                         <p className="font-medium">Sent Date</p>
                         <p className="text-muted-foreground">
-                          {campaign.sentDate ? new Date(campaign.sentDate).toLocaleDateString() : 'Not sent'}
+                          {campaign.sentDate
+                            ? new Date(campaign.sentDate).toLocaleDateString()
+                            : "Not sent"}
                         </p>
                       </div>
                     </div>
@@ -554,7 +644,12 @@ export default function AutomatedEmailEngine() {
                   <CardContent>
                     <div className="flex justify-between items-center text-sm text-muted-foreground">
                       <span>Triggered {rule.triggerCount} times</span>
-                      <span>Last triggered: {rule.lastTriggered ? new Date(rule.lastTriggered).toLocaleDateString() : 'Never'}</span>
+                      <span>
+                        Last triggered:{" "}
+                        {rule.lastTriggered
+                          ? new Date(rule.lastTriggered).toLocaleDateString()
+                          : "Never"}
+                      </span>
                     </div>
                     {rule.conditions.length > 0 && (
                       <div className="mt-2">
@@ -692,7 +787,7 @@ export default function AutomatedEmailEngine() {
                         <SelectContent>
                           {templateTypes.map((type) => (
                             <SelectItem key={type} value={type}>
-                              {type.replace('_', ' ').toUpperCase()}
+                              {type.replace("_", " ").toUpperCase()}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -724,10 +819,10 @@ export default function AutomatedEmailEngine() {
                   <FormItem>
                     <FormLabel>Email Content</FormLabel>
                     <FormControl>
-                      <Textarea 
+                      <Textarea
                         placeholder="Enter email content... You can use variables like {{name}}, {{appointment_date}}, etc."
                         className="min-h-[200px]"
-                        {...field} 
+                        {...field}
                       />
                     </FormControl>
                     <FormMessage />
@@ -747,10 +842,7 @@ export default function AutomatedEmailEngine() {
                       </FormDescription>
                     </div>
                     <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
+                      <Switch checked={field.value} onCheckedChange={field.onChange} />
                     </FormControl>
                   </FormItem>
                 )}
@@ -833,7 +925,7 @@ export default function AutomatedEmailEngine() {
                         <SelectContent>
                           {audienceOptions.map((audience) => (
                             <SelectItem key={audience} value={audience}>
-                              {audience.replace('_', ' ').toUpperCase()}
+                              {audience.replace("_", " ").toUpperCase()}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -841,9 +933,13 @@ export default function AutomatedEmailEngine() {
                     </FormControl>
                     <div className="flex flex-wrap gap-1 mt-2">
                       {field.value.map((audience) => (
-                        <Badge key={audience} variant="secondary" className="cursor-pointer"
-                               onClick={() => field.onChange(field.value.filter(a => a !== audience))}>
-                          {audience.replace('_', ' ')} ×
+                        <Badge
+                          key={audience}
+                          variant="secondary"
+                          className="cursor-pointer"
+                          onClick={() => field.onChange(field.value.filter((a) => a !== audience))}
+                        >
+                          {audience.replace("_", " ")} ×
                         </Badge>
                       ))}
                     </div>
@@ -868,11 +964,7 @@ export default function AutomatedEmailEngine() {
                                 !field.value && "text-muted-foreground"
                               }`}
                             >
-                              {field.value ? (
-                                format(field.value, "PPP")
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
+                              {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
                               <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                             </Button>
                           </FormControl>
@@ -882,9 +974,7 @@ export default function AutomatedEmailEngine() {
                             mode="single"
                             selected={field.value}
                             onSelect={field.onChange}
-                            disabled={(date) =>
-                              date < new Date()
-                            }
+                            disabled={(date) => date < new Date()}
                             initialFocus
                           />
                         </PopoverContent>
@@ -901,14 +991,9 @@ export default function AutomatedEmailEngine() {
                     <FormItem className="flex flex-col justify-end">
                       <div className="flex items-center space-x-2">
                         <FormControl>
-                          <Switch
-                            checked={field.value}
-                            onCheckedChange={field.onChange}
-                          />
+                          <Switch checked={field.value} onCheckedChange={field.onChange} />
                         </FormControl>
-                        <FormLabel className="text-sm font-normal">
-                          Recurring Campaign
-                        </FormLabel>
+                        <FormLabel className="text-sm font-normal">Recurring Campaign</FormLabel>
                       </div>
                     </FormItem>
                   )}
@@ -938,7 +1023,10 @@ export default function AutomatedEmailEngine() {
             </DialogDescription>
           </DialogHeader>
           <Form {...automationForm}>
-            <form onSubmit={automationForm.handleSubmit(handleAutomationSubmit)} className="space-y-4">
+            <form
+              onSubmit={automationForm.handleSubmit(handleAutomationSubmit)}
+              className="space-y-4"
+            >
               <FormField
                 control={automationForm.control}
                 name="name"
@@ -969,7 +1057,7 @@ export default function AutomatedEmailEngine() {
                         <SelectContent>
                           {triggerOptions.map((trigger) => (
                             <SelectItem key={trigger} value={trigger}>
-                              {trigger.replace('_', ' ').toUpperCase()}
+                              {trigger.replace("_", " ").toUpperCase()}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -1017,10 +1105,7 @@ export default function AutomatedEmailEngine() {
                       </FormDescription>
                     </div>
                     <FormControl>
-                      <Switch
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
+                      <Switch checked={field.value} onCheckedChange={field.onChange} />
                     </FormControl>
                   </FormItem>
                 )}
@@ -1044,16 +1129,14 @@ export default function AutomatedEmailEngine() {
         <DialogContent className="max-w-3xl">
           <DialogHeader>
             <DialogTitle>Template Preview: {previewTemplate?.name}</DialogTitle>
-            <DialogDescription>
-              Subject: {previewTemplate?.subject}
-            </DialogDescription>
+            <DialogDescription>Subject: {previewTemplate?.subject}</DialogDescription>
           </DialogHeader>
           <div className="bg-gray-50 p-6 rounded-lg">
             <div className="bg-white p-6 rounded shadow-sm border">
               <div className="prose max-w-none">
-                {previewTemplate?.content.split('\n').map((line, index) => (
+                {previewTemplate?.content.split("\n").map((line, index) => (
                   <p key={index} className="mb-2">
-                    {line || '\u00A0'}
+                    {line || "\u00A0"}
                   </p>
                 ))}
               </div>

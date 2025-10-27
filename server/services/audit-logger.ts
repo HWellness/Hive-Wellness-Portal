@@ -1,7 +1,7 @@
-import { Request } from 'express';
+import { Request } from "express";
 
 export interface AuditEvent {
-  eventType: 'password_reset_request' | 'password_reset_success' | 'password_reset_failure';
+  eventType: "password_reset_request" | "password_reset_success" | "password_reset_failure";
   userId?: string;
   userEmail?: string;
   ipAddress?: string;
@@ -19,15 +19,15 @@ export class AuditLogger {
   static logSecurityEvent(event: AuditEvent): void {
     const logEntry = {
       timestamp: event.timestamp,
-      level: event.success ? 'INFO' : 'WARN',
+      level: event.success ? "INFO" : "WARN",
       event: event.eventType,
-      userId: event.userId || 'unknown',
-      userEmail: event.userEmail || 'unknown',
-      ipAddress: event.ipAddress || 'unknown',
-      userAgent: event.userAgent || 'unknown',
+      userId: event.userId || "unknown",
+      userEmail: event.userEmail || "unknown",
+      ipAddress: event.ipAddress || "unknown",
+      userAgent: event.userAgent || "unknown",
       success: event.success,
       errorMessage: event.errorMessage,
-      metadata: event.metadata
+      metadata: event.metadata,
     };
 
     // Log to console (in production, this would go to a central logging service)
@@ -49,17 +49,17 @@ export class AuditLogger {
    */
   static logPasswordResetRequest(req: Request, email: string, userExists: boolean): void {
     this.logSecurityEvent({
-      eventType: 'password_reset_request',
+      eventType: "password_reset_request",
       userEmail: email,
       ipAddress: req.ip || req.connection.remoteAddress,
-      userAgent: req.get('User-Agent'),
+      userAgent: req.get("User-Agent"),
       timestamp: new Date().toISOString(),
       success: true,
       metadata: {
         userExists,
         emailRequested: email,
-        referrer: req.get('Referer')
-      }
+        referrer: req.get("Referer"),
+      },
     });
   }
 
@@ -68,17 +68,17 @@ export class AuditLogger {
    */
   static logPasswordResetSuccess(req: Request, userId: string, userEmail: string): void {
     this.logSecurityEvent({
-      eventType: 'password_reset_success',
+      eventType: "password_reset_success",
       userId,
       userEmail,
       ipAddress: req.ip || req.connection.remoteAddress,
-      userAgent: req.get('User-Agent'),
+      userAgent: req.get("User-Agent"),
       timestamp: new Date().toISOString(),
       success: true,
       metadata: {
         sessionDestroyed: true,
-        bcryptCostFactor: 12
-      }
+        bcryptCostFactor: 12,
+      },
     });
   }
 
@@ -87,18 +87,18 @@ export class AuditLogger {
    */
   static logPasswordResetFailure(req: Request, reason: string, uid?: string, email?: string): void {
     this.logSecurityEvent({
-      eventType: 'password_reset_failure',
+      eventType: "password_reset_failure",
       userId: uid,
       userEmail: email,
       ipAddress: req.ip || req.connection.remoteAddress,
-      userAgent: req.get('User-Agent'),
+      userAgent: req.get("User-Agent"),
       timestamp: new Date().toISOString(),
       success: false,
       errorMessage: reason,
       metadata: {
         failureReason: reason,
-        potentialAttack: reason.includes('token') || reason.includes('expired')
-      }
+        potentialAttack: reason.includes("token") || reason.includes("expired"),
+      },
     });
   }
 }

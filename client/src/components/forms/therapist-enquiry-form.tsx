@@ -7,12 +7,37 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Mail, User, MapPin, Phone, Clock, Users, Award, FileText, CheckCircle, Upload, Camera } from "lucide-react";
+import {
+  Mail,
+  User,
+  MapPin,
+  Phone,
+  Clock,
+  Users,
+  Award,
+  FileText,
+  CheckCircle,
+  Upload,
+  Camera,
+} from "lucide-react";
 import hiveWellnessLogo from "@assets/Hive Logo_1752073128164.png";
 
 const therapistEnquirySchema = z.object({
@@ -29,10 +54,12 @@ const therapistEnquirySchema = z.object({
     hours: z.string().min(1, "Please select preferred hours"),
   }),
   currentClients: z.string(),
-  aboutYou: z.string().min(50, "Please provide more details about yourself (minimum 50 characters)"),
+  aboutYou: z
+    .string()
+    .min(50, "Please provide more details about yourself (minimum 50 characters)"),
   motivation: z.string().min(50, "Please explain your motivation (minimum 50 characters)"),
   profilePhoto: z.string().optional(),
-  gdprConsent: z.boolean().refine(val => val === true, "You must consent to data processing"),
+  gdprConsent: z.boolean().refine((val) => val === true, "You must consent to data processing"),
   marketingConsent: z.boolean().optional(),
 });
 
@@ -59,12 +86,18 @@ const specializations = [
 const experienceLevels = [
   "Newly qualified (0-2 years)",
   "Developing therapist (2-5 years)",
-  "Experienced therapist (5-10 years)", 
+  "Experienced therapist (5-10 years)",
   "Senior therapist (10+ years)",
 ];
 
 const availableDays = [
-  "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
+  "Monday",
+  "Tuesday",
+  "Wednesday",
+  "Thursday",
+  "Friday",
+  "Saturday",
+  "Sunday",
 ];
 
 const preferredHours = [
@@ -112,15 +145,15 @@ export default function TherapistEnquiryForm() {
     try {
       // Upload profile photo
       const formData = new FormData();
-      formData.append('profilePhoto', file);
-      
+      formData.append("profilePhoto", file);
+
       const response = await apiRequest("POST", "/api/upload-profile-photo", formData);
-      
+
       if (response.ok) {
         const result = await response.json();
         setProfilePhotoUrl(result.fileUrl);
-        form.setValue('profilePhoto', result.fileUrl);
-        
+        form.setValue("profilePhoto", result.fileUrl);
+
         toast({
           title: "Photo uploaded successfully",
           description: "Your profile photo has been uploaded.",
@@ -138,19 +171,20 @@ export default function TherapistEnquiryForm() {
 
   const onSubmit = async (data: TherapistEnquiryData) => {
     setIsSubmitting(true);
-    
+
     try {
       // Submit therapist enquiry to the new API endpoint
       const response = await apiRequest("POST", "/api/therapist-applications", {
         ...data,
-        profilePhoto: profilePhotoUrl
+        profilePhoto: profilePhotoUrl,
       });
-      
+
       toast({
         title: "Application Submitted Successfully!",
-        description: "Thank you for your interest. We'll be in touch within 2 business days to schedule your introduction call.",
+        description:
+          "Thank you for your interest. We'll be in touch within 2 business days to schedule your introduction call.",
       });
-      
+
       setIsSubmitted(true);
     } catch (error: any) {
       console.error("Submission error:", error);
@@ -170,33 +204,39 @@ export default function TherapistEnquiryForm() {
         <Card className="w-full max-w-2xl bg-white/90 backdrop-blur-sm border-0 shadow-xl">
           <CardContent className="p-12 text-center">
             <div className="flex items-center justify-center mb-8">
-              <img 
-                src={hiveWellnessLogo} 
-                alt="Hive Wellness Logo" 
-                className="h-20 w-auto"
-              />
+              <img src={hiveWellnessLogo} alt="Hive Wellness Logo" className="h-20 w-auto" />
             </div>
             <CheckCircle className="w-20 h-20 text-green-600 mx-auto mb-6" />
             <h1 className="text-3xl font-primary text-hive-purple mb-4 font-bold">
               Application Submitted!
             </h1>
             <p className="text-lg font-secondary text-hive-black/80 mb-8">
-              Thank you for your interest in joining Hive Wellness. We've received your application and will be in touch within 2 business days to schedule your introduction call.
+              Thank you for your interest in joining Hive Wellness. We've received your application
+              and will be in touch within 2 business days to schedule your introduction call.
             </p>
             <div className="bg-hive-light-blue/30 rounded-lg p-6 mb-8">
-              <h3 className="font-primary font-semibold text-hive-black mb-4">What happens next?</h3>
+              <h3 className="font-primary font-semibold text-hive-black mb-4">
+                What happens next?
+              </h3>
               <div className="space-y-3 text-left">
                 <div className="flex items-start">
                   <div className="w-2 h-2 bg-hive-purple rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                  <p className="font-secondary text-sm text-hive-black/70">You'll receive a branded email with a calendar link to book your introduction call</p>
+                  <p className="font-secondary text-sm text-hive-black/70">
+                    You'll receive a branded email with a calendar link to book your introduction
+                    call
+                  </p>
                 </div>
                 <div className="flex items-start">
                   <div className="w-2 h-2 bg-hive-purple rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                  <p className="font-secondary text-sm text-hive-black/70">After the call, you'll get a unique onboarding link to complete your profile</p>
+                  <p className="font-secondary text-sm text-hive-black/70">
+                    After the call, you'll get a unique onboarding link to complete your profile
+                  </p>
                 </div>
                 <div className="flex items-start">
                   <div className="w-2 h-2 bg-hive-purple rounded-full mt-2 mr-3 flex-shrink-0"></div>
-                  <p className="font-secondary text-sm text-hive-black/70">Set up Stripe Connect to receive 85% of session fees instantly</p>
+                  <p className="font-secondary text-sm text-hive-black/70">
+                    Set up Stripe Connect to receive 85% of session fees instantly
+                  </p>
                 </div>
               </div>
             </div>
@@ -212,17 +252,14 @@ export default function TherapistEnquiryForm() {
         {/* Header */}
         <div className="text-center mb-12">
           <div className="flex items-center justify-center mb-6">
-            <img 
-              src={hiveWellnessLogo} 
-              alt="Hive Wellness Logo" 
-              className="h-16 w-auto"
-            />
+            <img src={hiveWellnessLogo} alt="Hive Wellness Logo" className="h-16 w-auto" />
           </div>
           <h1 className="text-4xl font-primary text-hive-purple mb-4 font-bold">
             Join Hive Wellness
           </h1>
           <p className="text-xl font-secondary text-hive-black/80 max-w-2xl mx-auto">
-            Help us connect clients with the right therapist for their unique needs. Start your journey with us today.
+            Help us connect clients with the right therapist for their unique needs. Start your
+            journey with us today.
           </p>
         </div>
 
@@ -264,7 +301,7 @@ export default function TherapistEnquiryForm() {
                     )}
                   />
                 </div>
-                
+
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <FormField
                     control={form.control}
@@ -293,7 +330,7 @@ export default function TherapistEnquiryForm() {
                     )}
                   />
                 </div>
-                
+
                 <FormField
                   control={form.control}
                   name="location"
@@ -314,9 +351,9 @@ export default function TherapistEnquiryForm() {
                   <div className="flex items-center space-x-4">
                     {profilePhotoUrl ? (
                       <div className="relative">
-                        <img 
-                          src={profilePhotoUrl} 
-                          alt="Profile preview" 
+                        <img
+                          src={profilePhotoUrl}
+                          alt="Profile preview"
                           className="w-20 h-20 rounded-full object-cover border-2 border-hive-purple/30"
                         />
                         <Button
@@ -326,7 +363,7 @@ export default function TherapistEnquiryForm() {
                           className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full p-0"
                           onClick={() => {
                             setProfilePhotoUrl("");
-                            form.setValue('profilePhoto', "");
+                            form.setValue("profilePhoto", "");
                           }}
                         >
                           ×
@@ -377,8 +414,8 @@ export default function TherapistEnquiryForm() {
                     <FormItem>
                       <FormLabel className="font-secondary">Qualifications & Credentials</FormLabel>
                       <FormControl>
-                        <Textarea 
-                          {...field} 
+                        <Textarea
+                          {...field}
                           className="font-secondary min-h-24"
                           placeholder="Please list your relevant qualifications, certifications, and professional memberships..."
                         />
@@ -387,7 +424,7 @@ export default function TherapistEnquiryForm() {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="experience"
@@ -412,7 +449,7 @@ export default function TherapistEnquiryForm() {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="specializations"
@@ -430,11 +467,11 @@ export default function TherapistEnquiryForm() {
                                 if (checked) {
                                   field.onChange([...current, specialization]);
                                 } else {
-                                  field.onChange(current.filter(item => item !== specialization));
+                                  field.onChange(current.filter((item) => item !== specialization));
                                 }
                               }}
                             />
-                            <label 
+                            <label
                               htmlFor={specialization}
                               className="text-sm font-secondary cursor-pointer"
                             >
@@ -447,7 +484,7 @@ export default function TherapistEnquiryForm() {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="currentClients"
@@ -455,8 +492,8 @@ export default function TherapistEnquiryForm() {
                     <FormItem>
                       <FormLabel className="font-secondary">Current Client Load</FormLabel>
                       <FormControl>
-                        <Input 
-                          {...field} 
+                        <Input
+                          {...field}
                           className="font-secondary"
                           placeholder="e.g., 15 clients per week"
                         />
@@ -493,14 +530,11 @@ export default function TherapistEnquiryForm() {
                                 if (checked) {
                                   field.onChange([...current, day]);
                                 } else {
-                                  field.onChange(current.filter(item => item !== day));
+                                  field.onChange(current.filter((item) => item !== day));
                                 }
                               }}
                             />
-                            <label 
-                              htmlFor={day}
-                              className="text-sm font-secondary cursor-pointer"
-                            >
+                            <label htmlFor={day} className="text-sm font-secondary cursor-pointer">
                               {day}
                             </label>
                           </div>
@@ -510,7 +544,7 @@ export default function TherapistEnquiryForm() {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="availability.hours"
@@ -551,10 +585,12 @@ export default function TherapistEnquiryForm() {
                   name="aboutYou"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="font-secondary">Tell us about yourself and your therapeutic approach</FormLabel>
+                      <FormLabel className="font-secondary">
+                        Tell us about yourself and your therapeutic approach
+                      </FormLabel>
                       <FormControl>
-                        <Textarea 
-                          {...field} 
+                        <Textarea
+                          {...field}
                           className="font-secondary min-h-32"
                           placeholder="Share your therapeutic philosophy, approach to working with clients, and what makes you passionate about therapy..."
                         />
@@ -563,16 +599,18 @@ export default function TherapistEnquiryForm() {
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="motivation"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="font-secondary">Why do you want to join Hive Wellness?</FormLabel>
+                      <FormLabel className="font-secondary">
+                        Why do you want to join Hive Wellness?
+                      </FormLabel>
                       <FormControl>
-                        <Textarea 
-                          {...field} 
+                        <Textarea
+                          {...field}
                           className="font-secondary min-h-32"
                           placeholder="What attracts you to our platform and how do you see yourself contributing to our mission..."
                         />
@@ -592,35 +630,32 @@ export default function TherapistEnquiryForm() {
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                       <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
+                        <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                       </FormControl>
                       <div className="space-y-1 leading-none">
                         <FormLabel className="font-secondary text-sm">
-                          I consent to Hive Wellness processing my personal data in accordance with the UK Data Protection Act 2018 and GDPR for the purpose of evaluating my application and potential onboarding. *
+                          I consent to Hive Wellness processing my personal data in accordance with
+                          the UK Data Protection Act 2018 and GDPR for the purpose of evaluating my
+                          application and potential onboarding. *
                         </FormLabel>
                         <FormMessage />
                       </div>
                     </FormItem>
                   )}
                 />
-                
+
                 <FormField
                   control={form.control}
                   name="marketingConsent"
                   render={({ field }) => (
                     <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                       <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
+                        <Checkbox checked={field.value} onCheckedChange={field.onChange} />
                       </FormControl>
                       <div className="space-y-1 leading-none">
                         <FormLabel className="font-secondary text-sm">
-                          I would like to receive updates about Hive Wellness platform developments and opportunities via email.
+                          I would like to receive updates about Hive Wellness platform developments
+                          and opportunities via email.
                         </FormLabel>
                       </div>
                     </FormItem>
