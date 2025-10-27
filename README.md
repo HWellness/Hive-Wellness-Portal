@@ -343,7 +343,7 @@ All automated emails follow the brand guidelines with:
 
 ---
 
-## 🆘 Support
+## Support
 
 For technical support or questions:
 - **Email**: support@hive-wellness.co.uk
@@ -352,6 +352,6 @@ For technical support or questions:
 
 ---
 
-## 📄 License
+## License
 
 Proprietary - © 2025 Hive Wellness. All rights reserved.
