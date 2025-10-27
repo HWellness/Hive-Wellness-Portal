@@ -1,10 +1,10 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
-import { useEffect } from "react";
+import { useEffect, ReactNode } from "react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 interface ProtectedRouteProps {
-  children: React.ReactNode;
+  children: ReactNode;
   fallbackPath?: string;
 }
 

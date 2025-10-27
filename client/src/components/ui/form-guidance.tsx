@@ -1,3 +1,4 @@
+import { ChangeEvent } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info, CheckCircle, AlertTriangle } from "lucide-react";
 
@@ -87,7 +88,7 @@ export function ValidatedInput({
   helpText,
   formatValue,
 }: ValidatedInputProps) {
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
     const formattedValue = formatValue ? formatValue(newValue) : newValue;
     onChange(formattedValue);

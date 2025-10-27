@@ -6,7 +6,16 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import { Clock, Calendar, CheckCircle, XCircle } from "lucide-react";
+import {
+  Clock,
+  Calendar,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  FileText,
+  User,
+  CreditCard,
+} from "lucide-react";
 import { User as UserType } from "@shared/schema";
 
 interface SessionApprovalRequest {

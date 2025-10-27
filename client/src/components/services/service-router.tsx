@@ -206,13 +206,14 @@ export default function ServiceRouter({
         return <ClientProfileCompletion user={user} />;
       case "client-therapist-assignment":
         return <ClientTherapistAssignment />;
-      case "real-data-import":
+      case "real-data-import": {
         const RealDataImportManager = lazy(() =>
           import("../admin/real-data-import-manager").then((module) => ({
             default: module.RealDataImportManager,
           }))
         );
         return <RealDataImportManager />;
+      }
       case "therapist-status-manager":
         return <TherapistStatusManager />;
       case "assignment-notifications":
