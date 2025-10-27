@@ -11,7 +11,6 @@ import {
   VideoOff,
   Mic,
   MicOff,
-  Phone,
   PhoneOff,
   Monitor,
   MonitorOff,

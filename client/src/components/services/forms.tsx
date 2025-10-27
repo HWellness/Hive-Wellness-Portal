@@ -4,14 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import GravityForm from "@/components/forms/gravity-forms";
-import type { User } from "@shared/schema";
 import { FileText, Mail, Users, Settings, Plus, Eye } from "lucide-react";
 
-interface FormsProps {
-  user: User;
-}
-
-export default function Forms({ user }: FormsProps) {
+export default function Forms() {
   const [selectedForm, setSelectedForm] = useState<string | null>(null);
 
   const gravityForms = [

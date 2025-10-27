@@ -14,13 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import {
@@ -39,43 +33,12 @@ import {
   Video,
   TrendingUp,
   UserPlus,
-  Filter,
-  Trash2,
   Eye,
   Download,
-  Star,
   FileText,
   MessageSquare,
-  MapPin,
-  Shield,
-  Heart,
-  Brain,
-  Zap,
-  ChevronRight,
-  BarChart3,
-  ChevronDown,
-  ChevronUp,
-  Save,
   Upload,
-  X,
-  MoreHorizontal,
-  Bell,
-  StickyNote,
-  Paperclip,
-  Tag,
-  Flag,
   Archive,
-  Copy,
-  ExternalLink,
-  Home,
-  Building,
-  GraduationCap,
-  Briefcase,
-  Car,
-  Smartphone,
-  Globe,
-  DollarSign,
-  CreditCard,
 } from "lucide-react";
 import type { User } from "@shared/schema";
 

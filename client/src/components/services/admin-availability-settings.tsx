@@ -17,14 +17,12 @@ import { Separator } from "@/components/ui/separator";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Clock,
-  Calendar,
   Settings,
   Save,
   RefreshCw,
   CheckCircle,
   AlertTriangle,
   Globe,
-  Users,
   Coffee,
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";

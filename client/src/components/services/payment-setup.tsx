@@ -1,5 +1,4 @@
 import * as React from "react";
-import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -24,7 +23,6 @@ interface PaymentSetupProps {
 }
 
 export default function PaymentSetup({ user, onNavigateToService }: PaymentSetupProps) {
-  console.log("PaymentSetup component loaded!", { user, onNavigateToService });
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -38,17 +36,12 @@ export default function PaymentSetup({ user, onNavigateToService }: PaymentSetup
     queryFn: async () => {
       const response = await apiRequest("GET", `/api/therapist/payment-status/${user.id}`);
       const result = await response.json();
-      console.log("Payment status query result:", result);
       return result;
     },
     retry: false,
     staleTime: 60000, // Keep payment status fresh for 1 minute
     refetchOnWindowFocus: false, // Prevent unnecessary refetches on focus
   });
-
-  console.log("Payment status data:", paymentStatus);
-  console.log("Payment status loading:", isLoading);
-  console.log("Payment status error:", error);
 
   // Setup payment mutation
   const setupPaymentMutation = useMutation({

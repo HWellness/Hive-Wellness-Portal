@@ -24,7 +24,6 @@ import {
 } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { toast } from "@/hooks/use-toast";
 // Performance optimisation: Import only the icons we actually use
 import {
   Building,
@@ -32,8 +31,6 @@ import {
   TrendingUp,
   BarChart3,
   PoundSterling,
-  UserCheck,
-  AlertTriangle,
   Calendar,
   Download,
   Settings,

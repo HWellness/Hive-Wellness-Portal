@@ -1,9 +1,9 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "@/hooks/use-toast";
-import { Video, VideoOff, Mic, MicOff, Users, Clock, Play, Phone, PhoneOff } from "lucide-react";
+import { Video, VideoOff, Mic, MicOff, Users, Clock, Play, PhoneOff } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 interface VideoSession {

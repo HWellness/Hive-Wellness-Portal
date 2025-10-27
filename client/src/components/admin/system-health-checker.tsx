@@ -7,9 +7,6 @@ import { Progress } from "@/components/ui/progress";
 import {
   Activity,
   Database,
-  Mail,
-  MessageSquare,
-  CreditCard,
   Globe,
   Shield,
   CheckCircle,

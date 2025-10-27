@@ -5,7 +5,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Select,
@@ -14,22 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  MessageSquare,
-  Phone,
-  Send,
-  Calendar,
-  CheckCircle,
-  AlertTriangle,
-  MessageCircle,
-  UserPlus,
-  Settings,
-  Clock,
-  Smartphone,
-  TestTube,
-  Wifi,
-  WifiOff,
-} from "lucide-react";
+import { Phone, Send, Calendar, AlertTriangle, MessageCircle, UserPlus, Clock } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";

@@ -25,8 +25,6 @@ import {
   Trash2,
   Shield,
   Lock,
-  CheckCircle,
-  AlertCircle,
   File,
   Image,
   FileArchive,

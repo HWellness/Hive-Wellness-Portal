@@ -14,8 +14,6 @@ import {
   Loader,
   User,
   Building,
-  Phone,
-  MapPin,
   RefreshCw,
   Shield,
   PoundSterling,

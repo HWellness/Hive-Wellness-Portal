@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "wouter";
 import hiveWellnessLogo from "@assets/Hive Logo_1752073128164.png";
 import ChatbotWidget from "@/components/chatbot/chatbot-widget";

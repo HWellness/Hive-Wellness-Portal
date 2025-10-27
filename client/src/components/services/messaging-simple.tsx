@@ -1,16 +1,11 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Send, UserIcon, MessageCircle, Users } from "lucide-react";
+import { Send, MessageCircle, Users } from "lucide-react";
 
-interface MessagingProps {
-  user: any;
-}
-
-export default function MessagingService({ user }: MessagingProps) {
+export default function MessagingService() {
   const { toast } = useToast();
   const [messageText, setMessageText] = useState("");
   const [selectedChat, setSelectedChat] = useState<string | null>(null);

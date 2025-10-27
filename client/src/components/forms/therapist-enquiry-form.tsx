@@ -25,19 +25,7 @@ import {
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import {
-  Mail,
-  User,
-  MapPin,
-  Phone,
-  Clock,
-  Users,
-  Award,
-  FileText,
-  CheckCircle,
-  Upload,
-  Camera,
-} from "lucide-react";
+import { User, Clock, Award, FileText, CheckCircle, Upload, Camera } from "lucide-react";
 import hiveWellnessLogo from "@assets/Hive Logo_1752073128164.png";
 
 const therapistEnquirySchema = z.object({

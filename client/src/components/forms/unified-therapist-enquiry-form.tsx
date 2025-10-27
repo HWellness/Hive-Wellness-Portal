@@ -25,20 +25,7 @@ import {
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import {
-  Mail,
-  User,
-  MapPin,
-  Phone,
-  Clock,
-  Users,
-  Award,
-  FileText,
-  CheckCircle,
-  Upload,
-  Camera,
-  Calendar,
-} from "lucide-react";
+import { CheckCircle, Upload, Calendar } from "lucide-react";
 import hiveWellnessLogo from "@assets/Hive Logo_1752073128164.png";
 import IntroductionCallBooking from "@/components/IntroductionCallBooking";
 

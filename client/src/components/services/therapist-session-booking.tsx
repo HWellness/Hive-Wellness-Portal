@@ -15,20 +15,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import {
-  Calendar,
-  Clock,
-  Users,
-  Video,
-  Plus,
-  Edit,
-  Trash2,
-  CheckCircle,
-  AlertCircle,
-  User as UserIcon,
-  MessageCircle,
-  PoundSterling,
-} from "lucide-react";
+import { Calendar, Clock, Users, Video, Plus, Edit, PoundSterling } from "lucide-react";
 import type { User } from "@shared/schema";
 
 interface TherapistSessionBookingProps {

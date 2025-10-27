@@ -22,15 +22,9 @@ import {
   Users,
   CheckCircle,
   XCircle,
-  Clock,
-  Eye,
   Edit,
   MessageSquare,
-  Star,
-  AlertTriangle,
   TrendingUp,
-  Filter,
-  Search,
   RefreshCw,
 } from "lucide-react";
 import type { User as UserType } from "@shared/schema";

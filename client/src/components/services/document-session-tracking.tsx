@@ -14,12 +14,10 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -32,7 +30,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
@@ -40,8 +37,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
   FileText,
-  Calendar,
-  User,
   Download,
   Plus,
   Shield,
@@ -51,8 +46,6 @@ import {
   Video,
   Eye,
   Lock,
-  ChevronDown,
-  Clock,
 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 

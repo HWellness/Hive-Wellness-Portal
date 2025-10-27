@@ -18,10 +18,6 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import {
   Shield,
-  Lock,
-  Unlock,
-  Eye,
-  EyeOff,
   AlertTriangle,
   CheckCircle,
   XCircle,
@@ -33,7 +29,6 @@ import {
   Download,
   RefreshCw,
   Settings,
-  Bell,
   Clock,
   MapPin,
   Search,

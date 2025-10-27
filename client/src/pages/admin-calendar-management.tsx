@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,7 +10,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,20 +29,16 @@ import {
   Users,
   AlertCircle,
   RefreshCw,
-  Settings,
   CheckCircle,
   XCircle,
-  Play,
   Activity,
   TrendingUp,
   Database,
   Search,
-  Filter,
   Download,
   Zap,
   Shield,
   BarChart3,
-  FileText,
   Gauge,
   Wifi,
   WifiOff,
@@ -51,11 +46,9 @@ import {
   Eye,
   RotateCcw,
   TestTube,
-  Wrench,
 } from "lucide-react";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { useToast } from "@/hooks/use-toast";
-import { Link } from "wouter";
 
 // Types for the admin calendar management system
 interface CalendarOverview {

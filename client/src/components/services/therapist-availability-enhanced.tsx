@@ -6,13 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Separator } from "@/components/ui/separator";
 import {
   Calendar,
   Clock,
   Plus,
   Trash2,
-  CheckCircle,
   AlertTriangle,
   Settings,
   User as UserIcon,

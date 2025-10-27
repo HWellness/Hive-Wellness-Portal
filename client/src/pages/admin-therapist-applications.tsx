@@ -14,7 +14,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { ArrowLeft, Eye, Check, X, Calendar, Mail, Phone, MapPin, Award } from "lucide-react";
+import { ArrowLeft, Eye, Check, X, Calendar, Mail, MapPin, Award } from "lucide-react";
 import { Link } from "wouter";
 
 interface TherapistApplication {

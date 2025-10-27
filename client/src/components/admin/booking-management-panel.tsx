@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Clock, Video, Mail, Phone, User } from "lucide-react";
+import { Calendar, Clock, Video, Mail, User } from "lucide-react";
 
 interface BookingManagementPanelProps {
   onBookingUpdate?: () => void;

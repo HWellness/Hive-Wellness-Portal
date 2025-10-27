@@ -17,7 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import { MessageSquare, Phone, Settings, Send, Users, Clock, Check, X } from "lucide-react";
+import { MessageSquare, Settings, Send, Users, Clock, Check, X } from "lucide-react";
 
 interface CommunicationPreferences {
   userId: string;
