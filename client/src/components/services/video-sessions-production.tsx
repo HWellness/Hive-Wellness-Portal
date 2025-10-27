@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, MouseEvent } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -307,7 +307,7 @@ export default function VideoSessionsProduction({
           ? "Join Session"
           : "Join Session";
 
-    const handleJoinClick = (e: React.MouseEvent) => {
+    const handleJoinClick = (e: MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
       if (!isJoining) {

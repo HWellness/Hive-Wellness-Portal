@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { AlertTriangle, Activity } from "lucide-react";
+import { AlertTriangle, Activity, CheckCircle, XCircle, Zap, Shield } from "lucide-react";
 
 interface SystemHealth {
   overall: "healthy" | "degraded" | "unhealthy";

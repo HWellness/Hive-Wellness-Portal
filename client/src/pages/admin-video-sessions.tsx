@@ -80,12 +80,13 @@ export default function AdminVideoSessions() {
         switch (dateFilter) {
           case "today":
             return sessionDate.toDateString() === today.toDateString();
-          case "this-week":
+          case "this-week": {
             const weekStart = new Date(today);
             weekStart.setDate(today.getDate() - today.getDay());
             const weekEnd = new Date(weekStart);
             weekEnd.setDate(weekStart.getDate() + 6);
             return sessionDate >= weekStart && sessionDate <= weekEnd;
+          }
           case "this-month":
             return (
               sessionDate.getMonth() === today.getMonth() &&

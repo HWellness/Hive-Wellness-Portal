@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -815,7 +815,6 @@ export default function AppointmentBookingComplete({ user }: AppointmentBookingP
         });
         return;
       }
-    } else {
     }
 
     const appointmentDateTime = new Date(selectedDate);
@@ -1705,7 +1704,7 @@ const PaymentForm = ({
     }
   }, [stripe, elements]);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
     if (!stripe || !elements) {

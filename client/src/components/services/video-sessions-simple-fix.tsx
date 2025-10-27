@@ -194,7 +194,7 @@ export default function VideoSessionsSimpleFix() {
             }
             break;
 
-          case "offer":
+          case "offer": {
             console.log("📞 Received offer");
             if (!peerConnectionRef.current) {
               peerConnectionRef.current = createPeerConnection();
@@ -212,6 +212,7 @@ export default function VideoSessionsSimpleFix() {
               })
             );
             break;
+          }
 
           case "answer":
             console.log("📞 Received answer");

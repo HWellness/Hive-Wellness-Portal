@@ -16,7 +16,19 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Calendar as CalendarIcon, Clock, Users, Video } from "lucide-react";
+import {
+  Calendar as CalendarIcon,
+  CheckCircle,
+  Clock,
+  MessageSquare,
+  RefreshCw,
+  Search,
+  User,
+  Users,
+  Video,
+  Plus,
+  AlertTriangle,
+} from "lucide-react";
 
 interface SchedulingEnhancedProps {
   user: {
