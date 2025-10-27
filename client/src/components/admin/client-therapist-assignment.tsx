@@ -31,7 +31,6 @@ import {
   Filter,
   User,
   Star,
-  ArrowLeft,
   Info,
   FileText,
   Award,

@@ -20,7 +20,6 @@ import {
   Clock,
   Users,
   Calendar,
-  Mail,
   CreditCard,
   Video,
   Sheet,

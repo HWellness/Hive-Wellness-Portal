@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import { Download, Upload, CheckCircle, AlertTriangle, Database, RefreshCw } from "lucide-react";
+import { Download, CheckCircle, AlertTriangle, Database, RefreshCw } from "lucide-react";
 
 interface ImportResults {
   clientQuestionnaires: { imported: number; errors: string[] };
