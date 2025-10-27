@@ -1,14 +1,12 @@
+import "dotenv/config";
+
 import express, { type Request, Response, NextFunction } from "express";
 import compression from "compression";
 import path from "path";
-import { config } from "dotenv";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { logger } from "./lib/logger";
 import { strictSecurityHeaders, allowWhitelistedFraming } from "./middleware/security-headers.js";
-
-// Load environment variables from .env file
-config();
 
 // CRITICAL: Database constraint health check on startup
 console.log('🔍 Validating database constraints...');
