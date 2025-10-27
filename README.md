@@ -1,12 +1,10 @@
 # Hive Wellness - Unified Therapy Platform
 
-**Production-Ready Therapy Management System**
-
 Hive Wellness is a comprehensive therapy platform offering therapist matching, appointment scheduling, payment processing, real-time video sessions, and AI-powered tools. The platform serves clients, therapists, administrators, and institutions through a unified portal system.
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Node.js 20+ 
@@ -22,8 +20,8 @@ Hive Wellness is a comprehensive therapy platform offering therapist matching, a
 
 1. **Clone the repository**
 ```bash
-git clone <repository-url>
-cd hive-wellness
+git clone https://github.com/HWellness/Hive-Wellness-Portal
+cd Hive-Wellness-Portal
 ```
 
 2. **Install dependencies**
@@ -48,7 +46,7 @@ The application will be available at `http://localhost:5000`
 
 ---
 
-## 🔐 Environment Variables
+## Environment Variables
 
 Create a `.env` file with the following variables:
 
@@ -111,7 +109,7 @@ VITE_API_URL=https://api.hive-wellness.co.uk
 
 ---
 
-## 🏗️ Project Structure
+## Project Structure
 
 ```
 hive-wellness/
@@ -136,7 +134,7 @@ hive-wellness/
 
 ---
 
-## 🎯 Key Features
+## Key Features
 
 ### User Management
 - **Multi-role authentication**: Client, Therapist, Admin, Institution
@@ -202,7 +200,7 @@ hive-wellness/
 
 ---
 
-## 📊 Technology Stack
+## Technology Stack
 
 ### Frontend
 - **React 18** with TypeScript
@@ -230,7 +228,7 @@ hive-wellness/
 
 ---
 
-## 🚢 Deployment
+## Deployment
 
 ### GitHub Setup
 
@@ -292,19 +290,7 @@ npm run db:push --force
 
 ---
 
-## 🔒 Security Best Practices
-
-1. **Never commit secrets**: Use environment variables for all API keys
-2. **Keep dependencies updated**: Run `npm audit` regularly
-3. **SSL/TLS enabled**: Database connections require valid certificates
-4. **PII protection**: All AI calls automatically mask sensitive data
-5. **Rate limiting**: IP-based throttling on sensitive endpoints
-6. **CSRF protection**: Enabled on all state-changing operations
-7. **Session security**: Fresh sessions required for sensitive actions
-
----
-
-## 🧪 Testing
+## Testing
 
 ### Run all tests
 ```bash
@@ -329,7 +315,7 @@ See `wordpress-chatbot-plugin/INSTALLATION.md` for setup instructions.
 
 ---
 
-## 🎨 Brand Guidelines
+## Brand Guidelines
 
 ### Colors
 - **Primary Purple**: #9306B1 (rgb(147, 6, 177))
@@ -369,42 +355,3 @@ For technical support or questions:
 ## 📄 License
 
 Proprietary - © 2025 Hive Wellness. All rights reserved.
-
----
-
-## 🔄 Transfer Checklist
-
-When transferring this project to a new team:
-
-### GitHub Transfer
-- [ ] Transfer repository ownership to Hive Wellness GitHub account
-- [ ] Update all team member access permissions
-- [ ] Enable branch protection on `main` branch
-- [ ] Set up GitHub Actions (if needed)
-
-### Railway Transfer
-- [ ] Transfer Railway project to Hive Wellness account
-- [ ] Update billing information
-- [ ] Verify all environment variables are set
-- [ ] Test deployment after transfer
-- [ ] Update custom domain settings
-
-### External Services
-- [ ] Transfer Stripe account ownership
-- [ ] Update SendGrid account settings
-- [ ] Transfer Twilio account
-- [ ] Update Daily.co ownership
-- [ ] Transfer Google Workspace integration
-- [ ] Update OpenAI API key billing
-
-### Documentation
-- [ ] Update all documentation with new contact information
-- [ ] Update repository URLs in code
-- [ ] Update deployment URLs
-- [ ] Archive or remove development-only files
-
----
-
-**Last Updated**: October 2025
-**Status**: Production Ready
-**Version**: 1.0.0
