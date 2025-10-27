@@ -228,50 +228,7 @@ hive-wellness/
 
 ---
 
-## Deployment
-
-### GitHub Setup
-
-1. **Create a new repository** in the Hive Wellness GitHub account
-2. **Add the remote**:
-```bash
-git remote add origin https://github.com/hive-wellness/platform.git
-```
-
-3. **Push the code**:
-```bash
-git push -u origin main
-```
-
-### Railway Deployment
-
-1. **Create a Railway account** for Hive Wellness
-2. **Create a new project** from GitHub repository
-3. **Add Neon PostgreSQL** database service
-4. **Configure environment variables** in Railway dashboard (all variables from .env)
-5. **Deploy**:
-   - Railway will automatically detect the Node.js app
-   - Build command: `npm install && npm run build`
-   - Start command: `npm start`
-
-6. **Set up custom domain**:
-   - Add `api.hive-wellness.co.uk` in Railway settings
-   - Update DNS records to point to Railway
-
-### Post-Deployment Checklist
-- [ ] Verify all environment variables are set
-- [ ] Test database connectivity
-- [ ] Run database migrations: `npm run db:push --force`
-- [ ] Verify SendGrid email sending
-- [ ] Test Stripe payment webhooks
-- [ ] Check Google Calendar integration
-- [ ] Verify Daily.co video sessions
-- [ ] Test Twilio SMS functionality
-- [ ] Monitor application logs
-
----
-
-## 📝 Database Management
+## Database Management
 
 ### Running Migrations
 ```bash
