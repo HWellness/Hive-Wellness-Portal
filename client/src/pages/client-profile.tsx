@@ -19,8 +19,6 @@ import {
   Cake,
   Briefcase,
   Heart,
-  Clock,
-  CheckCircle,
   AlertTriangle,
 } from "lucide-react";
 import { Link } from "wouter";

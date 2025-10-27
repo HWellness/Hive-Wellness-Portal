@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { Users, Settings, Check, X } from "lucide-react";
+import { Settings, Check, X } from "lucide-react";
 
 interface TherapyCategory {
   id: string;

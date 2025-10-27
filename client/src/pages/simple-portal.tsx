@@ -8,9 +8,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import { Video, User, LogIn, Calendar, Phone } from "lucide-react";
+import { LogIn, Calendar } from "lucide-react";
 import { Link } from "wouter";
 import ChatbotWidget from "@/components/chatbot/chatbot-widget";
 import IntroductionCallBooking from "@/components/booking/introduction-call-booking";
@@ -19,7 +17,6 @@ import IntroductionCallBooking from "@/components/booking/introduction-call-book
 const backgroundImage = "/header-bg.png";
 
 export default function SimplePortal() {
-  const { toast } = useToast();
   const [showBookingDialog, setShowBookingDialog] = useState(false);
   const [videoLink, setVideoLink] = useState<string | null>(null);
   const [bookingKey, setBookingKey] = useState(0); // Key to force remount only when needed

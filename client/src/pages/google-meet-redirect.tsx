@@ -4,14 +4,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 export default function GoogleMeetRedirect() {
-  const [match, params] = useRoute("/video-session/:sessionId");
+  const [params] = useRoute("/video-session/:sessionId");
   const [meetingUrl, setMeetingUrl] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
 
   const sessionId = params?.sessionId;
   const urlParams = new URLSearchParams(window.location.search);
-  const role = urlParams.get("role");
   const type = urlParams.get("type");
 
   useEffect(() => {

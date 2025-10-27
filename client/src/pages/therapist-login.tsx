@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dialog";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Eye, EyeOff, LogIn, Mail, Lock, AlertTriangle } from "lucide-react";
-import { useLocation, Link } from "wouter";
+import { useLocation } from "wouter";
 import hiveWellnessLogo from "@assets/Hive Wellness logo 1 (1)_1761429577346.png";
 
 export default function TherapistLogin() {

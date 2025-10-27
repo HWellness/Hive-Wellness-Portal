@@ -8,20 +8,17 @@ import {
   Clock,
   UserCheck,
   AlertCircle,
-  Phone,
   PhoneOff,
   Mic,
   MicOff,
   VideoOff,
 } from "lucide-react";
-import { useLocation } from "wouter";
 import hiveWellnessLogo from "@assets/Hive Logo_1752073128164.png";
 
 // Simple video meeting page accessible from email links
 export default function VideoMeetingPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [, setLocation] = useLocation();
   const [isJoining, setIsJoining] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [inVideoCall, setInVideoCall] = useState(false);

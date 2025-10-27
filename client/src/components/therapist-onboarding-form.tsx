@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import { UserPlus, Send, CheckCircle, Calendar, FileText, Heart } from "lucide-react";
+import { UserPlus, CheckCircle, Calendar, Heart } from "lucide-react";
 import IntroductionCallBooking from "./IntroductionCallBooking";
 
 interface TherapistOnboardingFormProps {

@@ -13,14 +13,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import {
   DollarSign,
-  TrendingUp,
-  TrendingDown,
   Users,
   Calendar,
   AlertTriangle,
   CheckCircle,
-  BarChart3,
-  PieChart,
   Download,
   RefreshCw,
   Lightbulb,
@@ -35,7 +31,7 @@ import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useState } from "react";
-import { formatCurrency, type CurrencyAmount } from "@/lib/currency";
+import { formatCurrency } from "@/lib/currency";
 
 // Cost Summary Component
 function CostSummaryCards({ timeRange }: { timeRange: string }) {

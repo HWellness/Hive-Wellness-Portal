@@ -6,7 +6,7 @@ import { Loader2 } from "lucide-react";
 import logoPath from "@assets/Hive Logo_1752073128164.png";
 
 const AuthPage: React.FC = () => {
-  const [location, setLocation] = useLocation();
+  const [, setLocation] = useLocation();
   const { user, isLoading } = useAuth();
 
   // Redirect if user is already authenticated
