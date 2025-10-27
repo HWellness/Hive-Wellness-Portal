@@ -21,7 +21,6 @@ import {
   Video,
   Loader2,
   RefreshCw,
-  AlertTriangle,
 } from "lucide-react";
 
 interface IntroductionCallBookingProps {

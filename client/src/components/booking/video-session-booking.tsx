@@ -17,7 +17,7 @@ import { Loader2, Calendar as CalendarIcon, Video, Clock, User, Mail } from "luc
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useQuery } from "@tanstack/react-query";
-import { format, addDays, isSameDay, setHours, setMinutes } from "date-fns";
+import { format, addDays } from "date-fns";
 
 interface Therapist {
   id: string;
