@@ -8,9 +8,18 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Search, MessageCircle, Settings, BarChart3, Plus, Edit } from "lucide-react";
+import {
+  MessageCircle,
+  Settings,
+  BarChart3,
+  Plus,
+  Edit,
+  Download,
+  Trash2,
+  X,
+  Save,
+} from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
