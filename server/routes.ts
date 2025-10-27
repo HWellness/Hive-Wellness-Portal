@@ -25187,12 +25187,10 @@ Session starts at: ${new Date(introCall.preferredDate).toLocaleString("en-GB", {
     } catch (error) {
       console.error("Error fetching video sessions:", error);
       res.setHeader("X-Response-Time", `${Date.now() - startTime}ms`);
-      res
-        .status(500)
-        .json({
-          message: "Failed to fetch video sessions",
-          error: error instanceof Error ? error.message : "Unknown error",
-        });
+      res.status(500).json({
+        message: "Failed to fetch video sessions",
+        error: error instanceof Error ? error.message : "Unknown error",
+      });
     }
   });
 
