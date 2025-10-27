@@ -6,7 +6,6 @@ on:
 
 jobs:
   lint-and-format:
-    name: Lint & Format Check
     runs-on: ubuntu-latest
     
     steps:
