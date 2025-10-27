@@ -1,25 +1,18 @@
-// This file intentionally fails quality gates for testing
-
-const testObject = {
-  name: "test",
-  value: 123,
-  active: true,
-};
-
-const unusedVar = 42;
-console.log("This should fail lint");
-
-
-function badFunction() {
-  const arr = [1, 2, 3];
-  return arr.map((x) => x * 2);
+export function calculateSum(a: number, b: number): number {
+  return a + b;
 }
 
-  export default class TestClass {
-  constructor() {
-    this.value = 0;
+export function greetUser(name: string): string {
+  return `Hello, ${name}!`;
+}
+
+export function multiplyNumbers(a: number, b: number): number {
+  return a * b;
+}
+
+export function divideNumbers(a: number, b: number): number {
+  if (b === 0) {
+    throw new Error("Division by zero");
   }
-  method() {
-    return "test";
-  }
+  return a / b;
 }
