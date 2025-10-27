@@ -30,6 +30,7 @@ import {
   Eye,
   FileText,
   Users,
+  MessageSquare,
 } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import type { User } from "@shared/schema";

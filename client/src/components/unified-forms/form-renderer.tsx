@@ -213,7 +213,7 @@ export default function FormRenderer({
           </div>
         );
 
-      case "rating-matrix":
+      case "rating-matrix": {
         const matrixValue = value || {};
         return (
           <div className="space-y-6">
@@ -259,6 +259,7 @@ export default function FormRenderer({
             {error && <p className="text-red-500 text-sm mt-4">{error}</p>}
           </div>
         );
+      }
 
       default:
         return (
