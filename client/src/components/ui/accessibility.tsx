@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, ReactNode } from "react";
 
 // Skip to main content link for keyboard navigation
 export function SkipToMain() {
@@ -19,7 +19,7 @@ export function LiveRegion({
   children,
   politeness = "polite",
 }: {
-  children: React.ReactNode;
+  children: ReactNode;
   politeness?: "polite" | "assertive" | "off";
 }) {
   return (

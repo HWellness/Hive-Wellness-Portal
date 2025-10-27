@@ -1,3 +1,4 @@
+import { createElement } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -82,7 +83,7 @@ function CostSummaryCards({ timeRange }: { timeRange: string }) {
                 {summary.totalMonthlyCost ? formatCurrency(summary.totalMonthlyCost) : "£0.00"}
               </p>
               <div className="flex items-center mt-1">
-                {React.createElement(changeIcon, { className: `w-4 h-4 ${changeColor}` })}
+                {createElement(changeIcon, { className: `w-4 h-4 ${changeColor}` })}
                 <span className={`text-sm ${changeColor} ml-1`}>
                   {Math.abs(summary.monthOverMonthChange || 0).toFixed(1)}%
                 </span>

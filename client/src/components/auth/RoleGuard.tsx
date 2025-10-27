@@ -1,3 +1,4 @@
+import { ReactNode } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import {
   AuthUser,
@@ -13,12 +14,12 @@ import { Button } from "@/components/ui/button";
 import { useLocation } from "wouter";
 
 interface RoleGuardProps {
-  children: React.ReactNode;
+  children: ReactNode;
   requiredRole?: UserRole;
   requiredRoles?: UserRole[];
   minimumRole?: UserRole;
   requireRoute?: string;
-  fallback?: React.ReactNode;
+  fallback?: ReactNode;
   showErrorMessage?: boolean;
 }
 
@@ -136,8 +137,8 @@ export const AdminOnly = ({
   children,
   fallback,
 }: {
-  children: React.ReactNode;
-  fallback?: React.ReactNode;
+  children: ReactNode;
+  fallback?: ReactNode;
 }) => (
   <RoleGuard requiredRole="admin" fallback={fallback}>
     {children}
@@ -148,8 +149,8 @@ export const TherapistOnly = ({
   children,
   fallback,
 }: {
-  children: React.ReactNode;
-  fallback?: React.ReactNode;
+  children: ReactNode;
+  fallback?: ReactNode;
 }) => (
   <RoleGuard requiredRole="therapist" fallback={fallback}>
     {children}
@@ -160,8 +161,8 @@ export const ClientOnly = ({
   children,
   fallback,
 }: {
-  children: React.ReactNode;
-  fallback?: React.ReactNode;
+  children: ReactNode;
+  fallback?: ReactNode;
 }) => (
   <RoleGuard requiredRole="client" fallback={fallback}>
     {children}
@@ -172,8 +173,8 @@ export const InstitutionOnly = ({
   children,
   fallback,
 }: {
-  children: React.ReactNode;
-  fallback?: React.ReactNode;
+  children: ReactNode;
+  fallback?: ReactNode;
 }) => (
   <RoleGuard requiredRole="institution" fallback={fallback}>
     {children}
@@ -187,7 +188,7 @@ export const ShowForRoles = ({
   user,
 }: {
   roles: UserRole[];
-  children: React.ReactNode;
+  children: ReactNode;
   user?: AuthUser;
 }) => {
   const { user: authUser } = useAuth();

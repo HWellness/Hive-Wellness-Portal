@@ -15,7 +15,22 @@ import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Mail, Send, Settings } from "lucide-react";
+import {
+  Mail,
+  Send,
+  Settings,
+  Clock,
+  RefreshCw,
+  CheckCircle,
+  XCircle,
+  AlertCircle,
+  Calendar,
+  Play,
+  Archive,
+  Eye,
+  FileText,
+  Users,
+} from "lucide-react";
 import { Label } from "@/components/ui/label";
 import type { User } from "@shared/schema";
 

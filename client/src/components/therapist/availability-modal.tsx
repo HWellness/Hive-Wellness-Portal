@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, ReactNode } from "react";
 import {
   Dialog,
   DialogContent,
@@ -32,7 +32,7 @@ interface DayAvailability {
 
 interface AvailabilityModalProps {
   userId: string;
-  trigger: React.ReactNode;
+  trigger: ReactNode;
 }
 
 export default function AvailabilityModal({ userId, trigger }: AvailabilityModalProps) {

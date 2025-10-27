@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, FormEvent } from "react";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -44,7 +44,7 @@ export default function ResetPassword() {
     }
   }, [toast]);
 
-  const handlePasswordReset = async (e: React.FormEvent) => {
+  const handlePasswordReset = async (e: FormEvent) => {
     e.preventDefault();
 
     if (!newPassword || !confirmPassword) {
