@@ -3,19 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import {
-  AlertTriangle,
-  Activity,
-  Database,
-  CheckCircle,
-  RefreshCw,
-  Server,
-  Clock,
-  Zap,
-} from "lucide-react";
+import { AlertTriangle, Activity, CheckCircle, RefreshCw, Server, Clock, Zap } from "lucide-react";
 import type { User } from "@shared/schema";
 
 interface SystemHealthDashboardProps {

@@ -37,9 +37,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
   FileText,
-  Building,
   Shield,
-  Settings,
   Plus,
   Download,
   Edit,

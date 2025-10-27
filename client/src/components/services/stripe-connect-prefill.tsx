@@ -36,7 +36,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { CreditCard, Settings, CheckCircle, XCircle } from "lucide-react";
+import { CheckCircle } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
 const stripeConnectAutomationSchema = z.object({

@@ -10,7 +10,6 @@ import {
   VideoOff,
   Mic,
   MicOff,
-  Phone,
   RefreshCw,
   Camera,
   Users,

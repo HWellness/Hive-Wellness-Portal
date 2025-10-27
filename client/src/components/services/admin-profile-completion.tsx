@@ -1,11 +1,10 @@
 import React, { useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -14,38 +13,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import {
-  phoneValidation,
-  postcodeValidation,
-  nameValidation,
-  emailValidation,
-  formatPhoneNumber,
-  formatPostcode,
-  VALIDATION_MESSAGES,
-} from "@/lib/form-validation";
+import { formatPhoneNumber, formatPostcode } from "@/lib/form-validation";
 import { apiRequest } from "@/lib/queryClient";
-import {
-  User,
-  MapPin,
-  Calendar,
-  Heart,
-  Shield,
-  Clock,
-  Target,
-  CheckCircle,
-  AlertCircle,
-  Info,
-  Plus,
-  X,
-  Save,
-  Settings,
-  Users,
-  Building,
-} from "lucide-react";
+import { User, Shield, CheckCircle, Save, Settings, Building } from "lucide-react";
 import type { User as UserType } from "@shared/schema";
 
 interface AdminProfileCompletionProps {
@@ -240,7 +212,7 @@ export default function AdminProfileCompletion({ user }: AdminProfileCompletionP
       const response = await apiRequest("POST", `/api/admin/profile/${user.id}`, data);
       return await response.json();
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       toast({
         title: "Profile Saved",
         description: "Your administrative profile has been saved successfully.",

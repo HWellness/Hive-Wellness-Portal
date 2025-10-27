@@ -25,18 +25,7 @@ import {
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import {
-  Mail,
-  User,
-  MapPin,
-  Phone,
-  Clock,
-  Users,
-  Award,
-  FileText,
-  CheckCircle,
-} from "lucide-react";
-import hiveWellnessLogo from "@assets/Hive Logo_1752073128164.png";
+import { User, CheckCircle } from "lucide-react";
 import IntroductionCallBooking from "@/components/IntroductionCallBooking";
 
 // Schema exactly matching the main website form structure

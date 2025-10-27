@@ -1,27 +1,21 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import {
   Users,
   Brain,
-  Search,
-  Settings,
   RefreshCw,
   Clock,
   ArrowRight,
   CheckCircle,
-  AlertCircle,
   Star,
-  TrendingUp,
   MessageCircle,
   Calendar,
-  Activity,
   Award,
   MapPin,
   User,

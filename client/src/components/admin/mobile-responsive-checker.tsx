@@ -14,7 +14,6 @@ import {
   Eye,
   RefreshCw,
   Download,
-  ExternalLink,
 } from "lucide-react";
 
 interface ResponsiveTest {

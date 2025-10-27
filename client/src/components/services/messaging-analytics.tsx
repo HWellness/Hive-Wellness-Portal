@@ -4,21 +4,16 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
 import type { User } from "@shared/schema";
-import { useQuery } from "@tanstack/react-query";
 import {
   MessageSquare,
   Mail,
   Smartphone,
   TrendingUp,
   Users,
-  Clock,
   CheckCircle,
-  XCircle,
-  AlertCircle,
   BarChart3,
   PieChart,
   Calendar,
-  Filter,
   Download,
   RefreshCw,
 } from "lucide-react";

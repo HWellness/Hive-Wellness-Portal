@@ -20,20 +20,17 @@ import {
   Download,
   Eye,
   Trash2,
-  CheckCircle,
   AlertCircle,
   Shield,
   Users,
   User,
 } from "lucide-react";
-import { useAuth } from "@/hooks/use-auth";
 
 interface PDFDocumentManagerProps {
   userRole: "admin" | "therapist" | "client";
 }
 
 export function PDFDocumentManager({ userRole }: PDFDocumentManagerProps) {
-  const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);

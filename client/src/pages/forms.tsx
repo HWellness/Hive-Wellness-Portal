@@ -8,7 +8,7 @@ import { ArrowLeft, FileText, Mail, Users, Settings, Plus, Eye, User } from "luc
 import GravityForm from "@/components/forms/gravity-forms";
 
 export default function FormsPage() {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
   const [selectedForm, setSelectedForm] = useState<string | null>(null);
   const [, setLocation] = useLocation();
 

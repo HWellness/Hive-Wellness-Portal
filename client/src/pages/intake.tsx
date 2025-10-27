@@ -9,16 +9,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Brain,
-  Heart,
-  Users,
-  GraduationCap,
-  Puzzle,
-  Mail,
-  HandHeart,
-  ArrowLeft,
-} from "lucide-react";
+import { Puzzle, Mail, HandHeart, ArrowLeft } from "lucide-react";
 import { Link } from "wouter";
 
 export default function IntakePage() {

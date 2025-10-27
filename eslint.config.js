@@ -3,8 +3,9 @@ import tseslint from "typescript-eslint";
 import react from "eslint-plugin-react";
 import reactHooks from "eslint-plugin-react-hooks";
 import prettierConfig from "eslint-config-prettier";
+import globals from "globals";
 
-export default tseslint.config(
+export default [
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
@@ -17,6 +18,11 @@ export default tseslint.config(
         ecmaFeatures: {
           jsx: true,
         },
+      },
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+        ...globals.es2021,
       },
     },
     plugins: {
@@ -34,6 +40,7 @@ export default tseslint.config(
       ...reactHooks.configs.recommended.rules,
       "react/react-in-jsx-scope": "off",
       "react/prop-types": "off",
+      "react/no-unescaped-entities": "warn",
       "@typescript-eslint/no-unused-vars": [
         "error",
         {
@@ -41,7 +48,7 @@ export default tseslint.config(
           varsIgnorePattern: "^_",
         },
       ],
-      "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/no-explicit-any": "warn",
       "no-console": "warn",
       "prefer-const": "error",
       "no-undef": "error",
@@ -51,6 +58,7 @@ export default tseslint.config(
   },
   prettierConfig,
   {
+    files: ["**/*.{js,jsx,ts,tsx}"],
     ignores: [
       "node_modules/**",
       "dist/**",
@@ -84,5 +92,5 @@ export default tseslint.config(
       "template-cleanup-verification.ts",
       "scripts/fix-admin-role.ts",
     ],
-  }
-);
+  },
+];

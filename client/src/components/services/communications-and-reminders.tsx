@@ -24,22 +24,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import {
-  MessageSquare,
-  Mail,
-  Send,
-  Users,
-  Filter,
-  Search,
-  Clock,
-  CheckCircle,
-  AlertCircle,
-  Eye,
-  Bell,
-  Plus,
-  Edit,
-  Settings,
-} from "lucide-react";
+import { MessageSquare, Mail, Clock, Bell, Plus, Edit, Settings } from "lucide-react";
 import type { User } from "@shared/schema";
 
 interface CommunicationsAndRemindersProps {

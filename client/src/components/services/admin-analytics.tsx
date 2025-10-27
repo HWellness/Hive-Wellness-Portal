@@ -1,8 +1,6 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -27,19 +25,7 @@ import {
   AreaChart,
   Area,
 } from "recharts";
-import {
-  TrendingUp,
-  Users,
-  MessageSquare,
-  Calendar,
-  PoundSterling,
-  Activity,
-  ArrowUp,
-  ArrowDown,
-  Download,
-  Filter,
-  RefreshCw,
-} from "lucide-react";
+import { Users, Calendar, PoundSterling, Activity, Download, RefreshCw } from "lucide-react";
 import type { User } from "@shared/schema";
 
 interface AdminAnalyticsProps {

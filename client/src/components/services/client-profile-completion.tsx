@@ -14,36 +14,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import {
   phoneValidation,
   postcodeValidation,
-  nameValidation,
-  emailValidation,
   formatPhoneNumber,
   formatPostcode,
   VALIDATION_MESSAGES,
 } from "@/lib/form-validation";
 import { apiRequest } from "@/lib/queryClient";
-import {
-  User,
-  MapPin,
-  Calendar,
-  Heart,
-  Shield,
-  Clock,
-  Target,
-  CheckCircle,
-  AlertCircle,
-  Info,
-  Plus,
-  X,
-  Save,
-  ArrowLeft,
-} from "lucide-react";
+import { User, Heart, Shield, CheckCircle, Info, Save, ArrowLeft } from "lucide-react";
 import type { User as UserType } from "@shared/schema";
 
 interface ClientProfileCompletionProps {

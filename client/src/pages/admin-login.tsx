@@ -18,7 +18,7 @@ import { useLocation, Link } from "wouter";
 import hiveWellnessLogo from "@assets/Hive Wellness logo 1 (1)_1761429577346.png";
 
 export default function AdminLogin() {
-  const { user, isAuthenticated, isLoading } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [email, setEmail] = useState("");

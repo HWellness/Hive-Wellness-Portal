@@ -6,13 +6,6 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
@@ -25,20 +18,11 @@ import {
   TrendingUp,
   Shield,
   FileText,
-  BarChart3,
   Settings,
   Download,
   Upload,
   Mail,
-  Phone,
   Globe,
-  MapPin,
-  Clock,
-  CheckCircle,
-  AlertCircle,
-  Eye,
-  Edit,
-  Trash2,
 } from "lucide-react";
 import type { User } from "@shared/schema";
 

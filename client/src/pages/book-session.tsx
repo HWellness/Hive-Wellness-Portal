@@ -7,7 +7,7 @@ import hiveWellnessLogo from "@assets/Hive Logo_1752073128164.png";
 
 export default function BookSessionPage() {
   const [, setLocation] = useLocation();
-  const { isAuthenticated, user, isLoading } = useAuth();
+  const { isAuthenticated, isLoading } = useAuth();
 
   const handleSelectTherapy = (tier: string, price: number, categoryId?: string) => {
     // Navigate to booking form with selected therapy type and category

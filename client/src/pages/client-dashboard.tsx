@@ -9,7 +9,6 @@ import {
   User,
   Video,
   CreditCard,
-  FileText,
   Settings,
   LogOut,
   TrendingUp,

@@ -13,7 +13,6 @@ import {
   Users,
   Calendar,
   Mail,
-  Phone,
   MessageCircle,
   Plus,
   FileText,

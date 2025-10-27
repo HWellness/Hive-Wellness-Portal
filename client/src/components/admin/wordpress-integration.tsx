@@ -6,7 +6,6 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -16,15 +15,8 @@ import {
   XCircle,
   AlertCircle,
   Globe,
-  Key,
   RefreshCw,
   ExternalLink,
-  FileText,
-  Database,
-  BarChart3,
-  Download,
-  Upload,
-  Calendar,
   Zap,
 } from "lucide-react";
 import ServiceNavigation from "@/components/ui/service-navigation";

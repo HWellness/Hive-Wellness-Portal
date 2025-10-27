@@ -6,16 +6,13 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
 import { toast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -25,9 +22,6 @@ import {
   Video,
   Shield,
   Mail,
-  CheckCircle,
-  Calendar,
-  UserPlus,
   Archive,
   RotateCcw,
   AlertTriangle,
@@ -39,11 +33,9 @@ import {
   FileText,
   Download,
   Calendar as CalendarIcon,
-  CheckSquare,
   Clock,
   Settings,
 } from "lucide-react";
-import jsPDF from "jspdf";
 import type { User } from "@shared/schema";
 import FormSubmissionsDashboard from "../admin/form-submissions-dashboard";
 import AdminAvailabilitySettings from "./admin-availability-settings";
