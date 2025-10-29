@@ -105,7 +105,7 @@ export default function VideoSessionsFixed({ user }: VideoSessionsProps) {
           console.log("⚠️ Video autoplay blocked, user interaction required");
         }
       }
-    } catch () {
+    } catch {
       setHasMediaAccess(false);
       toast({
         title: "Camera Access Required",
@@ -299,7 +299,6 @@ export default function VideoSessionsFixed({ user }: VideoSessionsProps) {
 
   // Leave session
   const handleLeaveSession = useCallback(() => {
-
     if (wsRef.current) {
       wsRef.current.close();
       wsRef.current = null;
