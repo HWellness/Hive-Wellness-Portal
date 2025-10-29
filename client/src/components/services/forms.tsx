@@ -88,14 +88,7 @@ export default function Forms() {
             </Card>
           </div>
 
-          <GravityForm
-            formType={form.type}
-            title={form.title}
-            description={form.description}
-            onSuccess={(data) => {
-              console.log("Form submitted successfully:", data);
-            }}
-          />
+          <GravityForm formType={form.type} title={form.title} description={form.description} />
         </div>
       );
     }
