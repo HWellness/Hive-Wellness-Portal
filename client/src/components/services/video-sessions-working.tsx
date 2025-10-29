@@ -100,12 +100,7 @@ export default function VideoSessionsWorking({ user }: VideoSessionsProps) {
       if (localVideoRef.current) {
         localVideoRef.current.srcObject = stream;
         localVideoRef.current.muted = true;
-
-        try {
-          await localVideoRef.current.play();
-        } catch (playError) {
-          console.log("⚠️ Video autoplay blocked, user interaction required");
-        }
+        await localVideoRef.current.play();
       }
     } catch {
       setHasMediaAccess(false);
@@ -119,14 +114,7 @@ export default function VideoSessionsWorking({ user }: VideoSessionsProps) {
 
   // Auto-initialize media stream on component mount for demo
   useEffect(() => {
-    const autoStartDemo = async () => {
-      try {
-        await initializeMediaStream();
-      } catch (error) {
-        console.log("Auto media initialization failed, user will need to enable manually");
-      }
-    };
-    autoStartDemo();
+    initializeMediaStream();
   }, [initializeMediaStream]);
 
   // WebRTC Configuration
@@ -306,9 +294,7 @@ export default function VideoSessionsWorking({ user }: VideoSessionsProps) {
         if (localVideoRef.current && localStreamRef.current) {
           localVideoRef.current.srcObject = localStreamRef.current;
           localVideoRef.current.load();
-          localVideoRef.current
-            .play()
-            .catch((e) => console.log("Manual camera refresh auto-play prevented:", e));
+          localVideoRef.current.play();
 
           toast({
             title: "Camera Refreshed",
@@ -373,12 +359,7 @@ export default function VideoSessionsWorking({ user }: VideoSessionsProps) {
         localVideoRef.current.srcObject = localStreamRef.current;
         localVideoRef.current.onloadedmetadata = () => {
           if (localVideoRef.current) {
-            localVideoRef.current
-              .play()
-              .catch((e) => console.log("Camera PiP auto-play prevented:", e));
-            localVideoRef.current.onloadedmetadata = () => {
-              console.log("📺 PiP camera metadata loaded during screen share");
-            };
+            localVideoRef.current.play();
           }
         };
       }

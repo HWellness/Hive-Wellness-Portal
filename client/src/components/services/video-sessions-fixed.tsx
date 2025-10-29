@@ -98,12 +98,7 @@ export default function VideoSessionsFixed({ user }: VideoSessionsProps) {
       if (localVideoRef.current) {
         localVideoRef.current.srcObject = stream;
         localVideoRef.current.muted = true;
-
-        try {
-          await localVideoRef.current.play();
-        } catch (playError) {
-          console.log("⚠️ Video autoplay blocked, user interaction required");
-        }
+        await localVideoRef.current.play();
       }
     } catch {
       setHasMediaAccess(false);
