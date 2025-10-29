@@ -884,16 +884,10 @@ export default function ClientManagementComprehensive({
                       variant="outline"
                       size="sm"
                       onClick={() => {
-                        console.log(
-                          "Message button clicked - onNavigateToService:",
-                          !!onNavigateToService
-                        );
                         // Navigate to messaging service
                         if (onNavigateToService) {
-                          console.log("Calling onNavigateToService with messaging");
                           onNavigateToService("messaging");
                         } else {
-                          console.log("No onNavigateToService prop, showing toast");
                           toast({
                             title: "Message Interface",
                             description: `Opening messaging with ${selectedClient.firstName} ${selectedClient.lastName}`,
@@ -909,16 +903,10 @@ export default function ClientManagementComprehensive({
                       variant="outline"
                       size="sm"
                       onClick={() => {
-                        console.log(
-                          "Start Session button clicked - onNavigateToService:",
-                          !!onNavigateToService
-                        );
                         // Navigate to video sessions service
                         if (onNavigateToService) {
-                          console.log("Calling onNavigateToService with video-sessions");
                           onNavigateToService("video-sessions");
                         } else {
-                          console.log("No onNavigateToService prop, showing toast");
                           toast({
                             title: "Video Session",
                             description: `Starting video session with ${selectedClient.firstName} ${selectedClient.lastName}`,

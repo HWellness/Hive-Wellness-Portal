@@ -67,7 +67,6 @@ export default function AdminDashboardWrapper() {
         window.location.href = "/login"; // Default fallback for admins
       }
     } catch (error) {
-      console.error("Logout error:", error);
       // Force logout even if API fails - admins go to main login
       window.location.href = "/login";
     }

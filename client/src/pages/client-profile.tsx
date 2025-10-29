@@ -90,9 +90,6 @@ export default function ClientProfile() {
     );
   }
 
-  // Log what we're getting
-  console.log("Client profile data:", clientProfile);
-
   const client = clientProfile as any;
   const userRole = (authUser as any)?.role;
   const canViewDetails =

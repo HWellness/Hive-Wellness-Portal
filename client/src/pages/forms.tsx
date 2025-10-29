@@ -143,7 +143,6 @@ export default function FormsPage() {
               title={form.title}
               description={form.description}
               onSuccess={(data) => {
-                console.log("Form submitted successfully:", data);
                 // Could redirect back to forms list or show success message
               }}
             />

@@ -252,7 +252,6 @@ export default function Messaging({ user, onBackToDashboard }: MessagingProps) {
     : null;
 
   const handleConversationClick = (conversationId: string) => {
-    console.log("Conversation clicked:", conversationId);
     setSelectedConversation(conversationId);
   };
 

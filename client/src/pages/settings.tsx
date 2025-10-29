@@ -67,7 +67,6 @@ export default function Settings() {
         window.location.href = "/portal";
       }
     } catch (error) {
-      console.error("Logout error:", error);
       window.location.href = "/portal";
     }
   };
@@ -84,7 +83,6 @@ export default function Settings() {
           "Your data export has been prepared. You will receive an email with a download link shortly.",
       });
     } catch (error) {
-      console.error("Export error:", error);
       toast({
         title: "Export Failed",
         description: "There was an error processing your data export. Please try again.",
@@ -109,7 +107,6 @@ export default function Settings() {
 
       setShowDeleteDialog(false);
     } catch (error) {
-      console.error("Deletion request error:", error);
       toast({
         title: "Request Failed",
         description: "There was an error processing your deletion request. Please try again.",

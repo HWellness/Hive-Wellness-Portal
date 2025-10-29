@@ -138,8 +138,6 @@ export default function TherapistProfileCompletion({ user }: TherapistProfileCom
     onSuccess: (data) => {
       if (data.success && data.hasData) {
         const hubspotData = data.profileData;
-        console.log("HubSpot Auto-Fill Response:", data);
-        console.log("HubSpot Profile Data:", hubspotData);
 
         let changedFields: string[] = [];
 
@@ -246,7 +244,6 @@ export default function TherapistProfileCompletion({ user }: TherapistProfileCom
     },
   });
 
-  console.log("Therapist Profile Component - existingApplication:", existingApplication);
   // Initialize profile data with auto-population from existing application
   const getInitialProfileData = (): TherapistProfileData => {
     const application = (existingApplication as any)?.exists
@@ -348,7 +345,6 @@ export default function TherapistProfileCompletion({ user }: TherapistProfileCom
   React.useEffect(() => {
     if ((existingApplication as any)?.exists && (existingApplication as any).application) {
       const app = (existingApplication as any).application;
-      console.log("Auto-populating profile from existing application:", app);
 
       setProfileData((prevData) => ({
         personalInfo: {

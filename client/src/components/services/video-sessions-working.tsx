@@ -79,7 +79,6 @@ export default function VideoSessionsWorking({ user }: VideoSessionsProps) {
   // Initialize media stream with camera-first approach
   const initializeMediaStream = useCallback(async () => {
     try {
-      console.log("🎥 Requesting camera and audio access...");
       const constraints = {
         video: {
           width: { ideal: 640 },
@@ -91,7 +90,6 @@ export default function VideoSessionsWorking({ user }: VideoSessionsProps) {
         },
       };
 
-      console.log("🎥 Requesting media with constraints:", constraints);
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
 
       localStreamRef.current = stream;
@@ -105,15 +103,11 @@ export default function VideoSessionsWorking({ user }: VideoSessionsProps) {
 
         try {
           await localVideoRef.current.play();
-          console.log("✅ Local video stream started successfully");
         } catch (playError) {
           console.log("⚠️ Video autoplay blocked, user interaction required");
         }
       }
-
-      console.log("✅ Camera and audio access granted successfully");
-    } catch (error) {
-      console.error("❌ Error accessing media devices:", error);
+    } catch {
       setHasMediaAccess(false);
       toast({
         title: "Camera Access Required",
@@ -152,13 +146,10 @@ export default function VideoSessionsWorking({ user }: VideoSessionsProps) {
     const port = window.location.port || (protocol === "wss:" ? "443" : "80");
     const wsUrl = `${protocol}//${hostname}:${port}/ws/video-sessions`;
 
-    console.log("🔌 Connecting to WebSocket:", wsUrl);
-
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 
     ws.onopen = () => {
-      console.log("🔌 WebSocket connected");
       // Join the room
       ws.send(
         JSON.stringify({
@@ -171,7 +162,6 @@ export default function VideoSessionsWorking({ user }: VideoSessionsProps) {
 
     ws.onmessage = async (event) => {
       const message = JSON.parse(event.data);
-      console.log("📨 WebSocket message:", message);
 
       switch (message.type) {
         case "user-joined":
@@ -201,21 +191,11 @@ export default function VideoSessionsWorking({ user }: VideoSessionsProps) {
           break;
       }
     };
-
-    ws.onclose = () => {
-      console.log("🔌 WebSocket disconnected");
-    };
-
-    ws.onerror = (error) => {
-      console.error("🔌 WebSocket error:", error);
-    };
   }, [currentSession, user.id]);
 
   // Initialize peer connection
   const initializePeerConnection = useCallback(
     async (isInitiator: boolean) => {
-      console.log("🤝 Initializing peer connection, isInitiator:", isInitiator);
-
       const pc = new RTCPeerConnection(pcConfig);
       peerConnectionRef.current = pc;
 
@@ -228,7 +208,6 @@ export default function VideoSessionsWorking({ user }: VideoSessionsProps) {
 
       // Handle incoming remote stream
       pc.ontrack = (event) => {
-        console.log("📺 Received remote stream");
         if (remoteVideoRef.current && event.streams[0]) {
           remoteVideoRef.current.srcObject = event.streams[0];
           remoteStreamRef.current = event.streams[0];
@@ -274,8 +253,6 @@ export default function VideoSessionsWorking({ user }: VideoSessionsProps) {
   // Handle incoming offer
   const handleOffer = useCallback(
     async (offer: RTCSessionDescriptionInit, senderId: string) => {
-      console.log("📨 Handling offer from:", senderId);
-
       if (!peerConnectionRef.current) {
         await initializePeerConnection(false);
       }
@@ -303,8 +280,6 @@ export default function VideoSessionsWorking({ user }: VideoSessionsProps) {
 
   // Handle incoming answer
   const handleAnswer = useCallback(async (answer: RTCSessionDescriptionInit) => {
-    console.log("📨 Handling answer");
-
     try {
       await peerConnectionRef.current!.setRemoteDescription(answer);
     } catch (error) {
@@ -314,8 +289,6 @@ export default function VideoSessionsWorking({ user }: VideoSessionsProps) {
 
   // Handle ICE candidate
   const handleIceCandidate = useCallback(async (candidate: RTCIceCandidateInit) => {
-    console.log("📨 Handling ICE candidate");
-
     try {
       await peerConnectionRef.current!.addIceCandidate(candidate);
     } catch (error) {
@@ -325,8 +298,6 @@ export default function VideoSessionsWorking({ user }: VideoSessionsProps) {
 
   // Manual camera refresh function
   const refreshCamera = useCallback(() => {
-    console.log("🔄 Manual camera refresh triggered");
-
     if (localVideoRef.current && localStreamRef.current) {
       // Clear and reset the video element
       localVideoRef.current.srcObject = null;
@@ -343,8 +314,6 @@ export default function VideoSessionsWorking({ user }: VideoSessionsProps) {
             title: "Camera Refreshed",
             description: "Camera feed has been restored",
           });
-
-          console.log("✅ Manual camera refresh completed");
         }
       }, 100);
     } else {
@@ -359,8 +328,6 @@ export default function VideoSessionsWorking({ user }: VideoSessionsProps) {
   // Initialize media (camera and microphone)
   const initializeMedia = useCallback(async () => {
     try {
-      console.log("🎥 Requesting camera and microphone access...");
-
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { width: 1280, height: 720 },
         audio: true,
@@ -369,18 +336,13 @@ export default function VideoSessionsWorking({ user }: VideoSessionsProps) {
       localStreamRef.current = stream;
 
       if (localVideoRef.current) {
-        console.log("📺 Setting local video stream");
         localVideoRef.current.srcObject = stream;
-        localVideoRef.current.onloadedmetadata = () => {
-          console.log("📺 Local video metadata loaded");
-        };
+
         await localVideoRef.current.play();
       }
 
-      console.log("✅ Media access granted successfully");
       return stream;
     } catch (error) {
-      console.error("❌ Error accessing media devices:", error);
       toast({
         title: "Camera Access Failed",
         description: "Could not access camera and microphone",
@@ -393,8 +355,6 @@ export default function VideoSessionsWorking({ user }: VideoSessionsProps) {
   // Start screen sharing
   const startScreenShare = useCallback(async () => {
     try {
-      console.log("🖥️ Starting screen share...");
-
       const screenStream = await navigator.mediaDevices.getDisplayMedia({
         video: true,
         audio: true,
@@ -409,12 +369,9 @@ export default function VideoSessionsWorking({ user }: VideoSessionsProps) {
 
       // Move camera to picture-in-picture during screen share
       if (localVideoRef.current && localStreamRef.current) {
-        console.log("📺 Maintaining camera stream during screen share");
         // Keep camera running in PiP while screen sharing
         localVideoRef.current.srcObject = localStreamRef.current;
         localVideoRef.current.onloadedmetadata = () => {
-          console.log("📺 Local video metadata loaded");
-          console.log("🔄 Refreshing camera stream for PiP display");
           if (localVideoRef.current) {
             localVideoRef.current
               .play()
@@ -427,15 +384,12 @@ export default function VideoSessionsWorking({ user }: VideoSessionsProps) {
       }
 
       setIsScreenSharing(true);
-      console.log("✅ Screen sharing started successfully");
 
       // Track when screen sharing ends
       screenStream.getVideoTracks()[0].addEventListener("ended", () => {
-        console.log("🖥️ Screen sharing ended by user or system");
         stopScreenShare();
       });
     } catch (error) {
-      console.error("❌ Error starting screen share:", error);
       toast({
         title: "Screen Share Failed",
         description:
@@ -449,8 +403,6 @@ export default function VideoSessionsWorking({ user }: VideoSessionsProps) {
 
   // Stop screen sharing
   const stopScreenShare = useCallback(() => {
-    console.log("🖥️ Stopping screen share...");
-
     if (screenShareStreamRef.current) {
       screenShareStreamRef.current.getTracks().forEach((track) => {
         track.stop();
@@ -464,18 +416,10 @@ export default function VideoSessionsWorking({ user }: VideoSessionsProps) {
 
     setIsScreenSharing(false);
 
-    // Restore camera to main video area when screen sharing stops
-    console.log("📹 Attempting to restore camera to main video area...");
-    console.log("localVideoRef.current:", !!localVideoRef.current);
-    console.log("localStreamRef.current:", !!localStreamRef.current);
-
     // Use the refreshCamera function for automatic restoration
     setTimeout(() => {
-      console.log("📹 Triggering automatic camera refresh after screen share ends");
       refreshCamera();
     }, 300);
-
-    console.log("✅ Screen sharing stopped and camera restored");
   }, [refreshCamera]);
 
   // Toggle video
@@ -517,9 +461,6 @@ export default function VideoSessionsWorking({ user }: VideoSessionsProps) {
       return response.json();
     },
     onSuccess: async (data) => {
-      console.log("=== JOIN SESSION SUCCESS ===");
-      console.log("Response data:", data);
-
       setIsInSession(true);
       setCurrentSession(data.session || { id: data.sessionId });
       setConnectionStatus("connected");
@@ -549,8 +490,6 @@ export default function VideoSessionsWorking({ user }: VideoSessionsProps) {
 
   // Leave session
   const leaveSession = useCallback(() => {
-    console.log("🚪 Leaving session...");
-
     // Close WebSocket connection
     if (wsRef.current) {
       wsRef.current.close();
@@ -614,7 +553,6 @@ export default function VideoSessionsWorking({ user }: VideoSessionsProps) {
 
     // Initialize WebSocket connection for peer-to-peer video
     setTimeout(() => {
-      console.log("🎯 Starting WebSocket connection for video chat");
       initializeWebSocket();
     }, 1000);
 
@@ -627,7 +565,6 @@ export default function VideoSessionsWorking({ user }: VideoSessionsProps) {
   // Start WebSocket connection when session becomes active
   useEffect(() => {
     if (currentSession && !wsRef.current) {
-      console.log("🔌 Session active, initializing WebSocket...");
       initializeWebSocket();
     }
   }, [currentSession, initializeWebSocket]);

@@ -77,7 +77,6 @@ export default function ChangePassword() {
         });
       }
     } catch (error) {
-      console.error("Password change error:", error);
       toast({
         title: "Password Change Failed",
         description: "An error occurred while changing your password. Please try again.",

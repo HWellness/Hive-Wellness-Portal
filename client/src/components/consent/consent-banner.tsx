@@ -98,7 +98,6 @@ export function ConsentBanner({ open, onClose, onSave, isFirstTime = false }: Co
   };
 
   const handleAcceptAll = async () => {
-    console.log("Accept All button clicked");
     const acceptAllPreferences = {
       essential: true,
       functional: true,
@@ -111,7 +110,6 @@ export function ConsentBanner({ open, onClose, onSave, isFirstTime = false }: Co
   };
 
   const handleRejectAll = async () => {
-    console.log("Reject Optional button clicked");
     const rejectOptionalPreferences = {
       essential: true,
       functional: false,

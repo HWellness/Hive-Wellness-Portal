@@ -83,40 +83,27 @@ export default function VideoSessionsProduction({
   const joinSessionMutation = useMutation({
     mutationFn: async (sessionId: string) => {
       setJoiningSessionId(sessionId); // Prevent multiple clicks
-      console.log(`🎯 ATTEMPTING TO JOIN CONFIRMED SESSION: ${sessionId}`);
-      console.log(`📍 Making POST request to: /api/video-sessions/${sessionId}/join`);
 
-      try {
-        const response = await fetch(`/api/video-sessions/${sessionId}/join`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            "X-Bypass-Payment": "true", // Signal to bypass payment processing
-          },
-          credentials: "same-origin",
-        });
+      const response = await fetch(`/api/video-sessions/${sessionId}/join`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          "X-Bypass-Payment": "true", // Signal to bypass payment processing
+        },
+        credentials: "same-origin",
+      });
 
-        console.log(`📡 Response status: ${response.status}`);
-        console.log(`📡 Response ok: ${response.ok}`);
-
-        if (!response.ok) {
-          const errorText = await response.text();
-          console.log(`❌ Response error: ${errorText}`);
-          throw new Error(`Failed to join session: ${response.status} ${errorText}`);
-        }
-
-        const result = await response.json();
-        console.log(`✅ Join session success:`, result);
-        return result;
-      } catch (error) {
-        console.log(`💥 Fetch error:`, error);
-        throw error;
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to join session: ${response.status} ${errorText}`);
       }
+
+      const result = await response.json();
+      return result;
     },
     onSuccess: (data, sessionId) => {
       setJoiningSessionId(null); // Reset joining state
-      console.log("🎉 CONFIRMED SESSION JOIN SUCCESS:", data);
 
       if (data.success && data.meetingUrl) {
         // Open meeting URL directly for confirmed sessions
@@ -210,27 +197,12 @@ export default function VideoSessionsProduction({
 
     // CRITICAL FIX: Exclude sessions without therapists for clients
     if (user.role === "client" && (!session.therapistName || session.therapistName.trim() === "")) {
-      console.log(`Filtering out session ${session.id.slice(0, 8)} - no therapist assigned`);
       return false;
     }
 
     // CRITICAL FIX: Exclude cancelled sessions from upcoming/today filters
     if ((filter === "upcoming" || filter === "today") && status === "cancelled") {
-      console.log(`Filtering out cancelled session ${session.id.slice(0, 8)}`);
       return false;
-    }
-
-    // DEBUG: Log filtering logic
-    if (filter === "today") {
-      console.log("DEBUG Today Filter:", {
-        sessionId: session.id.slice(0, 8),
-        scheduledAt: scheduledAt.toISOString(),
-        scheduledAtDateString: scheduledAt.toDateString(),
-        nowDateString: now.toDateString(),
-        matches: scheduledAt.toDateString() === now.toDateString(),
-        status,
-        therapistName: session.therapistName,
-      });
     }
 
     switch (filter) {

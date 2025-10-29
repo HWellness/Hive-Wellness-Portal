@@ -97,7 +97,6 @@ export default function VideoSessionsComplete({ user }: VideoSessionsProps) {
   // Initialize media devices with camera-first approach
   const initializeMedia = useCallback(async () => {
     try {
-      console.log("🎥 Requesting camera and audio access...");
       const constraints = {
         video: {
           width: { ideal: 640 },
@@ -111,7 +110,6 @@ export default function VideoSessionsComplete({ user }: VideoSessionsProps) {
         },
       };
 
-      console.log("🎥 Requesting media with constraints:", constraints);
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
 
       localStreamRef.current = stream;
@@ -122,19 +120,16 @@ export default function VideoSessionsComplete({ user }: VideoSessionsProps) {
 
         try {
           await localVideoRef.current.play();
-          console.log("✅ Local video stream started successfully");
         } catch (playError) {
           console.log("⚠️ Video autoplay blocked, user interaction required");
         }
       }
 
-      console.log("✅ Camera and audio access granted successfully");
       toast({
         title: "Camera Access Granted",
         description: "Video and audio are ready for your session.",
       });
-    } catch (error) {
-      console.error("❌ Error accessing media devices:", error);
+    } catch {
       toast({
         title: "Media Access Required",
         description: "Please allow camera and microphone access to use video sessions.",
@@ -146,8 +141,6 @@ export default function VideoSessionsComplete({ user }: VideoSessionsProps) {
   // Start screen sharing
   const startScreenShare = useCallback(async () => {
     try {
-      console.log("🖥️ Starting screen share...");
-
       const screenStream = await navigator.mediaDevices.getDisplayMedia({
         video: {
           width: { ideal: 1920 },
@@ -159,11 +152,9 @@ export default function VideoSessionsComplete({ user }: VideoSessionsProps) {
       screenShareStreamRef.current = screenStream;
 
       if (screenShareRef.current) {
-        console.log("🎥 Setting screen share video element");
         screenShareRef.current.srcObject = screenStream;
 
         screenShareRef.current.onloadedmetadata = () => {
-          console.log("📺 Screen share video metadata loaded");
           if (screenShareRef.current) {
             screenShareRef.current
               .play()
@@ -174,7 +165,6 @@ export default function VideoSessionsComplete({ user }: VideoSessionsProps) {
 
       // Ensure camera stream stays active in PiP during screen sharing
       if (localVideoRef.current && localStreamRef.current) {
-        console.log("📺 Maintaining camera stream during screen share");
         localVideoRef.current.srcObject = localStreamRef.current;
         localVideoRef.current
           .play()
@@ -188,14 +178,12 @@ export default function VideoSessionsComplete({ user }: VideoSessionsProps) {
 
       // Method 1: Track ended event
       screenTrack.onended = () => {
-        console.log("📺 Screen share ended by user (track ended)");
         stopScreenShare();
       };
 
       // Method 2: Monitor screen track state
       const checkScreenShareActive = () => {
         if (screenShareStreamRef.current && screenTrack.readyState === "ended") {
-          console.log("📺 Screen share ended by user (track state check)");
           stopScreenShare();
         } else if (isScreenSharing) {
           setTimeout(checkScreenShareActive, 1000); // Check every second
@@ -208,7 +196,6 @@ export default function VideoSessionsComplete({ user }: VideoSessionsProps) {
       // Force refresh camera stream to ensure it's visible in PiP
       setTimeout(() => {
         if (localVideoRef.current && localStreamRef.current) {
-          console.log("🔄 Refreshing camera stream for PiP display");
           localVideoRef.current.srcObject = null;
           setTimeout(() => {
             if (localVideoRef.current && localStreamRef.current) {
@@ -220,11 +207,7 @@ export default function VideoSessionsComplete({ user }: VideoSessionsProps) {
           }, 100);
         }
       }, 500);
-
-      console.log("✅ Screen sharing started successfully");
     } catch (error) {
-      console.error("❌ Error starting screen share:", error);
-
       let errorMessage = "Could not start screen sharing";
       if (error instanceof Error) {
         if (error.name === "NotAllowedError") {
@@ -247,8 +230,6 @@ export default function VideoSessionsComplete({ user }: VideoSessionsProps) {
 
   // Manual camera refresh function
   const refreshCamera = useCallback(() => {
-    console.log("🔄 Manual camera refresh triggered");
-
     if (localVideoRef.current && localStreamRef.current) {
       // Clear and reset the video element
       localVideoRef.current.srcObject = null;
@@ -265,8 +246,6 @@ export default function VideoSessionsComplete({ user }: VideoSessionsProps) {
             title: "Camera Refreshed",
             description: "Camera feed has been restored",
           });
-
-          console.log("✅ Manual camera refresh completed");
         }
       }, 100);
     } else {
@@ -280,8 +259,6 @@ export default function VideoSessionsComplete({ user }: VideoSessionsProps) {
 
   // Stop screen sharing
   const stopScreenShare = useCallback(() => {
-    console.log("🖥️ Stopping screen share...");
-
     if (screenShareStreamRef.current) {
       screenShareStreamRef.current.getTracks().forEach((track) => {
         track.stop();
@@ -295,18 +272,10 @@ export default function VideoSessionsComplete({ user }: VideoSessionsProps) {
 
     setIsScreenSharing(false);
 
-    // Restore camera to main video area when screen sharing stops
-    console.log("📹 Attempting to restore camera to main video area...");
-    console.log("localVideoRef.current:", !!localVideoRef.current);
-    console.log("localStreamRef.current:", !!localStreamRef.current);
-
     // Use the refreshCamera function for automatic restoration
     setTimeout(() => {
-      console.log("📹 Triggering automatic camera refresh after screen share ends");
       refreshCamera();
     }, 300);
-
-    console.log("✅ Screen sharing stopped and camera restored");
   }, [refreshCamera]);
 
   // Toggle video
@@ -338,9 +307,6 @@ export default function VideoSessionsComplete({ user }: VideoSessionsProps) {
       return response.json();
     },
     onSuccess: async (data) => {
-      console.log("=== JOIN SESSION SUCCESS ===");
-      console.log("Response data:", data);
-
       setIsInSession(true);
       setCurrentSession(data.session || { id: data.sessionId });
       setConnectionStatus("connected");
@@ -365,8 +331,6 @@ export default function VideoSessionsComplete({ user }: VideoSessionsProps) {
 
   // Leave session
   const leaveSession = useCallback(() => {
-    console.log("🚪 Leaving session...");
-
     // Stop all media streams
     if (localStreamRef.current) {
       localStreamRef.current.getTracks().forEach((track) => track.stop());
