@@ -44,14 +44,6 @@ export default function IntroductionCallBooking({
     therapistId: "admin", // NEW: Default to admin for general introduction calls
   });
 
-  // Debug logging to track state issues
-  useEffect(() => {
-    console.log("📝 IntroductionCallBooking: Form data state:", formData);
-    console.log("📍 IntroductionCallBooking: Current step:", step);
-  }, [formData, step]);
-
-  // Removed therapist selection - introduction calls are always with admin
-
   // Calendar state
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
@@ -125,14 +117,8 @@ export default function IntroductionCallBooking({
       );
       const data = await response.json();
 
-      console.log(`🔍 Checking admin calendar availability for ${dateString}`);
-      console.log(`📅 API response for ${dateString}:`, data);
-
       if (data.slots) {
         setAvailableSlots(data.slots);
-        console.log(
-          `📅 Loaded ${data.availableCount}/${data.totalSlots} available slots for ${dateString}`
-        );
 
         if (isRefresh) {
           toast({
@@ -248,8 +234,6 @@ export default function IntroductionCallBooking({
         source: "portal_widget",
         therapistId: formData.therapistId,
       };
-
-      console.log("Submitting introduction call booking:", bookingData);
 
       const response = await apiRequest("POST", "/api/introduction-calls/book-widget", bookingData);
 

@@ -159,8 +159,6 @@ export default function TherapistEarningsManagement({ user }: TherapistEarningsM
       return await response.json();
     },
     onSuccess: (data: any) => {
-      console.log("Stripe Connect response:", data);
-
       if (data.onboardingUrl) {
         // Try to open in new window
         const popup = window.open(

@@ -46,16 +46,6 @@ export default function PaymentSetup({ user, onNavigateToService }: PaymentSetup
   // Setup payment mutation
   const setupPaymentMutation = useMutation({
     mutationFn: async () => {
-      console.log("Sending payment setup request:", {
-        therapistId: user.id,
-        setupMethod: "quick",
-        paymentData: {
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-        },
-      });
-
       // Send data to your Stripe Payment Splitter API
       const response = await apiRequest("POST", "/api/therapist/payment-setup", {
         therapistId: user.id,
@@ -68,16 +58,13 @@ export default function PaymentSetup({ user, onNavigateToService }: PaymentSetup
       });
 
       const result = await response.json();
-      console.log("Payment setup response:", result);
       return result;
     },
     onSuccess: (data) => {
-      console.log("Payment setup successful:", data);
       queryClient.invalidateQueries({ queryKey: ["/api/therapist/payment-status"] });
 
       if (data.externalSetupUrl) {
         // Open external setup in new tab
-        console.log("Opening external setup URL:", data.externalSetupUrl);
         window.open(data.externalSetupUrl, "_blank");
         toast({
           title: "Payment Setup Initiated",
@@ -91,7 +78,6 @@ export default function PaymentSetup({ user, onNavigateToService }: PaymentSetup
       }
     },
     onError: (error: any) => {
-      console.error("Payment setup error:", error);
       toast({
         title: "Setup Failed",
         description: error.message || "Failed to setup payment processing. Please try again.",
@@ -150,7 +136,6 @@ export default function PaymentSetup({ user, onNavigateToService }: PaymentSetup
   }
 
   if (error) {
-    console.error("Payment status error:", error);
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-white p-6">
         <div className="max-w-4xl mx-auto">
@@ -329,7 +314,6 @@ export default function PaymentSetup({ user, onNavigateToService }: PaymentSetup
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <Button
                   onClick={() => {
-                    console.log("🎯 View Earnings button clicked!");
                     onNavigateToService?.("therapist-earnings");
                   }}
                   variant="outline"
@@ -340,7 +324,6 @@ export default function PaymentSetup({ user, onNavigateToService }: PaymentSetup
                 </Button>
                 <Button
                   onClick={() => {
-                    console.log("💳 Payment Dashboard button clicked!");
                     if (paymentStatus?.dashboardUrl) {
                       window.open(paymentStatus.dashboardUrl, "_blank");
                     } else if (paymentStatus?.isDemo) {

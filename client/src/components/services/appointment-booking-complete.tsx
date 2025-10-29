@@ -36,13 +36,8 @@ import { BulkBookingDialog } from "@/components/bulk-booking-dialog";
 // recreating the `Stripe` object on every render.
 // Use appropriate Stripe key based on environment
 // TEMPORARY: Using test keys in production for testing webhook flow
-const isProduction = import.meta.env.PROD;
 const stripePublicKey =
   import.meta.env.VITE_STRIPE_TEST_PUBLIC_KEY || import.meta.env.VITE_STRIPE_PUBLIC_KEY;
-
-console.log("Environment:", isProduction ? "production" : "development");
-console.log("Using Stripe key type:", stripePublicKey?.startsWith("pk_live_") ? "live" : "test");
-console.log("Stripe public key available:", !!stripePublicKey);
 
 // Initialize Stripe promise
 const stripePromise = stripePublicKey ? loadStripe(stripePublicKey) : Promise.resolve(null);
@@ -53,14 +48,11 @@ let stripeTestMode = false;
 // Log the stripe promise resolution
 stripePromise
   .then((stripe) => {
-    console.log("Stripe promise resolved with:", !!stripe);
     if (!stripe) {
-      console.error("Stripe instance is null - likely due to live key in development");
       stripeTestMode = true;
     }
   })
   .catch((error) => {
-    console.error("Stripe promise rejected:", error);
     stripeTestMode = true;
   });
 
@@ -244,35 +236,27 @@ export default function AppointmentBookingComplete({ user }: AppointmentBookingP
       const { numberOfSessions } = bulkData;
       const totalAmount = getNumericPrice(sessionType) * numberOfSessions;
 
-      console.log("Creating bulk payment intent for:", bulkData);
-      try {
-        // Create payment intent for bulk booking
-        const response = await apiRequest("POST", "/api/create-payment-intent", {
-          sessionType: sessionType, // Let server calculate price securely
-          currency: "gbp",
-          therapistId: selectedTherapist?.userId || "demo-therapist-1",
-          metadata: {
-            bulkBooking: true,
-            numberOfSessions: numberOfSessions,
-            bulkBookingData: JSON.stringify(bulkData),
-          },
-        });
+      // Create payment intent for bulk booking
+      const response = await apiRequest("POST", "/api/create-payment-intent", {
+        sessionType: sessionType, // Let server calculate price securely
+        currency: "gbp",
+        therapistId: selectedTherapist?.userId || "demo-therapist-1",
+        metadata: {
+          bulkBooking: true,
+          numberOfSessions: numberOfSessions,
+          bulkBookingData: JSON.stringify(bulkData),
+        },
+      });
 
-        const data = await response.json();
-        console.log("Bulk payment intent data received:", data);
+      const data = await response.json();
 
-        if (!data || !data.clientSecret) {
-          throw new Error("Invalid bulk payment response - no client secret received");
-        }
-
-        return data;
-      } catch (error) {
-        console.error("Bulk payment intent creation failed:", error);
-        throw error;
+      if (!data || !data.clientSecret) {
+        throw new Error("Invalid bulk payment response - no client secret received");
       }
+
+      return data;
     },
     onSuccess: (data: any, bulkData: any) => {
-      console.log("Bulk payment intent created successfully:", data);
       // Store bulk booking data for after payment
       setPendingAppointmentData(bulkData);
       setClientSecret(data.clientSecret);
@@ -367,7 +351,6 @@ export default function AppointmentBookingComplete({ user }: AppointmentBookingP
       queryClient.invalidateQueries({ queryKey: ["/api/appointments"] });
     },
     onError: (error: any) => {
-      console.error("Bulk booking failed:", error);
       toast({
         title: "Bulk Booking Failed",
         description: error.message || "Failed to create bulk booking. Please try again.",
@@ -385,9 +368,6 @@ export default function AppointmentBookingComplete({ user }: AppointmentBookingP
   // Handle successful payment completion
   const handlePaymentSuccess = async () => {
     if (pendingAppointmentData) {
-      // CRITICAL FIX: Don't create bulk appointments here - webhook handles it
-      console.log("Bulk payment successful! Webhook will create all appointments automatically.");
-
       setPendingAppointmentData(null);
       setClientSecret(null);
       setShowPaymentDialog(false);
@@ -409,9 +389,6 @@ export default function AppointmentBookingComplete({ user }: AppointmentBookingP
 
         const poll = async () => {
           attempts++;
-          console.log(
-            `🔄 Polling for ${expectedCount} bulk appointments (attempt ${attempts}/${maxAttempts})`
-          );
 
           try {
             await refetchAppointments();
@@ -422,9 +399,6 @@ export default function AppointmentBookingComplete({ user }: AppointmentBookingP
             const newAppointments = currentCount - initialAppointmentCount;
 
             if (newAppointments >= expectedCount) {
-              console.log(
-                `✅ All ${expectedCount} bulk appointments created after ${Date.now() - startTime}ms`
-              );
               await queryClient.invalidateQueries({ queryKey: ["/api/video-sessions"] });
               await queryClient.invalidateQueries({ queryKey: ["/api/appointments"] });
               await queryClient.invalidateQueries({ queryKey: ["/api/client/dashboard"] });
@@ -438,23 +412,16 @@ export default function AppointmentBookingComplete({ user }: AppointmentBookingP
             }
 
             if (attempts < maxAttempts) {
-              console.log(
-                `⏳ Found ${newAppointments}/${expectedCount} appointments, continuing...`
-              );
               interval = Math.min(interval * 1.2, 3000); // Exponential backoff, max 3s
               setTimeout(poll, interval);
             } else {
-              console.error(
-                `❌ Max polling attempts reached. Found ${newAppointments}/${expectedCount} appointments`
-              );
               toast({
                 title: "Please check your calendar",
                 description: `Some appointments may have been created. Please refresh the page to see all appointments.`,
                 variant: "destructive",
               });
             }
-          } catch (error) {
-            console.error("Bulk appointment polling error:", error);
+          } catch {
             if (attempts < maxAttempts) {
               setTimeout(poll, interval);
             }
@@ -545,38 +512,29 @@ export default function AppointmentBookingComplete({ user }: AppointmentBookingP
   // Create payment intent mutation
   const createPaymentIntentMutation = useMutation({
     mutationFn: async (appointmentData: any) => {
-      console.log("Creating payment intent for:", appointmentData);
-      try {
-        const response = await apiRequest("POST", "/api/create-payment-intent", {
-          sessionType: appointmentData.sessionType, // Let server calculate price securely
-          currency: "gbp",
-          metadata: {
-            appointmentData: JSON.stringify(appointmentData),
-            clientId: user.id,
-            therapistId: appointmentData.therapistId,
-          },
-        });
-        const data = await response.json();
-        console.log("Payment intent data received:", data);
+      const response = await apiRequest("POST", "/api/create-payment-intent", {
+        sessionType: appointmentData.sessionType, // Let server calculate price securely
+        currency: "gbp",
+        metadata: {
+          appointmentData: JSON.stringify(appointmentData),
+          clientId: user.id,
+          therapistId: appointmentData.therapistId,
+        },
+      });
+      const data = await response.json();
 
-        if (!data || !data.clientSecret) {
-          throw new Error("Invalid payment response - no client secret received");
-        }
-
-        return data;
-      } catch (error) {
-        console.error("Payment intent creation failed:", error);
-        throw error;
+      if (!data || !data.clientSecret) {
+        throw new Error("Invalid payment response - no client secret received");
       }
+
+      return data;
     },
     onSuccess: (data: any) => {
-      console.log("Payment intent created successfully:", data);
       setClientSecret(data.clientSecret);
       setShowPaymentDialog(true);
       setShowBookingDialog(false); // Close booking dialog when payment opens
     },
     onError: (error: any) => {
-      console.error("Payment intent mutation error:", error);
       toast({
         title: "Payment Setup Failed",
         description: error.message || "Failed to setup payment. Please try again.",
@@ -1511,7 +1469,6 @@ export default function AppointmentBookingComplete({ user }: AppointmentBookingP
                 pendingAppointmentData={pendingAppointmentData}
                 onSuccess={() => {
                   // CRITICAL FIX: Don't create appointments here - webhook handles it
-                  console.log("Payment successful! Webhook will create appointment automatically.");
 
                   // Close payment dialog and show success message
                   setShowPaymentDialog(false);
@@ -1537,9 +1494,6 @@ export default function AppointmentBookingComplete({ user }: AppointmentBookingP
 
                     const poll = async () => {
                       attempts++;
-                      console.log(
-                        `🔄 Polling for new appointment (attempt ${attempts}/${maxAttempts})`
-                      );
 
                       try {
                         await refetchAppointments();
@@ -1552,9 +1506,6 @@ export default function AppointmentBookingComplete({ user }: AppointmentBookingP
                           freshAppointments.length > initialAppointmentCount;
 
                         if (hasNewAppointment) {
-                          console.log(
-                            `✅ New appointment created after ${Date.now() - startTime}ms`
-                          );
                           await queryClient.invalidateQueries({
                             queryKey: ["/api/video-sessions"],
                           });
@@ -1573,11 +1524,9 @@ export default function AppointmentBookingComplete({ user }: AppointmentBookingP
                         }
 
                         if (attempts < maxAttempts) {
-                          console.log(`⏳ Waiting for appointment creation...`);
                           interval = Math.min(interval * 1.1, 2500); // Gradual backoff, max 2.5s
                           setTimeout(poll, interval);
                         } else {
-                          console.error(`❌ Max polling attempts reached for single appointment`);
                           toast({
                             title: "Please refresh to see your appointment",
                             description:
@@ -1585,8 +1534,7 @@ export default function AppointmentBookingComplete({ user }: AppointmentBookingP
                             variant: "destructive",
                           });
                         }
-                      } catch (error) {
-                        console.error("Single appointment polling error:", error);
+                      } catch {
                         if (attempts < maxAttempts) {
                           setTimeout(poll, interval);
                         }
@@ -1663,8 +1611,7 @@ const PaymentForm = ({
 
       return response.json();
     },
-    onSuccess: (data) => {
-      console.log("✅ Appointment created successfully:", data.appointment.id);
+    onSuccess: () => {
       toast({
         title: "Appointment Created! 🎉",
         description: "Your therapy session is now confirmed and in your calendar.",
@@ -1673,7 +1620,6 @@ const PaymentForm = ({
       onSuccess();
     },
     onError: (error: any) => {
-      console.error("❌ Failed to create appointment:", error);
       toast({
         title: "Appointment Creation Failed",
         description:
@@ -1684,7 +1630,6 @@ const PaymentForm = ({
   });
 
   useEffect(() => {
-    console.log("PaymentForm mounted, stripe:", !!stripe, "elements:", !!elements);
     if (stripe && elements) {
       console.log("Both stripe and elements are ready");
     } else {
@@ -1695,7 +1640,6 @@ const PaymentForm = ({
       // Only show dev mode if there's an actual error after reasonable time
       const timeout = setTimeout(() => {
         if (!stripe || !elements) {
-          console.log("Stripe loading timeout - offering development mode");
           setShowDevMode(true);
         }
       }, 5000); // Increased timeout to 5 seconds
@@ -1729,8 +1673,6 @@ const PaymentForm = ({
       });
       setIsProcessing(false);
     } else if (paymentIntent && paymentIntent.status === "succeeded") {
-      console.log("Payment successful! Creating appointment directly.");
-
       // Create appointment immediately after successful payment
       createAppointmentFromPaymentMutation.mutate({
         paymentIntentId: paymentIntent.id,
@@ -1887,8 +1829,7 @@ const PaymentForm = ({
           onReady={() => {
             console.log("PaymentElement ready");
           }}
-          onLoadError={(error) => {
-            console.error("PaymentElement load error:", error);
+          onLoadError={() => {
             // Don't immediately show dev mode on load error - give it time
             setTimeout(() => setShowDevMode(true), 3000);
           }}

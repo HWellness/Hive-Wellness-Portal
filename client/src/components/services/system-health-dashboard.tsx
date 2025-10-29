@@ -159,7 +159,6 @@ export default function SystemHealthDashboard({ user }: SystemHealthDashboardPro
     }
 
     setIsRefreshing(true);
-    console.log("Refresh button clicked - invalidating caches");
 
     try {
       // Add minimum delay to ensure visual feedback is seen

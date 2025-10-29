@@ -281,9 +281,6 @@ export default function AdminTherapistAvailability({ user }: AdminTherapistAvail
       totalWeeklyHours: 0,
     };
 
-    console.log("Opening edit dialog for therapist:", therapistId);
-    console.log("Existing availability data:", existingAvailability);
-
     // Use existing availability if found, otherwise use defaults
     let availabilityToEdit;
 
@@ -324,7 +321,6 @@ export default function AdminTherapistAvailability({ user }: AdminTherapistAvail
       availabilityToEdit = defaultAvailability;
     }
 
-    console.log("Setting availability to edit:", availabilityToEdit);
     setEditingAvailability(availabilityToEdit);
     setShowEditDialog(true);
   };
@@ -396,7 +392,6 @@ export default function AdminTherapistAvailability({ user }: AdminTherapistAvail
             <span>Therapist Availability Overview</span>
             <Button
               onClick={() => {
-                console.log("Refresh button clicked - invalidating caches");
                 queryClient.invalidateQueries({
                   queryKey: ["/api/admin/therapist-availability-overview"],
                 });

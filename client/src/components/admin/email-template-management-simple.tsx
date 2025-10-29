@@ -204,7 +204,6 @@ export default function EmailTemplateManagementSimple({
       return response.json();
     },
     onSuccess: (data) => {
-      console.log("✅ Test email mutation success:", data);
       toast({
         title: "Test Email Sent Successfully",
         description: `Test email sent to ${testEmail}. ${data.details?.deliveryStatus === "sent" ? "Email delivered successfully." : "Check delivery status."}`,
@@ -214,7 +213,6 @@ export default function EmailTemplateManagementSimple({
       setShowTestPanel(false);
     },
     onError: (error: Error) => {
-      console.error("❌ Test email mutation error:", error);
       toast({
         title: "Test Email Failed",
         description: error.message,

@@ -63,7 +63,6 @@ export function MultiMethodMFASetupDialog({
       return await response.json();
     },
     onSuccess: (data: any) => {
-      console.log("TOTP setup response:", data); // Debug logging
       setSetupData({
         qrCodeUrl: data.qrCodeUrl,
         secret: data.manualEntryKey || data.secret, // Handle both response formats
