@@ -117,14 +117,8 @@ export default function VideoSessionsComplete({ user }: VideoSessionsProps) {
       if (localVideoRef.current) {
         localVideoRef.current.srcObject = stream;
         localVideoRef.current.muted = true;
-
-        try {
-          await localVideoRef.current.play();
-        } catch (playError) {
-          console.log("⚠️ Video autoplay blocked, user interaction required");
-        }
+        await localVideoRef.current.play();
       }
-
       toast({
         title: "Camera Access Granted",
         description: "Video and audio are ready for your session.",
@@ -156,9 +150,7 @@ export default function VideoSessionsComplete({ user }: VideoSessionsProps) {
 
         screenShareRef.current.onloadedmetadata = () => {
           if (screenShareRef.current) {
-            screenShareRef.current
-              .play()
-              .catch((e) => console.log("Screen share auto-play prevented:", e));
+            screenShareRef.current.play();
           }
         };
       }
@@ -166,13 +158,11 @@ export default function VideoSessionsComplete({ user }: VideoSessionsProps) {
       // Ensure camera stream stays active in PiP during screen sharing
       if (localVideoRef.current && localStreamRef.current) {
         localVideoRef.current.srcObject = localStreamRef.current;
-        localVideoRef.current
-          .play()
-          .catch((e) => console.log("Camera PiP auto-play prevented:", e));
+        localVideoRef.current.play();
       }
 
       setIsScreenSharing(true);
-
+      d;
       // Handle screen share end - multiple detection methods
       const screenTrack = screenStream.getVideoTracks()[0];
 
@@ -200,9 +190,7 @@ export default function VideoSessionsComplete({ user }: VideoSessionsProps) {
           setTimeout(() => {
             if (localVideoRef.current && localStreamRef.current) {
               localVideoRef.current.srcObject = localStreamRef.current;
-              localVideoRef.current
-                .play()
-                .catch((e) => console.log("Camera refresh auto-play prevented:", e));
+              localVideoRef.current.play();
             }
           }, 100);
         }
@@ -238,9 +226,7 @@ export default function VideoSessionsComplete({ user }: VideoSessionsProps) {
         if (localVideoRef.current && localStreamRef.current) {
           localVideoRef.current.srcObject = localStreamRef.current;
           localVideoRef.current.load();
-          localVideoRef.current
-            .play()
-            .catch((e) => console.log("Manual camera refresh auto-play prevented:", e));
+          localVideoRef.current.play();
 
           toast({
             title: "Camera Refreshed",
@@ -482,9 +468,6 @@ export default function VideoSessionsComplete({ user }: VideoSessionsProps) {
                       style={{
                         display: "block",
                         minHeight: "160px",
-                      }}
-                      onLoadedMetadata={() => {
-                        console.log("📺 PiP camera metadata loaded during screen share");
                       }}
                     />
                   </div>

@@ -1631,21 +1631,16 @@ const PaymentForm = ({
 
   useEffect(() => {
     if (stripe && elements) {
-      console.log("Both stripe and elements are ready");
-    } else {
-      console.log("Still waiting for stripe and elements to load...");
-      if (!stripe) console.log("- Stripe not ready");
-      if (!elements) console.log("- Elements not ready");
-
-      // Only show dev mode if there's an actual error after reasonable time
-      const timeout = setTimeout(() => {
-        if (!stripe || !elements) {
-          setShowDevMode(true);
-        }
-      }, 5000); // Increased timeout to 5 seconds
-
-      return () => clearTimeout(timeout);
+      return;
     }
+
+    const timeout = setTimeout(() => {
+      if (!stripe || !elements) {
+        setShowDevMode(true);
+      }
+    }, 5000);
+
+    return () => clearTimeout(timeout);
   }, [stripe, elements]);
 
   const handleSubmit = async (e: FormEvent) => {
@@ -1825,9 +1820,6 @@ const PaymentForm = ({
                 email: "",
               },
             },
-          }}
-          onReady={() => {
-            console.log("PaymentElement ready");
           }}
           onLoadError={() => {
             // Don't immediately show dev mode on load error - give it time
