@@ -92,13 +92,6 @@ export async function createPaymentWithRevenueSplit(
     // Create payment intent WITHOUT immediate transfer - transfer happens via webhook
     const paymentIntent = await stripe.paymentIntents.create(paymentIntentOptions);
 
-    console.log(`💳 Payment Intent created for ${paymentTiming} collection:`, {
-      id: paymentIntent.id,
-      amount: sessionFeeInPence,
-      timing: paymentTiming,
-      confirmation: confirmationMethod,
-    });
-
     return {
       paymentIntentId: paymentIntent.id,
       therapistAmount: therapistAmount / 100, // What therapist will receive

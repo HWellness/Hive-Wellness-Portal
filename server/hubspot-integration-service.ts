@@ -53,9 +53,6 @@ export class HubSpotIntegrationService {
     }
 
     try {
-      console.log("🔍 Fetching real form submissions from HubSpot...");
-      console.log("🔑 Using API key:", this.apiKey.substring(0, 8) + "...");
-
       // Try both authentication methods for HubSpot API
       // Method 1: Bearer token (recommended)
       let formsResponse = await fetch(`${this.baseUrl}/forms/v2/forms`, {
