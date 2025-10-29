@@ -89,11 +89,6 @@ export default function Portal() {
         authIsAuthenticated &&
         userServices.some((service) => service.id === serviceId)
       ) {
-        console.log("Portal: Auto-selecting service from URL:", {
-          serviceParam,
-          hash,
-          selected: serviceId,
-        });
         setSelectedService(serviceId);
 
         // Clean up URL - remove hash but keep query params for consistency
@@ -235,7 +230,6 @@ export default function Portal() {
         throw new Error("Failed to send reset email");
       }
     } catch (error) {
-      console.error("Password reset error:", error);
       toast({
         title: "Error",
         description: "Failed to send reset email. Please try again later.",
@@ -246,15 +240,7 @@ export default function Portal() {
     }
   };
 
-  console.log("Portal: Authentication check:", {
-    authUser,
-    authIsAuthenticated,
-    authIsLoading,
-    globalUser: user,
-  });
-
   if (authIsLoading) {
-    console.log("Portal: Loading state");
     return (
       <div className="min-h-screen bg-gradient-to-br from-hive-light-blue to-hive-white flex items-center justify-center">
         <div className="text-center">
@@ -268,18 +254,8 @@ export default function Portal() {
     );
   }
 
-  console.log("Portal: Auth state:", { authIsAuthenticated, authUser, authIsLoading });
-
   if (authIsAuthenticated && authUser) {
     const userData = authUser as any;
-    console.log("Portal: Authenticated user data:", userData);
-    console.log("Portal: User services:", userServices);
-    console.log("Portal: Services loading state:", servicesLoading);
-    console.log("Portal: Selected service:", selectedService);
-    console.log(
-      "Portal: About to render main dashboard, userServices length:",
-      userServices?.length
-    );
 
     // Helper function to get portal title based on user role
     const getPortalTitle = () => {
@@ -323,7 +299,6 @@ export default function Portal() {
             try {
               setSelectedService(null);
             } catch (error) {
-              console.error("Portal navigation error:", error);
               // Force page refresh as fallback
               window.location.reload();
             }
@@ -333,7 +308,6 @@ export default function Portal() {
       );
     }
 
-    console.log("Portal: Rendering main dashboard UI now");
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
         {/* Modern Header */}
@@ -390,7 +364,6 @@ export default function Portal() {
                         }
                       }
                     } catch (error) {
-                      console.error("Logout error:", error);
                       // CRITICAL: Clear cache even on error to ensure clean logout
                       queryClient.removeQueries({ queryKey: ["/api/auth/user"] });
                       queryClient.clear();
@@ -511,10 +484,6 @@ export default function Portal() {
                                     alt="Profile"
                                     className="w-full h-full rounded-full object-cover"
                                     onError={(e) => {
-                                      console.log(
-                                        "Image failed to load:",
-                                        userData.profileImageUrl
-                                      );
                                       // Fallback to user icon if image fails to load
                                       e.currentTarget.style.display = "none";
                                       e.currentTarget.parentNode
@@ -556,7 +525,6 @@ export default function Portal() {
                                         }
 
                                         const result = await response.json();
-                                        console.log("Upload result:", result);
 
                                         toast({
                                           title: "Profile Photo Updated",
@@ -572,7 +540,6 @@ export default function Portal() {
                                         // Reset the file input
                                         e.target.value = "";
                                       } catch (error) {
-                                        console.error("Upload error:", error);
                                         toast({
                                           title: "Upload Failed",
                                           description:
@@ -844,7 +811,6 @@ export default function Portal() {
     );
   }
 
-  console.log("Portal: Reached login form section - user not authenticated");
   return (
     <div className="min-h-screen relative" style={{ backgroundColor: "#9306B1" }}>
       {/* Background Image with Subtle Opacity */}

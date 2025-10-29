@@ -95,13 +95,6 @@ export default function AppointmentManagement() {
     staleTime: 0,
   });
 
-  console.log("Appointment Management Debug:", {
-    isLoading,
-    error,
-    appointmentsData,
-    hasAppointments: !!appointmentsData?.length,
-  });
-
   const appointments: Appointment[] = appointmentsData || [];
 
   // Calculate stats from appointments
@@ -116,11 +109,6 @@ export default function AppointmentManagement() {
       return appointmentDate === today && a.status === "scheduled";
     }).length,
   };
-
-  // Display debug info for troubleshooting
-  console.log("Raw appointment data:", appointmentsData);
-  console.log("Parsed appointments:", appointments);
-  console.log("Parsed stats:", stats);
 
   // Archive appointments mutation
   const archiveAppointmentsMutation = useMutation({

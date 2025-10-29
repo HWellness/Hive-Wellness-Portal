@@ -51,7 +51,6 @@ export default function VideoMeetingPage() {
       setInVideoCall(true);
       setIsJoining(false);
     } catch (error) {
-      console.error("Error accessing media devices:", error);
       alert("Could not access camera/microphone. Please check permissions and try again.");
       setIsJoining(false);
     }

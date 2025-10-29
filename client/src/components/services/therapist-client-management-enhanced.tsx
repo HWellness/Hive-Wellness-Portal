@@ -552,15 +552,8 @@ export default function TherapistClientManagement({
                       variant="outline"
                       size="sm"
                       onClick={() => {
-                        console.log(
-                          "Enhanced CM: Message button clicked - onNavigateToService:",
-                          !!onNavigateToService
-                        );
                         if (onNavigateToService) {
-                          console.log("Enhanced CM: Calling onNavigateToService with messaging");
                           onNavigateToService("messaging");
-                        } else {
-                          console.log("Enhanced CM: No onNavigateToService prop available");
                         }
                       }}
                     >
@@ -571,17 +564,8 @@ export default function TherapistClientManagement({
                       variant="outline"
                       size="sm"
                       onClick={() => {
-                        console.log(
-                          "Enhanced CM: Start Session button clicked - onNavigateToService:",
-                          !!onNavigateToService
-                        );
                         if (onNavigateToService) {
-                          console.log(
-                            "Enhanced CM: Calling onNavigateToService with video-sessions"
-                          );
                           onNavigateToService("video-sessions");
-                        } else {
-                          console.log("Enhanced CM: No onNavigateToService prop available");
                         }
                       }}
                     >

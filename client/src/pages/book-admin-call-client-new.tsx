@@ -81,7 +81,6 @@ export default function BookAdminCallClientNew() {
         setAvailableSlots([]);
       }
     } catch (error) {
-      console.error("Failed to load availability:", error);
       toast({
         variant: "destructive",
         title: "Connection Failed",

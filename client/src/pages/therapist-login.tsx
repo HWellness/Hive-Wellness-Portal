@@ -81,7 +81,6 @@ export default function TherapistLogin() {
       queryClient.clear();
       window.location.href = "/";
     } catch (error) {
-      console.error("Logout error:", error);
       // Force logout even if API fails
       queryClient.clear();
       window.location.href = "/";
@@ -129,7 +128,6 @@ export default function TherapistLogin() {
       // Immediate redirect - let React Query handle the state update
       setLocation("/portal");
     } catch (error: any) {
-      console.error("Login error:", error);
       toast({
         title: "Login Failed",
         description: error.message || "Invalid email or password. Please try again.",
@@ -204,7 +202,6 @@ export default function TherapistLogin() {
       // Redirect to portal
       setLocation("/portal");
     } catch (error: any) {
-      console.error("Password change error:", error);
       toast({
         title: "Password Change Failed",
         description: error.message || "Failed to change password. Please try again.",
@@ -249,7 +246,6 @@ export default function TherapistLogin() {
         });
       }
     } catch (error) {
-      console.error("Password reset error:", error);
       toast({
         title: "Password reset failed",
         description: "An error occurred while requesting password reset",
@@ -320,7 +316,6 @@ export default function TherapistLogin() {
         });
       }
     } catch (error) {
-      console.error("Password reset confirmation error:", error);
       toast({
         title: "Password reset failed",
         description: "An error occurred while resetting your password",

@@ -284,7 +284,6 @@ export default function ServiceRouter({
                 try {
                   onBack();
                 } catch (error) {
-                  console.error("Navigation error:", error);
                   // Fallback navigation
                   window.history.back();
                 }

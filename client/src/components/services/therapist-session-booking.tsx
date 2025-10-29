@@ -230,9 +230,7 @@ export default function TherapistSessionBooking({ user }: TherapistSessionBookin
         <Button
           onClick={(e) => {
             e.preventDefault();
-            console.log("Main Create Session button clicked");
             setIsCreatingSession(true);
-            console.log("isCreatingSession set to true (main button)");
           }}
           className="bg-hive-purple hover:bg-hive-purple/90"
         >
@@ -356,14 +354,12 @@ export default function TherapistSessionBooking({ user }: TherapistSessionBookin
                       className="w-full bg-hive-purple hover:bg-hive-purple/90"
                       onClick={(e) => {
                         e.preventDefault();
-                        console.log("Create Session button clicked for client:", client.name);
                         setNewSession({
                           ...newSession,
                           clientId: client.id,
                           sessionRate: 60, // Default rate £60, can be adjusted
                         });
                         setIsCreatingSession(true);
-                        console.log("isCreatingSession set to true");
                       }}
                     >
                       <Plus className="w-4 h-4 mr-2" />

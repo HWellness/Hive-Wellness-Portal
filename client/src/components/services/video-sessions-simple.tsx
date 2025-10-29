@@ -97,20 +97,16 @@ export default function VideoSessionsService({
 
     // Only initialize WebSocket when actively joining a session
     if (!hasMediaAccess) {
-      console.log("⚡ Skipping WebSocket connection - no media access yet");
       return;
     }
 
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const wsUrl = `${protocol}//${window.location.host}/ws/video-sessions`;
 
-    console.log("🔌 Connecting to WebSocket:", wsUrl);
-
     try {
       const ws = new WebSocket(wsUrl);
 
       ws.onopen = () => {
-        console.log("✅ WebSocket connected");
         setConnectionStatus("Connected");
 
         // Join the session using the correct message type
@@ -122,67 +118,43 @@ export default function VideoSessionsService({
           userRole: user.role,
           userName: `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.id,
         };
-        console.log("🚀 Sending join message:", joinMessage);
         ws.send(JSON.stringify(joinMessage));
       };
 
       ws.onmessage = async (event) => {
         const message = JSON.parse(event.data);
-        console.log("📨 WebSocket message:", message);
 
         switch (message.type) {
           case "session-joined":
-            console.log("✅ Session joined successfully");
             setConnectionStatus("Connected");
             break;
 
           case "participant-joined":
-            console.log("👥 Participant joined:", message.participant);
-            console.log("👥 Participant count:", message.participantCount);
-            console.log("👥 Room status:", message.roomStatus);
-
             if (message.participant.userId !== user.id) {
-              console.log("🤝 OTHER PARTICIPANT DETECTED! Creating offer...");
-              console.log("🎯 My ID:", user.id, "Other ID:", message.participant.userId);
-
               // Set up the peer connection immediately
               initializePeerConnection();
 
               // Create offer if we're the therapist or if we're alphabetically first
               const shouldCreateOffer =
                 user.role === "therapist" || user.id < message.participant.userId;
-              console.log("🎯 Should create offer?", shouldCreateOffer, "(role:", user.role, ")");
 
               if (shouldCreateOffer) {
-                console.log("🚀 Creating offer as", user.role);
                 setTimeout(async () => {
                   await createOffer();
                 }, 500);
-              } else {
-                console.log("⏳ Waiting for offer from other participant");
               }
-            } else {
-              console.log("👤 This is my own join confirmation");
             }
             break;
 
           case "offer":
-            console.log("📨 Received offer from:", message.userId);
             if (message.userId !== user.id) {
-              console.log("📥 Processing offer from other participant");
               await handleOffer(message.offer);
-            } else {
-              console.log("🔄 Ignoring my own offer");
             }
             break;
 
           case "answer":
-            console.log("📨 Received answer from:", message.userId);
             if (message.userId !== user.id) {
-              console.log("📤 Processing answer from other participant");
               await handleAnswer(message.answer);
-            } else {
-              console.log("🔄 Ignoring my own answer");
             }
             break;
 
@@ -193,37 +165,31 @@ export default function VideoSessionsService({
             break;
 
           case "participant-left":
-            console.log("👋 Participant left:", message.userId);
             if (message.userId !== user.id) {
               handleUserLeft();
             }
             break;
 
           case "session-ended":
-            console.log("📞 Session ended:", message.reason);
             handleUserLeft();
             break;
 
           case "error":
-            console.error("❌ WebSocket error:", message.error);
             setConnectionStatus("Error");
             break;
         }
       };
 
       ws.onclose = () => {
-        console.log("❌ WebSocket disconnected");
         setConnectionStatus("Disconnected");
       };
 
-      ws.onerror = (error) => {
-        console.error("❌ WebSocket error:", error);
+      ws.onerror = () => {
         setConnectionStatus("Error");
       };
 
       websocketRef.current = ws;
-    } catch (error) {
-      console.warn("WebSocket connection failed (normal during development):", error);
+    } catch {
       setConnectionStatus("Disconnected");
     }
   }, [user.id, user.role]);
@@ -234,12 +200,10 @@ export default function VideoSessionsService({
       return peerConnectionRef.current;
     }
 
-    console.log("🔗 Creating peer connection");
     const pc = new RTCPeerConnection(rtcConfiguration);
 
     pc.onicecandidate = (event) => {
       if (event.candidate && websocketRef.current?.readyState === WebSocket.OPEN) {
-        console.log("🧊 Sending ICE candidate");
         websocketRef.current.send(
           JSON.stringify({
             type: "ice-candidate",
@@ -252,7 +216,6 @@ export default function VideoSessionsService({
     };
 
     pc.ontrack = (event) => {
-      console.log("📺 Remote stream received");
       const remoteStream = event.streams[0];
       remoteStreamRef.current = remoteStream;
       setHasRemoteStream(true);
@@ -263,7 +226,6 @@ export default function VideoSessionsService({
     };
 
     pc.onconnectionstatechange = () => {
-      console.log("🔄 Connection state:", pc.connectionState);
       setConnectionStatus(pc.connectionState);
     };
 
@@ -281,7 +243,6 @@ export default function VideoSessionsService({
   // Create offer
   const createOffer = useCallback(async () => {
     if (!localStreamRef.current) {
-      console.log("❌ No local stream available for offer");
       return;
     }
 
@@ -290,19 +251,15 @@ export default function VideoSessionsService({
     // Ensure local stream tracks are added before creating offer
     localStreamRef.current.getTracks().forEach((track) => {
       if (pc.getSenders().find((sender) => sender.track === track)) {
-        console.log("🎯 Track already added:", track.kind);
         return;
       }
-      console.log("🎵 Adding track to peer connection:", track.kind);
       pc.addTrack(track, localStreamRef.current!);
     });
 
     try {
-      console.log("📞 Creating offer with", localStreamRef.current.getTracks().length, "tracks");
       const offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
 
-      console.log("📤 Sending offer via WebSocket");
       if (websocketRef.current?.readyState === WebSocket.OPEN) {
         websocketRef.current.send(
           JSON.stringify({
@@ -322,7 +279,6 @@ export default function VideoSessionsService({
   const handleOffer = useCallback(
     async (offer: RTCSessionDescriptionInit) => {
       if (!localStreamRef.current) {
-        console.log("❌ No local stream available for handling offer");
         return;
       }
 
@@ -331,21 +287,17 @@ export default function VideoSessionsService({
       // Ensure local stream tracks are added before handling offer
       localStreamRef.current.getTracks().forEach((track) => {
         if (pc.getSenders().find((sender) => sender.track === track)) {
-          console.log("🎯 Track already added:", track.kind);
           return;
         }
-        console.log("🎵 Adding track to peer connection:", track.kind);
         pc.addTrack(track, localStreamRef.current!);
       });
 
       try {
-        console.log("📥 Handling offer with", localStreamRef.current.getTracks().length, "tracks");
         await pc.setRemoteDescription(offer);
 
         const answer = await pc.createAnswer();
         await pc.setLocalDescription(answer);
 
-        console.log("📤 Sending answer via WebSocket");
         if (websocketRef.current?.readyState === WebSocket.OPEN) {
           websocketRef.current.send(
             JSON.stringify({
@@ -368,7 +320,6 @@ export default function VideoSessionsService({
     const pc = peerConnectionRef.current;
     if (pc) {
       try {
-        console.log("📤 Handling answer");
         await pc.setRemoteDescription(answer);
       } catch (error) {
         console.error("❌ Error handling answer:", error);
@@ -381,7 +332,6 @@ export default function VideoSessionsService({
     const pc = peerConnectionRef.current;
     if (pc) {
       try {
-        console.log("🧊 Adding ICE candidate");
         await pc.addIceCandidate(candidate);
       } catch (error) {
         console.error("❌ Error adding ICE candidate:", error);
@@ -391,7 +341,6 @@ export default function VideoSessionsService({
 
   // Handle user left
   const handleUserLeft = useCallback(() => {
-    console.log("👋 Remote user left");
     setHasRemoteStream(false);
     if (remoteVideoRef.current) {
       remoteVideoRef.current.srcObject = null;
@@ -402,14 +351,12 @@ export default function VideoSessionsService({
   // Apply stream to video element
   const applyStreamToVideo = useCallback((videoElement: HTMLVideoElement, stream: MediaStream) => {
     if (videoElement && stream) {
-      console.log("📺 Applying stream to video element");
       videoElement.srcObject = stream;
       videoElement.autoplay = true;
       videoElement.playsInline = true;
       videoElement.muted = true;
 
       videoElement.onloadedmetadata = () => {
-        console.log("✅ Video metadata loaded");
         setStreamStatus("Video stream active");
       };
 
@@ -425,20 +372,9 @@ export default function VideoSessionsService({
       setIsConnecting(true);
       setStreamStatus("Requesting camera access...");
 
-      console.log("🎥 Requesting camera access...");
-
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { width: 640, height: 480 },
         audio: true,
-      });
-
-      console.log("✅ Camera access granted");
-      console.log("📊 Stream details:", {
-        id: stream.id,
-        active: stream.active,
-        tracks: stream.getTracks().length,
-        videoTracks: stream.getVideoTracks().length,
-        audioTracks: stream.getAudioTracks().length,
       });
 
       localStreamRef.current = stream;
@@ -533,7 +469,6 @@ export default function VideoSessionsService({
   // Force refresh video
   const refreshVideo = useCallback(() => {
     if (localStreamRef.current && localVideoRef.current) {
-      console.log("🔄 Refreshing video stream");
       applyStreamToVideo(localVideoRef.current, localStreamRef.current);
     }
   }, [applyStreamToVideo]);

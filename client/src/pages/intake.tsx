@@ -17,7 +17,6 @@ export default function IntakePage() {
   const { toast } = useToast();
 
   const handleFormComplete = (data: Record<string, any>) => {
-    console.log("Form completed:", data);
     toast({
       title: "Success!",
       description: "Your form has been submitted and processed.",

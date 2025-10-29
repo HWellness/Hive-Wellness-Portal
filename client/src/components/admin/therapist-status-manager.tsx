@@ -154,7 +154,6 @@ export default function TherapistStatusManager() {
 
   const createAccountMutation = useMutation({
     mutationFn: async (enquiry: TherapistEnquiry) => {
-      console.log(`API call: Creating account for ${enquiry.email} only (ID: ${enquiry.id})`);
       const response = await apiRequest("POST", "/api/admin/create-therapist-account", {
         enquiry_id: enquiry.id,
         email: enquiry.email,
@@ -192,7 +191,6 @@ export default function TherapistStatusManager() {
       }
     },
     onError: (error) => {
-      console.error("Account creation error:", error);
       toast({
         title: "Error",
         description: "Failed to create therapist account. Please try again.",
@@ -203,12 +201,10 @@ export default function TherapistStatusManager() {
 
   const resetPasswordMutation = useMutation({
     mutationFn: async (email: string) => {
-      console.log(`Resetting password for single therapist: ${email}`);
       const response = await apiRequest("POST", "/api/admin/reset-therapist-password", { email });
       return response.json();
     },
     onSuccess: (data, email) => {
-      console.log(`✓ Password reset successful for ${email}`);
       setPasswordModal({
         isOpen: true,
         email,
@@ -516,9 +512,6 @@ export default function TherapistStatusManager() {
                             size="sm"
                             onClick={(e) => {
                               e.preventDefault();
-                              console.log(
-                                `Creating account for single therapist: ${enquiry.email} (ID: ${enquiry.id})`
-                              );
                               createAccountMutation.mutate(enquiry);
                             }}
                             disabled={createAccountMutation.isPending}
@@ -536,9 +529,6 @@ export default function TherapistStatusManager() {
                             onClick={(e) => {
                               e.preventDefault();
                               e.stopPropagation();
-                              console.log(
-                                `Reset button clicked for ${enquiry.email} (ID: ${enquiry.id})`
-                              );
                               if (!resetPasswordMutation.isPending) {
                                 resetPasswordMutation.mutate(enquiry.email);
                               }

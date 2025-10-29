@@ -165,9 +165,6 @@ export default function ClientProfileCompletion({
 
   // Auto-fill logic (shared between useEffect and manual trigger)
   const autoFillFromQuestionnaire = (clientData: any) => {
-    console.log("Client Auto-Fill Response:", questionnaireData);
-    console.log("Client Questionnaire Data:", clientData);
-
     let changedFields: string[] = [];
 
     setProfileData((prevData) => {

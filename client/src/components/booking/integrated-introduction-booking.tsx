@@ -174,7 +174,6 @@ export default function IntegratedIntroductionBooking() {
     if (!canProceedToNextStep() && currentStep < 4) return;
 
     if (currentStep === 3) {
-      console.log("Submitting booking with form data:", formData);
       bookingMutation.mutate(formData);
     } else {
       setCurrentStep((prev) => prev + 1);

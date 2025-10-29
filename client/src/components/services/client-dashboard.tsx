@@ -1041,12 +1041,8 @@ export default function ClientDashboard({ user, onNavigateToService }: ClientDas
             </Button>
             <Button
               onClick={() => {
-                console.log("Cancel button clicked", { appointmentToCancel });
                 if (appointmentToCancel?.id) {
-                  console.log("Calling mutation with id:", appointmentToCancel.id);
                   cancelAppointmentMutation.mutate(appointmentToCancel.id);
-                } else {
-                  console.error("No appointment ID found!", appointmentToCancel);
                 }
               }}
               className="bg-red-600 hover:bg-red-700"

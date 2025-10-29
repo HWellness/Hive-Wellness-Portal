@@ -802,7 +802,6 @@ export default function TherapistClientManagement({ user }: TherapistClientManag
                                 `/api/therapist/client-documents/upload-params?clientId=${selectedClient.id}&fileName=${encodeURIComponent(tempFileName)}`
                               );
                               const params = await response.json();
-                              console.log("Upload params received:", params);
                               return {
                                 method: params.method,
                                 url: params.url,
@@ -813,7 +812,6 @@ export default function TherapistClientManagement({ user }: TherapistClientManag
                               };
                             }}
                             onComplete={(result) => {
-                              console.log("Upload completed:", result);
                               const file = result.successful[0];
                               if (file && selectedClient) {
                                 // Extract objectPath from upload result

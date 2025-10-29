@@ -99,7 +99,6 @@ export default function VideoSessionsSimpleFix() {
 
     // Handle remote stream
     pc.ontrack = (event) => {
-      console.log("✅ Remote stream received");
       const remoteStream = event.streams[0];
 
       if (remoteVideoRef.current) {
@@ -107,7 +106,6 @@ export default function VideoSessionsSimpleFix() {
         remoteVideoRef.current
           .play()
           .then(() => {
-            console.log("✅ Remote video playing");
             setParticipants(2);
             toast({
               title: "Peer Connected",
@@ -132,7 +130,6 @@ export default function VideoSessionsSimpleFix() {
     };
 
     pc.onconnectionstatechange = () => {
-      console.log("Connection state:", pc.connectionState);
       if (pc.connectionState === "connected") {
         setConnectionStatus("connected");
       }
@@ -149,7 +146,6 @@ export default function VideoSessionsSimpleFix() {
     wsRef.current = new WebSocket(wsUrl);
 
     wsRef.current.onopen = () => {
-      console.log("✅ WebSocket connected");
       if (currentSession) {
         wsRef.current?.send(
           JSON.stringify({
@@ -169,14 +165,12 @@ export default function VideoSessionsSimpleFix() {
 
         switch (message.type) {
           case "participant-joined":
-            console.log("👤 Participant joined");
             setParticipants(message.participantCount || 2);
 
             // Start connection if we have 2 participants
             if (message.participantCount === 2 && hasMediaAccess) {
               // Only user with smaller ID creates offer
               if (user.id < (message.userId || "zzz")) {
-                console.log("📞 Creating offer...");
                 setTimeout(async () => {
                   peerConnectionRef.current = createPeerConnection();
                   const offer = await peerConnectionRef.current.createOffer();
@@ -195,7 +189,6 @@ export default function VideoSessionsSimpleFix() {
             break;
 
           case "offer": {
-            console.log("📞 Received offer");
             if (!peerConnectionRef.current) {
               peerConnectionRef.current = createPeerConnection();
             }
@@ -215,17 +208,14 @@ export default function VideoSessionsSimpleFix() {
           }
 
           case "answer":
-            console.log("📞 Received answer");
             await peerConnectionRef.current?.setRemoteDescription(message.answer);
             break;
 
           case "ice-candidate":
-            console.log("🧊 Received ICE candidate");
             await peerConnectionRef.current?.addIceCandidate(message.candidate);
             break;
 
           case "session-joined":
-            console.log("✅ Joined session");
             setConnectionStatus("connected");
             break;
         }
@@ -235,7 +225,6 @@ export default function VideoSessionsSimpleFix() {
     };
 
     wsRef.current.onclose = () => {
-      console.log("WebSocket closed");
       setConnectionStatus("disconnected");
     };
   }, [currentSession, user.id, hasMediaAccess, createPeerConnection]);

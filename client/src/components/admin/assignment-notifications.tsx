@@ -253,9 +253,6 @@ export function AssignmentNotifications() {
                           size="sm"
                           onClick={(e) => {
                             e.stopPropagation();
-                            console.log(
-                              `Redirecting to assignment for client: ${notification.clientName} (ID: ${notification.clientId})`
-                            );
                             // First mark as read, then redirect to assignment interface
                             handleNotificationAction(notification.id, "mark_read");
                             setLocation(

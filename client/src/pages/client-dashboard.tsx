@@ -60,7 +60,6 @@ export default function ClientDashboard({ onNavigateToService }: ClientDashboard
         window.location.href = "/login";
       }
     } catch (error) {
-      console.error("Logout error:", error);
       // Fallback for client role
       window.location.href = "/login";
     }

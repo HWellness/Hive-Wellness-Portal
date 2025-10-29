@@ -77,7 +77,6 @@ export default function VideoSessionsFixed({ user }: VideoSessionsProps) {
   // Initialize media stream with camera-first approach
   const initializeMediaStream = useCallback(async () => {
     try {
-      console.log("🎥 Requesting camera and audio access...");
       const constraints = {
         video: {
           width: { ideal: 640 },
@@ -89,7 +88,6 @@ export default function VideoSessionsFixed({ user }: VideoSessionsProps) {
         },
       };
 
-      console.log("🎥 Requesting media with constraints:", constraints);
       const stream = await navigator.mediaDevices.getUserMedia(constraints);
 
       localStreamRef.current = stream;
@@ -103,15 +101,11 @@ export default function VideoSessionsFixed({ user }: VideoSessionsProps) {
 
         try {
           await localVideoRef.current.play();
-          console.log("✅ Local video stream started successfully");
         } catch (playError) {
           console.log("⚠️ Video autoplay blocked, user interaction required");
         }
       }
-
-      console.log("✅ Camera and audio access granted successfully");
-    } catch (error) {
-      console.error("❌ Error accessing media devices:", error);
+    } catch {
       setHasMediaAccess(false);
       toast({
         title: "Camera Access Required",
@@ -123,7 +117,6 @@ export default function VideoSessionsFixed({ user }: VideoSessionsProps) {
 
   // Create peer connection
   const createPeerConnection = useCallback(() => {
-    console.log("🔗 Creating peer connection...");
     const pc = new RTCPeerConnection(pcConfig);
 
     // Add local stream to peer connection
@@ -131,24 +124,20 @@ export default function VideoSessionsFixed({ user }: VideoSessionsProps) {
       localStreamRef.current.getTracks().forEach((track) => {
         pc.addTrack(track, localStreamRef.current!);
       });
-      console.log("📡 Added local stream to peer connection");
     }
 
     // Handle remote stream
     pc.ontrack = (event) => {
-      console.log("📡 Received remote stream");
       remoteStreamRef.current = event.streams[0];
       if (remoteVideoRef.current) {
         remoteVideoRef.current.srcObject = event.streams[0];
         setParticipants(2);
-        console.log("✅ Remote video connected!");
       }
     };
 
     // Handle ICE candidates
     pc.onicecandidate = (event) => {
       if (event.candidate && wsRef.current) {
-        console.log("🧊 Sending ICE candidate");
         wsRef.current.send(
           JSON.stringify({
             type: "ice-candidate",
@@ -173,7 +162,6 @@ export default function VideoSessionsFixed({ user }: VideoSessionsProps) {
       const offer = await peerConnectionRef.current!.createOffer();
       await peerConnectionRef.current!.setLocalDescription(offer);
 
-      console.log("📞 Sending offer");
       if (wsRef.current) {
         wsRef.current.send(
           JSON.stringify({
@@ -191,7 +179,6 @@ export default function VideoSessionsFixed({ user }: VideoSessionsProps) {
   // Handle offer
   const handleOffer = useCallback(
     async (offer: RTCSessionDescriptionInit) => {
-      console.log("📞 Received offer");
       if (!peerConnectionRef.current) {
         createPeerConnection();
       }
@@ -201,7 +188,6 @@ export default function VideoSessionsFixed({ user }: VideoSessionsProps) {
         const answer = await peerConnectionRef.current!.createAnswer();
         await peerConnectionRef.current!.setLocalDescription(answer);
 
-        console.log("📞 Sending answer");
         if (wsRef.current) {
           wsRef.current.send(
             JSON.stringify({
@@ -220,7 +206,6 @@ export default function VideoSessionsFixed({ user }: VideoSessionsProps) {
 
   // Handle answer
   const handleAnswer = useCallback(async (answer: RTCSessionDescriptionInit) => {
-    console.log("📞 Received answer");
     try {
       await peerConnectionRef.current!.setRemoteDescription(answer);
     } catch (error) {
@@ -230,7 +215,6 @@ export default function VideoSessionsFixed({ user }: VideoSessionsProps) {
 
   // Handle ICE candidate
   const handleIceCandidate = useCallback(async (candidate: RTCIceCandidateInit) => {
-    console.log("🧊 Received ICE candidate");
     try {
       await peerConnectionRef.current!.addIceCandidate(candidate);
     } catch (error) {
@@ -245,13 +229,10 @@ export default function VideoSessionsFixed({ user }: VideoSessionsProps) {
     const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
     const wsUrl = `${protocol}//${window.location.host}/ws/video-sessions`;
 
-    console.log("🔌 Connecting to WebSocket:", wsUrl);
-
     const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 
     ws.onopen = () => {
-      console.log("🔌 WebSocket connected");
       setConnectionStatus("connected");
 
       // Join the session room
@@ -268,11 +249,9 @@ export default function VideoSessionsFixed({ user }: VideoSessionsProps) {
 
     ws.onmessage = async (event) => {
       const message = JSON.parse(event.data);
-      console.log("📨 WebSocket message received:", message.type);
 
       switch (message.type) {
         case "participant-joined":
-          console.log("👥 Participant joined");
           setParticipants((prev) => prev + 1);
           // Start WebRTC when both participants are connected
           if (user.role === "client") {
@@ -295,12 +274,10 @@ export default function VideoSessionsFixed({ user }: VideoSessionsProps) {
     };
 
     ws.onclose = () => {
-      console.log("🔌 WebSocket disconnected");
       setConnectionStatus("disconnected");
     };
 
-    ws.onerror = (error) => {
-      console.error("❌ WebSocket error:", error);
+    ws.onerror = () => {
       setConnectionStatus("disconnected");
     };
   }, [currentSession, user, createOffer, handleOffer, handleAnswer, handleIceCandidate]);
@@ -322,8 +299,6 @@ export default function VideoSessionsFixed({ user }: VideoSessionsProps) {
 
   // Leave session
   const handleLeaveSession = useCallback(() => {
-    console.log("🚪 Leaving session...");
-
     if (wsRef.current) {
       wsRef.current.close();
       wsRef.current = null;

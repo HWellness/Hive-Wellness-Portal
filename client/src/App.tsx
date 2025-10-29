@@ -107,16 +107,6 @@ function Router() {
     return () => clearTimeout(prefetchTimeout);
   }, [isAuthenticated, user]);
 
-  // Reduce debug logging in production for better performance
-  if (process.env.NODE_ENV === "development") {
-    console.log("App Router: Auth state:", {
-      isAuthenticated,
-      isLoading,
-      user: user ? { role: user.role, id: user.id } : null,
-    });
-    console.log("Current location:", location);
-  }
-
   // Simple loading state - only show for a brief moment
   if (isLoading) {
     return <LoadingSpinner />;

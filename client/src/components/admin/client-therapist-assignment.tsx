@@ -121,7 +121,6 @@ export function ClientTherapistAssignment() {
   }
   const [searchTerm, setSearchTerm] = useState("");
 
-  console.log("Client Assignment URL params:", { urlClientId, urlClientName, location });
   const [statusFilter, setStatusFilter] = useState("all");
   const [showAIRecommendations, setShowAIRecommendations] = useState(false);
   const [viewingTherapist, setViewingTherapist] = useState<any | null>(null);
@@ -140,7 +139,6 @@ export function ClientTherapistAssignment() {
     if (urlClientId && clients && clients.length > 0 && !selectedClient) {
       const targetClient = clients.find((client: Client) => client.id === urlClientId);
       if (targetClient) {
-        console.log("Auto-selecting client from URL:", targetClient);
         setSelectedClient(targetClient);
       }
     }

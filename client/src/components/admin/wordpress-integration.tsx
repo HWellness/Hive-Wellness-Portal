@@ -117,7 +117,6 @@ export default function WordPressIntegration({
         title: "Connection Successful!",
         description: data.message || "WordPress connection is working correctly.",
       });
-      console.log("✅ Test results:", data);
     },
     onError: (error: any) => {
       toast({
@@ -125,7 +124,6 @@ export default function WordPressIntegration({
         description: error.message || "Failed to connect to WordPress.",
         variant: "destructive",
       });
-      console.error("❌ Test error:", error);
     },
   });
 
@@ -170,13 +168,6 @@ export default function WordPressIntegration({
       });
       return;
     }
-
-    console.log("🔧 Configuring WordPress integration with:", {
-      siteUrl,
-      publicApiKey: publicApiKey ? "present" : "missing",
-      privateApiKey: privateApiKey ? "present" : "missing",
-      pollingInterval,
-    });
 
     configureMutation.mutate({
       siteUrl,
