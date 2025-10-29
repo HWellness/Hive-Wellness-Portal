@@ -7737,8 +7737,6 @@ export class DatabaseStorage implements IStorage {
         })
         .where(eq(users.email, email.toLowerCase().trim()));
 
-      console.log(`✓ Password reset for therapist ${email} - New temporary password generated`);
-
       return {
         success: true,
         tempPassword: tempPassword,

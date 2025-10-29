@@ -1139,9 +1139,6 @@ Website: https://hive-wellness.co.uk`,
         bypassListManagement: { enable: false },
       },
     });
-
-    console.log(`✅ Password reset email sent successfully to ${params.to}`);
-    console.log(`📧 Reset link: ${resetUrl}`);
     return true;
   } catch (error) {
     console.error("❌ Failed to send password reset email:", error);
