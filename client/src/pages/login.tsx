@@ -124,7 +124,6 @@ export default function LoginPage() {
 
                 // If still authenticated, wait a moment for session destruction to complete
                 if (authResponse.ok) {
-                  console.log("Session still active, waiting for destruction...");
                   await new Promise((resolve) => setTimeout(resolve, 500)); // Wait 500ms
 
                   // Check again
@@ -134,7 +133,6 @@ export default function LoginPage() {
                   });
 
                   if (retryResponse.ok) {
-                    console.warn("Session still persists after retry, forcing logout...");
                     // Force a logout if session is still active
                     await fetch("/api/auth/logout", {
                       method: "POST",
@@ -151,7 +149,6 @@ export default function LoginPage() {
                 // Force navigation to portal
                 window.location.href = "/";
               } catch (error) {
-                console.error("Error during back to portal navigation:", error);
                 // Fallback: clear cache and navigate anyway
                 await queryClient.removeQueries({ queryKey: ["/api/auth/user"] });
                 queryClient.clear();

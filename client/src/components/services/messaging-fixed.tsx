@@ -291,7 +291,6 @@ export default function MessagingService({ user }: MessagingProps) {
       // Remove the request from the list by refetching notifications
       // In a real implementation, you would update the state here
     } catch (error) {
-      console.error("Error processing connection request:", error);
       toast({
         title: "Error",
         description: "Failed to process connection request. Please try again.",
@@ -338,7 +337,6 @@ export default function MessagingService({ user }: MessagingProps) {
     : null;
 
   const handleConversationClick = (conversationId: string) => {
-    console.log("Conversation clicked:", conversationId);
     setSelectedConversation(conversationId);
   };
 

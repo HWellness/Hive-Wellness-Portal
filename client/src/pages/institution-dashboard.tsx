@@ -41,7 +41,6 @@ export default function InstitutionDashboard() {
         window.location.href = "/institution-login";
       }
     } catch (error) {
-      console.error("Logout error:", error);
       // Force logout even if API fails
       queryClient.clear();
       window.location.href = "/institution-login";

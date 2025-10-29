@@ -123,7 +123,6 @@ export default function BookAdminCallWidget() {
       }
     } catch (error) {
       setAvailableSlots([]);
-      console.error("Availability error:", error);
     } finally {
       setIsLoadingAvailability(false);
     }

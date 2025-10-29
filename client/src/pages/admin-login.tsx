@@ -99,7 +99,6 @@ export default function AdminLogin() {
       // Immediate redirect
       setLocation("/admin-dashboard");
     } catch (error: any) {
-      console.error("Login error:", error);
       toast({
         title: "Login Failed",
         description: error.message || "Please check your credentials and try again.",
@@ -156,7 +155,6 @@ export default function AdminLogin() {
       setShowPasswordChangeModal(false);
       setLocation("/admin-dashboard");
     } catch (error: any) {
-      console.error("Password change error:", error);
       toast({
         title: "Password Change Failed",
         description: error.message || "Failed to change password.",
@@ -196,7 +194,6 @@ export default function AdminLogin() {
         throw new Error("Failed to send reset email");
       }
     } catch (error) {
-      console.error("Password reset error:", error);
       toast({
         title: "Error",
         description: "Failed to send reset email. Please try again later.",

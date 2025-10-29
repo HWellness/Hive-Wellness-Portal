@@ -234,7 +234,6 @@ export default function AdminDashboard() {
         window.location.href = "/login";
       }
     } catch (error) {
-      console.error("Logout error:", error);
       // Force logout even if API fails
       queryClient.clear();
       window.location.href = "/login";

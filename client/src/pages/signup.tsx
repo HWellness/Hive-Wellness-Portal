@@ -110,7 +110,6 @@ export default function SignupPage() {
           }
         })
         .catch((error) => {
-          console.error("Token validation error:", error);
           setTokenValidation({ valid: false });
         })
         .finally(() => {

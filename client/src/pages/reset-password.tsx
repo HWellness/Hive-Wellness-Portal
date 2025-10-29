@@ -102,7 +102,6 @@ export default function ResetPassword() {
         });
       }
     } catch (error) {
-      console.error("Password reset error:", error);
       toast({
         title: "Password Reset Failed",
         description: "An error occurred while resetting your password. Please try again.",
