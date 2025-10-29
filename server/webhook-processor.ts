@@ -182,7 +182,6 @@ export class WebhookProcessor {
   }> {
     const metadata = paymentIntent.metadata || {};
     console.log(`💳 [${webhookId}] Processing successful payment: ${paymentIntent.id}`);
-    console.log(`🔍 [${webhookId}] Payment metadata:`, JSON.stringify(metadata, null, 2));
 
     const operationsCompleted: string[] = [];
 
@@ -275,16 +274,6 @@ export class WebhookProcessor {
       // NEW: Detect new bookings from our appointment creation flow
       (metadata.appointmentData && !metadata.appointmentId);
 
-    console.log(`🧠 Appointment creation analysis:`, {
-      hasBaseData,
-      hasSessionData,
-      noExistingAppointmentId,
-      isNewBooking,
-      metadata_keys: Object.keys(metadata),
-      normalized: normalized,
-      raw_appointmentData: metadata.appointmentData,
-    });
-
     // Create appointment if we have all required data and no existing appointment ID
     const shouldCreate = hasBaseData && hasSessionData && noExistingAppointmentId;
     console.log(`🎯 Final decision - shouldCreateAppointment: ${shouldCreate}`);
@@ -314,15 +303,6 @@ export class WebhookProcessor {
     }
 
     return await db.transaction(async (tx) => {
-      console.log(`🔄 [${webhookId}] Starting atomic appointment creation transaction`);
-      console.log(`📋 [${webhookId}] Transaction normalized data:`, {
-        clientId: normalized.clientId,
-        therapistId: normalized.therapistId,
-        scheduledAt: normalized.scheduledAt,
-        sessionType: normalized.sessionType,
-        duration: normalized.duration,
-      });
-
       // 1. Create appointment record
       const appointmentId = nanoid();
       const scheduledAt = new Date(normalized.scheduledAt);

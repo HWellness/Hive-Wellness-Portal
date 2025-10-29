@@ -325,12 +325,6 @@ try {
   const config = getStripeConfiguration();
   stripe = new Stripe(config.secretKey);
   webhookSecret = config.webhookSecret;
-
-  const keyType = config.secretKey.startsWith("sk_live_") ? "live" : "test";
-  console.log(
-    `✅ Stripe initialized successfully with ${keyType} key for ${isProduction ? "production" : "development"}`
-  );
-  console.log(`✅ Webhook signature verification enabled (${webhookSecret.substring(0, 8)}...)`);
 } catch (error: any) {
   console.error("❌ CRITICAL STRIPE CONFIGURATION ERROR:", error.message);
   console.error(
@@ -396,7 +390,6 @@ function verifyStripeWebhook(body: any, signature: string): any {
     const event = stripe.webhooks.constructEvent(body, signature, webhookSecret);
     return event;
   } catch (err: any) {
-    console.error("⚠️ Webhook signature verification failed:", err.message);
     throw new Error(`Webhook signature verification failed: ${err.message}`);
   }
 }
@@ -3630,11 +3623,6 @@ setTimeout(() => { window.location.replace('/#/therapist-portal'); }, 500);
 
   // Video session route - serve the React app to handle video sessions from email links
   app.get("/video-session/:sessionId?", async (req, res) => {
-    console.log("=== VIDEO SESSION ROUTE ACCESS ===");
-    console.log("Session ID:", req.params.sessionId);
-    console.log("Query params:", req.query);
-    console.log("Full URL:", req.url);
-
     if (process.env.NODE_ENV === "development") {
       // In development, serve the client HTML template
       const fs = await import("fs");
@@ -5279,8 +5267,6 @@ function submitHiveBooking(event) {
     });
 
     try {
-      console.log("📞 Admin booking request received from WordPress:", req.body);
-
       const { fullName, email, phone, preferredDate, preferredTime, message, source } = req.body;
 
       // Validate required fields
@@ -5663,7 +5649,6 @@ function submitHiveBooking(event) {
           console.log("✅ SendGrid notifications sent for introduction call to", email);
         } catch (emailError) {
           console.error("SendGrid email error:", emailError);
-          console.log("Email delivery failed for:", email);
         }
       } catch (emailError) {
         console.error("❌ Gmail notification error for introduction call:", emailError);
@@ -5686,8 +5671,6 @@ function submitHiveBooking(event) {
   // Therapy session booking endpoint with Google Workspace integration
   app.post("/api/external/book-therapy-session", async (req, res) => {
     try {
-      console.log("Processing therapy session booking with Google integration...", req.body);
-
       const {
         therapistId,
         clientName,
@@ -5894,8 +5877,6 @@ function submitHiveBooking(event) {
         const startDate = new Date(bookingDate);
         startDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
         const endDate = new Date(startDate.getTime() + 30 * 60000); // 30 minutes session
-
-        console.log("Creating Google Calendar event for:", { fullName, to, startDate, endDate });
 
         const calendarEvent = await GoogleMeetService.createCalendarEvent({
           title: `Introduction Call - ${fullName}`,
@@ -6273,7 +6254,6 @@ function submitHiveBooking(event) {
   app.post("/api/webhooks/hubspot", express.raw({ type: "application/json" }), async (req, res) => {
     try {
       const webhookId = nanoid();
-      console.log(`🎯 [${webhookId}] HubSpot webhook received`);
 
       // CRITICAL FIX: Proper HubSpot signature verification (V3 with V2 fallback)
       const webhookSecret = process.env.HUBSPOT_WEBHOOK_SECRET;
@@ -6409,10 +6389,6 @@ function submitHiveBooking(event) {
         }
 
         if (!signatureValid) {
-          console.error(`❌ [${webhookId}] SECURITY: Invalid webhook signature detected`);
-          console.error(
-            `🚨 [${webhookId}] SECURITY EVENT: Signature verification failed - request rejected`
-          );
           // CRITICAL SECURITY FIX: Properly reject invalid signatures with 401 status
           return res.status(401).json({
             error: "Webhook signature verification failed",
@@ -6424,7 +6400,6 @@ function submitHiveBooking(event) {
       }
 
       // SECURITY SUCCESS: All validations passed - send success response
-      console.log(`✅ [${webhookId}] SECURITY: All security validations passed`);
       res.status(200).json({
         status: "received",
         message: "Webhook received and queued for processing",
@@ -6751,7 +6726,6 @@ function submitHiveBooking(event) {
       const tokens = await tokenResponse.json();
 
       if (!tokenResponse.ok) {
-        console.error("Token exchange failed:", tokens);
         return res.status(400).json({
           error: tokens.error_description || tokens.error || "Token exchange failed",
         });
@@ -7745,7 +7719,6 @@ Join via Google Meet link above.
       }
 
       // Verify Stripe signature here (implementation depends on Stripe SDK)
-      console.log("📧 Stripe webhook received:", req.body?.type);
       markWebhookProcessed(req.webhookKey);
       res.status(200).json({ received: true });
     } catch (error) {
@@ -7762,7 +7735,6 @@ Join via Google Meet link above.
         return res.status(400).json({ error: "Invalid webhook signature" });
       }
 
-      console.log("📧 HubSpot webhook received:", req.body?.subscriptionType);
       markWebhookProcessed(req.webhookKey);
       res.status(200).json({ received: true });
     } catch (error) {
@@ -8185,17 +8157,13 @@ Join via Google Meet link above.
   app.post("/api/test-email", async (req, res) => {
     try {
       const { to, subject, message } = req.body;
-      console.log(`📧 Direct test email request: ${subject} to ${to}`);
       const success = await sendTestEmail(to, subject, message);
       if (success) {
-        console.log(`✅ Direct test email sent successfully to ${to}`);
         res.json({ success: true, message: "Test email sent successfully" });
       } else {
-        console.error(`❌ Direct test email failed to send to ${to}`);
         res.status(500).json({ success: false, error: "Failed to send test email" });
       }
     } catch (error) {
-      console.error("Test email error:", error);
       res.status(500).json({ success: false, error: "Test email failed" });
     }
   });
@@ -9510,8 +9478,6 @@ Join via Google Meet link above.
   app.post("/api/therapist/payment-setup", sanitizeInput, async (req, res) => {
     try {
       const { therapistId, setupMethod, paymentData } = req.body;
-
-      console.log("🔥 Payment setup request received:", { therapistId, setupMethod, paymentData });
 
       const isQuickSetup = setupMethod === "quick";
 
@@ -13156,7 +13122,6 @@ Join via Google Meet link above.
         });
 
         if (emailSent) {
-          console.log(`✅ Password reset email sent to therapist ${therapist.email}`);
           res.json({
             success: true,
             message: "Password reset email sent successfully",
@@ -16046,9 +16011,6 @@ Join via Google Meet link above.
       // Verify password
       const bcrypt = await import("bcrypt");
 
-      // Log for debugging
-      console.log("Login attempt:", { email, hasPassword: !!user.password });
-
       if (!user.password) {
         console.log("User has no password set, rejecting login");
         return res.status(401).json({ message: "Invalid email or password" });
@@ -16280,7 +16242,6 @@ Join via Google Meet link above.
     async (req, res) => {
       try {
         const { email } = req.body;
-        console.log(`🔐 Password reset requested for email: ${email}`);
 
         if (!email) {
           return res.status(400).json({ message: "Email is required" });
@@ -16289,7 +16250,6 @@ Join via Google Meet link above.
         // Check if user exists
         const user = await storage.getUserByEmail(email);
         if (!user) {
-          console.log(`⚠️ No user found for email: ${email}`);
           // Don't reveal if user exists or not for security
           return res.status(200).json({
             success: true,
@@ -16315,10 +16275,7 @@ Join via Google Meet link above.
           resetExpires,
         });
 
-        console.log(`💾 Reset token stored in database for user ${user.id}`);
-
         // Send password reset email
-        console.log(`📧 Attempting to send password reset email to: ${email}`);
         const emailSent = await sendPasswordResetEmail({
           to: email,
           firstName: user.firstName || "User",
@@ -17523,12 +17480,6 @@ Join via Google Meet link above.
       const therapistId =
         directTherapistId || metadata?.therapistId || appointmentData?.therapistId;
 
-      console.log("Payment intent request data:", {
-        securePrice: securePrice.amount,
-        metadata,
-        therapistId,
-      });
-
       // For general payment intents without therapist
       if (!therapistId) {
         console.log("Creating general payment intent without therapist split");
@@ -18036,8 +17987,6 @@ Join via Google Meet link above.
   // Client registration endpoint - CRITICAL FOR PRODUCTION
   app.post("/api/client-onboarding/submit", async (req, res) => {
     try {
-      console.log("Client registration endpoint hit with:", req.body);
-
       const { email, password, fullName, role } = req.body;
 
       // Validate required fields
@@ -22389,18 +22338,6 @@ This document contains confidential therapeutic content
           backdatedReason,
         } = req.body;
         const clientId = userId; // Use authenticated user ID as client
-
-        console.log("Request body data:", {
-          therapistId,
-          scheduledAt,
-          duration,
-          sessionType,
-          price,
-          notes,
-          paymentStatus,
-          backdated,
-          backdatedReason,
-        });
 
         // Past-date booking validation with feature flags and UTC normalization
         const now = new Date();
