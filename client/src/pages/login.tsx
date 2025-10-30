@@ -70,23 +70,7 @@ export default function LoginPage() {
         await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
         queryClient.setQueryData(["/api/auth/user"], result.user);
 
-        // Force immediate hard refresh to role-specific dashboard
-        const targetUrl = (() => {
-          switch (result.user.role) {
-            case "client":
-              return "/client-dashboard";
-            case "therapist":
-              return "/portal";
-            case "admin":
-              return "/admin-dashboard";
-            case "institution":
-              return "/institution-dashboard";
-            default:
-              return "/";
-          }
-        })();
-
-        window.location.replace(targetUrl);
+        setLocation("/");
       } else {
         toast({
           title: "Login Failed",

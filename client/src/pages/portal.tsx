@@ -40,7 +40,7 @@ import {
   Camera,
   Upload,
 } from "lucide-react";
-import { Link } from "wouter";
+import { Link, useLocation, useRoute } from "wouter";
 import ServiceRouter from "@/components/services/service-router";
 import { serviceRegistry } from "@/lib/serviceRegistry";
 import hiveWellnessLogo from "@assets/Hive Wellness logo 1 (1)_1761429577346.png";
@@ -70,6 +70,28 @@ export default function Portal() {
     authIsAuthenticated && authUser
       ? serviceRegistry[(authUser as any)?.role as keyof typeof serviceRegistry] || []
       : [];
+
+  const [, setLocation] = useLocation();
+  const [, portalParams] = useRoute("/portal/:serviceId?");
+  const [, therapistParams] = useRoute("/therapist-dashboard/:serviceId?");
+  const [, rootServiceParams] = useRoute("/:serviceId");
+
+  // Sync selected service from route param
+  useEffect(() => {
+    const routeServiceId =
+      portalParams?.serviceId ||
+      (therapistParams ? therapistParams.serviceId || "therapist-dashboard" : null) ||
+      rootServiceParams?.serviceId ||
+      null;
+
+    if (routeServiceId && routeServiceId !== selectedService) {
+      setSelectedService(routeServiceId);
+    }
+    if (!routeServiceId && selectedService) {
+      // If route cleared, clear selection
+      setSelectedService(null);
+    }
+  }, [portalParams, therapistParams, rootServiceParams, selectedService]);
 
   // Handle URL routing for direct service access (both hash and query params)
   useEffect(() => {
@@ -297,13 +319,16 @@ export default function Portal() {
           selectedService={selectedService}
           onBack={() => {
             try {
-              setSelectedService(null);
+              setLocation("/");
             } catch (error) {
-              // Force page refresh as fallback
-              window.location.reload();
+              window.history.back();
             }
           }}
-          onNavigateToService={(serviceId) => setSelectedService(serviceId)}
+          onNavigateToService={(serviceId) =>
+            setLocation(
+              serviceId === "therapist-dashboard" ? "/therapist-dashboard" : `/portal/${serviceId}`
+            )
+          }
         />
       );
     }
@@ -431,7 +456,13 @@ export default function Portal() {
                           <Card
                             key={service.id}
                             className="group cursor-pointer hover:shadow-md transition-all duration-200 border-slate-200 hover:border-hive-purple/30 bg-white"
-                            onClick={() => setSelectedService(service.id)}
+                            onClick={() =>
+                              setLocation(
+                                service.id === "therapist-dashboard"
+                                  ? "/therapist-dashboard"
+                                  : `/${service.id}`
+                              )
+                            }
                           >
                             <CardContent className="p-6">
                               <div className="flex items-center space-x-3 mb-4">

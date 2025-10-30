@@ -1,12 +1,6 @@
 export const serviceRegistry = {
   client: [
     {
-      id: "client-dashboard",
-      name: "Dashboard",
-      icon: "Home",
-      description: "Your personal wellness overview",
-    },
-    {
       id: "client-profile",
       name: "Complete Profile",
       icon: "User",

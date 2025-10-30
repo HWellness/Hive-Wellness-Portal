@@ -539,7 +539,7 @@ export default function TherapistProfileCompletion({ user }: TherapistProfileCom
 
     // Auto-redirect after completion
     setTimeout(() => {
-      setLocation("/portal");
+      setLocation("/");
     }, 2000);
   };
 

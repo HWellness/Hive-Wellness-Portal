@@ -65,7 +65,7 @@ export default function TherapistLogin() {
   // Redirect if already authenticated as therapist
   useEffect(() => {
     if (isAuthenticated && (user as any)?.role === "therapist") {
-      setLocation("/portal");
+      setLocation("/");
     }
   }, [isAuthenticated, user, setLocation]);
 
@@ -125,8 +125,7 @@ export default function TherapistLogin() {
         description: "Welcome to your therapist dashboard.",
       });
 
-      // Immediate redirect - let React Query handle the state update
-      setLocation("/portal");
+      setLocation("/");
     } catch (error: any) {
       toast({
         title: "Login Failed",
@@ -199,8 +198,8 @@ export default function TherapistLogin() {
       setShowPasswordChangeModal(false);
       setPasswordChangeData(null);
 
-      // Redirect to portal
-      setLocation("/portal");
+      // Redirect to root - router will send by role
+      setLocation("/");
     } catch (error: any) {
       toast({
         title: "Password Change Failed",
