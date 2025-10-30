@@ -690,7 +690,6 @@ async function initializeDefaultEmailTemplates() {
     for (const template of existingTemplates) {
       if (!essentialTemplateIds.includes(template.id)) {
         await storage.deleteEmailTemplate(template.id);
-        console.log(`Removed excess email template: ${template.name}`);
       }
     }
 
@@ -807,12 +806,8 @@ async function initializeDefaultEmailTemplates() {
       const exists = remainingTemplates.some((existing) => existing.id === template.id);
       if (!exists) {
         await storage.createEmailTemplate(template);
-        console.log(`Created essential email template: ${template.name}`);
       }
     }
-
-    const finalCount = await storage.getEmailTemplates();
-    console.log(`Email templates initialized: ${finalCount.length}/10 essential templates`);
   } catch (error) {
     console.error("Error initializing email templates:", error);
   }
@@ -8887,8 +8882,6 @@ Join via Google Meet link above.
   // Auth middleware - Setup session and passport
   await setupAuth(app);
 
-  console.log("Authentication middleware setup completed");
-
   // Email authentication endpoints (AFTER setupAuth) - HANDLES ALL USERS GLOBALLY
   app.post("/api/auth/login", sanitizeInput, validateBody(loginSchema), async (req, res) => {
     const startTime = Date.now();
@@ -10145,7 +10138,6 @@ Join via Google Meet link above.
       try {
         const { default: openaiAnalyticsRouter } = await import("./routes/openai-analytics.js");
         app.use("/api/admin/openai", openaiAnalyticsRouter);
-        console.log("✅ OpenAI analytics routes mounted successfully");
       } catch (error) {
         console.error("⚠️  Failed to load OpenAI analytics routes:", error);
       }
@@ -25041,7 +25033,6 @@ Session starts at: ${new Date(introCall.preferredDate).toLocaleString("en-GB", {
       sessionCacheTimer = null;
     }
     sessionCache.clear();
-    console.log("Session cache cleanup completed");
   }
 
   // Initialize session cache management

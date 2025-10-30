@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { db, pool } from "../db";
+import { db } from "../db";
 
 // Database connection health monitoring
 export class DatabaseHealthMonitor {
@@ -18,7 +18,6 @@ export class DatabaseHealthMonitor {
   async checkConnection(): Promise<boolean> {
     try {
       // Enhanced health check with timeout and Railway-specific debugging
-      const startTime = Date.now();
 
       // Test basic connection
       await Promise.race([
@@ -27,9 +26,6 @@ export class DatabaseHealthMonitor {
           setTimeout(() => reject(new Error("Health check timeout")), 5000)
         ),
       ]);
-
-      const duration = Date.now() - startTime;
-      console.log(`✅ Database health check passed (${duration}ms)`);
 
       this.connectionStatus = "healthy";
       this.lastHealthCheck = Date.now();

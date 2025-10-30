@@ -190,11 +190,6 @@ export const securityHeaders = (req: Request, res: Response, next: NextFunction)
     req.headers.referer?.includes("staging2.hive-wellness.co.uk") ||
     req.headers.referer?.includes("hive-wellness.co.uk");
 
-  // Debug logging to see what's happening
-  console.log(
-    `🔐 Path: ${req.path}, RefererCheck: ${req.headers.referer?.includes("hive-wellness.co.uk")}, AllowIframe: ${allowIframeEmbedding}`
-  );
-
   if (isProduction) {
     // Production CSP - More restrictive
     csp = [
@@ -228,13 +223,6 @@ export const securityHeaders = (req: Request, res: Response, next: NextFunction)
     ];
   }
 
-  // Debug logging to see what's happening
-  if (allowIframeEmbedding) {
-    console.log(
-      `🔐 Iframe embedding allowed for path: ${req.path}, referer: ${req.headers.referer}`
-    );
-  }
-
   res.setHeader("Content-Security-Policy", csp.join("; "));
 
   // Additional security headers for HIPAA compliance
@@ -261,13 +249,6 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
       userAgent: req.get("User-Agent"),
       timestamp: new Date().toISOString(),
     };
-
-    // Log errors and slow requests
-    if (res.statusCode >= 400 || duration > 1000) {
-      console.error("Request log:", logData);
-    } else if (process.env.NODE_ENV === "development") {
-      console.log("Request log:", logData);
-    }
   });
 
   next();
