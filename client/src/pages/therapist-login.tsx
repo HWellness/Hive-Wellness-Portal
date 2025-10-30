@@ -69,24 +69,6 @@ export default function TherapistLogin() {
     }
   }, [isAuthenticated, user, setLocation]);
 
-  // Fast redirect without loading spinner for better performance
-  if (isAuthenticated && (user as any)?.role === "therapist") {
-    return null;
-  }
-
-  const handleLogout = async () => {
-    try {
-      await apiRequest("POST", "/api/auth/logout");
-      // Clear all authentication data
-      queryClient.clear();
-      window.location.href = "/";
-    } catch (error) {
-      // Force logout even if API fails
-      queryClient.clear();
-      window.location.href = "/";
-    }
-  };
-
   const handleLogin = async (e: FormEvent) => {
     e.preventDefault();
     setIsLoggingIn(true);
