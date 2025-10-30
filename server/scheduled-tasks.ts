@@ -532,20 +532,15 @@ export class ScheduledTasksService {
         });
       }
     });
-
-    console.log("⏰ Retention warning emails scheduled: Daily at 10:00 AM");
   }
 
   // Manual trigger for HubSpot import
   async triggerHubSpotImport(): Promise<any> {
-    console.log("🔄 Manual HubSpot import triggered...");
-
     try {
       const { HubSpotIntegrationService } = await import("./hubspot-integration-service.js");
       const hubspotService = new HubSpotIntegrationService(this.storage);
 
       const results = await hubspotService.importAllRealData();
-      console.log("✅ Manual HubSpot import completed:", results);
 
       return results;
     } catch (error) {

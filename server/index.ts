@@ -166,13 +166,10 @@ cleanupMemoryManagement = function () {
     cacheCleanupTimer = null;
   }
   performanceCache.clear();
-  console.log("Memory management cleanup completed");
 };
 
 // Enhanced shutdown handling with proper cleanup
 process.on("exit", () => {
-  const memUsage = process.memoryUsage();
-  console.log(`Server shutdown - Memory usage: ${Math.round(memUsage.heapUsed / 1024 / 1024)}MB`);
   cleanupMemoryManagement();
 });
 
@@ -221,7 +218,6 @@ app.use(express.urlencoded({ extended: false, limit: "10mb" }));
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
-  let capturedJsonResponse: Record<string, any> | undefined = undefined;
 
   // Add performance headers early
   res.set("X-Response-Time", `${Date.now() - start}ms`);
@@ -241,8 +237,6 @@ app.use((req, res, next) => {
 
   const originalResJson = res.json;
   res.json = function (bodyJson, ...args) {
-    capturedJsonResponse = bodyJson;
-
     // Cache successful responses
     if (req.method === "GET" && res.statusCode === 200 && !req.path.includes("auth")) {
       const cacheKey = `${req.method}:${req.path}:${JSON.stringify(req.query)}`;
@@ -263,11 +257,6 @@ app.use((req, res, next) => {
     if (path.startsWith("/api")) {
       // Use sanitized logger for all API requests (auto-sanitizes PII)
       logger.request(req, res, duration);
-
-      // Also log response body if present (will be sanitized)
-      if (capturedJsonResponse && Object.keys(capturedJsonResponse).length > 0) {
-        logger.debug("Response body", capturedJsonResponse);
-      }
     }
   });
 
@@ -292,8 +281,6 @@ app.get("/api/client/real-progress/:userId", async (req, res) => {
     if (!userId) {
       return res.status(400).json({ error: "User ID is required" });
     }
-
-    logger.info("Getting real progress data for user", { userId });
 
     // Return working progress data with realistic values for the demo user
     const progressData = {
