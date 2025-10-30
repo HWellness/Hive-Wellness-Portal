@@ -333,6 +333,14 @@ export default function Portal() {
       );
     }
 
+    const handleSignOut = async () => {
+      await apiRequest("POST", "/api/auth/logout").catch(() => {});
+      await queryClient.cancelQueries({ queryKey: ["/api/auth/user"] }).catch(() => {});
+      queryClient.removeQueries({ queryKey: ["/api/auth/user"] });
+      queryClient.setQueryData(["/api/auth/user"], null);
+      window.location.replace("/therapist-login");
+    };
+
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100">
         {/* Modern Header */}
@@ -363,49 +371,7 @@ export default function Portal() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={async () => {
-                    try {
-                      const response = await fetch("/api/auth/logout", { method: "POST" });
-                      const data = await response.json();
-
-                      // CRITICAL: Clear the authentication cache to prevent login state persistence
-                      queryClient.removeQueries({ queryKey: ["/api/auth/user"] });
-                      queryClient.clear(); // Clear all cached data for clean logout
-
-                      // Use the redirect path from backend based on user role
-                      if (data.success && data.redirect) {
-                        window.location.href = data.redirect;
-                      } else {
-                        // Fallback based on current user role
-                        const userRole = (authUser as any)?.role;
-                        if (userRole === "therapist") {
-                          window.location.href = "/therapist-login";
-                        } else if (userRole === "admin") {
-                          window.location.href = "/login";
-                        } else if (userRole === "institutional") {
-                          window.location.href = "/login";
-                        } else {
-                          window.location.href = "/login"; // Default to main login
-                        }
-                      }
-                    } catch (error) {
-                      // CRITICAL: Clear cache even on error to ensure clean logout
-                      queryClient.removeQueries({ queryKey: ["/api/auth/user"] });
-                      queryClient.clear();
-
-                      // Fallback on error - redirect based on current user role
-                      const userRole = (authUser as any)?.role;
-                      if (userRole === "therapist") {
-                        window.location.href = "/therapist-login";
-                      } else if (userRole === "admin") {
-                        window.location.href = "/login";
-                      } else if (userRole === "institutional") {
-                        window.location.href = "/login";
-                      } else {
-                        window.location.href = "/login"; // Default to main login
-                      }
-                    }
-                  }}
+                  onClick={handleSignOut}
                   className="border-slate-300 hover:border-hive-purple"
                   data-testid="button-sign-out"
                 >
