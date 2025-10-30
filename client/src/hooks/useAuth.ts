@@ -6,18 +6,24 @@ export function useAuth(): AuthState & { error: any } {
     data: user,
     isLoading,
     error,
-  } = useQuery<AuthUser>({
+  } = useQuery<AuthUser | null>({
     queryKey: ["/api/auth/user"],
-    retry: 0, // No retries for faster login page loading
-    refetchOnWindowFocus: false,
-    staleTime: 1000 * 60 * 5, // 5 minutes cache for better performance
-    gcTime: 1000 * 60 * 10, // 10 minutes cache
-    refetchInterval: false,
-    throwOnError: false,
-    // Faster timeout for login pages
-    meta: {
-      timeout: 3000, // 3 second timeout for quick response
+    queryFn: async () => {
+      const resp = await fetch("/api/auth/user", {
+        credentials: "include",
+        cache: "no-store",
+      });
+      if (resp.status === 401) return null;
+      if (!resp.ok) throw new Error("Failed to fetch auth user");
+      return (await resp.json()) as AuthUser;
     },
+    retry: 0,
+    refetchOnWindowFocus: false,
+    refetchOnMount: "always",
+    refetchInterval: false,
+    staleTime: 0,
+    gcTime: 1000 * 60 * 5,
+    throwOnError: false,
   });
 
   const isAuthenticated = !!user && !error;
