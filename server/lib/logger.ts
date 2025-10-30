@@ -323,20 +323,23 @@ export const logger = {
   },
 
   /**
-   * Request logging with automatic sanitization
+   * Request level logging for HTTP requests (auto-sanitizes PII)
    */
   request(req: any, res: any, duration: number): void {
-    const sanitizedLog = {
+    const requestData = {
       method: req.method,
-      url: sanitizeString(req.url || req.path),
-      status: res.statusCode,
+      url: req.path || req.url,
+      statusCode: res.statusCode,
       duration: `${duration}ms`,
-      ip: hashIdentifier(req.ip || req.socket?.remoteAddress || "unknown", "IP"),
-      userAgent: req.headers?.["user-agent"]?.substring(0, 50) || "unknown",
-      timestamp: new Date().toISOString(),
+      ip: req.ip || req.socket?.remoteAddress,
+      userAgent: req.get?.("User-Agent"),
     };
-
-    console.log("Request log:", sanitizedLog);
+    const formatted = formatLogMessage(
+      "info",
+      `HTTP ${req.method} ${req.path || req.url} ${res.statusCode}`,
+      requestData
+    );
+    console.log(formatted);
   },
 };
 

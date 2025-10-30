@@ -8,7 +8,6 @@ try {
   // Only set WebSocket constructor if it's available and needed
   if (typeof WebSocket === "undefined" && ws) {
     neonConfig.webSocketConstructor = ws;
-    console.log("✅ WebSocket constructor configured for Neon serverless");
   } else if (typeof WebSocket !== "undefined") {
     console.log("✅ Native WebSocket available, using built-in WebSocket");
   }
@@ -23,9 +22,6 @@ if (!process.env.DATABASE_URL) {
   throw new Error("DATABASE_URL must be set. Did you forget to provision a database?");
 }
 
-console.log("🔗 Initializing database connection...");
-console.log("📍 Environment: Railway deployment detected");
-
 // Railway-specific database configuration with comprehensive fallback
 let pool: Pool;
 let db: any;
@@ -34,13 +30,10 @@ let db: any;
 const isRailway = process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_PROJECT_ID;
 
 if (isRailway) {
-  console.log("🚂 Railway environment detected - using Railway-optimized configuration");
-
   try {
     // Railway-specific Neon configuration - completely disable serverless WebSocket
     neonConfig.webSocketConstructor = undefined;
     neonConfig.poolQueryViaFetch = true; // Force HTTP-based queries instead of WebSocket
-    console.log("🔄 Railway mode: WebSocket disabled, HTTP queries enabled");
 
     pool = new Pool({
       connectionString: process.env.DATABASE_URL,
@@ -58,16 +51,13 @@ if (isRailway) {
     });
 
     db = drizzle({ client: pool, schema });
-    console.log("✅ Railway database connection initialized with HTTP queries");
 
     // Test query asynchronously to verify Railway compatibility (non-blocking)
     setTimeout(async () => {
       try {
         await db.execute("SELECT 1 as test");
-        console.log("✅ Railway database query test successful");
       } catch (queryError) {
         console.error("⚠️ Railway database query test failed:", queryError);
-        console.log("🔄 Attempting Railway compatibility mode...");
 
         try {
           // Fallback: Even more aggressive Railway settings
