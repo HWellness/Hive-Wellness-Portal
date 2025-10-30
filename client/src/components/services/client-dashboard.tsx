@@ -41,6 +41,7 @@ import type { User } from "@shared/schema";
 import { serviceRegistry } from "@/lib/serviceRegistry";
 import ServiceRouter from "@/components/services/service-router";
 import TherapistInfoCard from "@/components/client/therapist-info-card";
+import { useLocation, useRoute } from "wouter";
 
 interface ClientDashboardData {
   nextAppointment?: {
@@ -92,13 +93,23 @@ interface ClientDashboardData {
 interface ClientDashboardProps {
   user: User;
   onNavigateToService?: (serviceId: string) => void;
+  initialServiceId?: string | null;
 }
 
-export default function ClientDashboard({ user, onNavigateToService }: ClientDashboardProps) {
+export default function ClientDashboard({
+  user,
+  onNavigateToService,
+  initialServiceId,
+}: ClientDashboardProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
+  const [, rootParams] = useRoute("/:serviceId");
+  const [, params] = useRoute("/client-dashboard/:serviceId?");
   const [isWellnessDialogOpen, setIsWellnessDialogOpen] = useState(false);
-  const [selectedService, setSelectedService] = useState<string | null>(null);
+
+  const serviceIdFromUrl = rootParams?.serviceId || params?.serviceId || null;
+  const selectedService = serviceIdFromUrl || initialServiceId;
   const [moodScore, setMoodScore] = useState([7.5]);
   const [sleepQuality, setSleepQuality] = useState([6.8]);
   const [stressLevel, setStressLevel] = useState([4.2]);
@@ -291,7 +302,7 @@ export default function ClientDashboard({ user, onNavigateToService }: ClientDas
     if (onNavigateToService) {
       onNavigateToService(serviceId);
     } else {
-      setSelectedService(serviceId);
+      setLocation(`/${serviceId}`);
     }
   };
 
@@ -301,7 +312,7 @@ export default function ClientDashboard({ user, onNavigateToService }: ClientDas
       <ServiceRouter
         user={user}
         selectedService={selectedService}
-        onBack={() => setSelectedService(null)}
+        onBack={() => setLocation("/")}
         onNavigateToService={handleServiceNavigation}
       />
     );
@@ -635,7 +646,7 @@ export default function ClientDashboard({ user, onNavigateToService }: ClientDas
                       </p>
                       <Button
                         className="mt-4 bg-hive-purple text-white hover:bg-hive-purple/90"
-                        onClick={() => setSelectedService("scheduling")}
+                        onClick={() => handleServiceNavigation("scheduling")}
                       >
                         Book Session with {data.assignedTherapist.firstName}{" "}
                         {data.assignedTherapist.lastName}

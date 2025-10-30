@@ -459,9 +459,8 @@ export default function ClientProfileCompletion({
         queryClient.invalidateQueries({ queryKey: ["/api/client/profile"] });
         queryClient.invalidateQueries({ queryKey: ["/api/client/completion-status"] });
 
-        // Redirect to client dashboard after 2 seconds
         setTimeout(() => {
-          window.location.replace("/client-dashboard");
+          window.location.replace("/");
         }, 2000);
       } else {
         const fieldsList =
@@ -629,8 +628,8 @@ export default function ClientProfileCompletion({
           <Button
             variant="ghost"
             onClick={() => {
-              // Fast navigation - go directly to dashboard root without reload
-              window.location.href = "/client-dashboard";
+              // Fast navigation - go directly to dashboard root
+              window.location.href = "/";
             }}
             className="flex items-center gap-2 text-white hover:bg-white/20 hover:text-white"
           >

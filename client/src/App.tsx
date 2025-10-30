@@ -83,9 +83,19 @@ const MFAVerifyPage = lazy(() => import("@/pages/mfa-verify"));
 // Loading spinner component
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
+function RoleRedirect() {
+  const { isAuthenticated, user } = useAuth();
+  if (!isAuthenticated) return <SimplePortal />;
+  const userRole = user?.role;
+  if (userRole === "client") return <ClientDashboard />;
+  if (userRole === "therapist") return <Portal />;
+  if (userRole === "admin") return <AdminDashboard />;
+  if (userRole === "institution") return <InstitutionDashboard />;
+  return <Home />;
+}
+
 function Router() {
   const { isAuthenticated, isLoading, user } = useAuth();
-  const [location] = useLocation();
   const { showBanner, isFirstTime, handleClose, markConsentAsGiven } = useConsentBanner();
 
   // Prefetch critical routes based on user role for faster navigation
@@ -168,23 +178,8 @@ function Router() {
             </>
           ) : (
             <>
-              {/* Force redirect to role-specific dashboard based on user role */}
-              <Route path="/">
-                {() => {
-                  const userRole = user?.role;
-                  if (userRole === "client") {
-                    return <ClientDashboard />;
-                  } else if (userRole === "therapist") {
-                    return <Portal />;
-                  } else if (userRole === "admin") {
-                    return <AdminDashboard />;
-                  } else if (userRole === "institution") {
-                    return <InstitutionDashboard />;
-                  } else {
-                    return <Home />;
-                  }
-                }}
-              </Route>
+              {/* Canonicalize root: redirect by role to avoid duplicate routes */}
+              <Route path="/" component={RoleRedirect} />
 
               {/* Generic dashboard route - redirect to role-specific dashboard */}
               <Route path="/dashboard">
@@ -205,14 +200,14 @@ function Router() {
               </Route>
 
               {/* Specific role dashboard routes - protected */}
-              <Route path="/client-dashboard">
+              <Route path="/client-dashboard/:serviceId?">
                 {() => (
                   <ProtectedRoute>
                     <ClientDashboard />
                   </ProtectedRoute>
                 )}
               </Route>
-              <Route path="/therapist-dashboard">
+              <Route path="/therapist-dashboard/:serviceId?">
                 {() => (
                   <ProtectedRoute fallbackPath="/therapist-login">
                     <Portal />
@@ -227,13 +222,14 @@ function Router() {
                 )}
               </Route>
               <Route path="/therapist-login" component={TherapistLogin} />
-              <Route path="/portal">
+              <Route path="/portal/:serviceId?">
                 {() => (
-                  <ProtectedRoute>
+                  <ProtectedRoute fallbackPath="/therapist-login">
                     <Portal />
                   </ProtectedRoute>
                 )}
               </Route>
+
               <Route path="/admin">
                 {() => (
                   <ProtectedRoute>
@@ -268,7 +264,11 @@ function Router() {
                 component={TherapistPasswordManagement}
               />
               <Route path="/video-sessions">
-                {() => <VideoSessionsProductionPage user={user as any} />}
+                {() => (
+                  <ProtectedRoute>
+                    {user?.role === "therapist" ? <Portal /> : <ClientDashboard />}
+                  </ProtectedRoute>
+                )}
               </Route>
               <Route path="/admin-services" component={AdminDashboard} />
               <Route
@@ -331,6 +331,25 @@ function Router() {
               <Route path="/refund-policy" component={RefundPolicyPage} />
             </>
           )}
+          {/* Root-level service routes (role-aware), placed last to avoid catching public pages */}
+          <Route path="/:serviceId">
+            {() => (
+              <ProtectedRoute fallbackPath="/login">
+                {user?.role === "therapist" ? (
+                  <Portal />
+                ) : user?.role === "client" ? (
+                  <ClientDashboard />
+                ) : user?.role === "admin" ? (
+                  <AdminDashboard />
+                ) : user?.role === "institution" ? (
+                  <InstitutionDashboard />
+                ) : (
+                  <Home />
+                )}
+              </ProtectedRoute>
+            )}
+          </Route>
+
           <Route component={NotFound} />
         </Switch>
       </Suspense>

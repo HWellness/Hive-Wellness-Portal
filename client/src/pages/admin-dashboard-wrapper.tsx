@@ -1,7 +1,7 @@
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Link } from "wouter";
+import { Link, useLocation, useRoute } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 import { serviceRegistry } from "@/lib/serviceRegistry";
@@ -34,6 +34,9 @@ export default function AdminDashboardWrapper() {
   const { user, isLoading } = useAuth();
   const { toast } = useToast();
   const [selectedService, setSelectedService] = useState<string | null>(null);
+  const [, setLocation] = useLocation();
+  const [, rootParams] = useRoute("/:serviceId");
+  const [, adminParams] = useRoute("/admin-dashboard/:serviceId?");
 
   // Fetch admin stats
   const { data: statsData = {} } = useQuery({
@@ -41,14 +44,15 @@ export default function AdminDashboardWrapper() {
     staleTime: 0,
   });
 
-  // Check URL parameters for service routing
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const serviceParam = urlParams.get("service");
-    if (serviceParam) {
-      setSelectedService(serviceParam);
+    const serviceId = rootParams?.serviceId || adminParams?.serviceId || null;
+    if (serviceId && serviceId !== selectedService) {
+      setSelectedService(serviceId);
     }
-  }, []);
+    if (!serviceId && selectedService) {
+      setSelectedService(null);
+    }
+  }, [rootParams, adminParams, selectedService]);
 
   const handleLogout = async () => {
     try {
@@ -73,7 +77,7 @@ export default function AdminDashboardWrapper() {
   };
 
   const handleServiceNavigation = (serviceId: string) => {
-    setSelectedService(serviceId);
+    setLocation(`/${serviceId}`);
   };
 
   // If a service is selected, render it instead of the dashboard
@@ -82,7 +86,7 @@ export default function AdminDashboardWrapper() {
       <ServiceRouter
         user={user as any}
         selectedService={selectedService}
-        onBack={() => setSelectedService(null)}
+        onBack={() => setLocation("/")}
         onNavigateToService={handleServiceNavigation}
       />
     );

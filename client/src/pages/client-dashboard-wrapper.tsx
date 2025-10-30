@@ -1,10 +1,13 @@
 import { useAuth } from "@/hooks/useAuth";
 import ClientDashboard from "@/components/services/client-dashboard";
 import { Button } from "@/components/ui/button";
-import { Link } from "wouter";
+import { Link, useRoute } from "wouter";
 
 export default function ClientDashboardWrapper() {
   const { user, isLoading } = useAuth();
+  const [, params] = useRoute("/client-dashboard/:serviceId?");
+
+  const serviceId = params?.serviceId || null;
 
   if (isLoading) {
     return (
@@ -33,5 +36,5 @@ export default function ClientDashboardWrapper() {
     );
   }
 
-  return <ClientDashboard user={user} />;
+  return <ClientDashboard user={user} initialServiceId={serviceId} />;
 }
