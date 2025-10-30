@@ -43,10 +43,8 @@ export default function Settings() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   const handleBackToPortal = () => {
-    // Navigate to portal and ensure we show the main dashboard (not a service)
-    setLocation("/portal");
-    // Clear any hash or query params that might select a service
-    window.history.replaceState(null, "", "/portal");
+    setLocation("/");
+    window.history.replaceState(null, "", "/");
   };
 
   const handleLogout = async () => {
