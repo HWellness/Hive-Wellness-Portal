@@ -108,7 +108,8 @@ export const queryClient = new QueryClient({
       queryFn: getQueryFn({ on401: "returnNull" }),
       refetchInterval: false,
       refetchOnWindowFocus: false,
-      staleTime: 1000 * 60 * 5, // 5 minutes
+      refetchOnMount: true, // Only refetch if data is stale
+      staleTime: 1000 * 60 * 2, // 2 minutes - data is fresh for 2 minutes
       gcTime: 1000 * 60 * 10, // 10 minutes cache time
       retry: false,
       networkMode: "online",
