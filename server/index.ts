@@ -200,14 +200,24 @@ app.use((req, res, next) => {
 
   // Get allowed origins from environment or use defaults
   const allowedOrigins = process.env.CORS_ALLOWED_ORIGINS
-    ? process.env.CORS_ALLOWED_ORIGINS.split(",").map((o) => o.trim())
+    ? process.env.CORS_ALLOWED_ORIGINS.split(",")
+        .map((o) => o.trim())
+        .filter((o) => o.length > 0)
     : [
         "https://portal.hive-wellness.co.uk",
         "https://www.hive-wellness.co.uk",
         "https://hive-wellness.co.uk",
+        "https://api.hive-wellness.co.uk",
         "http://localhost:3000",
         "http://localhost:5000",
       ];
+
+  // Log for debugging CORS issues
+  if (origin && process.env.NODE_ENV !== "production") {
+    console.log(
+      `CORS: origin="${origin}", allowed=${allowedOrigins.includes(origin)}, allowedOrigins=[${allowedOrigins.join(", ")}]`
+    );
+  }
 
   // If origin is in allowed list, allow it
   if (origin && allowedOrigins.includes(origin)) {
@@ -219,6 +229,11 @@ app.use((req, res, next) => {
       "Content-Type, Authorization, X-Requested-With, Accept, Origin"
     );
     res.setHeader("Access-Control-Max-Age", "86400"); // 24 hours
+  } else if (origin) {
+    // Log when origin is rejected for debugging
+    if (process.env.NODE_ENV !== "production") {
+      console.warn(`CORS: Origin "${origin}" not in allowed list`);
+    }
   }
 
   // Handle preflight requests
