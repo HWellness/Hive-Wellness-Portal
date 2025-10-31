@@ -1,6 +1,6 @@
 import sgMail from "@sendgrid/mail";
 import { db } from "../db.js";
-import { notifications, sendgridWebhooks, emailTemplates } from "../../shared/schema.js";
+import { notifications, sendgridWebhooks, emailTemplates } from "@shared/schema";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 

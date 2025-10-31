@@ -15,7 +15,7 @@ import { google } from "googleapis";
 import { nanoid } from "nanoid";
 import { storage } from "../storage";
 import { db } from "../db";
-import { therapistCalendars, appointments, users, therapistProfiles } from "../../shared/schema";
+import { therapistCalendars, appointments, users, therapistProfiles } from "@shared/schema";
 import { eq, and, gte, lte, or } from "drizzle-orm";
 
 // ============================================================================

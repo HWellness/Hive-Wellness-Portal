@@ -1,7 +1,7 @@
 import { notificationService } from "./services/notification-service.js";
 import { twilioService } from "./services/twilio-service.js";
 import { db } from "./db.js";
-import { appointments, users, therapistOnboardingProgress } from "../shared/schema.js";
+import { appointments, users, therapistOnboardingProgress } from "@shared/schema";
 import { eq } from "drizzle-orm";
 import { format } from "date-fns";
 

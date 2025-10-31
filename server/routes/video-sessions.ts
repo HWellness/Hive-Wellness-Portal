@@ -133,7 +133,7 @@ import { SessionPaymentService, SessionCompletionData } from "../session-payment
 import { nanoid } from "nanoid";
 import { db } from "../db";
 import { eq } from "drizzle-orm";
-import { appointments, users, therapistProfiles, introductionCalls } from "../../shared/schema";
+import { appointments, users, therapistProfiles, introductionCalls } from "@shared/schema";
 import { createPaymentWithRevenueSplit, PaymentSplitOptions } from "../stripe-revenue-split";
 import { storage } from "../storage";
 

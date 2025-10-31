@@ -1,6 +1,6 @@
 import { db } from "./db";
 import { eq, and, sql } from "drizzle-orm";
-import { appointments, users, therapistProfiles, payments } from "../shared/schema";
+import { appointments, users, therapistProfiles, payments } from "@shared/schema";
 import { VideoSessionService, VideoSessionData } from "./video-session-service";
 import { createPaymentWithRevenueSplit, checkTherapistAccountStatus } from "./stripe-revenue-split";
 import { createSessionPaymentWithHold, releaseSessionPayment } from "./stripe-payment-holds";

@@ -5,7 +5,7 @@ import {
   type InsertUserConsent,
   type InsertConsentAuditLog,
   type UserConsent,
-} from "../../shared/schema.js";
+} from "@shared/schema";
 import { eq, and, desc } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { logger } from "../lib/logger.js";

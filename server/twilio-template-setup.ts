@@ -1,5 +1,5 @@
 import { db } from "./db.js";
-import { notificationTemplates } from "../shared/schema.js";
+import { notificationTemplates } from "@shared/schema";
 import { nanoid } from "nanoid";
 
 /**

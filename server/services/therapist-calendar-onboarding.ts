@@ -13,7 +13,7 @@ import { nanoid } from "nanoid";
 import { CalendarService, CalendarServiceError, CalendarNotFoundError } from "./calendar-service";
 import { emailService } from "./email-service";
 import type { IStorage } from "../storage";
-import type { TherapistProfile, User } from "../../shared/schema";
+import type { TherapistProfile, User } from "@shared/schema";
 
 export interface CalendarSetupResult {
   success: boolean;

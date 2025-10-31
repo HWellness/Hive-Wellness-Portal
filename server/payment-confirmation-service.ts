@@ -9,7 +9,7 @@ import { nanoid } from "nanoid";
 import { storage } from "./storage";
 import { db } from "./db";
 import { eq, and } from "drizzle-orm";
-import { appointments, payments } from "../shared/schema";
+import { appointments, payments } from "@shared/schema";
 // ELEMENT #5: Import TherapistPayoutService for automated payout triggering
 import { triggerTherapistPayoutOnSessionCompletion } from "./therapist-payout-service";
 

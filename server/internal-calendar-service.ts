@@ -6,11 +6,7 @@
 
 import { db } from "./db";
 import { eq, and, gte, lte, between } from "drizzle-orm";
-import {
-  adminCalendarBlocks,
-  introductionCalls,
-  adminAvailabilitySettings,
-} from "../shared/schema";
+import { adminCalendarBlocks, introductionCalls, adminAvailabilitySettings } from "@shared/schema";
 import { nanoid } from "nanoid";
 import {
   toUtcFromUk,

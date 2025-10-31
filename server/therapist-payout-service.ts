@@ -17,7 +17,7 @@ import { nanoid } from "nanoid";
 import { storage } from "./storage";
 import { db } from "./db";
 import { eq, and, sql } from "drizzle-orm";
-import { payments, users, therapistProfiles, appointments } from "../shared/schema";
+import { payments, users, therapistProfiles, appointments } from "@shared/schema";
 import {
   stripe,
   processTherapistPayout,
