@@ -65,7 +65,7 @@ export class GoogleMeetService {
       // Fallback to OAuth with enhanced error handling
       const redirectUri =
         process.env.NODE_ENV === "development"
-          ? `${process.env.REPL_URL || "http://localhost:5000"}/api/admin/google-auth-callback`
+          ? `${process.env.CLIENT_URL || process.env.BASE_URL || "http://localhost:5000"}/api/admin/google-auth-callback`
           : "https://api.hive-wellness.co.uk/api/admin/google-auth-callback";
 
       this.auth = new google.auth.OAuth2(

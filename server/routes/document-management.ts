@@ -1,6 +1,6 @@
 import express from "express";
 import { ObjectStorageService } from "../objectStorage";
-import { isAuthenticated } from "../replitAuth";
+import { isAuthenticated } from "../auth";
 
 const router = express.Router();
 

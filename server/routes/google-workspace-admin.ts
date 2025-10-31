@@ -2,7 +2,7 @@ import express from "express";
 import { googleWorkspaceAdminService } from "../google-workspace-admin-service";
 import { storage } from "../storage";
 import { nanoid } from "nanoid";
-import { isAuthenticated } from "../replitAuth";
+import { isAuthenticated } from "../auth";
 import { z } from "zod";
 
 const router = express.Router();

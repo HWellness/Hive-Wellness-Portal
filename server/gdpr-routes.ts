@@ -48,7 +48,7 @@ export function registerGDPRRoutes(
             <p>Your personal data export has been prepared and is ready for download.</p>
             <p>You can download your data using the button below:</p>
             <div style="text-align: center; margin: 30px 0;">
-              <a href="${process.env.VITE_REPLIT_DEV_DOMAIN || "https://your-domain.com"}/api/user/download-export/${requestId}" 
+              <a href="${process.env.CLIENT_URL || process.env.BASE_URL || "https://hive-wellness.co.uk"}/api/user/download-export/${requestId}" 
                  style="background-color: #9306B1; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">
                 Download My Data
               </a>
@@ -157,7 +157,7 @@ export function registerGDPRRoutes(
       // Send confirmation email
       try {
         const gmail = await ensureGmailService();
-        const cancellationLink = `${process.env.VITE_REPLIT_DEV_DOMAIN || "https://your-domain.com"}/cancel-deletion/${requestId}/${cancellationToken}`;
+        const cancellationLink = `${process.env.CLIENT_URL || process.env.BASE_URL || "https://hive-wellness.co.uk"}/cancel-deletion/${requestId}/${cancellationToken}`;
 
         const emailBody = `
           <div style="font-family: 'Open Sans', Arial, sans-serif; max-width: 600px; margin: 0 auto;">

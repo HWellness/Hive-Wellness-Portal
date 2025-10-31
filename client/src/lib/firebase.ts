@@ -1,5 +1,5 @@
 // Firebase authentication has been removed from Hive Wellness
-// The platform now uses Replit Auth and demo authentication only
+// The platform now uses email/password authentication and demo authentication only
 // This file is kept for reference but no longer used
 
 export interface HiveUser {
@@ -16,13 +16,13 @@ export interface HiveUser {
 // Placeholder functions for backward compatibility
 export const signInWithGoogle = async (): Promise<any> => {
   throw new Error(
-    "Firebase authentication has been removed. Please use Replit Auth or demo accounts."
+    "Firebase authentication has been removed. Please use email/password authentication or demo accounts."
   );
 };
 
 export const signInWithEmail = async (email: string, password: string): Promise<any> => {
   throw new Error(
-    "Firebase authentication has been removed. Please use Replit Auth or demo accounts."
+    "Firebase authentication has been removed. Please use email/password authentication or demo accounts."
   );
 };
 
@@ -34,7 +34,7 @@ export const signUpWithEmail = async (
   role: "client" | "therapist" = "client"
 ): Promise<any> => {
   throw new Error(
-    "Firebase authentication has been removed. Please use Replit Auth or demo accounts."
+    "Firebase authentication has been removed. Please use email/password authentication or demo accounts."
   );
 };
 

@@ -588,7 +588,7 @@ export class GoogleWorkspaceCostCalculator {
       
       <p><strong>Action Required:</strong> Please review Google Workspace costs and consider optimization measures.</p>
       
-      <p><a href="${process.env.REPLIT_DEV_DOMAIN}/admin/cost-monitoring" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">View Cost Dashboard</a></p>
+      <p><a href="${process.env.CLIENT_URL || process.env.BASE_URL || "https://hive-wellness.co.uk"}/admin/cost-monitoring" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">View Cost Dashboard</a></p>
     `;
 
     for (const recipient of recipients) {

@@ -1,6 +1,6 @@
 import express from "express";
 import { storage } from "../storage";
-import { isAuthenticated } from "../replitAuth";
+import { isAuthenticated } from "../auth";
 import { z } from "zod";
 
 const router = express.Router();

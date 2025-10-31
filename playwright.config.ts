@@ -4,7 +4,7 @@ import { defineConfig } from "@playwright/test";
  * Playwright Configuration for Hive Wellness Platform
  *
  * This configuration runs API-level tests without browser automation
- * due to Replit environment limitations with graphical dependencies.
+ * due to environment limitations with graphical dependencies.
  */
 export default defineConfig({
   testDir: "./tests",
