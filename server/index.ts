@@ -194,6 +194,41 @@ initializeMemoryManagement();
 
 const app = express();
 
+// CORS middleware - must be before other middleware
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+
+  // Get allowed origins from environment or use defaults
+  const allowedOrigins = process.env.CORS_ALLOWED_ORIGINS
+    ? process.env.CORS_ALLOWED_ORIGINS.split(",").map((o) => o.trim())
+    : [
+        "https://portal.hive-wellness.co.uk",
+        "https://www.hive-wellness.co.uk",
+        "https://hive-wellness.co.uk",
+        "http://localhost:3000",
+        "http://localhost:5000",
+      ];
+
+  // If origin is in allowed list, allow it
+  if (origin && allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Access-Control-Allow-Credentials", "true");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
+    res.setHeader(
+      "Access-Control-Allow-Headers",
+      "Content-Type, Authorization, X-Requested-With, Accept, Origin"
+    );
+    res.setHeader("Access-Control-Max-Age", "86400"); // 24 hours
+  }
+
+  // Handle preflight requests
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204);
+  }
+
+  next();
+});
+
 // Enable compression for all responses with better settings
 app.use(
   compression({
