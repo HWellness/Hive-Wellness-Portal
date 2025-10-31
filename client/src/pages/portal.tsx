@@ -210,7 +210,7 @@ export default function Portal() {
     setIsLoggingIn(true);
 
     try {
-      // Redirect to Replit Auth
+      // Redirect to login
       window.location.href = "/api/login";
     } catch (error) {
       toast({

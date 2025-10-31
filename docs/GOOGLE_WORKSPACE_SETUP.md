@@ -5,7 +5,7 @@ This guide covers the setup of Google Admin SDK integration for automated Google
 
 ## Required Environment Variables
 
-Add these environment variables to your Replit secrets or `.env` file:
+Add these environment variables to your `.env` file or secrets management system:
 
 ```bash
 # Google Workspace Configuration
@@ -67,19 +67,19 @@ The service account needs these Admin SDK permissions:
 
 ### 1. Environment Check
 ```bash
-curl -X GET "https://your-app.replit.app/api/google-workspace/environment-check" \
+curl -X GET "https://api.hive-wellness.co.uk/api/google-workspace/environment-check" \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
 ### 2. Authentication Test
 ```bash
-curl -X GET "https://your-app.replit.app/api/google-workspace/test-auth" \
+curl -X GET "https://api.hive-wellness.co.uk/api/google-workspace/test-auth" \
   -H "Authorization: Bearer YOUR_TOKEN"
 ```
 
 ### 3. Create Test Account
 ```bash
-curl -X POST "https://your-app.replit.app/api/google-workspace/create-account" \
+curl -X POST "https://api.hive-wellness.co.uk/api/google-workspace/create-account" \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -d '{
@@ -121,7 +121,7 @@ workspace_account_notes TEXT
 ## Security Considerations
 
 ### Credential Security
-- Store Google service account key in Replit secrets
+- Store Google service account key in your environment variables or secrets management system
 - Use environment variables for configuration
 - Never log or expose service account credentials
 
@@ -171,7 +171,7 @@ node -e "console.log(JSON.stringify({
 }, null, 2))"
 
 # Test service account
-curl -X GET "https://your-app.replit.app/api/google-workspace/test-auth"
+curl -X GET "https://api.hive-wellness.co.uk/api/google-workspace/test-auth"
 ```
 
 ## Workflow Integration

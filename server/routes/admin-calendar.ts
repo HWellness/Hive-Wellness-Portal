@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { adminCalendarManager } from "../admin-calendar-management";
-import { isAuthenticated } from "../replitAuth";
+import { isAuthenticated } from "../auth";
 import { calendarService } from "../services/calendar-service";
 import { therapistCalendarOnboardingService } from "../services/therapist-calendar-onboarding";
 import { storage } from "../storage";

@@ -450,7 +450,7 @@ export class ScheduledTasksService {
                 <p>If you would like to keep your account active, simply log in to your Hive Wellness portal within the next 7 days:</p>
                 
                 <div style="text-align: center; margin: 30px 0;">
-                  <a href="${process.env.REPLIT_DEV_DOMAIN ? `https://${process.env.REPLIT_DEV_DOMAIN}` : "https://hive-wellness.co.uk"}" 
+                  <a href="${process.env.CLIENT_URL || process.env.BASE_URL || "https://hive-wellness.co.uk"}" 
                      style="background-color: #9306B1; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">
                     Log In to Your Account
                   </a>

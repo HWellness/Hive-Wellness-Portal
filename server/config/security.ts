@@ -18,7 +18,6 @@ export interface SecurityConfig {
     google: string[];
     dailyVideo: string[];
     openai: string[];
-    replit: string[];
     vite: string[];
   };
 }
@@ -42,20 +41,20 @@ export function getSecurityConfig(): SecurityConfig {
     ? ["http://localhost:5000", "http://localhost:3000", "http://127.0.0.1:5000"]
     : [];
 
-  // Replit domains (get actual domain from environment)
-  const replitDomains = [];
-  if (process.env.REPLIT_DEV_DOMAIN) {
-    replitDomains.push(`https://${process.env.REPLIT_DEV_DOMAIN}`);
+  // Additional domains from environment
+  const additionalDomains = [];
+  if (process.env.CLIENT_URL) {
+    additionalDomains.push(process.env.CLIENT_URL);
   }
-  if (process.env.REPL_SLUG) {
-    replitDomains.push(`https://${process.env.REPL_SLUG}.replit.app`);
+  if (process.env.BASE_URL) {
+    additionalDomains.push(process.env.BASE_URL);
   }
 
   const allowedFrameAncestors = [
     "'self'",
     ...productionDomains,
     ...customOrigins,
-    ...replitDomains,
+    ...additionalDomains,
     ...developmentDomains,
   ];
 
@@ -80,7 +79,6 @@ export function getSecurityConfig(): SecurityConfig {
       ],
       dailyVideo: ["https://*.daily.co", "https://daily.co"],
       openai: ["https://api.openai.com"],
-      replit: ["https://*.replit.dev", "https://*.replit.app"],
       vite: isDevelopment ? ["ws://localhost:*", "ws://127.0.0.1:*"] : [],
     },
   };
@@ -137,7 +135,6 @@ export function getAllowedConnectSources(): string[] {
     ...config.externalServices.google,
     ...config.externalServices.dailyVideo,
     ...config.externalServices.openai,
-    ...config.externalServices.replit,
     ...(isDevelopment ? config.externalServices.vite : []),
   ];
 }

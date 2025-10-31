@@ -1,6 +1,6 @@
 import { Express } from "express";
 import { emailEngine } from "./email-engine";
-import { isAuthenticated } from "./replitAuth";
+import { isAuthenticated } from "./auth";
 import { db } from "./db";
 import { emailQueue } from "@shared/schema";
 import { eq, desc } from "drizzle-orm";
@@ -141,8 +141,8 @@ export function registerEmailRoutes(app: Express) {
       }
 
       const { user } = authInfo;
-      // Check role from either demo user or Replit Auth user
-      const userRole = user.role || user.claims?.role;
+      // Check role from demo user or email auth user
+      const userRole = user.role;
       if (userRole !== "admin") {
         return res.status(403).json({ error: "Admin access required" });
       }

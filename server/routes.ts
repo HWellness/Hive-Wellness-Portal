@@ -8,7 +8,7 @@ import crypto from "crypto";
 import multer from "multer";
 import { storage } from "./storage";
 import { logger } from "./lib/logger";
-import { setupAuth, isAuthenticated } from "./replitAuth";
+import { setupAuth, isAuthenticated } from "./auth";
 import { productionDataService } from "./production-data-service";
 import { nanoid } from "nanoid";
 import {
@@ -450,16 +450,6 @@ function getUserFromRequest(req: any): { user: any; userId: string; role?: strin
   if ((req.session as any)?.user) {
     const user = (req.session as any).user;
     return { user, userId: user.id, role: user.role };
-  }
-
-  // Priority 4: Replit authenticated user (OAuth fallback)
-  if (
-    req.isAuthenticated &&
-    typeof req.isAuthenticated === "function" &&
-    req.isAuthenticated() &&
-    req.user?.claims?.sub
-  ) {
-    return { user: req.user, userId: req.user.claims.sub, role: req.user.role };
   }
 
   return null;
@@ -6192,7 +6182,7 @@ function submitHiveBooking(event) {
               <li>Copy the authorization code from the URL above</li>
               <li>Paste it into the form and click "Exchange for Refresh Token"</li>
               <li>Copy the refresh token from the result</li>
-              <li>Add it to Replit Secrets as <strong>GOOGLE_REFRESH_TOKEN</strong></li>
+              <li>Add it to your environment variables or secrets management system as <strong>GOOGLE_REFRESH_TOKEN</strong></li>
             </ol>
             <p><a href="/admin-google-integration">← Return to Google Integration Setup</a></p>
           </div>
@@ -6225,9 +6215,9 @@ function submitHiveBooking(event) {
                       <div class="code-box" style="margin: 15px 0;">\${result.refresh_token}</div>
                       <p><strong>Next steps:</strong></p>
                       <ol>
-                        <li>Copy the refresh token above</li>
-                        <li>Go to your Replit Secrets panel</li>
-                        <li>Add: <strong>GOOGLE_REFRESH_TOKEN</strong> = (paste token)</li>
+                      <li>Copy the refresh token above</li>
+                      <li>Add it to your environment variables or secrets management system</li>
+                      <li>Set: <strong>GOOGLE_REFRESH_TOKEN</strong> = (paste token)</li>
                         <li>Restart your application</li>
                       </ol>
                     </div>
@@ -7275,7 +7265,7 @@ Join via Google Meet link above.
           <h3>Refresh Token:</h3>
           <div class="token">${tokens.refresh_token || "Token stored automatically"}</div>
           
-          <p><strong>Next:</strong> Copy the refresh token above and add it as <code>GOOGLE_REFRESH_TOKEN</code> in your Replit secrets.</p>
+          <p><strong>Next:</strong> Copy the refresh token above and add it as <code>GOOGLE_REFRESH_TOKEN</code> in your environment variables or secrets management system.</p>
           
           <a href="/admin" class="button">Return to Admin Dashboard</a>
         </body>
@@ -8498,7 +8488,7 @@ Join via Google Meet link above.
           sessionTime: "2:00 PM GMT",
           sessionType: "Individual CBT Session",
           sessionFee: "£80.00",
-          sessionUrl: "https://hive-wellness-platform.replit.app/video-session/test-123",
+          sessionUrl: `${process.env.CLIENT_URL || process.env.BASE_URL || "https://hive-wellness.co.uk"}/video-session/test-123`,
         });
         results.push({
           type: "Session Booking Confirmation",
@@ -9859,8 +9849,8 @@ Join via Google Meet link above.
           sessionType: "Video Session",
           sessionRate: "£80.00",
           therapistEarnings: "£68.00",
-          portalUrl: "https://hive-wellness-platform.replit.app/portal",
-          sessionUrl: "https://hive-wellness-platform.replit.app/video-session/123",
+          portalUrl: `${process.env.CLIENT_URL || process.env.BASE_URL || "https://hive-wellness.co.uk"}/portal`,
+          sessionUrl: `${process.env.CLIENT_URL || process.env.BASE_URL || "https://hive-wellness.co.uk"}/video-session/123`,
         };
 
         // Replace template variables with sample data
@@ -9962,8 +9952,8 @@ Join via Google Meet link above.
           sessionType: "Video Session",
           sessionRate: "£80.00",
           therapistEarnings: "£68.00",
-          portalUrl: "https://hive-wellness-platform.replit.app/portal",
-          sessionUrl: "https://hive-wellness-platform.replit.app/video-session/test",
+          portalUrl: `${process.env.CLIENT_URL || process.env.BASE_URL || "https://hive-wellness.co.uk"}/portal`,
+          sessionUrl: `${process.env.CLIENT_URL || process.env.BASE_URL || "https://hive-wellness.co.uk"}/video-session/test`,
         };
 
         Object.keys(sampleData).forEach((key) => {
@@ -10028,9 +10018,7 @@ Join via Google Meet link above.
       userAgent.includes("axios") ||
       userAgent.includes("healthcheck") ||
       userAgent.includes("monitor") ||
-      (!userAgent.includes("Mozilla") &&
-        !userAgent.includes("WebKit") &&
-        !userAgent.includes("Replit"));
+      (!userAgent.includes("Mozilla") && !userAgent.includes("WebKit"));
 
     if (isDeploymentTool) {
       return res
@@ -16336,13 +16324,6 @@ Join via Google Meet link above.
           return res.json(freshUserData);
         }
         return res.json((req.session as any).demoUser);
-      }
-
-      // Check for Replit authentication (fallback)
-      if (req.isAuthenticated() && req.user?.claims?.sub) {
-        const userId = req.user.claims.sub;
-        const user = await storage.getUser(userId);
-        return res.json(user);
       }
 
       return res.status(401).json({ message: "Not authenticated" });
@@ -27578,7 +27559,6 @@ Session starts at: ${new Date(introCall.preferredDate).toLocaleString("en-GB", {
         businessAssociateAgreements: {
           stripeCompliant: true,
           sendgridCompliant: true,
-          replitCompliant: true,
           status: "compliant",
         },
         recentActivity: [
@@ -30182,17 +30162,6 @@ The Hive Wellness Team`,
         role: user.role,
         firstName: user.firstName,
         lastName: user.lastName,
-      };
-    }
-
-    // Check for Replit Auth user (OIDC) - req.user is set by passport after authentication
-    if (req.user?.claims?.sub) {
-      return {
-        id: req.user.claims.sub,
-        email: req.user.claims.email,
-        role: req.user.role, // This might be undefined, will need to fetch from DB
-        firstName: req.user.claims.first_name || req.user.claims.given_name,
-        lastName: req.user.claims.last_name || req.user.claims.family_name,
       };
     }
 

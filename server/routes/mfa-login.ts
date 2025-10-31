@@ -69,14 +69,8 @@ router.post("/verify-login", async (req: Request, res: Response) => {
       profileData: user.profileData,
     };
 
-    // Determine session type based on existing session data
-    // If session has replitAuthUserId, this was Replit OAuth, set session.user
-    // Otherwise, this was email/password, set session.emailAuthUser
-    if (session.replitAuthUserId) {
-      session.user = sessionUser;
-    } else {
-      session.emailAuthUser = sessionUser;
-    }
+    // Set session user for email/password authentication
+    session.emailAuthUser = sessionUser;
 
     // Clear the MFA requirement flags and set verification timestamp
     delete session.needsMfaVerification;

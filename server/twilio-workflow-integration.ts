@@ -62,9 +62,10 @@ export class TwilioWorkflowIntegration {
       }
 
       // Prepare template variables
-      const baseUrl = process.env.REPLIT_DEV_DOMAIN
-        ? `https://${process.env.REPLIT_DEV_DOMAIN}`
-        : "http://localhost:5000";
+      const baseUrl =
+        process.env.CLIENT_URL || process.env.BASE_URL
+          ? process.env.CLIENT_URL || process.env.BASE_URL
+          : "http://localhost:5000";
       const templateVariables = {
         client_name: `${client.firstName} ${client.lastName}`,
         therapist_name: `${therapist.firstName} ${therapist.lastName}`,
@@ -208,9 +209,10 @@ export class TwilioWorkflowIntegration {
       }
 
       // Prepare template variables
-      const baseUrl = process.env.REPLIT_DEV_DOMAIN
-        ? `https://${process.env.REPLIT_DEV_DOMAIN}`
-        : "http://localhost:5000";
+      const baseUrl =
+        process.env.CLIENT_URL || process.env.BASE_URL
+          ? process.env.CLIENT_URL || process.env.BASE_URL
+          : "http://localhost:5000";
       const templateVariables = {
         therapist_name: `${therapist.firstName} ${therapist.lastName}`,
         client_name: client ? `${client.firstName} ${client.lastName}` : "",

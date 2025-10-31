@@ -131,9 +131,10 @@ export class EmailService {
     const therapistSurnameInitial = therapistLastName.charAt(0).toUpperCase();
     const therapistDisplayName = `${therapistFirstName} ${therapistSurnameInitial}`;
     const therapistFullName = `${therapistFirstName} ${therapistLastName}`;
-    const baseUrl = process.env.REPLIT_DEV_DOMAIN
-      ? `https://${process.env.REPLIT_DEV_DOMAIN}`
-      : "http://localhost:5000";
+    const baseUrl =
+      process.env.CLIENT_URL || process.env.BASE_URL
+        ? process.env.CLIENT_URL || process.env.BASE_URL
+        : "http://localhost:5000";
     const clientTemplate = `
       <!DOCTYPE html>
       <html>
@@ -265,9 +266,10 @@ export class EmailService {
     therapistEmail: string,
     therapistName: string
   ): Promise<EmailResponse> {
-    const baseUrl = process.env.REPLIT_DEV_DOMAIN
-      ? `https://${process.env.REPLIT_DEV_DOMAIN}`
-      : "http://localhost:5000";
+    const baseUrl =
+      process.env.CLIENT_URL || process.env.BASE_URL
+        ? process.env.CLIENT_URL || process.env.BASE_URL
+        : "http://localhost:5000";
 
     const template = `
       <!DOCTYPE html>
