@@ -154,8 +154,8 @@ const SystemHealthChecker: React.FC<SystemHealthCheckerProps> = ({ user }) => {
       lastChecked: new Date().toISOString(),
     },
     {
-      id: "replit-auth",
-      name: "Replit Authentication",
+      id: "auth-system",
+      name: "Authentication System",
       category: "integrations",
       status: "healthy",
       responseTime: 85,

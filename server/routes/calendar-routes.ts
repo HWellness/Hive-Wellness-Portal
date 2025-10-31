@@ -9,7 +9,7 @@ import { calendarWebhookHandler } from "../services/calendar-webhook-handler";
 import { calendarChannelManager } from "../services/calendar-channel-manager";
 import { therapistCalendarOnboardingService } from "../services/therapist-calendar-onboarding";
 import { storage } from "../storage";
-import { isAuthenticated } from "../replitAuth";
+import { isAuthenticated } from "../auth";
 import { z } from "zod";
 
 const router = Router();

@@ -133,7 +133,7 @@ export async function sendClientWelcomeEmail(
                       <p>Our team of qualified therapists is here to provide professional support tailored to your needs.</p>
                   </div>
                   <div style="text-align: center;">
-                      <a href="https://hive-wellness-platform.replit.app/portal" class="cta-button">Access Your Portal</a>
+                      <a href="${process.env.CLIENT_URL || process.env.BASE_URL || "https://hive-wellness.co.uk"}/portal" class="cta-button">Access Your Portal</a>
                   </div>
               </div>
               <div class="footer">
@@ -280,7 +280,7 @@ export async function sendTherapistWelcomeEmail(
                       </ul>
                   </div>
                   <div style="text-align: center;">
-                      <a href="https://hive-wellness-platform.replit.app/portal" class="cta-button">Access Therapist Portal</a>
+                      <a href="${process.env.CLIENT_URL || process.env.BASE_URL || "https://hive-wellness.co.uk"}/portal" class="cta-button">Access Therapist Portal</a>
                   </div>
               </div>
               <div class="footer">

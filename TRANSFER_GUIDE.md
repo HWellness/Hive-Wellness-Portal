@@ -135,8 +135,8 @@ Add all environment variables from `.env` file:
 DATABASE_URL=postgresql://user:password@host/database?sslmode=require
 
 # Authentication
-REPL_ID=your-replit-id
-REPLIT_DOMAINS=api.hive-wellness.co.uk
+SESSION_SECRET=your-session-secret-here-generate-with-openssl
+CLIENT_URL=https://api.hive-wellness.co.uk
 
 # Email
 SENDGRID_API_KEY=SG.xxxxx

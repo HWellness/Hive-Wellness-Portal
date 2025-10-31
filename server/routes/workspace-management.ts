@@ -2,7 +2,7 @@
 // Provides complete lifecycle management for therapist workspace accounts
 
 import type { Express } from "express";
-import { isAuthenticated } from "../replitAuth";
+import { isAuthenticated } from "../auth";
 import { adminLimiter, ipSecurityCheck } from "../middleware/security";
 import { storage } from "../storage";
 import { GoogleWorkspaceAdminService } from "../google-workspace-admin-service";

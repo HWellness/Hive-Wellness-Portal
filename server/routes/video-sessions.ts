@@ -64,16 +64,6 @@ const isAuthenticated = (req: any, res: any, next: any) => {
     return next();
   }
 
-  // Check for Replit auth
-  if (
-    req.isAuthenticated &&
-    typeof req.isAuthenticated === "function" &&
-    req.isAuthenticated() &&
-    (req.user as any)?.claims?.sub
-  ) {
-    return next();
-  }
-
   // SECURITY: No unauthorized access to video sessions
   return res.status(401).json({ message: "Authentication required" });
 };
