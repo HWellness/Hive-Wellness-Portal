@@ -16,6 +16,25 @@ const getApiBaseUrl = () => {
 
 const API_BASE_URL = getApiBaseUrl();
 
+/**
+ * Helper to build full API URL from relative path
+ */
+export function getApiUrl(url: string): string {
+  return url.startsWith("http://") || url.startsWith("https://") ? url : `${API_BASE_URL}${url}`;
+}
+
+/**
+ * Wrapper around fetch that automatically handles API base URL
+ * Drop-in replacement for fetch() when making API calls
+ */
+export async function fetchApi(url: string, options?: RequestInit): Promise<Response> {
+  const fullUrl = getApiUrl(url);
+  return fetch(fullUrl, {
+    ...options,
+    credentials: options?.credentials || "include",
+  });
+}
+
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     const text = (await res.text()) || res.statusText;
@@ -40,10 +59,8 @@ export async function apiRequest(
     body = JSON.stringify(data);
   }
 
-  // Build full URL - if url already starts with http/https, use it as-is
-  // Otherwise prepend API_BASE_URL if it exists
-  const fullUrl =
-    url.startsWith("http://") || url.startsWith("https://") ? url : `${API_BASE_URL}${url}`;
+  // Build full URL using helper
+  const fullUrl = getApiUrl(url);
 
   const res = await fetch(fullUrl, {
     method,
@@ -85,10 +102,8 @@ export const getQueryFn: <T>(options: { on401: UnauthorizedBehavior }) => QueryF
       }
     }
 
-    // Build full URL - if url already starts with http/https, use it as-is
-    // Otherwise prepend API_BASE_URL if it exists
-    const fullUrl =
-      url.startsWith("http://") || url.startsWith("https://") ? url : `${API_BASE_URL}${url}`;
+    // Build full URL using helper
+    const fullUrl = getApiUrl(url);
 
     const res = await fetch(fullUrl, {
       credentials: "include",

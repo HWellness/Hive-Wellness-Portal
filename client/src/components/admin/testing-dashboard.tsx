@@ -27,6 +27,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { fetchApi } from "@/lib/queryClient";
 
 interface TestResult {
   id: string;
@@ -134,7 +135,7 @@ export function TestingDashboard() {
   // Run automated test mutation
   const runTestMutation = useMutation({
     mutationFn: async (testId: string) => {
-      const response = await fetch("/api/admin/testing/run-test", {
+      const response = await fetchApi("/api/admin/testing/run-test", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ testId }),
@@ -172,7 +173,7 @@ export function TestingDashboard() {
   // Clear test results mutation
   const clearResultsMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch("/api/admin/testing/clear-results", {
+      const response = await fetchApi("/api/admin/testing/clear-results", {
         method: "DELETE",
       });
 

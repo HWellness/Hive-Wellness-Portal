@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiRequest, queryClient, fetchApi } from "@/lib/queryClient";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 interface TimeSlot {
@@ -75,7 +75,7 @@ export function EnhancedAvailabilityManager({
   const { data: availabilityData, isLoading } = useQuery({
     queryKey: ["/api/therapist/availability", therapistId],
     queryFn: async () => {
-      const response = await fetch(`/api/therapist/availability/${therapistId}`);
+      const response = await fetchApi(`/api/therapist/availability/${therapistId}`);
       if (response.status === 404) {
         return null; // No existing schedule
       }

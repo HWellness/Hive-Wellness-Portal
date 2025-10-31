@@ -32,6 +32,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { fetchApi } from "@/lib/queryClient";
 
 interface FormResponse {
   id: string;
@@ -86,7 +87,7 @@ export function GoogleSheetsManager() {
   // Create new spreadsheet mutation
   const createSpreadsheetMutation = useMutation({
     mutationFn: async (title: string) => {
-      const response = await fetch("/api/admin/google-sheets/create", {
+      const response = await fetchApi("/api/admin/google-sheets/create", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ title }),
@@ -117,7 +118,7 @@ export function GoogleSheetsManager() {
       formType: string;
       spreadsheetId: string;
     }) => {
-      const response = await fetch("/api/admin/google-sheets/initialize", {
+      const response = await fetchApi("/api/admin/google-sheets/initialize", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ formType, spreadsheetId }),
@@ -157,7 +158,7 @@ export function GoogleSheetsManager() {
       identifier: string;
       status: string;
     }) => {
-      const response = await fetch("/api/admin/google-sheets/update-status", {
+      const response = await fetchApi("/api/admin/google-sheets/update-status", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ formType, identifier, status }),

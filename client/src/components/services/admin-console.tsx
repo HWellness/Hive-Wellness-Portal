@@ -1,3 +1,4 @@
+import { fetchApi } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -1526,12 +1527,11 @@ export default function AdminConsole({ user }: AdminConsoleProps) {
                     endDate: bulkExportType === "dateRange" ? exportEndDate : undefined,
                   };
 
-                  const response = await fetch("/api/admin/chatbot/conversations/bulk-export", {
+                  const response = await fetchApi("/api/admin/chatbot/conversations/bulk-export", {
                     method: "POST",
                     headers: {
                       "Content-Type": "application/json",
                     },
-                    credentials: "include",
                     body: JSON.stringify(exportData),
                   });
 

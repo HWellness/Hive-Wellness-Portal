@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { fetchApi } from "@/lib/queryClient";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -204,12 +205,11 @@ export default function ClientDashboard({
       notes?: string;
       therapeuticGoals?: Array<{ goal: string; progress: number; target: string }>;
     }) => {
-      const response = await fetch("/api/client/update-wellness", {
+      const response = await fetchApi("/api/client/update-wellness", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include",
         body: JSON.stringify(wellnessData),
       });
 
