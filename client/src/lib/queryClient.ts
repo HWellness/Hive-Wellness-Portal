@@ -1,5 +1,21 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
+// Get API base URL from environment or use relative path for dev proxy
+const getApiBaseUrl = () => {
+  // In production, use the environment variable if set
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  // In development, use empty string so requests go through vite proxy
+  if (import.meta.env.DEV) {
+    return "";
+  }
+  // Fallback: assume API is on same domain with /api prefix (for development)
+  return "";
+};
+
+const API_BASE_URL = getApiBaseUrl();
+
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     const text = (await res.text()) || res.statusText;
@@ -24,7 +40,12 @@ export async function apiRequest(
     body = JSON.stringify(data);
   }
 
-  const res = await fetch(url, {
+  // Build full URL - if url already starts with http/https, use it as-is
+  // Otherwise prepend API_BASE_URL if it exists
+  const fullUrl =
+    url.startsWith("http://") || url.startsWith("https://") ? url : `${API_BASE_URL}${url}`;
+
+  const res = await fetch(fullUrl, {
     method,
     headers,
     body,
@@ -64,7 +85,12 @@ export const getQueryFn: <T>(options: { on401: UnauthorizedBehavior }) => QueryF
       }
     }
 
-    const res = await fetch(url, {
+    // Build full URL - if url already starts with http/https, use it as-is
+    // Otherwise prepend API_BASE_URL if it exists
+    const fullUrl =
+      url.startsWith("http://") || url.startsWith("https://") ? url : `${API_BASE_URL}${url}`;
+
+    const res = await fetch(fullUrl, {
       credentials: "include",
     });
 
