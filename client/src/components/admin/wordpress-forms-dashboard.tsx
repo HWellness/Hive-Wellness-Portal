@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, fetchApi } from "@/lib/queryClient";
 import {
   Globe,
   FileText,
@@ -129,9 +129,8 @@ export default function WordPressFormsDashboard({
   // Export submissions mutation
   const exportMutation = useMutation({
     mutationFn: async (format: "csv" | "json") => {
-      const response = await fetch(`/api/admin/wordpress-forms/export?format=${format}`, {
+      const response = await fetchApi(`/api/admin/wordpress-forms/export?format=${format}`, {
         method: "GET",
-        credentials: "include",
       });
 
       if (!response.ok) {

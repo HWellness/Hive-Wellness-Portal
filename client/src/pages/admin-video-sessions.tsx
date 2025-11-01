@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { fetchApi } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -39,7 +40,7 @@ export default function AdminVideoSessions() {
   } = useQuery({
     queryKey: ["/api/admin/video-sessions"],
     queryFn: async () => {
-      const response = await fetch("/api/admin/video-sessions");
+      const response = await fetchApi("/api/admin/video-sessions");
       if (!response.ok) {
         throw new Error("Failed to fetch video sessions");
       }

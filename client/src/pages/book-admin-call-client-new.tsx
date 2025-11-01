@@ -1,4 +1,5 @@
 import { useState, FormEvent } from "react";
+import { fetchApi } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -49,7 +50,9 @@ export default function BookAdminCallClientNew() {
   const loadAvailability = async (date: Date) => {
     setIsLoadingAvailability(true);
     try {
-      const response = await fetch(`/api/available-time-slots?date=${format(date, "yyyy-MM-dd")}`);
+      const response = await fetchApi(
+        `/api/available-time-slots?date=${format(date, "yyyy-MM-dd")}`
+      );
       if (response.ok) {
         const data = await response.json();
         setAvailableSlots(data.availableSlots || []);
@@ -105,7 +108,7 @@ export default function BookAdminCallClientNew() {
 
     setIsSubmitting(true);
     try {
-      const response = await fetch("/api/introduction-calls/book-widget", {
+      const response = await fetchApi("/api/introduction-calls/book-widget", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

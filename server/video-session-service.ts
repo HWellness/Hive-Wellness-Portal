@@ -1,6 +1,6 @@
 import { db } from "./db";
 import { eq, and, gte, lte, or } from "drizzle-orm";
-import { introductionCalls, appointments, users } from "../shared/schema";
+import { introductionCalls, appointments, users } from "@shared/schema";
 import { dailyService } from "./daily-service";
 
 export interface VideoSessionData {

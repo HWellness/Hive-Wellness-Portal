@@ -5,7 +5,7 @@ import { calendarService } from "../services/calendar-service";
 import { therapistCalendarOnboardingService } from "../services/therapist-calendar-onboarding";
 import { storage } from "../storage";
 import { db } from "../db";
-import { therapistCalendars, appointments, users, therapistProfiles } from "../../shared/schema";
+import { therapistCalendars, appointments, users, therapistProfiles } from "@shared/schema";
 import { eq, and, gte, lte, desc, sql, count, isNotNull, inArray } from "drizzle-orm";
 import { z } from "zod";
 

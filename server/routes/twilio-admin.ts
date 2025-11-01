@@ -1,10 +1,6 @@
 import express from "express";
 import { db } from "../db.js";
-import {
-  notificationTemplates,
-  notifications,
-  userCommunicationPreferences,
-} from "../../shared/schema.js";
+import { notificationTemplates, notifications, userCommunicationPreferences } from "@shared/schema";
 import { eq, desc, and, count } from "drizzle-orm";
 import { twilioService } from "../services/twilio-service.js";
 import { twilioWorkflowIntegration } from "../twilio-workflow-integration.js";

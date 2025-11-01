@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Mail, Lock, Eye, EyeOff } from "lucide-react";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiRequest, queryClient, fetchApi } from "@/lib/queryClient";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -109,8 +109,7 @@ export default function LoginPage() {
             onClick={async () => {
               try {
                 // First, verify that user is actually logged out by checking session
-                const authResponse = await fetch("/api/auth/user", {
-                  credentials: "include",
+                const authResponse = await fetchApi("/api/auth/user", {
                   cache: "no-cache",
                 });
 
@@ -119,16 +118,14 @@ export default function LoginPage() {
                   await new Promise((resolve) => setTimeout(resolve, 500)); // Wait 500ms
 
                   // Check again
-                  const retryResponse = await fetch("/api/auth/user", {
-                    credentials: "include",
+                  const retryResponse = await fetchApi("/api/auth/user", {
                     cache: "no-cache",
                   });
 
                   if (retryResponse.ok) {
                     // Force a logout if session is still active
-                    await fetch("/api/auth/logout", {
+                    await fetchApi("/api/auth/logout", {
                       method: "POST",
-                      credentials: "include",
                     });
                     await new Promise((resolve) => setTimeout(resolve, 200)); // Wait for logout
                   }

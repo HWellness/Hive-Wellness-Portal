@@ -6,7 +6,7 @@
 import { storage } from "../storage";
 import { calendarService } from "./calendar-service";
 import { db } from "../db";
-import { therapistCalendars, appointments } from "../../shared/schema";
+import { therapistCalendars, appointments } from "@shared/schema";
 import { eq, and } from "drizzle-orm";
 import { nanoid } from "nanoid";
 

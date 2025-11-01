@@ -89,7 +89,7 @@
 
 @layer base {
   * {
-    @apply border-border;
+    border-color: var(--border);
   }
 
   /* Default body uses Open Sans as per brand guidelines */

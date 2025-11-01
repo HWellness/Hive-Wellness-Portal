@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { fetchApi } from "@/lib/queryClient";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -226,9 +227,8 @@ export default function AdminCalendarManagement() {
   // Individual calendar sync
   const syncCalendarMutation = useMutation({
     mutationFn: async (therapistId: string) => {
-      const response = await fetch(`/api/admin/calendar/therapist/${therapistId}/sync`, {
+      const response = await fetchApi(`/api/admin/calendar/therapist/${therapistId}/sync`, {
         method: "POST",
-        credentials: "include",
       });
       if (!response.ok) throw new Error("Failed to sync calendar");
       return response.json();
@@ -254,9 +254,8 @@ export default function AdminCalendarManagement() {
   // Reset calendar integration
   const resetCalendarMutation = useMutation({
     mutationFn: async (therapistId: string) => {
-      const response = await fetch(`/api/admin/calendar/therapist/${therapistId}/reset`, {
+      const response = await fetchApi(`/api/admin/calendar/therapist/${therapistId}/reset`, {
         method: "POST",
-        credentials: "include",
       });
       if (!response.ok) throw new Error("Failed to reset calendar");
       return response.json();
@@ -282,11 +281,10 @@ export default function AdminCalendarManagement() {
   // Bulk sync operation
   const bulkSyncMutation = useMutation({
     mutationFn: async (therapistIds: string[]) => {
-      const response = await fetch("/api/admin/calendar/bulk/sync", {
+      const response = await fetchApi("/api/admin/calendar/bulk/sync", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ therapistIds }),
-        credentials: "include",
       });
       if (!response.ok) throw new Error("Failed to perform bulk sync");
       return response.json();
@@ -313,11 +311,10 @@ export default function AdminCalendarManagement() {
   // Bulk health check operation
   const bulkHealthCheckMutation = useMutation({
     mutationFn: async (therapistIds: string[]) => {
-      const response = await fetch("/api/admin/calendar/bulk/health-check", {
+      const response = await fetchApi("/api/admin/calendar/bulk/health-check", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ therapistIds }),
-        credentials: "include",
       });
       if (!response.ok) throw new Error("Failed to perform bulk health check");
       return response.json();
@@ -343,11 +340,10 @@ export default function AdminCalendarManagement() {
   // Connection test mutation
   const testConnectionMutation = useMutation({
     mutationFn: async (therapistId: string) => {
-      const response = await fetch("/api/admin/calendar/diagnostics/test-connection", {
+      const response = await fetchApi("/api/admin/calendar/diagnostics/test-connection", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ therapistId }),
-        credentials: "include",
       });
       if (!response.ok) throw new Error("Failed to test connection");
       return response.json();

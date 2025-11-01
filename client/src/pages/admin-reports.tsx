@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { fetchApi } from "@/lib/queryClient";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -36,7 +37,9 @@ export default function AdminReports() {
   } = useQuery({
     queryKey: ["/api/admin/reports", timeframe, reportType],
     queryFn: async () => {
-      const response = await fetch(`/api/admin/reports?timeframe=${timeframe}&type=${reportType}`);
+      const response = await fetchApi(
+        `/api/admin/reports?timeframe=${timeframe}&type=${reportType}`
+      );
       if (!response.ok) {
         throw new Error("Failed to fetch report data");
       }

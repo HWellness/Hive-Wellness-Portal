@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { fetchApi } from "@/lib/queryClient";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -20,7 +21,7 @@ export function RefundPolicyComponent() {
   useEffect(() => {
     const fetchPolicy = async () => {
       try {
-        const response = await fetch("/api/refunds/policy");
+        const response = await fetchApi("/api/refunds/policy");
         if (response.ok) {
           const data = await response.json();
           setPolicyData(data);

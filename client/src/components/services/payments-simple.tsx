@@ -1,4 +1,5 @@
 import { useState, FormEvent } from "react";
+import { fetchApi } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -59,12 +60,11 @@ function StripePaymentMethodForm({
         });
       } else {
         // Save payment method to backend
-        const response = await fetch("/api/payment-methods", {
+        const response = await fetchApi("/api/payment-methods", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
-          credentials: "include",
           body: JSON.stringify({
             paymentMethodId: paymentMethod.id,
           }),

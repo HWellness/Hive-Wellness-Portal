@@ -5,7 +5,7 @@ import {
   getPrivacyWarningMessage,
   containsHealthInformation,
 } from "./privacy-filter";
-import { PRICING_INFO } from "../../shared/constants";
+import { PRICING_INFO } from "@shared/constants";
 import { logger } from "../lib/logger";
 import { openaiTracking } from "../openai-tracking-service";
 import { piiDetectionService } from "../pii-detection-service";

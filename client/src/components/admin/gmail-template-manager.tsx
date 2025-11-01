@@ -17,6 +17,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Mail, Plus, Edit, Trash2, Send, Copy, Save } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { fetchApi } from "@/lib/queryClient";
 
 interface EmailTemplate {
   id: string;
@@ -69,7 +70,7 @@ export function GmailTemplateManager() {
   // Create template mutation
   const createTemplateMutation = useMutation({
     mutationFn: async (templateData: Omit<EmailTemplate, "id" | "createdAt" | "updatedAt">) => {
-      const response = await fetch("/api/admin/gmail-templates", {
+      const response = await fetchApi("/api/admin/gmail-templates", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(templateData),
@@ -94,7 +95,7 @@ export function GmailTemplateManager() {
   // Update template mutation
   const updateTemplateMutation = useMutation({
     mutationFn: async ({ id, ...updates }: Partial<EmailTemplate> & { id: string }) => {
-      const response = await fetch(`/api/admin/gmail-templates/${id}`, {
+      const response = await fetchApi(`/api/admin/gmail-templates/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(updates),
@@ -117,7 +118,7 @@ export function GmailTemplateManager() {
   // Delete template mutation
   const deleteTemplateMutation = useMutation({
     mutationFn: async (id: string) => {
-      const response = await fetch(`/api/admin/gmail-templates/${id}`, {
+      const response = await fetchApi(`/api/admin/gmail-templates/${id}`, {
         method: "DELETE",
       });
 
@@ -145,7 +146,7 @@ export function GmailTemplateManager() {
       to: string;
       variables: Record<string, string>;
     }) => {
-      const response = await fetch("/api/admin/gmail-templates/send", {
+      const response = await fetchApi("/api/admin/gmail-templates/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ templateId, to, variables }),

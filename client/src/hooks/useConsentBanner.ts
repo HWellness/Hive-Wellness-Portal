@@ -30,8 +30,9 @@ export function useConsentBanner() {
     queryKey: ["/api/user/consent"],
     enabled: !authLoading, // Enable for ALL visitors, not just authenticated
     retry: false,
-    // Don't show stale data
-    staleTime: 0,
+    staleTime: 1000 * 60, // Consider data fresh for 1 minute
+    refetchOnMount: false, // Don't refetch on every mount
+    refetchOnWindowFocus: false,
   });
 
   useEffect(() => {
@@ -63,7 +64,9 @@ export function useConsentBanner() {
       setIsFirstTime(true);
       setShowBanner(true);
     }
-  }, [isAuthenticated, authLoading, consentLoading, consentStatus]);
+    // Use consentStatus.hasResponded instead of the whole object to avoid unnecessary re-runs
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isAuthenticated, authLoading, consentLoading, consentStatus?.hasResponded]);
 
   const handleClose = () => {
     // Only hide banner, don't mark as completed
