@@ -61,7 +61,9 @@ export default function BookAdminCallClient() {
   const loadAvailability = async (date: Date) => {
     setIsLoadingAvailability(true);
     try {
-      const response = await fetchApi(`/api/calendar/availability?date=${format(date, "yyyy-MM-dd")}`);
+      const response = await fetchApi(
+        `/api/calendar/availability?date=${format(date, "yyyy-MM-dd")}`
+      );
       if (response.ok) {
         const data = await response.json();
         setAvailableSlots(data.slots || []);
