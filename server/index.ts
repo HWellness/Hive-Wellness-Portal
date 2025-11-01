@@ -1,10 +1,17 @@
-import "dotenv/config";
+import dotenv from "dotenv";
+import path from "path";
+import { fileURLToPath } from "url";
+
+// Load .env from root directory (parent of server/)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const rootDir = path.resolve(__dirname, "..");
+dotenv.config({ path: path.resolve(rootDir, ".env") });
 
 import express, { type Request, Response, NextFunction } from "express";
 import compression from "compression";
-import path from "path";
 import { registerRoutes } from "./routes";
-import { setupVite, serveStatic, log } from "./vite";
+// Vite setup removed - client is now a separate service
 import { logger } from "./lib/logger";
 import { strictSecurityHeaders, allowWhitelistedFraming } from "./middleware/security-headers.js";
 
@@ -91,17 +98,27 @@ try {
   console.error("❌ CRITICAL: Failed to initiate GoogleCalendarService import:", error);
 }
 
-// Declare cleanup function first
-let cleanupMemoryManagement: () => void;
-
 // Enhanced memory management and performance optimisation
 const performanceCache = new Map();
 const MAX_CACHE_SIZE = 25; // Reduced cache size for better memory management
 const CACHE_TTL = 15000; // 15 seconds - shorter cache time for better memory turnover
 
 // Memory management timers
-let memoryCleanupTimer: NodeJS.Timeout | null = null;
-let cacheCleanupTimer: NodeJS.Timeout | null = null;
+let memoryCleanupTimer: ReturnType<typeof setInterval> | null = null;
+let cacheCleanupTimer: ReturnType<typeof setInterval> | null = null;
+
+// Cleanup function for graceful shutdown
+const cleanupMemoryManagement = function () {
+  if (memoryCleanupTimer) {
+    clearInterval(memoryCleanupTimer);
+    memoryCleanupTimer = null;
+  }
+  if (cacheCleanupTimer) {
+    clearInterval(cacheCleanupTimer);
+    cacheCleanupTimer = null;
+  }
+  performanceCache.clear();
+};
 
 // Optimized memory monitoring with proper cleanup
 function initializeMemoryManagement() {
@@ -155,19 +172,6 @@ function initializeMemoryManagement() {
   }, 10000);
 }
 
-// Cleanup function for graceful shutdown
-cleanupMemoryManagement = function () {
-  if (memoryCleanupTimer) {
-    clearInterval(memoryCleanupTimer);
-    memoryCleanupTimer = null;
-  }
-  if (cacheCleanupTimer) {
-    clearInterval(cacheCleanupTimer);
-    cacheCleanupTimer = null;
-  }
-  performanceCache.clear();
-};
-
 // Enhanced shutdown handling with proper cleanup
 process.on("exit", () => {
   cleanupMemoryManagement();
@@ -189,6 +193,56 @@ process.on("SIGTERM", () => {
 initializeMemoryManagement();
 
 const app = express();
+
+// CORS middleware - must be before other middleware
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+
+  // Get allowed origins from environment or use defaults
+  const allowedOrigins = process.env.CORS_ALLOWED_ORIGINS
+    ? process.env.CORS_ALLOWED_ORIGINS.split(",")
+        .map((o) => o.trim())
+        .filter((o) => o.length > 0)
+    : [
+        "https://portal.hive-wellness.co.uk",
+        "https://www.hive-wellness.co.uk",
+        "https://hive-wellness.co.uk",
+        "https://api.hive-wellness.co.uk",
+        "http://localhost:3000",
+        "http://localhost:5000",
+      ];
+
+  // Log for debugging CORS issues
+  if (origin && process.env.NODE_ENV !== "production") {
+    console.log(
+      `CORS: origin="${origin}", allowed=${allowedOrigins.includes(origin)}, allowedOrigins=[${allowedOrigins.join(", ")}]`
+    );
+  }
+
+  // If origin is in allowed list, allow it
+  if (origin && allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+    res.setHeader("Access-Control-Allow-Credentials", "true");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, PATCH, OPTIONS");
+    res.setHeader(
+      "Access-Control-Allow-Headers",
+      "Content-Type, Authorization, X-Requested-With, Accept, Origin"
+    );
+    res.setHeader("Access-Control-Max-Age", "86400"); // 24 hours
+  } else if (origin) {
+    // Log when origin is rejected for debugging
+    if (process.env.NODE_ENV !== "production") {
+      console.warn(`CORS: Origin "${origin}" not in allowed list`);
+    }
+  }
+
+  // Handle preflight requests
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204);
+  }
+
+  next();
+});
 
 // Enable compression for all responses with better settings
 app.use(
@@ -512,17 +566,10 @@ process.on("uncaughtException", (error) => {
       throw err;
     });
 
-    // importantly only setup vite in development and after
-    // setting up all the other routes so the catch-all route
-    // doesn't interfere with the other routes
-    if (app.get("env") === "development") {
-      await setupVite(app, server);
-    } else {
-      serveStatic(app);
-    }
+    // Client is now a separate service running on its own port
+    // This server only handles API requests
 
     // Use dynamic port for deployment platforms (Railway, etc.) or fallback to 5000
-    // this serves both the API and the client.
     // Railway and other platforms assign PORT via environment variable
     const port = process.env.PORT || 5000;
     server.listen(
@@ -532,7 +579,7 @@ process.on("uncaughtException", (error) => {
         reusePort: true,
       },
       () => {
-        log(`serving on port ${port}`);
+        console.log(`Server listening on port ${port}`);
       }
     );
 
@@ -573,17 +620,17 @@ process.on("uncaughtException", (error) => {
 
     // Keep the process alive
     process.on("SIGTERM", () => {
-      log("SIGTERM received, shutting down gracefully");
+      console.log("SIGTERM received, shutting down gracefully");
       server.close(() => {
-        log("Process terminated");
+        console.log("Process terminated");
         process.exit(0);
       });
     });
 
     process.on("SIGINT", () => {
-      log("SIGINT received, shutting down gracefully");
+      console.log("SIGINT received, shutting down gracefully");
       server.close(() => {
-        log("Process terminated");
+        console.log("Process terminated");
         process.exit(0);
       });
     });

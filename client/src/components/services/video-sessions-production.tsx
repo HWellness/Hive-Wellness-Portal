@@ -1,5 +1,6 @@
 import { useState, MouseEvent } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { fetchApi } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -69,7 +70,7 @@ export default function VideoSessionsProduction({
   } = useQuery<VideoSession[]>({
     queryKey: ["/api/video-sessions", user.id],
     queryFn: async () => {
-      const response = await fetch(`/api/video-sessions/${user.id}`);
+      const response = await fetchApi(`/api/video-sessions/${user.id}`);
       if (!response.ok) {
         throw new Error("Failed to fetch sessions");
       }
@@ -84,7 +85,7 @@ export default function VideoSessionsProduction({
     mutationFn: async (sessionId: string) => {
       setJoiningSessionId(sessionId); // Prevent multiple clicks
 
-      const response = await fetch(`/api/video-sessions/${sessionId}/join`, {
+      const response = await fetchApi(`/api/video-sessions/${sessionId}/join`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

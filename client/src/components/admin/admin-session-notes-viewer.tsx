@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { fetchApi } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -91,7 +92,7 @@ export default function AdminSessionNotesViewer() {
   const { data: clientsData } = useQuery({
     queryKey: ["/api/admin/clients"],
     queryFn: async () => {
-      const response = await fetch("/api/admin/clients");
+      const response = await fetchApi("/api/admin/clients");
       if (!response.ok) return [];
       const data = await response.json();
       return data.clients || [];
@@ -102,7 +103,7 @@ export default function AdminSessionNotesViewer() {
   const { data: therapistsData } = useQuery({
     queryKey: ["/api/admin/therapists"],
     queryFn: async () => {
-      const response = await fetch("/api/admin/therapists");
+      const response = await fetchApi("/api/admin/therapists");
       if (!response.ok) return [];
       const data = await response.json();
       return data.therapists || [];
@@ -132,7 +133,7 @@ export default function AdminSessionNotesViewer() {
       if (startDate) params.append("startDate", startDate);
       if (endDate) params.append("endDate", endDate);
 
-      const response = await fetch(`/api/admin/session-notes?${params}`);
+      const response = await fetchApi(`/api/admin/session-notes?${params}`);
       if (!response.ok) throw new Error("Failed to fetch session notes");
       return response.json();
     },

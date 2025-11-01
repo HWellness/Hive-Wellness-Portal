@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { fetchApi } from "@/lib/queryClient";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -71,12 +72,11 @@ const EmailPasswordAuth: React.FC<EmailPasswordAuthProps> = ({
 
   const loginMutation = useMutation({
     mutationFn: async (data: LoginFormData) => {
-      const response = await fetch("/api/auth/login", {
+      const response = await fetchApi("/api/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include", // Critical: Include cookies/session
         body: JSON.stringify(data),
       });
 
@@ -125,12 +125,11 @@ const EmailPasswordAuth: React.FC<EmailPasswordAuthProps> = ({
 
   const registerMutation = useMutation({
     mutationFn: async (data: RegisterFormData) => {
-      const response = await fetch("/api/auth/register", {
+      const response = await fetchApi("/api/auth/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include", // Critical: Include cookies/session
         body: JSON.stringify(data),
       });
 

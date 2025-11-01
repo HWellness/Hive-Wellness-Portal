@@ -1,5 +1,6 @@
 // Real Data Import Manager - Critical for accurate client-therapist matching
 import { useState } from "react";
+import { fetchApi } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -25,7 +26,7 @@ export function RealDataImportManager() {
     setIsImporting(true);
 
     try {
-      const response = await fetch("/api/admin/import-hubspot-data", {
+      const response = await fetchApi("/api/admin/import-hubspot-data", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
       });
@@ -68,7 +69,7 @@ export function RealDataImportManager() {
         },
       };
 
-      const response = await fetch("/api/external/gravity-forms", {
+      const response = await fetchApi("/api/external/gravity-forms", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(testData),

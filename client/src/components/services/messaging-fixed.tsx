@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, fetchApi } from "@/lib/queryClient";
 import {
   Send,
   User,
@@ -265,12 +265,11 @@ export default function MessagingService({ user }: MessagingProps) {
     clientName: string
   ) => {
     try {
-      const response = await fetch(`/api/therapist/connection-request/${requestId}/${action}`, {
+      const response = await fetchApi(`/api/therapist/connection-request/${requestId}/${action}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include",
       });
 
       if (!response.ok) {

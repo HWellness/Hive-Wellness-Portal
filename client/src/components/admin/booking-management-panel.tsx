@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { fetchApi } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -44,7 +45,7 @@ export const BookingManagementPanel: React.FC<BookingManagementPanelProps> = ({
     setBookingResult(null);
 
     try {
-      const response = await fetch("/api/sessions/book-video", {
+      const response = await fetchApi("/api/sessions/book-video", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

@@ -1,6 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
 import { AuthUser, AuthState } from "@/types/auth";
 
+// Get API base URL (same logic as queryClient)
+const getApiBaseUrl = () => {
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  if (import.meta.env.DEV) {
+    return "";
+  }
+  return "";
+};
+
+const API_BASE_URL = getApiBaseUrl();
+
 export function useAuth(): AuthState & { error: any } {
   const {
     data: user,
@@ -9,7 +22,10 @@ export function useAuth(): AuthState & { error: any } {
   } = useQuery<AuthUser | null>({
     queryKey: ["/api/auth/user"],
     queryFn: async () => {
-      const resp = await fetch("/api/auth/user", {
+      const url = `/api/auth/user`;
+      const fullUrl =
+        url.startsWith("http://") || url.startsWith("https://") ? url : `${API_BASE_URL}${url}`;
+      const resp = await fetch(fullUrl, {
         credentials: "include",
         cache: "no-store",
       });
@@ -19,9 +35,9 @@ export function useAuth(): AuthState & { error: any } {
     },
     retry: 0,
     refetchOnWindowFocus: false,
-    refetchOnMount: "always",
+    refetchOnMount: true, // Only refetch if data is stale
     refetchInterval: false,
-    staleTime: 0,
+    staleTime: 1000 * 30, // Consider data fresh for 30 seconds
     gcTime: 1000 * 60 * 5,
     throwOnError: false,
   });

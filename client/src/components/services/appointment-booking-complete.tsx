@@ -8,7 +8,7 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, fetchApi } from "@/lib/queryClient";
 import { useFeatureFlags } from "@/hooks/useFeatureFlags";
 import { Elements, useStripe, useElements, PaymentElement } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
@@ -589,7 +589,7 @@ export default function AppointmentBookingComplete({ user }: AppointmentBookingP
 
       // If we get a sessionId, now call the video-sessions join endpoint
       if (data?.sessionId) {
-        const joinResponse = await fetch(`/api/video-sessions/${data.sessionId}/join`, {
+        const joinResponse = await fetchApi(`/api/video-sessions/${data.sessionId}/join`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
         });
@@ -653,9 +653,7 @@ export default function AppointmentBookingComplete({ user }: AppointmentBookingP
     queryKey: ["/api/available-time-slots", selectedDate.toISOString().split("T")[0]],
     queryFn: async () => {
       const dateStr = selectedDate.toISOString().split("T")[0];
-      const response = await fetch(`/api/available-time-slots?date=${dateStr}`, {
-        credentials: "include",
-      });
+      const response = await fetchApi(`/api/available-time-slots?date=${dateStr}`);
       if (!response.ok) {
         throw new Error("Failed to fetch available time slots");
       }
@@ -1597,10 +1595,9 @@ const PaymentForm = ({
       paymentIntentId: string;
       appointmentData: any;
     }) => {
-      const response = await fetch("/api/create-appointment-from-payment", {
+      const response = await fetchApi("/api/create-appointment-from-payment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include", // Include session cookies for authentication
         body: JSON.stringify({ paymentIntentId, appointmentData }),
       });
 

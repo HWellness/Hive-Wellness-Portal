@@ -7,7 +7,7 @@ import {
   notificationLogs,
   users,
   appointments,
-} from "../../shared/schema.js";
+} from "@shared/schema";
 import { eq, and, or } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { twilioService } from "./twilio-service.js";

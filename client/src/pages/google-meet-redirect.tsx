@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useRoute } from "wouter";
+import { fetchApi } from "@/lib/queryClient";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
@@ -37,7 +38,7 @@ export default function GoogleMeetRedirect() {
 
   const fetchMeetingDetails = async () => {
     try {
-      const response = await fetch(`/api/video-sessions/${sessionId}/google-meet`);
+      const response = await fetchApi(`/api/video-sessions/${sessionId}/google-meet`);
       if (!response.ok) {
         throw new Error("Session not found");
       }

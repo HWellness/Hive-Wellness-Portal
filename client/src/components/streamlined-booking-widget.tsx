@@ -1,4 +1,5 @@
 import { useState, FormEvent } from "react";
+import { fetchApi } from "@/lib/queryClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -114,7 +115,7 @@ export function StreamlinedBookingWidget() {
 
     setIsSubmitting(true);
     try {
-      const response = await fetch("/api/introduction-calls/book-widget", {
+      const response = await fetchApi("/api/introduction-calls/book-widget", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

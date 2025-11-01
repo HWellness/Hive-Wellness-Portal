@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { fetchApi } from "@/lib/queryClient";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -143,12 +144,11 @@ export default function TherapistEarningsManagement({ user }: TherapistEarningsM
 
   const setupStripeConnectMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch("/api/therapist/setup-stripe-connect", {
+      const response = await fetchApi("/api/therapist/setup-stripe-connect", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include",
       });
 
       if (!response.ok) {

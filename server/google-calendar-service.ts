@@ -1,7 +1,7 @@
 import { google } from "googleapis";
 import { db } from "./db";
 import { eq } from "drizzle-orm";
-import { therapistProfiles, users } from "../shared/schema";
+import { therapistProfiles, users } from "@shared/schema";
 
 interface TherapistCalendarInfo {
   calendarId: string;
