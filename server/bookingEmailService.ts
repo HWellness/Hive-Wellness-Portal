@@ -421,7 +421,7 @@ class BookingEmailService {
                 </a>
               </div>
               <div style="display: inline-block;">
-                <a href="https://api.hive-wellness.co.uk/admin/calendar" style="background: #9306B1; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: 600; display: inline-block;">
+                <a href="https://portal.hive-wellness.co.uk/admin/calendar" style="background: #9306B1; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: 600; display: inline-block;">
                   Admin Calendar
                 </a>
               </div>

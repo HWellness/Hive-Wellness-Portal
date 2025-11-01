@@ -104,7 +104,7 @@ class TwilioService {
       type: "sms" | "whatsapp";
     }
   ): Promise<{ success: boolean; messageId?: string; error?: string }> {
-    const message = `Hive Wellness Reminder: You have an appointment with ${appointmentDetails.therapistName} on ${appointmentDetails.date} at ${appointmentDetails.time}. Join via: https://api.hive-wellness.co.uk/portal#/video-sessions`;
+    const message = `Hive Wellness Reminder: You have an appointment with ${appointmentDetails.therapistName} on ${appointmentDetails.date} at ${appointmentDetails.time}. Join via: https://portal.hive-wellness.co.uk/portal#/video-sessions`;
 
     if (appointmentDetails.type === "whatsapp") {
       return this.sendWhatsApp({ to: clientPhone, body: message });
@@ -121,7 +121,7 @@ class TwilioService {
       type: "sms" | "whatsapp";
     }
   ): Promise<{ success: boolean; messageId?: string; error?: string }> {
-    const message = `Hive Wellness: ${notificationDetails.message} from ${notificationDetails.clientName}. Check your portal: https://api.hive-wellness.co.uk/portal`;
+    const message = `Hive Wellness: ${notificationDetails.message} from ${notificationDetails.clientName}. Check your portal: https://portal.hive-wellness.co.uk/portal`;
 
     if (notificationDetails.type === "whatsapp") {
       return this.sendWhatsApp({ to: therapistPhone, body: message });

@@ -92,7 +92,7 @@ export const hiveWellnessEmailTemplates = {
         </div>
         
         <div style="text-align: center; margin: 30px 0;">
-          <a href="https://api.hive-wellness.co.uk/portal" style="background: #9306B1; color: white; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-family: 'Open Sans', sans-serif; font-weight: 600; display: inline-block; font-size: 16px;">
+          <a href="https://portal.hive-wellness.co.uk/portal" style="background: #9306B1; color: white; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-family: 'Open Sans', sans-serif; font-weight: 600; display: inline-block; font-size: 16px;">
             Access Your Portal
           </a>
         </div>
@@ -180,7 +180,7 @@ export const hiveWellnessEmailTemplates = {
         </div>
         
         <div style="text-align: center; margin: 30px 0;">
-          <a href="https://api.hive-wellness.co.uk/therapist-login" style="background: #9306B1; color: white; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-family: 'Open Sans', sans-serif; font-weight: 600; display: inline-block; font-size: 16px;">
+          <a href="https://portal.hive-wellness.co.uk/therapist-login" style="background: #9306B1; color: white; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-family: 'Open Sans', sans-serif; font-weight: 600; display: inline-block; font-size: 16px;">
             Access Therapist Portal
           </a>
         </div>
@@ -275,7 +275,7 @@ export const hiveWellnessEmailTemplates = {
         </div>
         
         <div style="text-align: center; margin: 30px 0;">
-          <a href="https://api.hive-wellness.co.uk/therapist-login" style="background: #9306B1; color: white; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-family: 'Open Sans', sans-serif; font-weight: 600; display: inline-block; font-size: 16px;">
+          <a href="https://portal.hive-wellness.co.uk/therapist-login" style="background: #9306B1; color: white; padding: 14px 32px; text-decoration: none; border-radius: 6px; font-family: 'Open Sans', sans-serif; font-weight: 600; display: inline-block; font-size: 16px;">
             Access Therapist Portal
           </a>
         </div>

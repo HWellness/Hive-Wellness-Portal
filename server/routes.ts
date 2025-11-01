@@ -3229,7 +3229,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             🚀 Access Portal
         </a>
         
-        <a href="https://api.hive-wellness.co.uk/" target="_blank" class="access-btn" style="background: #6c757d;">
+        <a href="https://portal.hive-wellness.co.uk/" target="_blank" class="access-btn" style="background: #6c757d;">
             🔗 Direct Link
         </a>
         
@@ -3243,7 +3243,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     <script>
         function openPortal() {
             // Multiple fallback strategies for portal access
-            const portalUrl = 'https://api.hive-wellness.co.uk/';
+            const portalUrl = 'https://portal.hive-wellness.co.uk/';
             
             // Try popup first
             const popup = window.open(
