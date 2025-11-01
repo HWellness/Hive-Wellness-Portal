@@ -61,7 +61,7 @@ export class TherapistOnboardingService {
 
   // Step 2: Send email inviting therapist to book intro call with admin team
   async sendIntroCallInvitation(enquiry: TherapistEnquiry): Promise<void> {
-    const bookingLink = `https://api.hive-wellness.co.uk/book-admin-call?therapist=${encodeURIComponent(enquiry.email)}`;
+    const bookingLink = `https://portal.hive-wellness.co.uk/book-admin-call?therapist=${encodeURIComponent(enquiry.email)}`;
 
     const emailTemplate = {
       to: enquiry.email,

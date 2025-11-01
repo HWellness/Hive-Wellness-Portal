@@ -723,7 +723,7 @@ export async function sendFormSubmissionNotification(
         
         <div style="text-align: center; margin: 20px 0;">
             <p><strong>Action Required:</strong> Please review this submission in the admin dashboard.</p>
-            <a href="https://api.hive-wellness.co.uk/admin-dashboard" 
+            <a href="https://portal.hive-wellness.co.uk/admin-dashboard" 
                style="background: #9306B1; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block;">
                View in Admin Dashboard →
             </a>
@@ -749,7 +749,7 @@ Submission Details:
 Form Data:
 ${formattedData}
 
-Please review this submission in the admin dashboard: https://api.hive-wellness.co.uk/admin-dashboard
+Please review this submission in the admin dashboard: https://portal.hive-wellness.co.uk/admin-dashboard
 
 This is an automated notification from Hive Wellness Portal.
 `;
