@@ -14,11 +14,12 @@ const resolveSharedPlugin = {
     build.onResolve({ filter: /^@shared\// }, (args) => {
       const relativePath = args.path.replace(/^@shared\//, "");
       const resolvedPath = path.join(sharedPath, relativePath);
-      return { 
-        path: resolvedPath.endsWith('.ts') || resolvedPath.endsWith('.js') 
-          ? resolvedPath 
-          : `${resolvedPath}.ts`,
-        external: false 
+      return {
+        path:
+          resolvedPath.endsWith(".ts") || resolvedPath.endsWith(".js")
+            ? resolvedPath
+            : `${resolvedPath}.ts`,
+        external: false,
       };
     });
   },
